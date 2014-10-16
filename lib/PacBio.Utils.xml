@@ -1,0 +1,1273 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PacBio.Utils</name>
+    </assembly>
+    <members>
+        <member name="M:PacBio.Utils.Extensions.Fill``1(System.Int32,System.Func{System.Int32,``0})">
+            <summary>
+            alternate form where the integer is the 'this' param
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="n"></param>
+            <param name="f"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.Fill``1(System.UInt32,System.Func{System.Int32,``0})">
+            <summary>
+            alternate form where the integer is the 'this' param
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="n"></param>
+            <param name="f"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.Slice``1(System.Collections.Generic.IList{``0},System.Int32,System.Int32)">
+            <summary>
+            extract a region from an array
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="array"></param>
+            <param name="start"></param>
+            <param name="length"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.Slice``1(``0[],System.Int32,System.Int32)">
+            <summary>
+            extract a region from an array
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="array"></param>
+            <param name="start"></param>
+            <param name="length"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.Slice``1(``0[0:,0:],System.Int32,System.Int32)">
+            <summary>
+            Take a 1d slice out of a 2D array
+            </summary>
+            <param name="array">Array to slice</param>
+            <param name="dim">Dimension the slice lies in</param>
+            <param name="index">Index of the slice</param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.Map``2(System.Collections.Generic.IList{``0},System.Func{``0,``1})">
+            <summary>
+            Call the given function on each element of an array, returning
+            an array of the results of each call.
+            </summary>
+            <param name="input">
+            The input array.
+            </param>
+            <param name="fn">
+            The function.
+            </param>
+            <returns>
+            The mapped values.
+            </returns>
+            <typeparam name="TInput">
+            The type of the input array.
+            </typeparam>
+            <typeparam name="TOutput">
+            The type of the output array.
+            </typeparam>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.Map``2(System.Collections.Generic.ICollection{``0},System.Func{``0,System.Int32,``1})">
+            <summary>
+            Call a given function on all the elements of a collection
+            I think this is the same as 'Select' in C# lingo
+            </summary>
+            <typeparam name="TInput"></typeparam>
+            <typeparam name="TOutput"></typeparam>
+            <param name="input"></param>
+            <param name="fn"></param>
+            <returns>the results of the map funct applied to each element</returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.Map``2(``0[0:,0:],System.Func{``0,``1})">
+            <summary>
+            Map a 2d array
+            </summary>
+            <param name="data">input 2d array</param>
+            <param name="f">function to apply to each element</param>
+            <returns>the array of return values</returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.Map``2(``0[0:,0:],System.Func{``0,System.Int32,System.Int32,``1})">
+            <summary>
+            Map a 2d array
+            </summary>
+            <param name="data">input 2d array</param>
+            <param name="f">function to apply to each element</param>
+            <returns>the array of return values</returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.ForEach``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
+            <summary>
+            may be kind of pointless ...
+            </summary>
+            <param name="fn"></param>
+            <param name="a"></param>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.Chunk``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Break an IEnumerable into a series of separate chunks with size of at most chunkSize.  The last
+            chunk may be smaller than chunkSize
+            </summary>
+            <param name="source">Input IEnumerable</param>
+            <param name="chunkSize">size of chunks.  If chunkSize == 0, the entire input will be returned in a single chunk.</param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.ArrayEquals(System.Collections.IEnumerable,System.Collections.IEnumerable)">
+            <summary>
+            odd that there's no Array.Compare() ...
+            or would a.Equals(b) do the trick??
+            </summary>
+            <param name="_a"></param>
+            <param name="_b"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.JaggedToRectRows``1(``0[][])">
+            <summary>
+            Converts an array of column vectors into a 2D array
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="array">An array of arrays. Each array will form a row of the output array</param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.RectToJagged``1(``0[0:,0:])">
+            <summary>
+            converts a 2D array into an array of column vectors
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="array"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.RectToJaggedCols``1(``0[0:,0:])">
+            <summary>
+            converts a 2D array into an array of row vectors
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="array"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.TakeAtMost``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Takes at most n items from the source sequence.  Stops silently if there are less than n items in the source, 
+            rather than throwing an exception as Take() does
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.ConcatArrays``1(System.Collections.Generic.IEnumerable{``0[]})">
+            <summary>
+            Concatenate a series of arrays into a single array
+            </summary>
+            <param name="arrays">The input arrays</param>
+            <returns>The concatenated arrays</returns>
+        </member>
+        <member name="M:PacBio.Utils.Extensions.FastCopy``1(``0[],System.Int32,``0[],System.Int32,System.Int32)">
+            <summary>
+            A hack to replace Array.Copy for Mono because it's dead slow
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.IOptimizer">
+            <summary>
+            Base class for numerical optimizers (without derivative information).
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.LDouble">
+            <summary>
+            LDouble - Mutable with by value comparisons
+            Note: do not use this as a key in a dictionary, hash, or tree. Audited Oct 2011
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.SLDouble">
+            <summary>
+            SLDouble - Mutable with by value comparisons
+            Note: do not use this as a key in a dictionary, hash, or tree. Audited Oct 2011
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.LFloat">
+            <summary>
+            FLoat - Mutable with by value comparisons
+            Note: do not use this as a key in a dictionary, hash, or tree. Audited Oct 2011
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.SLFloat">
+            <summary>
+            SFLoat - Mutable with by value comparisons
+            Note: do not use this as a key in a dictionary, hash, or tree. Audited Oct 2011
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.PacBioLogger">
+            <summary>
+                Encapsulate the NLog functionality in this class.
+                Everything that wants to log can do so via this class, avoiding a reference to NLog
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.PacBioLogger.GetLogger(System.Int32)">
+            <summary>
+            Gets the logger.
+            </summary>
+            <returns>The logger</returns>
+            <param name="depth">0 : GetLogger, 1 : BaseClass, 2 : ChildClass</param>
+        </member>
+        <member name="M:PacBio.Utils.PacBioLogger.Shutdown">
+            <summary>
+                Shutdown the logging system
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.MathUtils.ApproximatelyEquals(System.Double[],System.Double[],System.Double)">
+            <summary>
+            Are two double arrays approximately equal
+            </summary>
+            <param name="a"></param>
+            <param name="b"></param>
+            <param name="epsilon"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.MathUtils.ApproximatelyEquals(System.Single[],System.Single[],System.Single)">
+            <summary>
+            Are two double arrays approximately equal
+            </summary>
+            <param name="a"></param>
+            <param name="b"></param>
+            <param name="epsilon"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.MathUtils.Pow(System.Int32,System.UInt32)">
+            <summary>
+            Take the power of an integer, using integer math
+            </summary>
+            <param name="x">number</param>
+            <param name="y">power</param>
+            <returns>return a specified number raised to a specified power</returns>
+        </member>
+        <member name="M:PacBio.Utils.MathUtils.ChooseLn(System.Int32,System.Int32)">
+            <summary>
+            Log of the binomial coefficient
+            </summary>
+            <param name="n">n</param>
+            <param name="k">k</param>
+            <returns>log(choose(n, k))</returns>
+        </member>
+        <member name="M:PacBio.Utils.MathUtils.BetaRegularized(System.Double,System.Double,System.Double)">
+            <summary>
+            Returns the regularized lower incomplete beta function
+            I_x(a,b) = 1/Beta(a,b) * int(t^(a-1)*(1-t)^(b-1),t=0..x) for real a &gt; 0, b &gt; 0, 1 &gt;= x &gt;= 0.
+            </summary>
+            <param name="a">The first Beta parameter, a positive real number.</param>
+            <param name="b">The second Beta parameter, a positive real number.</param>
+            <param name="x">The upper limit of the integral.</param>
+            <returns>The regularized lower incomplete beta function.</returns>
+        </member>
+        <member name="M:PacBio.Utils.MathUtils.PowUp(System.Int32,System.Int32)">
+            <summary>
+            Align <paramref name="val"/> to the next highest integer power of
+            <paramref name="powof"/>
+            e.g. PowUp(7,2) = 8
+            e.g. PowUp(9,2) = 16
+            e.g. PowUp(16,3) = 27
+            e.g. PowUp(2048,2) = 2048
+            e.g. PowUp(2048,3) = 2187
+            </summary>
+            <param name="val">The value to be "powered up"</param>
+            <param name="powof">The "log base" of the powering up</param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.NelderMeadOptimizer._initializeErrorValues(MathNet.Numerics.LinearAlgebra.Double.DenseVector[],System.Func{MathNet.Numerics.LinearAlgebra.Double.DenseVector,System.Double})">
+            <summary>
+            Evaluate the objective function at each vertex to create a corresponding
+            list of error values for each vertex
+            </summary>
+            <param name="vertices"></param>
+            <param name="objectiveFunction"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.NelderMeadOptimizer._hasConverged(System.Double,PacBio.Utils.NelderMeadOptimizer.ErrorProfile,System.Double[])">
+            <summary>
+            Check whether the points in the error profile have so little range that we
+            consider ourselves to have converged
+            </summary>
+            <param name="convergenceTolerance"></param>
+            <param name="errorProfile"></param>
+            <param name="errorValues"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.NelderMeadOptimizer._evaluateSimplex(System.Double[])">
+            <summary>
+            Examine all error values to determine the ErrorProfile
+            </summary>
+            <param name="errorValues"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.NelderMeadOptimizer._initializeVertices(MathNet.Numerics.LinearAlgebra.Double.DenseVector,MathNet.Numerics.LinearAlgebra.Double.DenseVector)">
+            <summary>
+            Construct an initial simplex, given starting guesses for the constants, and
+            initial step sizes for each dimension
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.NelderMeadOptimizer._tryToScaleSimplex(System.Double,PacBio.Utils.NelderMeadOptimizer.ErrorProfile@,MathNet.Numerics.LinearAlgebra.Double.DenseVector[],System.Double[],System.Func{MathNet.Numerics.LinearAlgebra.Double.DenseVector,System.Double})">
+            <summary>
+            Test a scaling operation of the high point, and replace it if it is an improvement
+            </summary>
+            <param name="scaleFactor"></param>
+            <param name="errorProfile"></param>
+            <param name="vertices"></param>
+            <param name="errorValues"></param>
+            <param name="objectiveFunction"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.NelderMeadOptimizer._shrinkSimplex(PacBio.Utils.NelderMeadOptimizer.ErrorProfile,MathNet.Numerics.LinearAlgebra.Double.DenseVector[],System.Double[],System.Func{MathNet.Numerics.LinearAlgebra.Double.DenseVector,System.Double})">
+            <summary>
+            Contract the simplex uniformly around the lowest point
+            </summary>
+            <param name="errorProfile"></param>
+            <param name="vertices"></param>
+            <param name="errorValues"></param>
+            <param name="objectiveFunction"></param>
+        </member>
+        <member name="M:PacBio.Utils.NelderMeadOptimizer._computeCentroid(MathNet.Numerics.LinearAlgebra.Double.DenseVector[],PacBio.Utils.NelderMeadOptimizer.ErrorProfile)">
+            <summary>
+            Compute the centroid of all points except the worst
+            </summary>
+            <param name="vertices"></param>
+            <param name="errorProfile"></param>
+            <returns></returns>
+        </member>
+        <member name="T:PacBio.Utils.IMapStage`2">
+            <summary>
+            A process that can convert TIn to TOut via a Map method
+            </summary>
+            <typeparam name="TIn"></typeparam>
+            <typeparam name="TOut"></typeparam>
+        </member>
+        <member name="T:PacBio.Utils.ISinkStage`1">
+            <summary>
+            A process that consumes a series of TIn objects. It may summarize or save this data.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.ISinkStage`1.OnNext(`0)">
+            <summary>
+            Called with each successive data element to be sinked.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.ISinkStage`1.OnComplete">
+            <summary>
+            Called when all the data has been passed
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.ISinkStage`1.OnError(System.Exception)">
+            <summary>
+            Called when an error occurs in the data generation process. The SinkStage should clean up
+            any open output files if this method is called.
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.BasicSinkStage`1">
+            <summary>
+            A base class for pipeline file writers.  Keeps track of temporary output files.  Renames them to their final
+            filename when OnComplete() is called.  Deletes incomplete temporary files when OnError() is called.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.BasicSinkStage`1.Log(PacBio.Utils.LogLevel,System.String)">
+            <summary>
+            Emit a message to be logged to the system
+            </summary>
+            <param name="level">Log level</param>
+            <param name="msg">Log message</param>
+        </member>
+        <member name="M:PacBio.Utils.BasicSinkStage`1.FinalizeTempFiles">
+            <summary>
+            Move all the temp files to their final destination filename
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.BasicSinkStage`1.TempFile(System.String)">
+            <summary>
+            Generate a temporary Uri from a given Uri by appending the Process Id and a .tmp extension.
+            Temporary Uris are tracked by the protocol class and will be cleaned up when the protocol exits
+            </summary>
+            <param name="target">The starting Uri</param>
+            <returns>A fresh temporary Uri</returns>
+        </member>
+        <member name="M:PacBio.Utils.BasicSinkStage`1.TempFileName(System.String)">
+            <summary>
+            Generate a temporary Uri from a given Uri by appending the Process Id and a .tmp extension.
+            Temporary Uris are tracked by the protocol class and will be cleaned up when the protocol exits
+            </summary>
+            <param name="fp">The starting Uri</param>
+            <returns>A fresh temporary Uri</returns>
+        </member>
+        <member name="M:PacBio.Utils.BasicSinkStage`1.DeleteTempFiles">
+            <summary>
+            Clean up any temporary files that we may have been left scattered by a failed
+            pipeline invocation 
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.ParallelPipeline">
+            <summary>
+            A class for building pipelines to run via a thread-parallel Map() execution.
+            This class should be used to build pipelines that run end-to-end in parallel.
+            
+            To build a pipeline, plug in the pipeline stages in the following order --
+            
+            1. Call SetSource() with the enumerable that is the source data to process
+            2. Call AddMapStage() for each mapping stage required, the the order they need to be applied.  These stages will be run multi-threaded
+            3. Call AddSinkStage() for each output stage required.  These stages will be run on the calling thread
+            4. Call Run() to execute the pipeline.
+            
+            When you add mapping and sink stages, the input types will be checked against the output types of 
+            the previous stage to ensure that the required input data will be available for the stage. The intermediate
+            results of each stage are stored in a Dictionary which is indexed by the datatype of the intermediate result.
+            Therefore if a later stage emits the same type as a previous stage, the earlier result will be overwritten with the new result.
+            
+            Any stage or sink can accept and/or emit simply typed values, or Tuples of values.  Tuples in the input or output
+            of a pipeline stage will automatically be wrapped and unwrapped to and from basic types to satisfy the requirements
+            of the stages.
+            
+            To ensure that the correct ZmwRange is used, the source collection must implement IZmwRangeable, and the 
+            run method must be called with a ZmwRange to execute the pipeline over.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.#ctor(System.Int32)">
+            <summary>
+            Initialize a new parallel pipeline.
+            </summary>
+            <param name="nThreads">The number of concurrent threads to execute the pipeline with.</param>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.Log(PacBio.Utils.LogLevel,System.String)">
+            <summary>
+            Emit a message to be logged to the system
+            </summary>
+            <param name="level">Log level</param>
+            <param name="msg">Log message</param>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.SetSource``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Set the IEnumerable that will be processed when the pipeline is run, how far to read-ahead buffer from the IEnumerable, and how 
+            many threads to parallelize on.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.AddMapStage``2(PacBio.Utils.IMapStage{``0,``1},System.String)">
+            <summary>
+            Add a Map stage to the pipeline,
+            i.e. a stage that maps input type(s) to output type(s).
+            </summary>
+            <typeparam name="TIn">The required input type of the mapping stage</typeparam>
+            <typeparam name="TOut">The output type of the mapping stage</typeparam>
+            <param name="stage">A single pipeline processing stage</param>
+            <param name="stageName">Descriptive name for the pipeline stage</param>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.CheckRequiredTypes(System.Type,System.Type)">
+            <summary>
+            Ensure that the pipeline stage being added has the required input type for the stage to run.
+            If the stage outputs any types, they are added to the list types available to later stages
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.GetSourceType``1(PacBio.Utils.ParallelPipeline.Result)">
+            <summary>
+            Extract the required source type for a pipeline stage from the Result object.
+            If the required source type is a tuple, extract the tuple elements and create the tuple.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.StoreResultType``1(``0,PacBio.Utils.ParallelPipeline.Result)">
+            <summary>
+            Store a pipeline stage output object into the Result object. If the output is a tuple of results, they will each be stored 
+            separately as a distinct entry in the Result dictionary.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.AddSinkStage``1(PacBio.Utils.ISinkStage{``0})">
+            <summary>
+            Add a Sink stage to the pipeline,
+            i.e. a stage with input(s) but no output(s).
+            </summary>
+            <typeparam name="TIn">The datatype </typeparam>
+            <param name="stage"></param>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.GetMapper">
+            <summary>
+            Return the Map function for pipeline execution.  
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.GetSinker">
+            <summary>
+            Return the Sink action to consume the IEnumerable of Results.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.ParallelPipeline.Run">
+            <summary>
+            Execute the workflow against the given ZMW range.
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.ParallelPipeline.StartType">
+            <summary>
+            The input type for the start of the pipeline 
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.ParallelPipeline.Result">
+            <summary>
+            A pipeline result, i.e. the result on the unit-of-work, where the
+            units-of-work define the granularity of the embarrasingly parallel
+            situation, e.g., the multiple ZMWs in an acquisition.  We require
+            that a pipeline consumes or produces at most one object of a given type.
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.PipelineStage`1">
+            <summary>
+            The base class for a Primary Pipeline Stage.  Implementing this class allows code to be easily run in
+            primary analysis pipeline.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.PipelineStage`1.Log(PacBio.Utils.LogLevel,System.String)">
+            <summary>
+            Emit a message to be logged to the system
+            </summary>
+            <param name="level">Log level</param>
+            <param name="msg">Log message</param>
+        </member>
+        <member name="M:PacBio.Utils.PipelineStage`1.Execute(System.Collections.Generic.IDictionary{System.String,System.Uri})">
+            <summary>
+            Execute the pipeline stage
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.PipelineStage`1.Config">
+            <summary>
+            The sub-type config is set to the default value on construction.
+            Only non-null values will override the current value via the setter.
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.PipelineMapper`3">
+            <summary>
+            The base class for a Primary Pipeline Stage.  Implementing this class allows code to be easily run in
+            primary analysis pipeline.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.PipelineMapper`3.Log(PacBio.Utils.LogLevel,System.String)">
+            <summary>
+            Emit a message to be logged to the system
+            </summary>
+            <param name="level">Log level</param>
+            <param name="msg">Log message</param>
+        </member>
+        <member name="M:PacBio.Utils.PipelineMapper`3.Map(`1)">
+            <summary>
+            Execute the pipeline stage
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.PipelineMapper`3.OnError(System.Exception)">
+            <summary>
+            Indicates that the pipeline has encountered an unrecoverable error and will shut down.
+            Any clean-up tasks should be executed here.
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="P:PacBio.Utils.PipelineMapper`3.Config">
+            <summary>
+            The sub-type config is set to the default value on construction.
+            Only non-null values will override the current value via the setter.
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.PowellOptimizer">
+            <summary>
+            A singleton class for numerical optimization using a modification of Powell's method
+            as described in Numerical Recipes
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.PowellOptimizer.linMin(System.Func{MathNet.Numerics.LinearAlgebra.Double.DenseVector,System.Double},MathNet.Numerics.LinearAlgebra.Double.DenseVector@,MathNet.Numerics.LinearAlgebra.Double.DenseVector@,System.Double)">
+            <summary>
+            Line search.
+            <param name="objectiveFunction">the function to be minimized</param>
+            <param name="P">start point</param>
+            <param name="n">search direction</param>
+            <param name="tol">tolerance</param>
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.Success">
+            <summary>
+            Pipeline completed protocol as expected
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.UnspecifiedError">
+            <summary>
+            An un-anticipated exception that terminated the pipeline.
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.InputFileNotFound">
+            <summary>
+            The input file to pipeline is not found
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.ConfigFileNotFound">
+            <summary>
+            A configuration file or algorithm parameter file is not found
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.ProtocolNotFound">
+            <summary>
+            Unknown protocol
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.DiskFull">
+            <summary>
+            HDF returned no space on device
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.OutOfMemory">
+            <summary>
+            Fatal out of memory error
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.ArgumentError">
+            <summary>
+            Invalid argument to pipeline.exe
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.UserInterrupt">
+            <summary>
+            Shutdown signal caught during pipeline execution
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.DeploymentError">
+            <summary>
+            Required library not found, HDF5, libPacBioNative, etc
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.ConfigurationError">
+            <summary>
+            Error parsing config xml or metadata xml
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.SystemIOError">
+            <summary>
+            An un-handled System.IO.IOException of unknown cause
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.InvalidMetadata">
+            <summary>
+            Error with metadata
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.ProcessExitCode.RemoteProcessInterrupt">
+            <summary>
+            The runner gets this back when launching pipeline.exe through ssh, when
+            there is a hard failure -- e.g. a SIGSEGV. These may be indistinguishable
+            from errors in the ssh process itself.  See comments under bug 19298.
+            This is not a pipeline return code per se, and the pipeline should not use it.
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.Strand">
+            <summary>
+            DNA strand
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.StrandExtensions.Parse(System.String)">
+            <summary>
+            Convert from +/- string to Strand enum
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.StrandExtensions.Opposite(PacBio.Utils.Strand)">
+            <summary>
+            Flip to opposite strand
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.SpacedSelector1">
+            <summary>
+            We have a list of mutations. Each mutation, is made up of a score, and a template position.
+            This class selects the set of mutations that are all least n bases separated that have the highest
+            total score.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.SpacedSelector1.BestItems``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Int32},System.Func{``0,System.Double},System.Int32)">
+            <summary>
+            We are given a list of items. For each item we can compute a position and a score.  This method finds the set
+            of items with the maximum total score such that are all at least <code>spacing</code> units away from one another
+            </summary>
+            <typeparam name="T">The item type</typeparam>
+            <param name="items">The set of items</param>
+            <param name="positionFunc">A function that returns the position of an item</param>
+            <param name="scoreFunc">A function that returns the score of an item</param>
+            <param name="minSpacing">The minimum spacing required between items in the returned set</param>
+            <returns>The best set of items</returns>
+        </member>
+        <member name="T:PacBio.Utils.RStats">
+            <summary>
+            A function to quickly extract robust statistics from a histogram.  
+            Should give essentially the same numbers as Gaussian, but with much less overhead.
+            Use in situations where Gaussian is giving perf problems.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.RStats.#ctor(System.Double[],System.Double[])">
+            <summary>
+            fit two arrays, default to full-fit (not peak)
+            </summary>
+            <param name="x"></param>
+            <param name="y"></param>
+        </member>
+        <member name="M:PacBio.Utils.RStats.F(System.Double)">
+            <summary>
+            the gaussian function f(x) = (A / sigma)
+            </summary>
+            <param name="x"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.RStats.Fit">
+            <summary>
+            Compute the robust statistics of the distribution
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.RStats.A">
+            <summary>
+            area under the curve
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.RStats.Sigma">
+            <summary>
+            standard deviation
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.RStats.Mu">
+            <summary>
+            where's the peak?
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.RStats.FWHM">
+            <summary>
+            full-width half-max
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.Stats.QuickMedian(System.Single[])">
+            <summary>
+            Return the median of the input array.
+            This method mutates the array that is passed in! Use with care.
+            </summary>
+            <param name="arr"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.QuickMedian(System.Single[],System.Int32)">
+            <summary>
+            Compute the median of the input array over the first <paramref name="n"/> values.
+            This method mutates the array that is passed in! Use with care.
+            </summary>
+            <param name="arr"></param>
+            <param name="n"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.RemoveNaN(System.Single[])">
+            <summary>
+            Remove NaN entries from a float array.
+            Returns the original array if no NaNs are present. 
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.TrimmedMean(System.Collections.Generic.IEnumerable{System.Double},System.Double)">
+            <summary>
+            Compute a trimmed mean of the data array
+            </summary>
+            <param name="data">Raw data array</param>
+            <param name="trim">Fraction of the data to trim from each end.</param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.Percentile(System.Collections.Generic.IEnumerable{System.Single},System.Single)">
+            <summary>
+            Return the <paramref name="percentile"/>-th percentile of the data values.
+            This method sorts the input data, so use with care!
+            </summary>
+            <param name="data"></param>
+            <param name="percentile">The percentile to compute, in (0,1).</param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.Percentile(System.Single[],System.Int32,System.Int32,System.Single)">
+            <summary>
+            Return the <paramref name="percentile"/>-th percentile of the array values
+            in the index range [i0, i0+n).  This method sorts the input array, so use
+            with care!
+            </summary>
+            <param name="arr"></param>
+            <param name="i0">The starting index in the array</param>
+            <param name="n">The number of elements to include</param>
+            <param name="percentile"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.StdDev(System.Single[])">
+            <summary>
+            Standard deviation of all array elements.
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.StdDev(System.Single[],System.Int32,System.Int32)">
+            <summary>
+            Standard deviation of array elements in the range [index, index+length).
+            </summary>
+            <param name="data"></param>
+            <param name="index"></param>
+            <param name="length"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.RobustStats(System.Collections.Generic.IEnumerable{System.Single},System.Single@,System.Single@)">
+            <summary>
+            Return median and robust std over all data elements.
+            </summary>
+            <param name="data"></param>
+            <param name="med"></param>
+            <param name="std"></param>
+        </member>
+        <member name="M:PacBio.Utils.Stats.RobustStats(System.Single[],System.Int32,System.Single@,System.Single@)">
+            <summary>
+            Return median and robust std over array elements in the range [0,<paramref name="n"/>).
+            This method mutates the input array, so use with care!
+            </summary>
+            <param name="arr"></param>
+            <param name="n"></param>
+            <param name="med"></param>
+            <param name="std"></param>
+        </member>
+        <member name="M:PacBio.Utils.Stats.NumOutliers(System.Collections.Generic.IEnumerable{System.Double},System.Double)">
+            <summary>
+            A rough attempt at counting outliers.
+            Returns the number of data points which exceed Z robust standard deviations from the median.
+            </summary>
+            <param name="data">Data points</param>
+            <param name="Z">Number of robust standard deviations from </param>
+            <returns>The number of data points which exceed Z robust standard deviations from the median</returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.Sample``1(System.Collections.Generic.IEnumerable{``0},System.Int32,PacBio.Utils.RandomCMWC)">
+            <summary>
+            Sample with replacement n samples from the contents of the IEnumerable
+            </summary>
+            <param name="data">IEnumerable to sample from</param>
+            <param name="n">Number of elements int the output collection</param>
+            <param name="rand"></param>
+            <returns>Series of samples (with-replacement) from the IEnumerable</returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.Sample``1(System.Collections.Generic.IEnumerable{``0},System.Int32,System.Boolean,PacBio.Utils.RandomCMWC)">
+            <summary>
+            Sample data points from an IEnumerable. 
+            </summary>
+            <param name="data">Source enumerable</param>
+            <param name="n">Number of data points to sample</param>
+            <param name="withReplacement">True for sampling with replacement, false for sampling without replacement</param>
+            <param name="rand"></param>
+            <returns>An array with the sampled items</returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.StreamSample``1(System.Collections.Generic.IEnumerable{``0},System.Double,PacBio.Utils.RandomCMWC)">
+            <summary>
+            Go through an IEnumerable and randomly return or skip items.  Return each item with probability fraction.
+            </summary>
+            <param name="data">The data to stream through</param>
+            <param name="fraction">The fraction of the data to pass</param>
+            <param name="rand"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.ReservoirSample``1(System.Collections.Generic.IEnumerable{``0},System.Int32,PacBio.Utils.RandomCMWC)">
+            <summary>
+            Use reservoir sampling to uniform without replacement sample n elements of data.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.Stats.TargetSample``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,System.Boolean},System.Int32,System.Int32,PacBio.Utils.RandomCMWC)">
+            <summary>
+            Go through an IEnumerable try and return target items that pass the filter, from an estimated total number of 
+            observations of total. Adjust the fraction that get returned dynamically.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.Stats.Sample``1(System.Collections.Generic.IEnumerable{``0},PacBio.Utils.RandomCMWC)">
+            <summary>
+            Sample a value from the contents of the IEnumerable
+            </summary>
+            <param name="data">IEnumerable to sample from</param>
+            <param name="rand">User provided rng</param>
+            <returns>Random sample from the IEnumerable</returns>
+        </member>
+        <member name="M:PacBio.Utils.Stats.Shuffle``1(System.Collections.Generic.IEnumerable{``0},PacBio.Utils.RandomCMWC)">
+            <summary>
+            Return the contents of the enumerable as an array in random order
+            </summary>
+            <param name="data">The data to shuffle</param>
+            <param name="rand">User provided rng</param>
+            <returns>The shuffled result</returns>
+        </member>
+        <member name="T:PacBio.Utils.MemoryPool`1">
+            <summary>
+            A memory pool for reusing large array allocations
+            </summary>
+            See http://www.simple-talk.com/dotnet/.net-framework/the-dangers-of-the-large-object-heap/
+            Because large allocations can create islands that fragment the heap, we try to avoid this by reusing arrays that
+            we're previously allocated _of the exact same size_.  This is mostly useful for things like movie frames where we have a 
+            small # of different lengths, and we reuse those same # of fixed length arrays over and over again.
+            
+            To use this class just go to MemoryPool.Instance.Create(mylen).  The returned PoolRef should be stored in your instance
+            so that it gets GCed when you are done with the array.  Do not cache the array reference returned from PoolRef longer than 
+            the PoolRef is alive, or you will find your array is now changing under you.
+            
+            This class is recommended any time you'll be repeatedly allocating large arrays (gtr than 80KB) of a small # sizes (less than 20?).
+            See TestMemoryPool for example usage.
+            -kevinh
+        </member>
+        <member name="F:PacBio.Utils.MemoryPool`1.available">
+            <summary>
+            A mapping from array lengths to instances available for reuse
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.MemoryPool`1.TooSmallToTrack">
+            <summary>
+            If the array is shorter than this we use the regular allocator. 
+            If the array is not going to end up on the large object heap anyway, we can let the Mono/.net coalesing mmgr handle it
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.Create(System.Int32)">
+            <summary>
+            Allocate an array with no free time limit
+            </summary>
+            <param name="numElem"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.Create(System.Int32,System.Boolean)">
+            <summary>
+            Allocate an array with no free time limit
+            </summary>
+            <param name="numElem"></param>
+            <param name="strict"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.Create(System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Allocate an array and assign a time limit for free memory to be disposed of
+            </summary>
+            <param name="numElem"></param>
+            <param name="freeTimelimit">maximum time (in seconds) that free memory can remain unused</param>
+            <param name="strict"></param>
+            <returns></returns>
+            The array will stay alive for as long as you keep the PoolRef instance alive.  Once the PoolRef
+            gets GCed the array inside will get reused for other callers
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.Dump">
+            <summary>
+            Print debugging info about this pool to the console
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.GetInfo(System.Int32,System.Int32)">
+            <summary>
+            Get the info for the pool
+            </summary>
+            <param name="numElem">number of elements in array</param>
+            <param name="freeTimelimit">the time limit (in seconds) that memory can remain unused</param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.Alloc(System.Int32,System.Int32)">
+            <summary>
+            Allocate (or reuse) an array
+            </summary>
+            <param name="numElem"></param>
+            <param name="freeTimelimit"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.Free(`0[],System.Int32)">
+            <summary>
+            Return an array for recycling
+            </summary>
+            <param name="arr"></param>
+            <param name="freeTimelimit"></param>
+        </member>
+        <member name="P:PacBio.Utils.MemoryPool`1.Instance">
+            <summary>
+            Our singleton for this type of memory pool
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.MemoryPool`1.NumAlloced">
+            <summary>
+            For debugging - how many arrays are currently alloced
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.MemoryPool`1.NumAllocedAndFree">
+            <summary>
+            For debugging - how many arrays in memory pool (alive and free)
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.MemoryPool`1.TotalElementsInMemory">
+            <summary>
+            For debugging - how pool elements of the type T in memory pool (alive and free)
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.MemoryPool`1.TotalElementsInFreePool">
+            <summary>
+            For debugging - how pool elements of the type T in free pool
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.MemoryPool`1.NumSmallAllocs">
+            <summary>
+            # of allocs that were too small to track
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.MemoryPool`1.NumSmallFrees">
+            <summary>
+            # of frees that were too small to track
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.MemoryPool`1.SubPoolInfo">
+            <summary>
+            Info about all arrays of length X
+            </summary>
+            Note: this class is not threadsafe, you must ensure only a single thread is in here at a time
+        </member>
+        <member name="F:PacBio.Utils.MemoryPool`1.SubPoolInfo.free">
+            <summary>
+            Arrays available for reuse
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.MemoryPool`1.SubPoolInfo.numAlloced">
+            <summary>
+            Total # allocated (ever)
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.MemoryPool`1.SubPoolInfo.numFreed">
+            <summary>
+            Total # freed
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.MemoryPool`1.SubPoolInfo.numScrubbed">
+            <summary>
+            Total # scrubbed 
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.MemoryPool`1.SubPoolInfo.lowFreeMark">
+            <summary>
+            Lowest free during idle limit
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.MemoryPool`1.SubPoolInfo.mySize">
+            <summary>
+            # of elems for arrays in this subpool
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.MemoryPool`1.SubPoolInfo.freeTimelimit">
+            <summary>
+            time in seconds that unused freed memory will be scrubbed
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.SubPoolInfo.TryAlloc">
+            <summary>
+            Attempt to reuse an existing free array
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.SubPoolInfo.Alloc">
+            <summary>
+            Allocate (or reuse) an array
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.SubPoolInfo.Free(`0[])">
+            <summary>
+            Return an array for recycling
+            </summary>
+            <param name="arr"></param>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.SubPoolInfo.Scrub">
+            <summary>
+            Free memory that has exceeded the time limit for being unused.
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.MemoryPool`1.SubPoolInfo.NumAlive">
+            <summary>
+            # of currently live objects
+            </summary>
+        </member>
+        <member name="P:PacBio.Utils.MemoryPool`1.SubPoolInfo.NumFree">
+            <summary>
+            # of memory objects in Free Pool
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.MemoryPool`1.Ref">
+            <summary>
+            A reference holder for an array that came from a MemoryPool
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.MemoryPool`1.Ref.#ctor(PacBio.Utils.MemoryPool{`0},`0[],System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="pool"></param>
+            <param name="arr"></param>
+            <param name="freeTimelimit"></param>
+        </member>
+        <member name="P:PacBio.Utils.MemoryPool`1.Ref.Contents">
+            <summary>
+            The array (be careful  when caching this)
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.MemoryScrubber">
+            <summary>
+            Runs a timer that scrubs unused free memory from the Memory Pool.   
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.MemoryScrubber.instance">
+            <summary>
+            singleton instance
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.MemoryScrubber.scrubs">
+            <summary>
+            Scrub actions to be performed
+            </summary>
+        </member>
+        <member name="F:PacBio.Utils.MemoryScrubber.scrubTimer">
+            <summary>
+            Timer for running scrub actions
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.MemoryScrubber.#ctor">
+            <summary>
+            private constructor
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.MemoryScrubber.scrubTimer_Elapsed(System.Object,System.Timers.ElapsedEventArgs)">
+            <summary>
+            runs the scrub actions
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="M:PacBio.Utils.MemoryScrubber.AddScrub(System.Action)">
+            <summary>
+            Add a scrub action
+            </summary>
+            <param name="scrub"></param>
+        </member>
+        <member name="P:PacBio.Utils.MemoryScrubber.Instance">
+            <summary>
+            Instance accessor
+            </summary>
+        </member>
+        <member name="T:PacBio.Utils.BuildVersion">
+            <summary>
+            Utility class for reporting the software version.  This assumes that the build process has created a buildVersion.txt file
+            in the build directory.  We just check for that file and return the first line, or a default value if buildVersion.txt doesn't exist
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism2.TakeAtMost``1(System.Collections.Generic.IEnumerator{``0},System.Int32)">
+            <summary>
+            Takes at most chunkSize objects off the IEnumerator
+            </summary>
+            <returns>List of objects no greater than chunkSize, which will be empty if e is.</returns>
+            <param name="e">The IEnumerator from which we will be consuming.</param>
+            <param name="chunkSize">the maximum number of objects that will be taken off e</param>
+            <typeparam name="T">The 1st type parameter.</typeparam>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism2.InitializeTasks``1(System.Collections.Generic.IEnumerator{``0},System.Func{System.Collections.Generic.IList{``0},System.Threading.Tasks.Task},System.Threading.Tasks.Task[],PacBio.Utils.Parallelism2.ChunkSizeOptimizer@)">
+            <summary>
+            Initializes the tasks.
+            </summary>
+            <param name="e">IEnumerator from which we will be consuming jobs.</param>
+            <param name="startTask">A function that starts Tasks.</param>
+            <param name="tasks">The array of Tasks.</param>
+            <param name="optimizer">State machine for optimizing the size of the job submitted to maximize throughput.</param>
+            <typeparam name="T">The type of the job.</typeparam>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism2.SubmitTasks``1(System.Collections.Generic.IEnumerator{``0},System.Func{System.Collections.Generic.IList{``0},System.Threading.Tasks.Task},System.Threading.Tasks.Task[],PacBio.Utils.Parallelism2.ChunkSizeOptimizer@)">
+            <summary>
+            Iterates over tasks and submits new ones if any are completed
+            </summary>
+            <returns><c>true</c>, if there are any active tasks, <c>false</c> otherwise.</returns>
+            <param name="e">IEnumerator from which we will be consuming jobs.</param>
+            <param name="startTask">A function that starts Tasks.</param>
+            <param name="tasks">The array of Tasks.</param>
+            <param name="optimizer">State machine for optimizing the size of the job submitted to maximize throughput.</param>
+            <typeparam name="T">The type of the job.</typeparam>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism2.SemiParSelectInner``2(System.Collections.Generic.IEnumerable{``0},System.Int32,System.Func{``0,``1})">
+            <summary>
+            The real logic behind SemiParSelect
+            </summary>
+            <returns>IEnumerable of return values</returns>
+            <param name="source">IEnumerable of input values</param>
+            <param name="numThreads">Number threads to parallelize over (less than 1 subtracts from Environment.ProcessorCount, 1 performs no parallelization, greater than 1 is the desired number of threads)</param>
+            <param name="func">Function to map over IEnumerable</param>
+            <typeparam name="TS">Input type of func</typeparam>
+            <typeparam name="TR">Output type of func</typeparam>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism2.SemiParForEachInner``1(System.Collections.Generic.IEnumerable{``0},System.Int32,System.Action{``0})">
+            <summary>
+            The real logic behind SemiParForEach2
+            </summary>
+            <returns>IEnumerable of return values</returns>
+            <param name="source">IEnumerable of input values</param>
+            <param name="numThreads">Number threads to parallelize over (less than 1 subtracts from Environment.ProcessorCount, 1 performs no parallelization, greater than 1 is the desired number of threads)</param>
+            <param name="func">Action to map over IEnumerable</param>
+            <typeparam name="T">Input type of func</typeparam>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism2.SemiParSelect2``2(System.Collections.Generic.IEnumerable{``0},System.Int32,System.Func{``0,``1})">
+            <summary>
+            Map a Function over an IEnumerable with thread-based parallelism; enumerable input is
+            evaluated on the original thread.
+            </summary>
+            <returns>IEnumerable of return values</returns>
+            <param name="source">IEnumerable of input values</param>
+            <param name="numThreads">Number threads to parallelize over (less than 1 subtracts from
+            Environment.ProcessorCount, 1 performs no parallelization, greater than 1 is the desired
+            number of threads)</param>
+            <param name="func">Function to map over IEnumerable</param>
+            <typeparam name="TS">Input type of func</typeparam>
+            <typeparam name="TR">Output type of func</typeparam>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism2.SemiParForEach2``1(System.Collections.Generic.IEnumerable{``0},System.Int32,System.Action{``0})">
+            <summary>
+            Map an Action over an IEnumerable with thread-based parallelism;  enumerable input is
+            evaluated on the original thread.
+            </summary>
+            <returns>IEnumerable of return values</returns>
+            <param name="source">IEnumerable of input values</param>
+            <param name="numThreads">Number threads to parallelize over (less than 1 subtracts
+            from Environment.ProcessorCount, 1 performs no parallelization, greater than 1 is the
+            desired number of threads)</param>
+            <param name="func">Action to map over IEnumerable</param>
+            <typeparam name="T">Input type of func</typeparam>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism2.SemiParSelect2``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
+            <summary>
+            Map a Function over an IEnumerable with thread-based parallelism  (with Settings.NumThreads threads)
+            </summary>
+            <returns>IEnumerable of return values</returns>
+            <param name="source">IEnumerable of input values</param>
+            <param name="func">Function to map over IEnumerable</param>
+            <typeparam name="TS">Input type of func</typeparam>
+            <typeparam name="TR">Output type of func</typeparam>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism2.SemiParForEach2``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
+            <summary>
+            Map an Action over an IEnumerable with thread-based parallelism (with Settings.NumThreads threads)
+            </summary>
+            <returns>IEnumerable of return values</returns>
+            <param name="source">IEnumerable of input values</param>
+            <param name="func">Action to perform over IEnumerable</param>
+            <typeparam name="T">Input type of func</typeparam>
+        </member>
+        <member name="T:PacBio.Utils.Parallelism2.ChunkSizeOptimizer">
+            <summary>
+            State machine for optimizing throughput by modulating
+            the number of jobs submitted to each thread at a time
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism.ParSelect``2(System.Collections.Generic.IEnumerable{``0},System.Int32,System.Func{``0,``1})">
+            <summary>
+            Fully parallel 'Select': both the evaluation of 'func' and the enumeration of 'source' are
+            delegated to parallel worker threads.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism.ParSelect``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
+            <summary>
+            Fully parallel 'Select': both the evaluation of 'func' and the enumeration of 'source' are
+            delegated to parallel worker threads.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism.SemiParSelect``2(System.Collections.Generic.IEnumerable{``0},System.Int32,System.Func{``0,``1})">
+            <summary>
+            "Semi"-parallel select: parallel in func evaluation, but enumerates source on main thread
+            Note: this is non-streaming in its *output*.
+            </summary>
+        </member>
+        <member name="M:PacBio.Utils.Parallelism.SemiParSelect``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
+            <summary>
+            "Semi"-parallel select: parallel in func evaluation, but enumerates source on main thread
+            </summary>
+        </member>
+    </members>
+</doc>

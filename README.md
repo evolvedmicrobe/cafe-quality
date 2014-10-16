@@ -3,7 +3,8 @@ cafe-quality
 
 Tools to assess and diagnose accuracy issues in PacBio data.
 
-This is a library designed to help analyze PacBio data and assess quality issues.  It is composed of the following items.
+This is a library designed to help analyze PacBio data and assess quality issues.  It is composed of the following items.  In the future, git hooks will be attached to benchmark different algorithms on branches.
+
 
 Directory Structure
 ===================
@@ -14,3 +15,12 @@ Directory Structure
         /ConsensusCore - Fork of PacBio consensus core, for compute intense tasks (C++).
         /VariantCaller - Code for loading ZMW reads, calling variants and creating quality metrics (C#).
         /scripts - Scripts to use the library to examine quality (F#)
+
+
+Requirements
+============
+
+ ## Needed On Path*
+  * Swig
+  * C++ Compiler
+  * CLR Runtime

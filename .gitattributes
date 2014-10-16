@@ -1,1 +1,10 @@
 * text eol=lf
+*.dll binary
+*.exe binary
+*.so binary
+*.a binary
+*.pdb binary
+*.mdb binary
+*.xml binary
+*.XML binary
+*.dylib binary
