@@ -1,3 +1,27 @@
+# Nigel's list
+*.dll
+*.exe
+*.pdb
+*.pdf
+*.graphml
+*.csv
+*.java
+*.jar
+*.mdb
+*.cache
+*.user
+*.userprefs
+*.class
+*.xml
+*.gif
+*.vspscc
+Temporary*
+*/obj/*
+*/bin/*
+src/ConsensusCore/Debug/*
+*/Debug/*
+
+# Git's list
 # Compiled Object files
 *.slo
 *.lo
@@ -11,7 +35,6 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -23,6 +46,5 @@
 *.lib
 
 # Executables
-*.exe
 *.out
 *.app
