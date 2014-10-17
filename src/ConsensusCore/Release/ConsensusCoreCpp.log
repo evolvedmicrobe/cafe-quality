@@ -1,0 +1,580 @@
+﻿Build started 10/16/2014 11:03:54 AM.
+     1>Project "C:\git\cafe-quality\src\ConsensusCore\ConsensusCoreCpp.vcxproj" on node 4 (Rebuild target(s)).
+     1>BeforeBuild:
+         swig -csharp -dllimport libConsensusCore -namespace ConsensusCore -c++ -Isrc/C++ -outdir build\CSharp -o build\CSharp\ConsensusCore_wrap.cxx src/SWIG/ConsensusCore.i
+     1>src\C++\Interval.hpp(59): warning 503: Can't wrap 'operator ==' unless renamed to a valid identifier.
+     1>src\C++\Matrix\DenseMatrix.hpp(97): warning 503: Can't wrap 'operator ()' unless renamed to a valid identifier.
+     1>src\C++\Matrix\SparseMatrix.hpp(76): warning 503: Can't wrap 'operator ()' unless renamed to a valid identifier.
+     1>src\C++\Mutation.hpp(97): warning 503: Can't wrap 'operator ==' unless renamed to a valid identifier.
+     1>src\C++\Mutation.hpp(98): warning 503: Can't wrap 'operator <' unless renamed to a valid identifier.
+     1>src\C++\Mutation.hpp(104): warning 503: Can't wrap 'operator <<' unless renamed to a valid identifier.
+     1>src\C++\Mutation.hpp(128): warning 503: Can't wrap 'operator <<' unless renamed to a valid identifier.
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(357,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Isrc\C++\ /I"C:\git\cafe-quality\src\ConsensusCore\\" /I../../lib/boost_1_55_0 /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D CODE_ANALYSIS /D _WINDLL /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze /analyze:plugin"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\\bin\localespc.dll" /errorReport:prompt   /analyze:quiet build\CSharp\ConsensusCore_wrap.cxx src\C++\AffineAlignment.cpp src\C++\Checksum.cpp src\C++\Coverage.cpp src\C++\Feature.cpp src\C++\Features.cpp src\C++\Edna\EdnaCounts.cpp src\C++\Logging\Logging.cpp src\C++\Matrix\DenseMatrix.cpp src\C++\Matrix\SparseMatrix.cpp src\C++\Mutation.cpp src\C++\PairwiseAlignment.cpp src\C++\Poa\PoaConfig.cpp src\C++\Poa\PoaConsensus.cpp src\C++\Poa\PoaGraph.cpp src\C++\Quiver\detail\RecursorBase.cpp src\C++\Quiver\Diploid.cpp src\C++\Quiver\MultiReadMutationScorer.cpp src\C++\Quiver\MutationEnumerator.cpp src\C++\Quiver\MutationScorer.cpp src\C++\Quiver\QuiverConfig.cpp src\C++\Quiver\QuiverConsensus.cpp src\C++\Quiver\ReadScorer.cpp src\C++\Quiver\SimpleRecursor.cpp src\C++\Quiver\SseRecursor.cpp src\C++\Read.cpp src\C++\Sequence.cpp src\C++\Simulation\Random.cpp src\C++\Simulation\Simulator.cpp src\C++\Statistics\Binomial.cpp src\C++\Utils.cpp src\C++\Version.cpp
+         ConsensusCore_wrap.cxx
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/QuiverConfig.hpp(215): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(79): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(113) : see reference to class template instantiation 'ConsensusCore::detail::RecursorBase<M,E,C>' being compiled
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(62): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(91) : see reference to class template instantiation 'ConsensusCore::MutationScorer<R>' being compiled
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(71): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/ReadScorer.hpp(57): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/ReadScorer.hpp(61): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/ReadScorer.hpp(65): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/ReadScorer.hpp(69): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>build\CSharp\ConsensusCore_wrap.cxx(4352): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(4368): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(4384): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(4400): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(4763): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(4779): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(4795): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(4811): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(4829): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(7117): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(7727): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(11334): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+     1>build\CSharp\ConsensusCore_wrap.cxx(11460): warning C4316: '__m128' : object allocated on the heap may not be aligned 16
+         AffineAlignment.cpp
+         Checksum.cpp
+         Coverage.cpp
+         Feature.cpp
+         Features.cpp
+         EdnaCounts.cpp
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/QuiverConfig.hpp(215): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(79): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(113) : see reference to class template instantiation 'ConsensusCore::detail::RecursorBase<M,E,C>' being compiled
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(62): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(91) : see reference to class template instantiation 'ConsensusCore::MutationScorer<R>' being compiled
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(71): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+         Logging.cpp
+         DenseMatrix.cpp
+         SparseMatrix.cpp
+         Mutation.cpp
+         PairwiseAlignment.cpp
+         PoaConfig.cpp
+         PoaConsensus.cpp
+         PoaGraph.cpp
+     1>src\C++\Poa\PoaGraph.cpp(842): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+         RecursorBase.cpp
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/QuiverConfig.hpp(215): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(79): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(113) : see reference to class template instantiation 'ConsensusCore::detail::RecursorBase<M,E,C>' being compiled
+     1>src\C++\Quiver\detail\RecursorBase.cpp(73): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+         Diploid.cpp
+     1>src\C++\Quiver\Diploid.cpp(143): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+         MultiReadMutationScorer.cpp
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/QuiverConfig.hpp(215): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(79): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(113) : see reference to class template instantiation 'ConsensusCore::detail::RecursorBase<M,E,C>' being compiled
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(62): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(91) : see reference to class template instantiation 'ConsensusCore::MutationScorer<R>' being compiled
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(71): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>src\C++\Quiver\MultiReadMutationScorer.cpp(239): warning C4101: 'e' : unreferenced local variable
+                 src\C++\Quiver\MultiReadMutationScorer.cpp(216) : while compiling class template member function 'void ConsensusCore::MultiReadMutationScorer<ConsensusCore::SparseSseQvRecursor>::ApplyMutations(const std::vector<ConsensusCore::Mutation,std::allocator<_Ty>> &)'
+                 with
+                 [
+                     _Ty=ConsensusCore::Mutation
+                 ]
+     1>src\C++\Quiver\MultiReadMutationScorer.cpp(262): warning C4101: 'e' : unreferenced local variable
+                 src\C++\Quiver\MultiReadMutationScorer.cpp(249) : while compiling class template member function 'bool ConsensusCore::MultiReadMutationScorer<ConsensusCore::SparseSseQvRecursor>::AddRead(const ConsensusCore::MappedRead &,float)'
+                 src\C++\Quiver\MultiReadMutationScorer.cpp(292) : see reference to function template instantiation 'bool ConsensusCore::MultiReadMutationScorer<ConsensusCore::SparseSseQvRecursor>::AddRead(const ConsensusCore::MappedRead &,float)' being compiled
+     1>src\C++\Quiver\MultiReadMutationScorer.cpp(493): warning C4018: '<=' : signed/unsigned mismatch
+                 src\C++\Quiver\MultiReadMutationScorer.cpp(483) : while compiling class template member function 'void ConsensusCore::MultiReadMutationScorer<ConsensusCore::SparseSseQvRecursor>::CheckInvariants(void) const'
+                 src\C++\Quiver\MultiReadMutationScorer.cpp(160) : see reference to function template instantiation 'void ConsensusCore::MultiReadMutationScorer<ConsensusCore::SparseSseQvRecursor>::CheckInvariants(void) const' being compiled
+     1>src\C++\Quiver\MultiReadMutationScorer.cpp(494): warning C4018: '<=' : signed/unsigned mismatch
+         MutationEnumerator.cpp
+         MutationScorer.cpp
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/QuiverConfig.hpp(215): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(79): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(113) : see reference to class template instantiation 'ConsensusCore::detail::RecursorBase<M,E,C>' being compiled
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(62): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(91) : see reference to class template instantiation 'ConsensusCore::MutationScorer<R>' being compiled
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(71): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>src\C++\Quiver\MutationScorer.cpp(56): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>src\C++\Quiver\MutationScorer.cpp(100): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+         Running Code Analysis for C/C++...
+         Compiling...
+         QuiverConfig.cpp
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/QuiverConfig.hpp(215): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>src\C++\Quiver\QuiverConfig.cpp(88): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+         QuiverConsensus.cpp
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/QuiverConfig.hpp(215): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(79): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(113) : see reference to class template instantiation 'ConsensusCore::detail::RecursorBase<M,E,C>' being compiled
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(62): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(91) : see reference to class template instantiation 'ConsensusCore::MutationScorer<R>' being compiled
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/MutationScorer.hpp(71): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+         ReadScorer.cpp
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/QuiverConfig.hpp(215): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/ReadScorer.hpp(57): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/ReadScorer.hpp(61): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/ReadScorer.hpp(65): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/ReadScorer.hpp(69): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(79): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(113) : see reference to class template instantiation 'ConsensusCore::detail::RecursorBase<M,E,C>' being compiled
+     1>src\C++\Quiver\ReadScorer.cpp(59): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>src\C++\Quiver\ReadScorer.cpp(75): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>src\C++\Quiver\ReadScorer.cpp(90): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>src\C++\Quiver\ReadScorer.cpp(106): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+         SimpleRecursor.cpp
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/QuiverConfig.hpp(215): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(79): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(113) : see reference to class template instantiation 'ConsensusCore::detail::RecursorBase<M,E,C>' being compiled
+         SseRecursor.cpp
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/QuiverConfig.hpp(215): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(79): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+                 C:\git\cafe-quality\src\ConsensusCore\src\C++\Quiver/detail/RecursorBase.hpp(113) : see reference to class template instantiation 'ConsensusCore::detail::RecursorBase<M,E,C>' being compiled
+         Read.cpp
+         Sequence.cpp
+         Random.cpp
+         Simulator.cpp
+     1>C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(20): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(31) : see reference to function template instantiation '_Ty std::_Accumulate<double*,_Ty,_Fn2>(_InIt,_InIt,_Ty,_Fn2)' being compiled
+                 with
+                 [
+                     _Ty=int
+         ,            _Fn2=std::plus<void>
+         ,            _InIt=double *
+                 ]
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\numeric(39) : see reference to function template instantiation '_Ty std::accumulate<_InIt,_Ty,std::plus<void>>(_InIt,_InIt,_Ty,_Fn2)' being compiled
+                 with
+                 [
+                     _Ty=int
+         ,            _InIt=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<double>>>
+         ,            _Fn2=std::plus<void>
+                 ]
+                 src\C++\Simulation\Simulator.cpp(89) : see reference to function template instantiation '_Ty std::accumulate<std::_Vector_iterator<std::_Vector_val<std::_Simple_types<double>>>,int>(_InIt,_InIt,_Ty)' being compiled
+                 with
+                 [
+                     _Ty=int
+         ,            _InIt=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<double>>>
+                 ]
+         Binomial.cpp
+         Utils.cpp
+         Version.cpp
+         Running Code Analysis for C/C++...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\git\cafe-quality\src\ConsensusCore\build\CSharp\libConsensusCore.dll" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\git\cafe-quality\src\ConsensusCore\build\CSharp\libConsensusCore.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\git\cafe-quality\src\ConsensusCore\build\CSharp\libConsensusCore.lib" /MACHINE:X86 /SAFESEH /DLL Release\ConsensusCore_wrap.obj
+         Release\AffineAlignment.obj
+         Release\Checksum.obj
+         Release\Coverage.obj
+         Release\Feature.obj
+         Release\Features.obj
+         Release\EdnaCounts.obj
+         Release\Logging.obj
+         Release\DenseMatrix.obj
+         Release\SparseMatrix.obj
+         Release\Mutation.obj
+         Release\PairwiseAlignment.obj
+         Release\PoaConfig.obj
+         Release\PoaConsensus.obj
+         Release\PoaGraph.obj
+         Release\RecursorBase.obj
+         Release\Diploid.obj
+         Release\MultiReadMutationScorer.obj
+         Release\MutationEnumerator.obj
+         Release\MutationScorer.obj
+         Release\QuiverConfig.obj
+         Release\QuiverConsensus.obj
+         Release\ReadScorer.obj
+         Release\SimpleRecursor.obj
+         Release\SseRecursor.obj
+         Release\Read.obj
+         Release\Sequence.obj
+         Release\Random.obj
+         Release\Simulator.obj
+         Release\Binomial.obj
+         Release\Utils.obj
+         Release\Version.obj
+            Creating library C:\git\cafe-quality\src\ConsensusCore\build\CSharp\libConsensusCore.lib and object C:\git\cafe-quality\src\ConsensusCore\build\CSharp\libConsensusCore.exp
+         Generating code
+         Finished generating code
+         ConsensusCoreCpp.vcxproj -> C:\git\cafe-quality\src\ConsensusCore\build\CSharp\libConsensusCore.dll
+     1>c:\git\cafe-quality\src\consensuscore\src\c++\coverage.cpp(78): warning C6262: Function uses '40068' bytes of stack:  exceeds /analyze:stacksize '16384'.  Consider moving some data to heap.
+     1>c:\git\cafe-quality\src\consensuscore\src\c++\matrix\sparsematrix.cpp(121): warning C6386: Buffer overrun while writing to '*mat':  the writable size is 'public: virtual int const __thiscall ConsensusCore::SparseMatrix::Rows(void)const ()*public: virtual int const __thiscall ConsensusCore::SparseMatrix::Columns(void)const ()*4' bytes, but '8' bytes might be written.
+     1>c:\git\cafe-quality\lib\boost_1_55_0\boost\random\mersenne_twister.hpp(454): warning C6385: Reading invalid data from 'x':  the readable size is '2496' bytes, but 'i' bytes may be read.
+     1>c:\git\cafe-quality\lib\boost_1_55_0\boost\random\mersenne_twister.hpp(430): warning C6294: Ill-defined for-loop:  initial condition does not satisfy test.  Loop body not executed.
+     1>c:\git\cafe-quality\lib\boost_1_55_0\boost\random\mersenne_twister.hpp(431): warning C6201: Index '624' is out of valid index range '0' to '623' for possibly stack allocated buffer 'x'.
+     1>c:\git\cafe-quality\lib\boost_1_55_0\boost\random\mersenne_twister.hpp(432): warning C6201: Index '624' is out of valid index range '0' to '623' for possibly stack allocated buffer 'x'.
+     1>c:\git\cafe-quality\lib\boost_1_55_0\boost\array.hpp(130): warning C6385: Reading invalid data from 'elems':  the readable size is '140' bytes, but 'i' bytes may be read.
+     1>c:\git\cafe-quality\lib\boost_1_55_0\boost\math\special_functions\gamma.hpp(747): warning C6011: Dereferencing NULL pointer 'pgam'. 
+       AfterBuild:
+         type build\CSharp\*.cs > build\CSharp\ConsensusCore.cs.pre
+         
+         build\CSharp\AbstractMatrix.cs
+         
+         
+         
+         build\CSharp\AbstractMultiReadMutationScorer.cs
+         
+         
+         
+         build\CSharp\AbstractMutationEnumerator.cs
+         
+         
+         
+         build\CSharp\AffineAlignmentParams.cs
+         
+         
+         
+         build\CSharp\AllSingleBaseMutationEnumerator.cs
+         
+         
+         
+         build\CSharp\AlphaBetaMismatchException.cs
+         
+         
+         
+         build\CSharp\BandingOptions.cs
+         
+         
+         
+         build\CSharp\ChannelSequenceFeatures.cs
+         
+         
+         
+         build\CSharp\CharFeature.cs
+         
+         
+         
+         build\CSharp\ConsensusCore.cs
+         
+         
+         
+         build\CSharp\ConsensusCorePINVOKE.cs
+         
+         
+         
+         build\CSharp\DenseMatrix.cs
+         
+         
+         
+         build\CSharp\DinucleotideRepeatMutationEnumerator.cs
+         
+         
+         
+         build\CSharp\DiploidSite.cs
+         
+         
+         
+         build\CSharp\EdnaCounts.cs
+         
+         
+         
+         build\CSharp\EdnaEvaluator.cs
+         
+         
+         
+         build\CSharp\EdnaModelParams.cs
+         
+         
+         
+         build\CSharp\ErrorBase.cs
+         
+         
+         
+         build\CSharp\ExceptionBase.cs
+         
+         
+         
+         build\CSharp\FeaturesVector.cs
+         
+         
+         
+         build\CSharp\FloatArray.cs
+         
+         
+         
+         build\CSharp\FloatFeature.cs
+         
+         
+         
+         build\CSharp\FloatVector.cs
+         
+         
+         
+         build\CSharp\IntArray.cs
+         
+         
+         
+         build\CSharp\InternalError.cs
+         
+         
+         
+         build\CSharp\Interval.cs
+         
+         
+         
+         build\CSharp\IntervalVector.cs
+         
+         
+         
+         build\CSharp\IntFeature.cs
+         
+         
+         
+         build\CSharp\IntPair.cs
+         
+         
+         
+         build\CSharp\IntVector.cs
+         
+         
+         
+         build\CSharp\InvalidInputError.cs
+         
+         
+         
+         build\CSharp\Logging.cs
+         
+         
+         
+         build\CSharp\MappedRead.cs
+         
+         
+         
+         build\CSharp\Move.cs
+         
+         
+         
+         build\CSharp\Mutation.cs
+         
+         
+         
+         build\CSharp\MutationType.cs
+         
+         
+         
+         build\CSharp\MutationVector.cs
+         
+         
+         
+         build\CSharp\NeedlemanWunschParams.cs
+         
+         
+         
+         build\CSharp\NotYetImplementedException.cs
+         
+         
+         
+         build\CSharp\PairwiseAlignment.cs
+         
+         
+         
+         build\CSharp\PoaConfig.cs
+         
+         
+         
+         build\CSharp\PoaConsensus.cs
+         
+         
+         
+         build\CSharp\PoaGraph.cs
+         
+         
+         
+         build\CSharp\PoaParameterSet.cs
+         
+         
+         
+         build\CSharp\QuiverConfig.cs
+         
+         
+         
+         build\CSharp\QuiverConfigTable.cs
+         
+         
+         
+         build\CSharp\QvEvaluator.cs
+         
+         
+         
+         build\CSharp\QvModelParams.cs
+         
+         
+         
+         build\CSharp\QvRecursorBase.cs
+         
+         
+         
+         build\CSharp\QvSequenceFeatures.cs
+         
+         
+         
+         build\CSharp\RandomNumberGenerator.cs
+         
+         
+         
+         build\CSharp\Read.cs
+         
+         
+         
+         build\CSharp\ReadScorer.cs
+         
+         
+         
+         build\CSharp\RefineOptions.cs
+         
+         
+         
+         build\CSharp\ScoredMutation.cs
+         
+         
+         
+         build\CSharp\ScoredMutationVector.cs
+         
+         
+         
+         build\CSharp\SequenceFeatures.cs
+         
+         
+         
+         build\CSharp\SequencingParameters.cs
+         
+         
+         
+         build\CSharp\SimpleQvMutationScorer.cs
+         
+         
+         
+         build\CSharp\SimpleQvRecursor.cs
+         
+         
+         
+         build\CSharp\SparseEdnaRecursorBase.cs
+         
+         
+         
+         build\CSharp\SparseMatrix.cs
+         
+         
+         
+         build\CSharp\SparseQvRecursorBase.cs
+         
+         
+         
+         build\CSharp\SparseQvSumProductRecursorBase.cs
+         
+         
+         
+         build\CSharp\SparseSimpleQvMutationScorer.cs
+         
+         
+         
+         build\CSharp\SparseSimpleQvRecursor.cs
+         
+         
+         
+         build\CSharp\SparseSimpleQvSumProductMutationScorer.cs
+         
+         
+         
+         build\CSharp\SparseSimpleQvSumProductRecursor.cs
+         
+         
+         
+         build\CSharp\SparseSseEdnaMutationScorer.cs
+         
+         
+         
+         build\CSharp\SparseSseEdnaRecursor.cs
+         
+         
+         
+         build\CSharp\SparseSseQvMultiReadMutationScorer.cs
+         
+         
+         
+         build\CSharp\SparseSseQvMutationScorer.cs
+         
+         
+         
+         build\CSharp\SparseSseQvRecursor.cs
+         
+         
+         
+         build\CSharp\SparseSseQvSumProductMultiReadMutationScorer.cs
+         
+         
+         
+         build\CSharp\SparseSseQvSumProductMutationScorer.cs
+         
+         
+         
+         build\CSharp\SparseSseQvSumProductRecursor.cs
+         
+         
+         
+         build\CSharp\SseQvMutationScorer.cs
+         
+         
+         
+         build\CSharp\SseQvRecursor.cs
+         
+         
+         
+         build\CSharp\StrandEnum.cs
+         
+         
+         
+         build\CSharp\StringVector.cs
+         
+         
+         
+         build\CSharp\SumProductCombiner.cs
+         
+         
+         
+         build\CSharp\SWIGTYPE_p_a_4__double.cs
+         
+         
+         
+         build\CSharp\SWIGTYPE_p_double.cs
+         
+         
+         
+         build\CSharp\SWIGTYPE_p_float.cs
+         
+         
+         
+         build\CSharp\SWIGTYPE_p_int.cs
+         
+         
+         
+         build\CSharp\SWIGTYPE_p_p_float.cs
+         
+         
+         
+         build\CSharp\SWIGTYPE_p_Read.cs
+         
+         
+         
+         build\CSharp\SWIGTYPE_p_std__vectorT_double_t.cs
+         
+         
+         
+         build\CSharp\SWIGTYPE_p___m128.cs
+         
+         
+         
+         build\CSharp\UniqueSingleBaseMutationEnumerator.cs
+         
+         
+         
+         build\CSharp\Version.cs
+         
+         
+         
+         build\CSharp\ViterbiCombiner.cs
+         
+         
+         del /q build\CSharp\*.cs
+         move build\CSharp\ConsensusCore.cs.pre build\CSharp\ConsensusCore.cs
+                 1 file(s) moved.
+     1>Done Building Project "C:\git\cafe-quality\src\ConsensusCore\ConsensusCoreCpp.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:23:33.83
