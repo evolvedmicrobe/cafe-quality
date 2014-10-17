@@ -1,11 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>9d8ae536-244a-4c9a-9a49-933776909902</ProjectGuid>
+    <ProjectGuid>{9D8AE536-244A-4C9A-9A49-933776909902}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>scripts</RootNamespace>
     <AssemblyName>scripts</AssemblyName>
@@ -67,15 +66,13 @@
     <Compile Include="LoadZMWs.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\bio\Bio.csproj">
-      <Name>Bio</Name>
-      <Project>{b53e11df-f9a9-4939-893e-78e59872089a}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\VariantCaller\VariantCaller.csproj">
       <Name>VariantCaller</Name>
-      <Project>{c1ea5b21-991d-4455-baa7-05cfd8c04b88}</Project>
-      <Private>True</Private>
+      <Project>{C1EA5B21-991D-4455-BAA7-05CFD8C04B88}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\bio\Bio.csproj">
+      <Project>{B53E11DF-F9A9-4939-893E-78E59872089A}</Project>
+      <Name>Bio</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

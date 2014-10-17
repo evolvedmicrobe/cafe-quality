@@ -20,28 +20,17 @@ lib:
 #
 # SWIG targets
 #
-python: lib
-	make -f make/Python.mk
-
-echo-python-build-directory:
-	@echo $(PYTHON_BUILD_DIR)
 
 csharp: lib
 	make -f make/CSharp.mk
 
 before-xbuild: csharp
-	-mkdir -p bin/Debug
-	-mkdir -p bin/Release
-	-cp $(BUILD_ROOT)/CSharp/libConsensusCore.so bin/Debug/
-	-cp $(BUILD_ROOT)/CSharp/libConsensusCore.so bin/Release/
+	-cp build/CSharp/libConsensusCore.so ../../lib/libConsensusCore.so
+
 
 #
 # Clean targets
 #
-clean-python:
-	-rm -rf $(PYTHON_BUILD_DIR)
-	-rm -rf ConsensusCore.egg-info
-	-rm -rf dist
 
 clean-csharp:
 	-rm -rf $(CSHARP_BUILD_DIR)
@@ -50,14 +39,12 @@ clean-csharp:
 clean-cxx:
 	-rm -rf $(BUILD_ROOT)/C++
 
-clean: clean-cxx clean-python clean-csharp
+clean: clean-cxx clean-csharp
 	-rm -rf $(BUILD_ROOT)
 
 #
 # Test targets
 #
-test-python:
-	@make -f make/Python.mk test-python
 
 test-csharp:
 	@make -f make/CSharp.mk test-csharp
@@ -69,34 +56,11 @@ check: test
 tests: test
 
 
-#
-# Lint targets
-#
-
-lint:
-	-find src -name "*.[ch]pp" | xargs ./tools/cpplint.py --verbose=0 --counting=toplevel
-
-pre-commit-hook:
-#       for speed, apply cpplint only to changed files.
-	git diff --cached --name-only --diff-filter=ACM | \
-         grep -e  '.*.[ch]pp$$' | xargs tools/cpplint.py --verbose=3
 
 
 #
 # Targets used by PBI internal build
 #
-pip-uninstall: $(shell which pip > /dev/null)
-	@pip freeze|grep 'ConsensusCore=='>/dev/null \
-      && pip uninstall -y ConsensusCore \
-      || true
-
-pip-install: $(shell which pip > /dev/null)
-	@pip install --no-index \
-          --install-option="--swig=$(SWIG)" \
-          --install-option="--boost=$(BOOST)" \
-          ./
-
-.PHONY: all lib clean-cxx clean test tests check python clean-python \
-	csharp clean-csharp echo-python-build-directory \
-	test-python test-csharp pip-uninstall pip-install \
-	lint pre-commit-hook 
+.PHONY: all lib clean-cxx clean test tests check  \
+	csharp clean-csharp \
+	test-csharp  

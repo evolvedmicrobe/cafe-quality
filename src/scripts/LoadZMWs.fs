@@ -11,11 +11,19 @@ open PacBio.Data
 open PacBio.HDF
 open PacBio.Utils
 open PacBio.IO
+open Bio.Util
 
 [<EntryPoint>]
 let main args = 
-    let d_direct = @"C:\git\cafe-quality\data\"
-    let direc = @"C:\CCS_P6_C4\Analysis_Results\\"
+    let runninMono = Bio.CrossPlatform.Environment.RunningInMono
+    let d_direct = if runninMono  then 
+                        "/Users/nigel/git/cafe-quality/data/" else
+                        @"C:\git\cafe-quality\data\"
+
+    let direc = if runninMono then
+                    "/Users/nigel/CCS_P6_C4/Analysis_Results/"
+                else
+                    @"C:\CCS_P6_C4\Analysis_Results\\"
 
     let ccsFiles = (new DirectoryInfo(d_direct)).GetFiles() |> 
                     Seq.where (fun h -> h.Name.EndsWith(".ccs.fasta.gz")) |> 

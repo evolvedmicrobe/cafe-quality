@@ -16,6 +16,9 @@
 *.gif
 *.vspscc
 Temporary*
+Bio.csproj.FilesWrittenAbsolute.txt
+*AssemblyAttribute.cs
+*FilesWrittenAbsolute.txt
 */obj/*
 */bin/*
 src/ConsensusCore/Debug/*
