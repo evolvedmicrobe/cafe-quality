@@ -420,7 +420,7 @@ namespace Bio.Algorithms.Alignment
         {
             if (1 > LengthOfMUM)
             {
-                string message = Properties.Resource.MUMLengthTooSmall;
+                string message = "MUMLengthTooSmall";
                 Trace.Report(message);
                 throw new ArgumentException(message);
             }

@@ -40,8 +40,8 @@ namespace Bio.Algorithms.MUMmer
             this.LengthOfMUM = 20;
             this.NoAmbiguity = false;
 
-            this.Name = Properties.Resource.MUMmerName;
-            this.Description = Properties.Resource.MUMmerDescription;
+            this.Name = "MUMmer";
+            this.Description = "MUMmerDescription";
         }
 
         /// <summary>
@@ -62,8 +62,8 @@ namespace Bio.Algorithms.MUMmer
             // Default Min length of Match - set to 20.
             this.LengthOfMUM = 20;
             this.NoAmbiguity = false;
-            this.Name = Properties.Resource.MUMmerName;
-            this.Description = Properties.Resource.MUMmerDescription;
+            this.Name = "MUMmer";
+            this.Description = "MUMmerDescription";
         }
 
         #endregion

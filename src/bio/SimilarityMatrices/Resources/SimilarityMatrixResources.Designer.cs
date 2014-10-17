@@ -176,7 +176,8 @@ namespace Bio.SimilarityMatrices.Resources {
         /// </summary>
         internal static string DiagonalScoreMatrix {
             get {
-                return ResourceManager.GetString("DiagonalScoreMatrix", resourceCulture);
+                return 
+@"x";
             }
         }
         
@@ -204,7 +205,8 @@ namespace Bio.SimilarityMatrices.Resources {
         ///  2  -2   0   0  -2   0   0   1  -1  -1  -2  -1  -1  -3   1   1   1  -6  -3   0   0  -1   0  -1  -8
         /// -2   6   0  -1  -4   1  -1  -3   2  -2  -3   3   0  -4   0   0  -1   2  -4  -2  -1  -3   0  -1  -8
         ///  0   0   2   2  -4   1   1   0   2  -2  -3   1  -2  -3   0   1   0  -4  -2  -2   2  -3   1  -1  -8
-        ///  0  -1   2   4  -5   2   3   1   1  -2  -4   0  -3  -6  -1   0   0  -7  -4  -2   3  -3   3  -1  -8        /// [rest of string was truncated]&quot;;.
+        ///  0  -1   2   4  -5   2   3   1   1  -2  -4   0  -3  -6  -1   0   0  -7  -4  -2   3  -3   3  -1  -8
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Pam250 {
             get {

@@ -447,9 +447,7 @@ file specification, and converts the data to in-memory ISequence objects.  For a
 users, the ability to select an encoding for the internal memory representation is
 provided. There is also a default encoding for each alphabet that may be encountered.</value>
   </data>
-  <data name="FASTA_FILEEXTENSION" xml:space="preserve">
-    <value>.fa,.mpfa,.fna,.faa,.fsa,.fas,.fasta</value>
-  </data>
+
   <data name="FASTA_NAME" xml:space="preserve">
     <value>Fasta</value>
   </data>

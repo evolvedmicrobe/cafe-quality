@@ -2,10 +2,10 @@
 using System.IO;
 using System.Text;
 using Bio.Phylogenetics;
-using Bio.Properties;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
+using Bio.Properties;
 
 namespace Bio.IO.Newick
 {
@@ -49,7 +49,7 @@ namespace Bio.IO.Newick
         {
             get
             {
-                return Resource.NEWICK_NAME;
+				return Resource.NEWICK_NAME;
             }
         }
 

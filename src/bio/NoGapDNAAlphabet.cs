@@ -49,17 +49,11 @@ namespace Bio
         /// </summary>
         private List<byte> nucleotides = new List<byte>();
 
-        #if (SILVERLIGHT == false)
-            /// <summary>
-            /// Mapping from set of symbols to corresponding ambiguous symbol.
-            /// </summary>
-            private Dictionary<HashSet<byte>, byte> basicSymbolsToAmbiguousSymbolMap = new Dictionary<HashSet<byte>, byte>(HashSet<byte>.CreateSetComparer());
-        #else
-            /// <summary>
-            /// Mapping from set of symbols to corresponding ambiguous symbol.
-            /// </summary>
-            private Dictionary<HashSet<byte>, byte> basicSymbolsToAmbiguousSymbolMap = new Dictionary<HashSet<byte>, byte>(new HashSetComparer<byte>());
-        #endif
+        /// <summary>
+        /// Mapping from set of symbols to corresponding ambiguous symbol.
+        /// </summary>
+        private Dictionary<HashSet<byte>, byte> basicSymbolsToAmbiguousSymbolMap = new Dictionary<HashSet<byte>, byte>(HashSet<byte>.CreateSetComparer());
+
 
         /// <summary>
         /// Mapping from ambiguous symbol to set of basic symbols they represent.
@@ -90,7 +84,7 @@ namespace Bio
         /// </summary>
         protected NoGapDnaAlphabet()
         {
-            this.Name = Properties.Resource.UnambiguousDNAalphabetName;
+            this.Name = "UnambiguousDNAalphabet";
             this.HasGaps = false;
             this.HasAmbiguity = false;
             this.HasTerminations = false;

@@ -28,7 +28,7 @@ namespace Bio
         /// </summary>
         protected AmbiguousRnaAlphabet()
         {
-            Name = Properties.Resource.AmbiguousRnaAlphabetName;
+            Name = "AmbiguousRnaAlphabet";
             HasAmbiguity = true;
 
             this.AC = (byte)'M';

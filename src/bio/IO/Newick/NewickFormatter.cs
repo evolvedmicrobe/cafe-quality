@@ -2,9 +2,9 @@
 using System.IO;
 using System.Text;
 using Bio.Phylogenetics;
-using Bio.Properties;
 using System.Globalization;
 using System.Collections.Generic;
+using Bio.Properties;
 
 namespace Bio.IO.Newick
 {

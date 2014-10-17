@@ -28,7 +28,7 @@ namespace Bio
         /// </summary>
         protected AmbiguousDnaAlphabet()
         {
-            Name = Properties.Resource.AmbiguousDnaAlphabetName;
+			Name = "AmbiguousDnaAlphabet";
             HasAmbiguity = true;
 
             this.AC = (byte)'M';

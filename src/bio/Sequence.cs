@@ -32,6 +32,9 @@ namespace Bio
         /// </summary>
         private byte[] _sequenceData;
 
+
+
+
         /// <summary>
         /// Metadata is features or references or related things of a sequence.
         /// </summary>
@@ -501,18 +504,18 @@ namespace Bio
         }
 
 
-#if !SILVERLIGHT
+
         /// <summary>
         /// This is used by some of the built-in algorithms which access the data in a read-only fashion
         /// to quickly grab a sequence of data without copying it.  It cannot be used outside Bio.dll
         /// For outside users, use the CopyTo method.
-        /// </summary>
+		/// 
+		/// </summary>
         /// <returns></returns>
         internal byte[] GetInternalArray()
         {
             return this._sequenceData;
         }
-#endif
 
         /// <summary>
         /// Copies all items from the sequence to a pre allocated array.

@@ -17,7 +17,7 @@ namespace VariantCaller
         public CCSSubRead(Sequence seq)
         {
             var name = seq.ID;
-            var Seq = seq.ToArray();
+			var Seq = seq.ToArray ();
             var sp = name.Split('/');
             ParentZMW = Convert.ToInt32(sp[1]);
             var spl = sp.Last();

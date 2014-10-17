@@ -105,7 +105,7 @@ namespace Bio.IO.FastA
         {
             get
             {
-                return Properties.Resource.FASTA_FILEEXTENSION;
+				return Bio.IO.FastA.FastAFormatter.FASTA_FILE_EXTENSION;
             }
         }
 

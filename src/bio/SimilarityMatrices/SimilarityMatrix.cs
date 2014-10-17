@@ -75,7 +75,7 @@ namespace Bio.SimilarityMatrices
                     moleculeType = Alphabets.RNA;
                     break;
                 case StandardSimilarityMatrix.DiagonalScoreMatrix:
-                    matrixText = SimilarityMatrixResources.DiagonalScoreMatrix;
+                    matrixText = DiagonalScoreMatrix.Matrix;
                     break;
                 case StandardSimilarityMatrix.EDnaFull:
                     matrixText = SimilarityMatrixResources.EDNAFull;

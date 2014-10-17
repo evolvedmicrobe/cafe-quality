@@ -456,6 +456,7 @@
     <Compile Include="IO\SAM\CigarUtils.cs" />
     <Compile Include="IO\SAM\CigarElement.cs" />
     <Compile Include="IO\SAM\CigarOperations.cs" />
+    <Compile Include="SimilarityMatrices\DiagonalScoreMatrix.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resource.resx">
@@ -476,7 +477,6 @@
     <Content Include="SimilarityMatrices\Resources\SimilarityMatrices\BLOSUM62.txt" />
     <Content Include="SimilarityMatrices\Resources\SimilarityMatrices\BLOSUM80.txt" />
     <Content Include="SimilarityMatrices\Resources\SimilarityMatrices\BLOSUM90.txt" />
-    <Content Include="SimilarityMatrices\Resources\SimilarityMatrices\DiagonalScoreMatrix.txt" />
     <Content Include="SimilarityMatrices\Resources\SimilarityMatrices\EDNAFull.txt" />
     <Content Include="SimilarityMatrices\Resources\SimilarityMatrices\PAM250.txt" />
     <Content Include="SimilarityMatrices\Resources\SimilarityMatrices\PAM30.txt" />

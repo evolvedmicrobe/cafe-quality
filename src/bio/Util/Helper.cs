@@ -281,7 +281,7 @@ namespace Bio.Util
             if (-1 < extensionDelimiter)
             {
                 string fileExtension = fileName.Substring(extensionDelimiter);
-                string fastaExtensions = Properties.Resource.FASTA_FILEEXTENSION;
+				string fastaExtensions = Bio.IO.FastA.FastAFormatter.FASTA_FILE_EXTENSION;
                 string[] extensions = fastaExtensions.Split(',');
                 foreach (string extension in extensions)
                 {

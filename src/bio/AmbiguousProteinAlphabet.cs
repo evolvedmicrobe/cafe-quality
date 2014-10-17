@@ -28,7 +28,7 @@ namespace Bio
         /// </summary>
         protected AmbiguousProteinAlphabet()
         {
-            Name = Properties.Resource.AmbiguousProteinAlphabetName;
+            Name = "AmbiguousProteinAlphabet";
             HasAmbiguity = true;
 
             this.X = (byte)'X';

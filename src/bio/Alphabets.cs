@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bio.Properties;
-#if !SILVERLIGHT
 using Bio.Algorithms.MUMmer;
-
-#endif
 
 namespace Bio
 {
@@ -123,11 +120,9 @@ namespace Bio
             
             
 
-#if (SILVERLIGHT == false)
 		    MapAlphabetToBaseAlphabet(MummerDnaAlphabet.Instance, DnaAlphabet.Instance);
             MapAlphabetToBaseAlphabet(MummerRnaAlphabet.Instance, RnaAlphabet.Instance);
             MapAlphabetToBaseAlphabet(MummerProteinAlphabet.Instance, ProteinAlphabet.Instance);  
-#endif
         }
 
         /// <summary>

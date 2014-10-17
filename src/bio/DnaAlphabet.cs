@@ -92,7 +92,7 @@ namespace Bio
         /// </summary>
         protected DnaAlphabet()
         {
-            this.Name = Properties.Resource.DnaAlphabetName;
+            this.Name = "DnaAlphabet";
             this.HasGaps = true;
             this.HasAmbiguity = false;
             this.HasTerminations = false;

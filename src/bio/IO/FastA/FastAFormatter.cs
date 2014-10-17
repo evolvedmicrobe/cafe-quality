@@ -12,7 +12,11 @@ namespace Bio.IO.FastA
     public sealed class FastAFormatter : ISequenceFormatter
     {
         #region Member variables
-        /// <summary>
+        
+
+		public const string FASTA_FILE_EXTENSION = ".fa,.mpfa,.fna,.faa,.fsa,.fas,.fasta";
+
+		/// <summary>
         /// Default Maximum symbols allowed per line. 
         /// As per FastA format, recommended value is 80.
         /// </summary>
@@ -87,7 +91,7 @@ namespace Bio.IO.FastA
         {
             get
             {
-                return Properties.Resource.FASTA_FILEEXTENSION;
+				return Bio.IO.FastA.FastAFormatter.FASTA_FILE_EXTENSION;
             }
         }
 

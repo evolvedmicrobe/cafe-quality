@@ -100,7 +100,7 @@ namespace Bio
         /// </summary>
         protected RnaAlphabet()
         {
-            this.Name = Properties.Resource.RnaAlphabetName;
+            this.Name = "RnaAlphabet";
             this.HasGaps = true;
             this.HasAmbiguity = false;
             this.HasTerminations = false;

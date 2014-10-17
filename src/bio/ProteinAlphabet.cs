@@ -104,7 +104,7 @@ namespace Bio
         /// </summary>
         protected ProteinAlphabet()
         {
-            this.Name = Properties.Resource.ProteinAlphabetName;
+            this.Name = "ProteinAlphabet";
             this.HasGaps = true;
             this.HasAmbiguity = false;
             this.HasTerminations = true;

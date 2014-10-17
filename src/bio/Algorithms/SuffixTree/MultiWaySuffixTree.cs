@@ -91,7 +91,7 @@ namespace Bio.Algorithms.SuffixTree
             this.Sequence = sequence;
             this._referenceSequence = new Sequence(sequence.Alphabet, convertedValeus, false);
             this._symbolsCount = sequence.Count;
-            this.Name = Properties.Resource.MultiWaySuffixTreeName;
+            this.Name = "MultiWaySuffixTree";
             this.MinLengthOfMatch = 20;
             this.NoAmbiguity = false;
 

@@ -24,7 +24,7 @@ namespace Bio.Util.Logging
             EchoToConsole = ConsoleAttached;
             if (!Ready)
             {
-                Open(Properties.Resource.LogFileName);
+                Open("Bio.log");
             }
         }
 
@@ -42,7 +42,10 @@ namespace Bio.Util.Logging
         {
             get
             {
-                if (AttachConsole(ATTACH_PARENT_PROCESS))
+				if (CrossPlatform.Environment.RunningInMono) {
+					return false;
+				}
+                if (  AttachConsole(ATTACH_PARENT_PROCESS))
                 {
                     FreeConsole();
                     return false;

@@ -118,7 +118,7 @@ namespace Bio.Algorithms.MUMmer
         /// </summary>
         public string Name
         {
-            get { return Properties.Resource.MUMmerAlignerName; }
+            get { return "MUMmerAligner"; }
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Bio.Algorithms.MUMmer
         /// </summary>
         public string Description
         {
-            get { return Properties.Resource.MUMmerAlignerDescription; }
+			get { return " A mummer aligner";}
         }
 
         /// <summary>
@@ -363,7 +363,7 @@ namespace Bio.Algorithms.MUMmer
 
             if (1 > this.LengthOfMUM)
             {
-                string message = Properties.Resource.MUMLengthTooSmall;
+				string message = "MUMLengthTooSmall";
                 Trace.Report(message);
                 throw new ArgumentException(message);
             }
