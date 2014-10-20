@@ -292,7 +292,7 @@ namespace Bio.Algorithms.SuffixTree
                         querySymbol = convertedSearchSeq[searchIndex];
                     }
 
-                    int edgeIndex = -1;
+					bool edgeFound = false;
 
                     childCount = previousIntermediateEdge.Children.Length;
                     for (int childIndex = 0; childIndex < childCount; childIndex++)
@@ -310,7 +310,7 @@ namespace Bio.Algorithms.SuffixTree
                         if (refSymbol == querySymbol)
                         {
                             searchIndex++;
-                            edgeIndex = childIndex;
+							edgeFound = true;
                             lengthOfMatchFound++;
                             lengthOfMatchInEdge = 1;
                             break;
@@ -318,7 +318,7 @@ namespace Bio.Algorithms.SuffixTree
                     }
 
                     // if edge not found.
-                    if (edgeIndex == -1)
+                    if (!edgeFound)
                     {
                         // Since the previous edge is an intermediate edge the match is repeated in the reference sequence.
                         // Thus even though the match length is greater than or equal to the MinLengthOfMatch don't consider the match.
@@ -464,6 +464,11 @@ namespace Bio.Algorithms.SuffixTree
 
             MultiWaySuffixEdge edge = this._rootEdge;
             MultiWaySuffixEdge previousIntermediateEdge = this._rootEdge;
+			Console.WriteLine ( previousIntermediateEdge.StartIndex );
+			Console.WriteLine (this._rootEdge.StartIndex);
+			if (previousIntermediateEdge.StartIndex != this._rootEdge.StartIndex) {
+				throw new Exception ("Compiler error");
+			}
 
             for (queryIndex = 0; queryIndex <= querySequenceLength - minLengthOfMatch; queryIndex++)
             {
@@ -612,7 +617,7 @@ namespace Bio.Algorithms.SuffixTree
                         querySymbol = convertedSearchSeq[searchIndex];
                     }
 
-                    int edgeIndex = -1;
+					bool edgeFound = false;
 
                     childCount = previousIntermediateEdge.Children.Length;
                     for (int childIndex = 0; childIndex < childCount; childIndex++)
@@ -629,12 +634,12 @@ namespace Bio.Algorithms.SuffixTree
 
                         if (refSymbol == querySymbol)
                         {
-                            edgeIndex = childIndex;
+                            edgeFound = true;
                             break;
                         }
                     }
-
-                    if (edgeIndex == -1)
+					//No edge had a symbol that matched query
+                    if (!edgeFound)
                     {
                         lengthOfMatchInEdge = 0;
                         continueSearch = false;
@@ -668,7 +673,7 @@ namespace Bio.Algorithms.SuffixTree
                         }
 
                         long edgeLength = edgeEndIndex - edgeStartIndex + 1;
-
+						// Scan along reference looking for a match
                         for (long referenceIndex = edgeStartIndex + 1; referenceIndex <= edgeEndIndex; referenceIndex++)
                         {
                             refSymbol = TERMINATINGSYMBOL;
@@ -1001,6 +1006,7 @@ namespace Bio.Algorithms.SuffixTree
             int arraySize = this._uniqueSymbolsInReference.Max() + 1;
             MultiWaySuffixEdge[] parentRootForSymbol = new MultiWaySuffixEdge[arraySize];
 
+			// Loop over all unique symbols (e.g. A, C, G, T) in parallel, building up edges.
 			//Parallel.ForEach(this._uniqueSymbolsInReference, symbol =>
 			foreach(var symbol in this._uniqueSymbolsInReference)
 			  {
@@ -1058,7 +1064,6 @@ namespace Bio.Algorithms.SuffixTree
                                     }
                                 }
                             }
-
                             MultiWaySuffixEdge newEdge;
                             if (indexOfEdgeFound == -1)
                             {
