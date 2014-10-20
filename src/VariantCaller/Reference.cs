@@ -16,15 +16,14 @@ namespace VariantCaller
         public Reference(Sequence seq)
         {
             ReferenceSequence = new Sequence(DnaAlphabet.Instance, seq.ToArray(), false);
-            nucmer= new NucmerQueryable(ReferenceSequence);
-
-
+            nucmer= new NucmerQueryable(ReferenceSequence,5);
         }
-        public IEnumerable<IEnumerable<DeltaAlignment>> GetDeltaAlignments(ISequence querySequence)
-        {
-            return nucmer.GetDeltaAlignments(querySequence);
-            
-        }
+
+		public List<PairwiseAlignedSequence> AlignSequence(Sequence toAlign)
+		{
+			return nucmer.GetAlignments (toAlign);
+		}
+
         /// <summary>
         /// Gets a reference sequence based on the 0 indexed values for position in the genom.e
         /// </summary>
@@ -51,29 +50,10 @@ namespace VariantCaller
             }
 
         }
+
         public const string DELTA_ALIGNMENT_METADATAKEY = "DeltaAlns";
 
 
-		public CompactSAMSequence AlignSequence(ISequence seq)
-		{
-            return null;
-            //CompactSAMSequence css; 
-            //if (seq is QualitativeSequence) {
-            //    var qs = seq as QualitativeSequence;
-            //    css = new CompactSAMSequence (seq.Alphabet,
-            //        FastQFormatType.GATK_Recalibrated, 
-            //        qs.ToArray (), 
-            //        qs.GetPhredQualityScores ());
-            //}
-            //else
-            //{
-            //    css = new CompactSAMSequence (seq.Alphabet,
-            //        FastQFormatType.GATK_Recalibrated, 
-            //        seq.ToArray (), 
-            //        Enumerable.Repeat ((byte)30, seq.Count).ToArray ());
-            //}
-
-		}
 
       
        

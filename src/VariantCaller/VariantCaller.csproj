@@ -62,6 +62,8 @@
     <Compile Include="CCSSubRead.cs" />
     <Compile Include="Variant.cs" />
     <Compile Include="VariantType.cs" />
+    <Compile Include="VariantAlignment.cs" />
+    <Compile Include="VariantCaller.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\bio\Bio.csproj">

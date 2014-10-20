@@ -58,6 +58,10 @@ namespace VariantCaller.QualityExperiment
             return zmwsToSubReads.GetEnumerator();
         }
 
+		public bool TryGetValue(int zmw, out List<CCSSubRead> values)
+		{
+			return zmwsToSubReads.TryGetValue (zmw, out values);
+		}
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();

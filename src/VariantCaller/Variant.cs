@@ -22,18 +22,18 @@ namespace VariantCaller
         /// <summary>
         /// 0-based start position of variant, 
         /// </summary>
-        public readonly int Position_Start;
+        public readonly int StartPosition;
 
         /// <summary>
         /// O-based end index (same as start for SNPs)
         /// </summary>
-        public readonly int Position_End;
+        public readonly int EndPosition;
 
-        public Sequence Reference
+        public Sequence ReferenceBases
         {
             get
             {
-                return (Sequence) Genome.ReferenceSequence.GetSubSequence(Position_Start, (Position_End - Position_Start + 1));
+                return (Sequence) Genome.ReferenceSequence.GetSubSequence(StartPosition, (EndPosition - StartPosition + 1));
             }
         }
 

@@ -14,11 +14,13 @@
 *.class
 *.xml
 *.gif
+*.plist
 *.vspscc
 Temporary*
 Bio.csproj.FilesWrittenAbsolute.txt
 *AssemblyAttribute.cs
 *FilesWrittenAbsolute.txt
+*/bin/Release/*
 */obj/*
 */bin/*
 src/ConsensusCore/Debug/*

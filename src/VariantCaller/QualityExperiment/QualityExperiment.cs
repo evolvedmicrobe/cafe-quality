@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 using Bio;
 using Bio.IO.FastA;
-using PacBio.Data;
 using PacBio.IO;
 
 namespace VariantCaller.QualityExperiment
@@ -76,12 +75,20 @@ namespace VariantCaller.QualityExperiment
             
             // Merge
             CCSReads = ccs_reads_maker.Result;
+			int missing = 0;
+			List<CCSRead> missingReads = new List<CCSRead>();
             foreach (var read in CCSReads)
             {
-                read.SubReads = subReadDict[read.ZMW];
+				List<CCSSubRead> subReadList;
+				bool hasValue = subReadDict.TryGetValue(read.ZMW, out subReadList);
+				if (!hasValue) {
+					missing++;
+					missingReads.Add (read);
+				} else {
+					read.SubReads = subReadList;
+				}
             }
-            subReadDict = null;
-
+			Console.WriteLine ("Missing: " + missing.ToString () + " reads");
         }
         /// <summary>
         /// Load the subreads in parallel.

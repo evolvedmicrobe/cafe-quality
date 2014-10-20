@@ -12,7 +12,7 @@ namespace VariantCaller
     {
         public readonly int ZMW;
         public List<CCSSubRead> SubReads;
-        public byte[] Seq;
+        public Sequence Seq;
         
         /// <summary>
         /// The DNA this read is derived from.
@@ -22,7 +22,7 @@ namespace VariantCaller
         public CCSRead(Sequence read)
         {
             ZMW = Convert.ToInt32(read.ID.Split('/')[1]);
-            Seq = read.ToArray();
+            Seq = read;
         } 
     }
 }

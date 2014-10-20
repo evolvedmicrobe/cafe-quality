@@ -1,14 +1,14 @@
 ﻿//#I @"C:\git\cafe-quality\lib\\"
-//#r "PacBio.Utils.dll"
-//#r "PacBio.HDF.dll"
-//#r "PacBio.IO.dll"
-//#r "VariantCaller.dll"
-module LoadZMWs
+#I  "/Users/nigel/git/cafe-quality/lib/" 
+#r "PacBio.Utils.dll"
+#r "PacBio.HDF.dll"
+#r "PacBio.IO.dll"
+#r "VariantCaller.dll"
+#r "Bio.dll"
 
 open System;
 open System.IO
 open VariantCaller
-open PacBio.Data
 open PacBio.HDF
 open PacBio.Utils
 open PacBio.IO
@@ -45,16 +45,11 @@ let loadData =
     qc_exp
 
 
-//[<EntryPoint>]
-//let main args = 
-//    let data = loadData
+let zmw1 = loadData.CCSReads.[20]
 
-//    0
+let assignRef (zmw : CCSRead) (refs : List<Reference>) =
+    let refs = Seq.map (fun x -> x.AlignSequence(zmw.Seq)) |> Seq.toArray\
+    let 
 
 
-    //let trialFile = direc + "m141008_060349_42194_c100704972550000001823137703241586_s1_p0.1.bax.h5"
-
-    //let data = BaseReader.CreateSource trialFile
-    //let zmws = data.ByHoleNumberRange(null) |> Seq.toArray
-    //zmws.[0].Metrics.
-    //zmws.[0].AdapterHits |> Seq.toArray
+let alns = loadData.References |> Seq.map (fun ref -> ref.
