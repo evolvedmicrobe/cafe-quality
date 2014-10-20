@@ -29,11 +29,6 @@ namespace Bio.Algorithms.SuffixTree
         private long _edgesCount;
 
         /// <summary>
-        /// Holds number of symbols in reference sequence.
-        /// </summary>
-        private readonly long _symbolsCount;
-
-        /// <summary>
         /// Base alphabet supported by this instance of suffix tree.
         /// This property depends on the reference sequence.
         /// For example: if the reference sequence's alphabet is 
@@ -45,7 +40,7 @@ namespace Bio.Algorithms.SuffixTree
         /// Holds the reference sequence.
         /// This will be converted using SymbolValueMap of the alphabet for the performance.
         /// </summary>
-        private readonly Sequence _referenceSequence;
+		private readonly byte[] _referenceSequence;
 
         /// <summary>
         /// Holds the unique symbols present in the reference sequence with their start index.
@@ -76,7 +71,7 @@ namespace Bio.Algorithms.SuffixTree
             byte[] aliasMap = sequence.Alphabet.GetSymbolValueMap();
             this._uniqueSymbolsInReference = new HashSet<byte>();
             this._uniqueSymbolsStartIndexes = new long[byte.MaxValue + 1];
-            byte[] convertedValeus = new byte[sequence.Count];
+            byte[] convertedValues = new byte[sequence.Count];
             for (int index = 0; index < sequence.Count; index++)
             {
                 byte symbol = aliasMap[sequence[index]];
@@ -85,12 +80,11 @@ namespace Bio.Algorithms.SuffixTree
                     this._uniqueSymbolsStartIndexes[symbol] = index;
                     this._uniqueSymbolsInReference.Add(symbol);
                 }
-                convertedValeus[index] = symbol;
+                convertedValues[index] = symbol;
             }
 
             this.Sequence = sequence;
-            this._referenceSequence = new Sequence(sequence.Alphabet, convertedValeus, false);
-            this._symbolsCount = sequence.Count;
+			this._referenceSequence = convertedValues;
             this.Name = "MultiWaySuffixTree";
             this.MinLengthOfMatch = 20;
             this.NoAmbiguity = false;
@@ -225,16 +219,13 @@ namespace Bio.Algorithms.SuffixTree
                     querySymbol = convertedSearchSeq[searchIndex];
                     for (int index = 0; index < childCount; index++)
                     {
-                        edge = previousIntermediateEdge.Children[index];
-
+						edge = previousIntermediateEdge.Children [index];
                         edgeStartIndex = edge.StartIndex;
-
                         refSymbol = TERMINATINGSYMBOL;
-                        if (edgeStartIndex < this._symbolsCount)
+                        if (edgeStartIndex < _referenceSequence.Length)
                         {
                             refSymbol = this._referenceSequence[edgeStartIndex];
                         }
-
                         if (refSymbol == querySymbol)
                         {
                             break;
@@ -311,7 +302,7 @@ namespace Bio.Algorithms.SuffixTree
 
                         refSymbol = TERMINATINGSYMBOL;
 
-                        if (edgeStartIndex < this._symbolsCount)
+                        if (edgeStartIndex < this._referenceSequence.Length)
                         {
                             refSymbol = this._referenceSequence[edgeStartIndex];
                         }
@@ -338,7 +329,7 @@ namespace Bio.Algorithms.SuffixTree
                     }
 
                     // Get the endIndex of the edge found.
-                    long edgeEndIndex = this._symbolsCount;
+                    long edgeEndIndex = this._referenceSequence.Length;
 
                     if (!edge.IsLeaf)
                     {
@@ -349,7 +340,7 @@ namespace Bio.Algorithms.SuffixTree
                     for (long referenceIndex = edgeStartIndex + 1; referenceIndex <= edgeEndIndex; referenceIndex++)
                     {
                         refSymbol = TERMINATINGSYMBOL;
-                        if (referenceIndex < this._symbolsCount)
+                        if (referenceIndex < this._referenceSequence.Length)
                         {
                             refSymbol = this._referenceSequence[referenceIndex];
                         }
@@ -528,7 +519,7 @@ namespace Bio.Algorithms.SuffixTree
                         edgeStartIndex = edge.StartIndex;
                         refSymbol = TERMINATINGSYMBOL;
 
-                        if (edgeStartIndex < this._symbolsCount)
+                        if (edgeStartIndex < _referenceSequence.Length)
                         {
                             refSymbol = this._referenceSequence[edgeStartIndex];
                         }
@@ -631,7 +622,7 @@ namespace Bio.Algorithms.SuffixTree
 
                         refSymbol = TERMINATINGSYMBOL;
 
-                        if (edgeStartIndex < this._symbolsCount)
+                        if (edgeStartIndex < this._referenceSequence.Length)
                         {
                             refSymbol = this._referenceSequence[edgeStartIndex];
                         }
@@ -668,7 +659,7 @@ namespace Bio.Algorithms.SuffixTree
                         lengthOfMatchInEdge = 1;
 
                         // Get the endIndex of the edge found.
-                        long edgeEndIndex = this._symbolsCount;
+                        long edgeEndIndex = this._referenceSequence.Length;
 
                         if (!edge.IsLeaf)
                         {
@@ -681,7 +672,7 @@ namespace Bio.Algorithms.SuffixTree
                         for (long referenceIndex = edgeStartIndex + 1; referenceIndex <= edgeEndIndex; referenceIndex++)
                         {
                             refSymbol = TERMINATINGSYMBOL;
-                            if (referenceIndex < this._symbolsCount)
+                            if (referenceIndex < this._referenceSequence.Length)
                             {
                                 refSymbol = this._referenceSequence[referenceIndex];
                             }
@@ -926,29 +917,19 @@ namespace Bio.Algorithms.SuffixTree
             byte[] searchSeqSymbolValueMap = searchSequence.Alphabet.GetSymbolValueMap();
             byte[] convertedSymbols = new byte[searchSequence.Count];
 
-            if (!noambiguity)
+			var cleanAmbiguous = noambiguity && searchSeqAmbiguousSymbols.Count > 0;
+            for (long index = 0; index < searchSequence.Count; index++)
             {
-                for (long index = 0; index < searchSequence.Count; index++)
-                {
-                    convertedSymbols[index] = searchSeqSymbolValueMap[searchSequence[index]];
-                }
+				byte symbol = searchSeqSymbolValueMap[searchSequence[index]];
+				if (cleanAmbiguous) {
+				// Set all ambiguous symbols to 0 so that it will not match with any of the reference sequence symbols.
+					if (searchSeqAmbiguousSymbols.Contains(symbol))
+					{
+						symbol = 0;
+					}					
+				}
+				convertedSymbols[index] = symbol;
             }
-            else
-            {
-                for (long index = 0; index < searchSequence.Count; index++)
-                {
-                    byte symbol = searchSeqSymbolValueMap[searchSequence[index]];
-
-                    // Set all ambiguous symbols to 0 so that it will not match with any of the reference sequence symbols.
-                    if (searchSeqAmbiguousSymbols.Contains(symbol))
-                    {
-                        symbol = 0;
-                    }
-
-                    convertedSymbols[index] = symbol;
-                }
-            }
-
             return new Sequence(searchSequence.Alphabet, convertedSymbols, false);
         }
 
@@ -1025,7 +1006,7 @@ namespace Bio.Algorithms.SuffixTree
 			  {
                     MultiWaySuffixEdge edge = new MultiWaySuffixEdge();
 
-                    for (long index = this._uniqueSymbolsStartIndexes[symbol]; index < this._symbolsCount; index++)
+                    for (long index = this._uniqueSymbolsStartIndexes[symbol]; index < _referenceSequence.Length; index++)
                     {
                         byte symbolAtIndex = this._referenceSequence[index];
 
@@ -1045,7 +1026,7 @@ namespace Bio.Algorithms.SuffixTree
                         do
                         {
                             byte symbolAtStartIndex = TERMINATINGSYMBOL;
-                            if (startIndex < this._symbolsCount)
+                            if (startIndex < _referenceSequence.Length)
                             {
                                 symbolAtStartIndex = this._referenceSequence[startIndex];
                             }
@@ -1059,7 +1040,7 @@ namespace Bio.Algorithms.SuffixTree
                                 for (int i = 0; i < childCount; i++)
                                 {
                                     MultiWaySuffixEdge childEdge = parent.Children[i];
-                                    if (childEdge.StartIndex < this._symbolsCount)
+                                    if (childEdge.StartIndex < _referenceSequence.Length)
                                     {
                                         byte edgeSymbol = this._referenceSequence[childEdge.StartIndex];
                                         if (edgeSymbol == symbolAtStartIndex)
@@ -1105,7 +1086,7 @@ namespace Bio.Algorithms.SuffixTree
                             }
                             else
                             {
-                                long edgeEndIndex = this._symbolsCount;
+                                long edgeEndIndex = _referenceSequence.Length;
 
                                 if (!edge.IsLeaf)
                                 {
@@ -1121,13 +1102,13 @@ namespace Bio.Algorithms.SuffixTree
                                     for (long counter = edge.StartIndex + 1; counter <= edgeEndIndex; counter++, startIndex++)
                                     {
                                         symbolAtStartIndex = TERMINATINGSYMBOL;
-                                        if (startIndex < this._symbolsCount)
+                                        if (startIndex < _referenceSequence.Length)
                                         {
                                             symbolAtStartIndex = this._referenceSequence[startIndex];
                                         }
 
                                         byte symbolAtCounter = TERMINATINGSYMBOL;
-                                        if (counter < this._symbolsCount)
+                                        if (counter < _referenceSequence.Length)
                                         {
                                             symbolAtCounter = this._referenceSequence[counter];
                                         }
@@ -1214,7 +1195,7 @@ namespace Bio.Algorithms.SuffixTree
                                 }
                             }
                         }
-                        while ((startIndex <= this._symbolsCount) && continueInsert);
+					while ((startIndex <= this._referenceSequence.Length) && continueInsert);
                     }
                 }
 			//);
@@ -1234,7 +1215,7 @@ namespace Bio.Algorithms.SuffixTree
             }
 
             // Add edge for $.
-            this._rootEdge.Children[rootChildrenCount - 1] = new MultiWaySuffixEdge(this._symbolsCount);
+            this._rootEdge.Children[rootChildrenCount - 1] = new MultiWaySuffixEdge(this._referenceSequence.Length);
             this._edgesCount++;
         }
 
@@ -1281,7 +1262,7 @@ namespace Bio.Algorithms.SuffixTree
 
                     edgeStartIndex = edge.StartIndex;
 
-                    byte refSymbol = edgeStartIndex < this._symbolsCount ? this._referenceSequence[edgeStartIndex] : TERMINATINGSYMBOL;
+                    byte refSymbol = edgeStartIndex < this._referenceSequence.Length ? this._referenceSequence[edgeStartIndex] : TERMINATINGSYMBOL;
                     if (refSymbol == querySymbol)
                     {
                         break;
