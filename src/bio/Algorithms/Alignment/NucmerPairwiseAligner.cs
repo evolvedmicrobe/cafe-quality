@@ -191,7 +191,6 @@ namespace Bio.Algorithms.Alignment
             {
                 throw new ArgumentException(Properties.Resource.MinimumTwoSequences);
             }
-
             return Alignment(referenceList, queryList).ToList().ConvertAll(SA => SA as ISequenceAlignment);
         }
 
@@ -338,7 +337,6 @@ namespace Bio.Algorithms.Alignment
                         {
                             gapCount = FindExtensionLength(querySequence, index);
                         }
-
                         score += GapOpenCost + (gapCount * GapExtensionCost);
 
                         // move the index pointer to end of extension
@@ -350,7 +348,6 @@ namespace Bio.Algorithms.Alignment
                     }
                 }
             }
-
             return score;
         }
 
@@ -360,18 +357,16 @@ namespace Bio.Algorithms.Alignment
         /// <param name="sequence">Sequence object.</param>
         /// <param name="index">Position at which extension starts.</param>
         /// <returns>Last index of extension.</returns>
-        private static int FindExtensionLength(ISequence sequence, int index)
+        public static int FindExtensionLength(ISequence sequence, int index)
         {
             // Find the number of alignment characters "-" in the given sequence 
             // from position index
             int gapCounter = index;
-
             while (gapCounter < sequence.Count
                     && DnaAlphabet.Instance.Gap == sequence[gapCounter])
             {
                 gapCounter++;
             }
-
             return gapCounter - index;
         }
 
