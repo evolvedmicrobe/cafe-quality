@@ -13,10 +13,11 @@ namespace VariantCaller
     {
         NucmerQueryable nucmer;
         public readonly Sequence ReferenceSequence;
+
         public Reference(Sequence seq)
         {
             ReferenceSequence = new Sequence(DnaAlphabet.Instance, seq.ToArray(), false);
-            nucmer= new NucmerQueryable(ReferenceSequence,5);
+            nucmer= new NucmerQueryable(ReferenceSequence, 9);
         }
 
 		public List<PairwiseAlignedSequence> AlignSequence(Sequence toAlign)
