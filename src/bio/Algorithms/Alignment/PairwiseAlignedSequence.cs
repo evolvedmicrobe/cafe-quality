@@ -160,6 +160,9 @@ namespace Bio.Algorithms.Alignment
 
         /// <summary>
         /// Gets or sets Offset of FirstSequence.
+        /// 
+        /// Danger!  This is not the start position of the alignment, it is some goofy
+        /// difference in start positions.
         /// </summary>
         public long FirstOffset
         {
@@ -183,8 +186,13 @@ namespace Bio.Algorithms.Alignment
             }
         }
 
+        public long? FirstSequenceStart;
+        public long? SecondSequenceStart;
+
         /// <summary>
         /// Gets or sets Offset of SecondSequence.
+        /// Danger!  This is not the start position of the alignment, it is some goofy
+        /// difference in start positions.
         /// </summary>
         public long SecondOffset
         {

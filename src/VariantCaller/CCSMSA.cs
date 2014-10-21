@@ -15,6 +15,9 @@ namespace VariantCaller
     /// </summary>
     public class CCSMSA
     {
+        /// <summary>
+        /// Test currently fails, need to figure out what is wrong with aligner.
+        /// </summary>
         public static void TestMuscleMultipleSequenceAlignment()
         {
 

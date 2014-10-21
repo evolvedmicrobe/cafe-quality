@@ -528,7 +528,11 @@ namespace Bio.Algorithms.Alignment
 
                 // Find the offsets
                 long referenceStart = deltaAlignment.FirstSequenceStart;
+                alignedSequence.FirstSequenceStart = referenceStart;
+
                 long queryStart = deltaAlignment.SecondSequenceStart;
+                alignedSequence.SecondSequenceStart = queryStart;
+
                 long difference = referenceStart - queryStart;
                 if (0 < difference)
                 {

@@ -21,7 +21,7 @@ namespace VariantCaller
 
 		public List<PairwiseAlignedSequence> AlignSequence(Sequence toAlign)
 		{
-			return nucmer.GetAlignments (toAlign);
+            return nucmer.GetAlignments(toAlign);
 		}
 
         /// <summary>

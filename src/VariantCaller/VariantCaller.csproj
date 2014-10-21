@@ -52,6 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CCSRead.cs" />
+    <Compile Include="CCSMSA.cs" />
+    <Compile Include="IndelVariant.cs" />
     <Compile Include="NucmerQueryable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QualityExperiment\QualityExperiment.cs" />
@@ -60,9 +62,9 @@
     <Compile Include="Reference.cs" />
     <Compile Include="SectionOfReferenceGenome.cs" />
     <Compile Include="CCSSubRead.cs" />
+    <Compile Include="SNPVariant.cs" />
     <Compile Include="Variant.cs" />
     <Compile Include="VariantType.cs" />
-    <Compile Include="VariantAlignment.cs" />
     <Compile Include="VariantCaller.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -59,13 +59,14 @@
     <Compile Include="DemoAligner.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\VariantCaller\VariantCaller.csproj">
-      <Name>VariantCaller</Name>
-      <Project>{C1EA5B21-991D-4455-BAA7-05CFD8C04B88}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\bio\Bio.csproj">
       <Project>{B53E11DF-F9A9-4939-893E-78E59872089A}</Project>
       <Name>Bio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VariantCaller\VariantCaller.csproj">
+      <Name>VariantCaller</Name>
+      <Project>{c1ea5b21-991d-4455-baa7-05cfd8c04b88}</Project>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

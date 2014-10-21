@@ -203,6 +203,7 @@
     <Compile Include="Bio.Pamsam\SmithWatermanProfileAlignerParallel.cs" />
     <Compile Include="Bio.Pamsam\SmithWatermanProfileAlignerSerial.cs" />
     <Compile Include="Bio.Pamsam\SymmetricDistanceMatrix.cs" />
+    <Compile Include="BioinformaticsException.cs" />
     <Compile Include="CrossPlatform.cs" />
     <Compile Include="Filters\QualityFilter.cs" />
     <Compile Include="IO\BAM\AlignmentData.cs" />

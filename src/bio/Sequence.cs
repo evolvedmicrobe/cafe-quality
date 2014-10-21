@@ -508,9 +508,7 @@ namespace Bio
         /// <summary>
         /// Danger!!! Do not mutate this array.  Should only be used to avoid a new memory allocation.
 		/// This is used by some of the built-in algorithms which access the data in a read-only fashion
-        /// to quickly grab a sequence of data without copying it.  It cannot be used outside Bio.dll
-        /// For outside users, use the CopyTo method.
-		/// 
+        /// to quickly grab a sequence of data without copying it.  
 		/// </summary>
         /// <returns></returns>
         public byte[] GetInternalArray()
