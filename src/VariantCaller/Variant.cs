@@ -31,7 +31,7 @@ namespace VariantCaller
         /// AAATTTAAA   -> is a deletion of length 3 starting at position 2.
         /// AAA---AAA
         /// 
-        /// A--TTAAA -> is an insertion of length 2 starting at position 1.
+        /// A--TTAAA -> is an insertion of length 2 starting at position 0.
         /// ACCTTAAA
         /// </summary>
         public int StartPosition { get; protected set; }
