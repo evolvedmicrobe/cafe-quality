@@ -116,7 +116,6 @@ namespace Bio.Algorithms.Alignment
             GapOpenCost = DefaultGapOpenCost;
             GapExtensionCost = DefaultGapExtensionCost;
             LengthOfMUM = DefaultLengthOfMUM;
-
             // Set the ClusterBuilder properties to defaults
             FixedSeparation = ClusterBuilder.DefaultFixedSeparation;
             MaximumSeparation = ClusterBuilder.DefaultMaximumSeparation;
@@ -180,7 +179,10 @@ namespace Bio.Algorithms.Alignment
         public int MaximumSeparation { get; set; }
 
         /// <summary>
-        /// Gets or sets minimum output score
+        /// Gets or sets minimum score to output a cluster during the cluster step.
+		/// 
+		/// Typically, clusters of length < MinimumScore are not output.  For more details see
+		/// ClusterScoreMethod where this minimum is calculated. 
         /// </summary>
         public int MinimumScore { get; set; }
 
