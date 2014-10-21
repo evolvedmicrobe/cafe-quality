@@ -1,0 +1,8 @@
+G:\cafe-quality\src\bio\obj\Release\Bio.csprojResolveAssemblyReference.cache
+G:\cafe-quality\src\bio\obj\Release\Bio.Properties.Resource.resources
+G:\cafe-quality\src\bio\obj\Release\Bio.csproj.GenerateResource.Cache
+G:\cafe-quality\src\bio\obj\Release\Bio.SimilarityMatrices.Resources.SimilarityMatrixResources.resources
+G:\cafe-quality\lib\Bio.dll
+G:\cafe-quality\lib\Bio.pdb
+G:\cafe-quality\src\bio\obj\Release\Bio.dll
+G:\cafe-quality\src\bio\obj\Release\Bio.pdb
