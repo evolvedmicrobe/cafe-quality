@@ -16,7 +16,7 @@ namespace VariantCaller
 
         public Reference(Sequence seq)
         {
-            ReferenceSequence = new Sequence(DnaAlphabet.Instance, seq.ToArray(), false);
+            ReferenceSequence = new Sequence(NoGapDnaAlphabet.Instance, seq.ToArray(), true);
             nucmer= new NucmerQueryable(ReferenceSequence, 9);
         }
 
@@ -45,7 +45,7 @@ namespace VariantCaller
                 var seq2 = ReferenceSequence.GetSubSequence(0, end);
                 List<byte> seqs = new List<byte>(seq1);
                 seqs.AddRange(seq2);
-                var seq = new Sequence(DnaAlphabet.Instance,seqs.ToArray());
+                var seq = new Sequence(ReferenceSequence.Alphabet, seqs.ToArray(), false);
                 seq.ID = "Ref:" + start.ToString() + "-" + end.ToString();
                 return new SectionOfReferenceGenome() {Start = start, End = end, Seq = seq};
             }

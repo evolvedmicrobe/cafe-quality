@@ -135,7 +135,7 @@ namespace Bio
                 // Validate sequence data
                 if (!alphabet.ValidateSequence(values, 0, values.Length))
                 {
-                    throw new ArgumentOutOfRangeException("values");
+                    throw new ArgumentOutOfRangeException("Sequence contains illegal characters");
                 }
             }
 
@@ -442,7 +442,7 @@ namespace Bio
         {
             if (this.Count > Helper.AlphabetsToShowInToString)
             {
-                return string.Format(CultureInfo.CurrentCulture, Properties.Resource.ToStringFormat,
+                return string.Format(CultureInfo.InvariantCulture, HardCodedProperties.ToStringFormat,
                                      new string(this._sequenceData.Take(Helper.AlphabetsToShowInToString).Select((a => (char)a)).ToArray()),
                                      (this.Count - Helper.AlphabetsToShowInToString));
             }

@@ -113,12 +113,12 @@ namespace Bio
             MapAlphabetToAmbiguousAlphabet(AmbiguousRnaAlphabet.Instance, AmbiguousRnaAlphabet.Instance);
             
             AlphabetToBaseAlphabetMap = new Dictionary<IAlphabet, IAlphabet>();
-            MapAlphabetToBaseAlphabet(AmbiguousDnaAlphabet.Instance, DnaAlphabet.Instance);
+            MapAlphabetToBaseAlphabet(AmbiguousDnaAlphabet.Instance,  DnaAlphabet.Instance);
             MapAlphabetToBaseAlphabet(AmbiguousRnaAlphabet.Instance, RnaAlphabet.Instance);
             MapAlphabetToBaseAlphabet(AmbiguousProteinAlphabet.Instance, ProteinAlphabet.Instance);
-            // TODO: Redesign later to better handle this.
-            // MapAlphabetToBaseAlphabet(DnaAlphabet.Instance, NoGapDnaAlphabet.Instance);
 
+            // TODO: Redesign later to better handle this.
+            MapAlphabetToBaseAlphabet(DnaAlphabet.Instance, NoGapDnaAlphabet.Instance);
 		    MapAlphabetToBaseAlphabet(MummerDnaAlphabet.Instance, DnaAlphabet.Instance);
             MapAlphabetToBaseAlphabet(MummerRnaAlphabet.Instance, RnaAlphabet.Instance);
             MapAlphabetToBaseAlphabet(MummerProteinAlphabet.Instance, ProteinAlphabet.Instance);  
