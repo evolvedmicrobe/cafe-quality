@@ -17,6 +17,7 @@ namespace VariantCaller
         public Reference(Sequence seq)
         {
             ReferenceSequence = new Sequence(NoGapDnaAlphabet.Instance, seq.ToArray(), true);
+            ReferenceSequence.ID = seq.ID;
             nucmer= new NucmerQueryable(ReferenceSequence, 9);
         }
 
