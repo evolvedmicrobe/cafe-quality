@@ -223,9 +223,13 @@ namespace Bio.Algorithms.Alignment
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
-            builder.AppendLine(this.Consensus.ToString());
-            builder.AppendLine(this.FirstSequence.ToString());
-            builder.AppendLine(this.SecondSequence.ToString());
+            builder.AppendLine ("Alignment to " + this.FirstSequence.ID);
+            builder.AppendLine ("Start Ref = " + this.FirstSequenceStart.ToString () + " ; Start Query = " + this.SecondSequenceStart.ToString ());
+            if (Consensus != null) {
+                builder.AppendLine (this.Consensus.ConvertToString ());
+            }
+            builder.AppendLine(this.FirstSequence.ConvertToString());
+            builder.AppendLine(this.SecondSequence.ConvertToString());
             return builder.ToString();
         }
     }
