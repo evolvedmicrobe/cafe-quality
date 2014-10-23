@@ -27,7 +27,7 @@ namespace VariantCaller
             nucmer= new NUCmer(ReferenceSequence)
            {
                 LengthOfMUM = lengthOfMUM,
-				MinimumScore = (int)(touse.Count * .5),
+				MinimumScore = (int)(touse.Count * .2),
             };
         }
 
@@ -48,7 +48,6 @@ namespace VariantCaller
 			alns.ForEach (z => {
                 z.Score = CalculateScore ( (Sequence)z.FirstSequence, (Sequence) z.SecondSequence);
 			});
-
 			return alns;
 		}
 
