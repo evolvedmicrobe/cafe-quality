@@ -493,6 +493,7 @@
     <Compile Include="IO\SAM\CigarOperations.cs" />
     <Compile Include="SimilarityMatrices\DiagonalScoreMatrix.cs" />
     <Compile Include="Util\FastStringUtils.cs" />
+    <Compile Include="Properties\HardCodedProperties.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resource.resx">
