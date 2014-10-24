@@ -41,23 +41,41 @@
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-    <Reference Include="QuickGraph">
-      <HintPath>..\..\..\..\third-party\dotnet\QuickGraph\QuickGraph.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Graphviz">
-      <HintPath>..\..\..\..\third-party\dotnet\QuickGraph\QuickGraph.Graphviz.dll</HintPath>
-    </Reference>
-    <Reference Include="INIFileParser">
-      <HintPath>..\..\..\..\third-party\dotnet\INIFileParser\INIFileParser.dll</HintPath>
-    </Reference>
     <Reference Include="C5">
-      <HintPath>..\..\..\..\third-party\dotnet\C5\C5.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\..\..\third-party\dotnet\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\..\lib\C5.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics">
-      <HintPath>..\..\..\..\third-party\dotnet\MathNet.Numerics.3.2.1\lib\net45\MathNet.Numerics.dll</HintPath>
+      <HintPath>..\..\lib\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>..\..\lib\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.Align">
+      <HintPath>..\..\lib\PacBio.Align.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.Data">
+      <HintPath>..\..\lib\PacBio.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.HDF">
+      <HintPath>..\..\lib\PacBio.HDF.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.IO">
+      <HintPath>..\..\lib\PacBio.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.Utils">
+      <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Graphviz">
+      <HintPath>..\..\lib\QuickGraph.Graphviz.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph">
+      <HintPath>..\..\lib\QuickGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.FSharp.Utils">
+      <HintPath>..\..\lib\PacBio.FSharp.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="INIFileParser">
+      <HintPath>..\..\lib\INIFileParser.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -76,12 +94,6 @@
     <Compile Include="PartialOrderAlignment.cs" />
     <Compile Include="PoaLocal.cs" />
     <Compile Include="ReadPartition.cs" />
-    <Compile Include="Test\ClusteringTest.cs" />
-    <Compile Include="Test\ConsensusCoreTests.cs" />
-    <Compile Include="Test\MutationSelectionTest.cs" />
-    <Compile Include="Test\PartialOrderAlignment.cs" />
-    <Compile Include="Test\Phasing.cs" />
-    <Compile Include="Test\TestParameterLoading.cs" />
     <Compile Include="ConsensusTrain.cs" />
     <Compile Include="ConsensusTrainExamples.cs" />
   </ItemGroup>
@@ -92,56 +104,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Test\canned-phasing-test-6haplotypes-240reads.bin">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\CCSParameters.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\multi-phasing-test.fofn">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\QuiverParameters.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\tooManyAllocatedTestConsensus.fasta">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="MathNet.Numerics.OpenBLAS.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Test\AN1_A_h0.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Test\AN1_A_h1.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Test\AN2_A_h0.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Test\AN2_A_h1.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Test\AN3_A_h0.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Test\AN3_A_h1.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Test\chemistry_mapping.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">
-    xcopy /D /Y "$(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\libConsensusCore.*" "$(TargetDir)"
-    xcopy /D /Y "$(ProjectDir)..\..\..\..\third-party\dotnet\HDF5\Windows_$(PlatformTarget)\*.dll" "$(TargetDir)"
-    </PreBuildEvent>
-    <PreBuildEvent Condition=" '$(OS)' != 'Windows_NT' ">
-    rsync -l $(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\libConsensusCore.* $(TargetDir)
     </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

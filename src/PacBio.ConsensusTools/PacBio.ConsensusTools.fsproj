@@ -56,13 +56,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.fs" />
     <Compile Include="ConsensusSubCommand.fs" />
-    <Compile Include="AmpliconAnalysis.fs" />
-    <Compile Include="CCSTrain.fs" />
-    <Compile Include="DumberView.fs" />
-    <Compile Include="MinorVariants.fs" />
     <Compile Include="CircularConsensus.fs" />
-    <Compile Include="ChimeraFinder.fs" />
-    <Compile Include="MappedConsensus.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -73,18 +67,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="QuickGraph">
-      <HintPath>..\..\..\..\third-party\dotnet\QuickGraph\QuickGraph.dll</HintPath>
-    </Reference>
-    <Reference Include="ManyConsole">
-      <HintPath>..\..\..\..\third-party\dotnet\ManyConsole.0.4.2.21\lib\ManyConsole.dll</HintPath>
-    </Reference>
-    <Reference Include="NDesk.Options">
-      <HintPath>..\..\..\..\third-party\dotnet\ManyConsole.0.4.2.21\lib\NDesk.Options.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\..\..\third-party\dotnet\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="FSharpx.Core">
       <HintPath>..\..\..\..\third-party\dotnet\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
     </Reference>
@@ -92,38 +74,38 @@
       <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
       <Name>ConsensusCore</Name>
     </ProjectReference>
+    <Reference Include="PacBio.Align">
+      <HintPath>..\..\lib\PacBio.Align.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.Data">
+      <HintPath>..\..\lib\PacBio.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.FSharp.Utils">
+      <HintPath>..\..\lib\PacBio.FSharp.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.HDF">
+      <HintPath>..\..\lib\PacBio.HDF.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.IO">
+      <HintPath>..\..\lib\PacBio.IO.dll</HintPath>
+    </Reference>
     <ProjectReference Include="..\PacBio.Consensus\PacBio.Consensus.csproj">
       <Project>{D3A49F4E-1139-4782-A72A-599CCE57D715}</Project>
       <Name>PacBio.Consensus</Name>
     </ProjectReference>
+    <Reference Include="QuickGraph">
+      <HintPath>..\..\lib\QuickGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.Utils">
+      <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="ManyConsole">
+      <HintPath>..\..\lib\ManyConsole.dll</HintPath>
+    </Reference>
+    <Reference Include="NDesk.Options">
+      <HintPath>..\..\lib\NDesk.Options.dll</HintPath>
+    </Reference>
   </ItemGroup>
-  <UsingTask TaskName="PacBio.BuildTasks.VersionInfo" AssemblyFile="..\..\..\..\lib\dotnet\PacBio.BuildTasks\obj\Release\PacBio.BuildTasks.dll" />
-  <Target Name="GetVersionInfo">
-    <VersionInfo DepotPath="//depot/software/smrtanalysis/bioinformatics">
-      <Output TaskParameter="Major" PropertyName="Major" />
-      <Output TaskParameter="Minor" PropertyName="Minor" />
-      <Output TaskParameter="Build" PropertyName="Build" />
-      <Output TaskParameter="Revision" PropertyName="Revision" />
-      <Output TaskParameter="Version" PropertyName="Version" />
-    </VersionInfo>
-    <Message Text="Found Version: $(Version)" />
-  </Target>
   <PropertyGroup>
-    <PreBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">
-    xcopy /D /Y  $(ProjectDir)..\..\..\..\lib\dotnet\PacBio.Native.BamTools\bin\$(Configuration)\libBamTools.* $(TargetDir)
-    xcopy /D /Y "$(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\libConsensusCore.*" "$(TargetDir)"
-    xcopy /D /Y "$(ProjectDir)..\..\..\..\third-party\dotnet\HDF5\Windows_$(PlatformTarget)\*.dll" "$(TargetDir)"
-    </PreBuildEvent>
-    <PreBuildEvent Condition=" '$(OS)' != 'Windows_NT' ">
-    rsync -l $(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\libConsensusCore.* $(TargetDir)
-    rsync -l $(ProjectDir)..\..\..\..\lib\dotnet\PacBio.Native.BamTools\bin\$(Configuration)\libBamTools.* $(TargetDir)
-    </PreBuildEvent>
   </PropertyGroup>
-  <UsingTask TaskName="PacBio.BuildTasks.FileUpdate" AssemblyFile="..\..\..\..\lib\dotnet\PacBio.BuildTasks\obj\Release\PacBio.BuildTasks.dll" />
-  <Target Name="BeforeBuild" DependsOnTargets="GetVersionInfo">
-    <FileUpdate Files="Properties/AssemblyInfo.fs" Regex="%5Cd%2B%5C.%5Cd%2B%5C.%5Cd%2B%5C.%5Cd%2B" ReplacementText="$(Major).$(Minor).$(Build).$(Revision)" Force="true" />
-  </Target>
-  <Target Name="AfterBuild">
-    <FileUpdate Files="Properties/AssemblyInfo.fs" Regex="%5Cd%2B%5C.%5Cd%2B%5C.%5Cd%2B%5C.%5Cd%2B" ReplacementText="0.0.0.0" Force="true" />
-  </Target>
 </Project>

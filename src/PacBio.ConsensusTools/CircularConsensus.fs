@@ -9,6 +9,7 @@ open PacBio.FSharp.Utils.ActivePatterns
 open PacBio.FSharp.Utils.Logging
 open PacBio.FSharp.Utils.SubCommands
 open PacBio.Utils
+open ManyConsole
 
 type CircularConsensus() as this =
     inherit ConsensusSubCommand ("CircularConsensus", "Generate consensus sequences from single molecules")

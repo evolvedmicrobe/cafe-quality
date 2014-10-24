@@ -1,14 +1,12 @@
 
 namespace PacBio.ConsensusTools
-
-open ManyConsole
 open System
-
 open PacBio.HDF
 open PacBio.FSharp.Utils.Logging
 open PacBio.FSharp.Utils.SubCommands
 open PacBio.Utils
 open PacBio.Data
+open ManyConsole
 
 module EntryPoint =
 
