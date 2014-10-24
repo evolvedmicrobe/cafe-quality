@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using Bio;
 using Bio.IO.FastA;
-using PacBio.IO;
+using PacBio.Data;
 
 namespace VariantCaller.QualityExperiment
 {
@@ -21,10 +21,13 @@ namespace VariantCaller.QualityExperiment
         /// All references used in experiment
         /// </summary>
         public List<Reference> References;
+
         /// <summary>
         /// Original base files used.  
         /// </summary>
-        public List<FileInfo> BaseFiles;
+        public List<FileInfo> BaseFileNames;
+
+        private List<BaxH5Reader> baseFileReaders;
 
         /// <summary>
         /// A list of CCS Reads.
@@ -50,6 +53,7 @@ namespace VariantCaller.QualityExperiment
                     if (fss.Any(p => !(new FileInfo(p)).Exists))
                     {
                         throw new FileNotFoundException(names[i]);
+               
                     }
                 }
             }
@@ -57,7 +61,8 @@ namespace VariantCaller.QualityExperiment
             // Load Base files if present
             if (baseFiles != null)
             {
-                BaseFiles = baseFiles.Select(x => new FileInfo(x)).ToList();
+                BaseFileNames = baseFiles.Select(x => new FileInfo(x)).ToList();
+                baseFileReaders = BaseFileNames.Select (x => new PacBio.Data.BaxH5Reader(x.FullName)).ToList ();
             }
 
             References = (new FastAParser(referenceFile)).Parse().Select(x => new Reference((Sequence)x)).ToList();
@@ -149,18 +154,25 @@ namespace VariantCaller.QualityExperiment
             return mainDictionary;
         }
 
-        public IEnumerable<IZmwBases> GetZMWReads()
+        public IEnumerable<Zmw> GetZMWSequencingReads()
         {
-            foreach (var bas in BaseFiles)
+            foreach (var bas in baseFileReaders)
             {
-
-                var br = BaseReader.CreateSource(bas.FullName);
-                // null range apparently selects all
-                foreach (var zmw in br.ByHoleNumberRange(null))
+                foreach (var zmw in bas.SequencingZmws)
                 {
                     yield return zmw;
                 }
             }
+        }
+
+        public Zmw GetZMWforRead(CCSRead read)
+        {
+            foreach (var v in baseFileReaders) {
+                if (v.HasHoleNumber (read.ZMW)) {
+                    return v [read.ZMW];
+                }
+            }
+            throw new BioinformaticsException ("The loaded experiment did not have data for that hole");
         }
 
     }    

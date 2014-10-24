@@ -10,7 +10,12 @@ namespace VariantCaller
 {
     public class CCSRead
     {
+        /// <summary>
+        /// This is to avoid storing tons of unique strings with the same silly name.
+        /// </summary>
+        public static string GENERIC_READ_NAME="CCSRead";
         public readonly int ZMW;
+        public readonly string Movie;
         public List<CCSSubRead> SubReads;
         public Sequence Seq;
         
@@ -18,10 +23,19 @@ namespace VariantCaller
         /// The DNA this read is derived from.
         /// </summary>
         public Reference AssignedReference;
-
+        /// <summary>
+        /// Create a CCS read from the given sequence, usually with an ID like:
+        /// "m141008_060349_42194_c100704972550000001823137703241586_s1_p0/43/ccs"
+        /// </summary>
+        /// <param name="read">Read.</param>
         public CCSRead(Sequence read)
         {
-            ZMW = Convert.ToInt32(read.ID.Split('/')[1]);
+            //m141008_060349_42194_c100704972550000001823137703241586_s1_p0/43/ccs
+            string[] sp = new string[3];
+            Bio.Util.FastStringUtils.Split(read.ID,'/',sp);
+            Movie = String.Intern (sp [0]);
+            read.ID = GENERIC_READ_NAME;
+            ZMW = Convert.ToInt32(sp[1]);
             Seq = read;
         } 
     }
