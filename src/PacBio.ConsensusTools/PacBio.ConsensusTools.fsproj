@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4DDC858E-1EA7-4A48-9348-51B7D932C684}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>PacBio.ConsensusTools</RootNamespace>
+    <AssemblyName>PacBio.ConsensusTools</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+    <Commandlineparameters> CircularConsensus -n 8 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  -csv.
+</Commandlineparameters>
+    <ConsolePause>false</ConsolePause>
+    <EnvironmentVariables>
+      <EnvironmentVariables>
+        <Variable name="LD_LIBRARY_PATH" value="/Users/nigel/lib/lib" />
+      </EnvironmentVariables>
+    </EnvironmentVariables>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>
+    </PlatformTarget>
+    <Tailcalls>true</Tailcalls>
+    <ConsolePause>false</ConsolePause>
+    <Commandlineparameters>CircularConsensus -n 8 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  -csv.
+</Commandlineparameters>
+    <EnvironmentVariables>
+      <EnvironmentVariables>
+        <Variable name="LD_LIBRARY_PATH" value="/Users/nigel/lib/lib" />
+      </EnvironmentVariables>
+    </EnvironmentVariables>
+    <DefineConstants>
+    </DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '11.0' Or '$(OS)' != 'Windows_NT' ">
+    <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+  </PropertyGroup>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.fs" />
+    <Compile Include="ConsensusSubCommand.fs" />
+    <Compile Include="AmpliconAnalysis.fs" />
+    <Compile Include="CCSTrain.fs" />
+    <Compile Include="DumberView.fs" />
+    <Compile Include="MinorVariants.fs" />
+    <Compile Include="CircularConsensus.fs" />
+    <Compile Include="ChimeraFinder.fs" />
+    <Compile Include="MappedConsensus.fs" />
+    <Compile Include="Main.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FSharp.Core">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="QuickGraph">
+      <HintPath>..\..\..\..\third-party\dotnet\QuickGraph\QuickGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="ManyConsole">
+      <HintPath>..\..\..\..\third-party\dotnet\ManyConsole.0.4.2.21\lib\ManyConsole.dll</HintPath>
+    </Reference>
+    <Reference Include="NDesk.Options">
+      <HintPath>..\..\..\..\third-party\dotnet\ManyConsole.0.4.2.21\lib\NDesk.Options.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\..\..\third-party\dotnet\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\..\..\..\third-party\dotnet\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
+      <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
+      <Name>ConsensusCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PacBio.Consensus\PacBio.Consensus.csproj">
+      <Project>{D3A49F4E-1139-4782-A72A-599CCE57D715}</Project>
+      <Name>PacBio.Consensus</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <UsingTask TaskName="PacBio.BuildTasks.VersionInfo" AssemblyFile="..\..\..\..\lib\dotnet\PacBio.BuildTasks\obj\Release\PacBio.BuildTasks.dll" />
+  <Target Name="GetVersionInfo">
+    <VersionInfo DepotPath="//depot/software/smrtanalysis/bioinformatics">
+      <Output TaskParameter="Major" PropertyName="Major" />
+      <Output TaskParameter="Minor" PropertyName="Minor" />
+      <Output TaskParameter="Build" PropertyName="Build" />
+      <Output TaskParameter="Revision" PropertyName="Revision" />
+      <Output TaskParameter="Version" PropertyName="Version" />
+    </VersionInfo>
+    <Message Text="Found Version: $(Version)" />
+  </Target>
+  <PropertyGroup>
+    <PreBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">
+    xcopy /D /Y  $(ProjectDir)..\..\..\..\lib\dotnet\PacBio.Native.BamTools\bin\$(Configuration)\libBamTools.* $(TargetDir)
+    xcopy /D /Y "$(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\libConsensusCore.*" "$(TargetDir)"
+    xcopy /D /Y "$(ProjectDir)..\..\..\..\third-party\dotnet\HDF5\Windows_$(PlatformTarget)\*.dll" "$(TargetDir)"
+    </PreBuildEvent>
+    <PreBuildEvent Condition=" '$(OS)' != 'Windows_NT' ">
+    rsync -l $(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\libConsensusCore.* $(TargetDir)
+    rsync -l $(ProjectDir)..\..\..\..\lib\dotnet\PacBio.Native.BamTools\bin\$(Configuration)\libBamTools.* $(TargetDir)
+    </PreBuildEvent>
+  </PropertyGroup>
+  <UsingTask TaskName="PacBio.BuildTasks.FileUpdate" AssemblyFile="..\..\..\..\lib\dotnet\PacBio.BuildTasks\obj\Release\PacBio.BuildTasks.dll" />
+  <Target Name="BeforeBuild" DependsOnTargets="GetVersionInfo">
+    <FileUpdate Files="Properties/AssemblyInfo.fs" Regex="%5Cd%2B%5C.%5Cd%2B%5C.%5Cd%2B%5C.%5Cd%2B" ReplacementText="$(Major).$(Minor).$(Build).$(Revision)" Force="true" />
+  </Target>
+  <Target Name="AfterBuild">
+    <FileUpdate Files="Properties/AssemblyInfo.fs" Regex="%5Cd%2B%5C.%5Cd%2B%5C.%5Cd%2B%5C.%5Cd%2B" ReplacementText="0.0.0.0" Force="true" />
+  </Target>
+</Project>
