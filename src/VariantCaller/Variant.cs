@@ -59,8 +59,14 @@ namespace VariantCaller
         /// They should almost always be excluded by the alignment algorithm clipping at the ends.
         /// </summary>
         public bool AtEndOfAlignment { get; protected set; }
-        
-        public Sequence ReferenceBases  {
+
+
+        /// <summary>
+        /// Gets the reference bases at variant position.
+        /// Use RefSeq for the whole reference.
+        /// </summary>
+        /// <value>The reference bases at variant position.</value>
+        public Sequence ReferenceBasesAtVariantPosition  {
             get {
                 return (Sequence) RefSeq.GetSubSequence(StartPosition, (EndPosition - StartPosition + 1));
             }

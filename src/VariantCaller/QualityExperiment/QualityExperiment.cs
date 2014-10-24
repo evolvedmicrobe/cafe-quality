@@ -88,8 +88,47 @@ namespace VariantCaller.QualityExperiment
 					read.SubReads = subReadList;
 				}
             }
-			Console.WriteLine ("Missing: " + missing.ToString () + " reads");
+			
+
+            assignCCSReadsToReference ();
+
+            var numMissing = CCSReads.Count ( x => x.AssignedReference == null);
+            Console.WriteLine ("Total Reads: " + CCSReads.Count.ToString ());
+            Console.WriteLine ("Unmatched between CCS and subreads (missing): " + missing.ToString () + " reads");
+            var percMissing = numMissing / (double) CCSReads.Count;
+            Console.WriteLine ("Not Assigned to References: " + numMissing.ToString () + " reads (" + percMissing.ToString("f4") +"%)");
+            var counts = new int[References.Count];
+            foreach (var read in CCSReads) {
+                for(int j =0; j < counts.Length; j++) {
+                    if (read.AssignedReference == References[j]) {
+                        counts [j]++;
+                    }
+                }
+            }
+            for (int i = 0; i < References.Count; i++) {
+                var c = counts [i];
+                percMissing = c / (double) CCSReads.Count;
+                Console.WriteLine ("Assigned to " + References[i].RefSeq.ID + ": " + c.ToString () + " reads (" + percMissing.ToString("f4") +"%)");
+
+            }
+
         }
+        /// <summary>
+        /// Naive temporary implementation, where we assign on size.
+        /// TODO: Improvements needed!
+        /// </summary>
+        private void assignCCSReadsToReference()
+        {
+            foreach (var v in CCSReads) {
+                foreach (var r in References) {
+                    if (Math.Abs (r.RefSeq.Count - v.Seq.Count) < 25) {
+                        v.AssignedReference = r;
+                        break;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Load the subreads in parallel.
         /// </summary>
@@ -124,7 +163,5 @@ namespace VariantCaller.QualityExperiment
             }
         }
 
-    }
-
-    
+    }    
  }

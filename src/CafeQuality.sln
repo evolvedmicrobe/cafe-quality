@@ -121,6 +121,7 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+		{C1EA5B21-991D-4455-BAA7-05CFD8C04B88}.Mono|Mixed Platforms.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = scripts\scripts.fsproj

@@ -17,7 +17,7 @@ namespace VariantCaller
         /// <summary>
         /// The DNA this read is derived from.
         /// </summary>
-        public Reference AssignedRefrerence;
+        public Reference AssignedReference;
 
         public CCSRead(Sequence read)
         {

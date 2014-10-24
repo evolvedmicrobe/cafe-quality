@@ -22,7 +22,7 @@ namespace VariantCaller
         /// .NET Bio used a PairwiseSequenceAlignment class but that seemed too heavy weight, 
         /// alternatively, the  name for these sequences in the shortend sequence meta data
         /// matches the original, so maybe I could use that?  
-        public static IList<Variant> CallVariants(PairwiseAlignedSequence alignment, Sequence refSeq)
+        public static List<Variant> CallVariants(PairwiseAlignedSequence alignment, Sequence refSeq)
         {
            if (alignment==null) {throw new ArgumentNullException("alignment");}
         	List<Variant> variants = new List<Variant>();
