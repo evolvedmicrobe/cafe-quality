@@ -544,6 +544,14 @@ namespace Bio.Algorithms.Alignment
 
         /// <summary>
         /// Extend the cluster in synteny
+        /// See original code in postnuc.cc According to the comments there:
+        /// Connect all the matches in every cluster between sequences A and B.
+        //  Also, extend alignments off of the front and back of each cluster to
+        //  expand total alignment coverage. When these extensions encounter an
+        //  adjacent cluster, fuse the two regions to create one single
+        //  encompassing region. This routine will create alignment objects from
+        //  these extensions and output the resulting delta information to the
+        //  delta output file.
         /// </summary>
         /// <param name="synteny">Synteny in which cluster needs to be extened.</param>
         /// <returns>List of delta alignments</returns>
@@ -557,10 +565,21 @@ namespace Bio.Algorithms.Alignment
             
             IList<Cluster> clusters = synteny.Clusters;
 
+            var pre_sort_start = clusters.Last ();
+
             // Sort the cluster by first sequence start
             clusters = SortCluster(clusters, FirstSequenceStart);
-
+            // TODO: This statement used to be before the sort but I moved it to match the original mummer code.  
+            // Make sure that was kosher, though I know it passes all tests.
+            // Also, the target should be at the end...
             Cluster targetCluster = synteny.Clusters.Last();
+
+            if (targetCluster != pre_sort_start) {
+                throw new BioinformaticsException( 
+                    @" Error thrown: Report Bug.  You changed the code to be in line with the mummmer 
+source and assign after sorting, but never verified this improved things (largely because it seemed to make no difference).
+This is an alignment where it could matter, so use this as a test case between implementations.");
+            }
 
             IEnumerator<Cluster> previousCluster = clusters.GetEnumerator();
             previousCluster.MoveNext();
@@ -606,9 +625,14 @@ namespace Bio.Algorithms.Alignment
 
                         // Find the MUM which is a good candidate for extension in reverse direction
                         DeltaAlignment targetAlignment = GetPreviousAlignment(deltaAlignments, deltaAlignment);
-                        if(targetAlignment!=deltaAlignment&&
-                          //TODO: NEED TO VERIFY THIS!!!
-                        //if (
+                        // if(targetAlignment != deltaAlignment &&
+                        /* TODO: Verify if including if statement above is allowed.  This shortcut prevents 
+                         * a long alignment being redone for each MUM, and so saves quite a bit of execution time.
+                         * However, it might goof up some more complex merging (it passes all current tests), so
+                         * I am taking it out for now.  
+                         * see my discussion here regarding this: https://bio.codeplex.com/workitem/8949
+                        */
+                        if (
                             ExtendToPreviousSequence(
                                 synteny.ReferenceSequence,
                                 synteny.QuerySequence,

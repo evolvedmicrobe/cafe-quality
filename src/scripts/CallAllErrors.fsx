@@ -101,7 +101,10 @@ let outputRead (read:CCSRead) =
 
 [<EntryPoint>]
 let main args =
+    let sw = new System.Diagnostics.Stopwatch.StartNew()
     LoadZMWs.ccs_data.CCSReads  |> Seq.iter outputRead
+    sw.Stop()
+    printfn "%f" sw.Elapsed.TotalMilliseconds
     cwriter.Close
     vwriter.Close
     Console.WriteLine("Success");
