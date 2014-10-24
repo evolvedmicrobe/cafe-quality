@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -51,12 +51,36 @@
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\RProvider.1.0.17\lib\net40\FSharp.Core.dll</HintPath>
     </Reference>
+    <Reference Include="RDotNet.FSharp">
+      <HintPath>..\..\lib\RDotNet.FSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="RDotNet.NativeLibrary">
+      <HintPath>..\..\lib\RDotNet.NativeLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="RDotNet">
+      <HintPath>..\..\lib\RDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="RProvider.DesignTime">
+      <HintPath>..\..\lib\RProvider.DesignTime.dll</HintPath>
+    </Reference>
+    <Reference Include="RProvider.Runtime">
+      <HintPath>..\..\lib\RProvider.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="RProvider.Server">
+      <HintPath>..\..\lib\RProvider.Server.exe</HintPath>
+    </Reference>
+    <Reference Include="RProvider">
+      <HintPath>..\..\lib\RProvider.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Script.fsx" />
     <Compile Include="LoadZMWs.fs" />
     <None Include="AssignZMWs.fsx" />
     <Compile Include="DemoAligner.fs" />
+    <None Include="Csv.fsx" />
+    <None Include="GenerateReferences.fsx" />
+    <None Include="CallAllErrors.fsx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\bio\Bio.csproj">
@@ -65,8 +89,7 @@
     </ProjectReference>
     <ProjectReference Include="..\VariantCaller\VariantCaller.csproj">
       <Name>VariantCaller</Name>
-      <Project>{c1ea5b21-991d-4455-baa7-05cfd8c04b88}</Project>
-      <Private>True</Private>
+      <Project>{C1EA5B21-991D-4455-BAA7-05CFD8C04B88}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
