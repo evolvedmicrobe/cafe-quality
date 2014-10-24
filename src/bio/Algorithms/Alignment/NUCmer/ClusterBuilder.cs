@@ -161,146 +161,127 @@ namespace Bio.Algorithms.Alignment
                 matches[counter1].IsGood = true;
             }
 
-            for (counter1 = 0; counter1 < matches.Count - 1; counter1++)
+            for (counter1 = 0; counter1 < matches.Count ; counter1++)
             {
+                var cur_match = matches [counter1];
                 long diagonalIndex, endIndex;
 
-                matches[counter1].IsGood = false;
+                cur_match.IsGood = false;
 
-                diagonalIndex = matches[counter1].QuerySequenceOffset
-                        - matches[counter1].ReferenceSequenceOffset;
-                endIndex = matches[counter1].QuerySequenceOffset
-                        + matches[counter1].Length;
+                diagonalIndex = cur_match.QuerySequenceOffset
+                        - cur_match.ReferenceSequenceOffset;
+                endIndex = cur_match.QuerySequenceOffset
+                        + cur_match.Length;
 
                 for (counter2 = counter1 + 1;
                         counter2 < matches.Count &&
-                            matches[counter2].QuerySequenceOffset <= endIndex;
-                        counter2++)
-                {
+                        matches[counter2].QuerySequenceOffset <= endIndex;
+                        counter2++) {
+
                     long overlap;
                     long diagonalj;
+                    var next_match = matches [counter2];
 
                     // this is always true as the matches are sorted on QuerySequenceOffset.
-                    if (matches[counter1].QuerySequenceOffset <= matches[counter2].QuerySequenceOffset)
-                    {
-                        diagonalj = matches[counter2].QuerySequenceOffset
-                                - matches[counter2].ReferenceSequenceOffset;
-                        if (diagonalIndex == diagonalj)
-                        {
-                            long extentj;
+                    if (cur_match.QuerySequenceOffset > next_match.QuerySequenceOffset) {
+                        throw new Exception ("This was always supposed to be true");
+                    }
 
-                            extentj = matches[counter2].Length
-                                    + matches[counter2].QuerySequenceOffset
-                                    - matches[counter1].QuerySequenceOffset;
-                            if (extentj > matches[counter1].Length)
-                            {
-                                matches[counter1].Length = extentj;
-                                endIndex = matches[counter1].QuerySequenceOffset
-                                        + extentj;
-                            }
+                    diagonalj = next_match.QuerySequenceOffset - next_match.ReferenceSequenceOffset;
+                    if (diagonalIndex == diagonalj) { // ND - Same offset of sequences, how can this happen?? Shouldn't it just be a bigger MUM?
+                        long extentj;
 
-                            // match lies on the same diagonal, this match cannot be part of
-                            // any cluster
-
-                            // remove the match and decrement the count to continue with the next item.
-                            matches.RemoveAt(counter2);
-                            counter2--;
+                        extentj = next_match.Length
+                        + next_match.QuerySequenceOffset
+                        - cur_match.QuerySequenceOffset;
+                        if (extentj > cur_match.Length) {
+                            cur_match.Length = extentj;
+                            endIndex = cur_match.QuerySequenceOffset
+                            + extentj;
                         }
-                        else if (matches[counter1].ReferenceSequenceOffset == matches[counter2].ReferenceSequenceOffset)
-                        {
-                            // look for overlaps in second(query) sequence
-                            overlap = matches[counter1].QuerySequenceOffset
-                                    + matches[counter1].Length
-                                    - matches[counter2].QuerySequenceOffset;
 
-                            if (matches[counter1].Length < matches[counter2].Length)
-                            {
-                                if (overlap >= matches[counter1].Length / 2)
-                                {
+                        // match lies on the same diagonal, this match cannot be part of
+                        // any cluster
+
+                        // remove the match and decrement the count to continue with the next item.
+                        matches.RemoveAt (counter2);
+                        counter2--;
+                    } 
+                    else if (cur_match.ReferenceSequenceOffset == next_match.ReferenceSequenceOffset) {
+                        // look for overlaps in second(query) sequence
+                        overlap = cur_match.QuerySequenceOffset
+                        + cur_match.Length
+                        - next_match.QuerySequenceOffset;
+
+                        if (cur_match.Length < next_match.Length) {
+                            if (overlap >= cur_match.Length / 2) {
+                                // match is overlapping, this match cannot be part of 
+                                // any cluster
+                                // remove the match and decrement the count to continue with the next item.
+                                matches.RemoveAt (counter1);
+                                counter1--;
+                                break;
+                            }
+                        } else if (next_match.Length < cur_match.Length) {
+                            if (overlap >= next_match.Length / 2) {
+                                // match is overlapping, this match cannot be part of 
+                                // any cluster
+                                // remove the match and decrement the count to continue with the next item.
+                                matches.RemoveAt (counter2);
+                                counter2--;
+                            }
+                        } else {
+                            if (overlap >= cur_match.Length / 2) {
+                                next_match.IsTentative = true;
+                                if (cur_match.IsTentative) {
                                     // match is overlapping, this match cannot be part of 
                                     // any cluster
                                     // remove the match and decrement the count to continue with the next item.
-                                    matches.RemoveAt(counter1);
+                                    matches.RemoveAt (counter1);
                                     counter1--;
                                     break;
                                 }
                             }
-                            else if (matches[counter2].Length < matches[counter1].Length)
-                            {
-                                if (overlap >= matches[counter2].Length / 2)
-                                {
-                                    // match is overlapping, this match cannot be part of 
-                                    // any cluster
-                                    // remove the match and decrement the count to continue with the next item.
-                                    matches.RemoveAt(counter2);
-                                    counter2--;
-                                }
-                            }
-                            else
-                            {
-                                if (overlap >= matches[counter1].Length / 2)
-                                {
-                                    matches[counter2].IsTentative = true;
-                                    if (matches[counter1].IsTentative)
-                                    {
-                                        // match is overlapping, this match cannot be part of 
-                                        // any cluster
-                                        // remove the match and decrement the count to continue with the next item.
-                                        matches.RemoveAt(counter1);
-                                        counter1--;
-                                        break;
-                                    }
-                                }
-                            }
                         }
-                        else if (matches[counter1].QuerySequenceOffset == matches[counter2].QuerySequenceOffset)
-                        {
-                            // look for overlaps in first(reference) sequence
-                            overlap = matches[counter1].ReferenceSequenceOffset
-                                    + matches[counter1].Length
-                                    - matches[counter2].ReferenceSequenceOffset;
+                    } 
+                    else if (cur_match.QuerySequenceOffset == next_match.QuerySequenceOffset) {
+                        // look for overlaps in first(reference) sequence
+                        overlap = cur_match.ReferenceSequenceOffset
+                        + cur_match.Length
+                        - next_match.ReferenceSequenceOffset;
 
-                            if (matches[counter1].Length < matches[counter2].Length)
-                            {
-                                if (overlap >= matches[counter1].Length / 2)
-                                {
+                        if (cur_match.Length < next_match.Length) {
+                            if (overlap >= cur_match.Length / 2) {
+                                // match is overlapping, this match cannot be part of 
+                                // any cluster
+                                // remove the match and decrement the count to continue with the next item.
+                                matches.RemoveAt (counter1);
+                                counter1--;
+                                break;
+                            }
+                        } else if (next_match.Length < cur_match.Length) {
+                            if (overlap >= next_match.Length / 2) {
+                                // match is overlapping, this match cannot be part of 
+                                // any cluster
+                                // remove the match and decrement the count to continue with the next item.
+                                matches.RemoveAt (counter2);
+                                counter2--;
+                            }
+                        } else {
+                            if (overlap >= cur_match.Length / 2) {
+                                next_match.IsTentative = true;
+                                if (cur_match.IsTentative) {
                                     // match is overlapping, this match cannot be part of 
                                     // any cluster
                                     // remove the match and decrement the count to continue with the next item.
-                                    matches.RemoveAt(counter1);
+                                    matches.RemoveAt (counter1);
                                     counter1--;
                                     break;
-                                }
-                            }
-                            else if (matches[counter2].Length < matches[counter1].Length)
-                            {
-                                if (overlap >= matches[counter2].Length / 2)
-                                {
-                                    // match is overlapping, this match cannot be part of 
-                                    // any cluster
-                                    // remove the match and decrement the count to continue with the next item.
-                                    matches.RemoveAt(counter2);
-                                    counter2--;
-                                }
-                            }
-                            else
-                            {
-                                if (overlap >= matches[counter1].Length / 2)
-                                {
-                                    matches[counter2].IsTentative = true;
-                                    if (matches[counter1].IsTentative)
-                                    {
-                                        // match is overlapping, this match cannot be part of 
-                                        // any cluster
-                                        // remove the match and decrement the count to continue with the next item.
-                                        matches.RemoveAt(counter1);
-                                        counter1--;
-                                        break;
-                                    }
                                 }
                             }
                         }
                     }
+                
                 }
             }
         }
