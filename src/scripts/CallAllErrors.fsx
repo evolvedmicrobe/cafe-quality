@@ -21,7 +21,7 @@ type CCSWriter (fname:string) =
     let sw = new StreamWriter(fname)
     do sw.WriteLine("ZMW,Reference,NumSubReads,NumErrors,Length,NumIndelErrors,NumSNPErrors")
     member this.Output (read : CCSRead) ( vars: List<Variant>) = 
-        if read.AssignedReference <> null & read.SubReads <> null then 
+        if read.AssignedReference <> null && read.SubReads <> null then 
             let indel_cnt = vars |>  Seq.where (fun u  -> u.Type = VariantType.INDEL) |> Seq.length
             let snp_cnt = vars |> Seq.where (fun u -> u.Type = VariantType.SNP) |> Seq.length
 
@@ -50,7 +50,7 @@ type VariantWriter (fname:string) =
 
     let sw = new StreamWriter(fname)        
 
-    do sw.WriteLine("Ref,Pos,zmw,type,length,num_subreads,homopolymerLength,homopolymerType")
+    do sw.WriteLine("Ref,Pos,zmw,type,length,num_subreads,homopolymerLength,homopolymerChar,indelSize,indeltype")
         
     member this.Write (read : CCSRead) (variant : Variant )= 
 
@@ -68,12 +68,22 @@ type VariantWriter (fname:string) =
                                              | :? SNPVariant as snp -> "1"
                                              | _ -> failwith "type miss"
         
+        let goodIndel = (not variant.AtEndOfAlignment) && variant.Type = VariantType.INDEL
+        let indeltype = if goodIndel then
+                             System.Enum.GetName(typeof<IndelType>, (variant :?> IndelVariant).InsertionOrDeletion) else
+                            "NA"
+        let indelLength = if goodIndel then
+                            (variant :?> IndelVariant).InsertedOrDeletedBases.Length.ToString() else
+                            "NA"
+
+              
+
         let homoChar = match variant with
                         | :? IndelVariant as indel -> indel.HomopolymerBase.ToString()
                         | :? SNPVariant as snp -> "N"
                         | _ -> failwith "type miss"
 
-        let toWrite : Object[] = [| variant.RefSeq.ID; variant.StartPosition; read.ZMW; vtype; read.Seq.Count; read.SubReads.Count; homopolymerLength; homoChar|]
+        let toWrite : Object[] = [| variant.RefSeq.ID; variant.StartPosition; read.ZMW; vtype; read.Seq.Count; read.SubReads.Count; homopolymerLength; homoChar; indelLength; indeltype|]
 
         let toOut = join toWrite
         sw.WriteLine(toOut)
@@ -101,11 +111,14 @@ let outputRead (read:CCSRead) =
 
 [<EntryPoint>]
 let main args =
-    let sw = new System.Diagnostics.Stopwatch.StartNew()
+    let sw = System.Diagnostics.Stopwatch.StartNew()
     LoadZMWs.ccs_data.CCSReads  |> Seq.iter outputRead
     sw.Stop()
     printfn "%f" sw.Elapsed.TotalMilliseconds
     cwriter.Close
     vwriter.Close
+
+    // Now to ouptu
+
     Console.WriteLine("Success");
     0
