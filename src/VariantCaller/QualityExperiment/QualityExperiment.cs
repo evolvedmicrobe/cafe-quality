@@ -9,8 +9,9 @@ using Bio;
 using Bio.IO.FastA;
 using PacBio.Data;
 
-namespace VariantCaller.QualityExperiment
+namespace VariantCaller
 {
+
     /// <summary>
     /// This class represents an experiment designed to evaluate the accuracy of CCS reads.  
     /// It consists of several pulse file and references.
@@ -33,6 +34,8 @@ namespace VariantCaller.QualityExperiment
         /// A list of CCS Reads.
         /// </summary>
         public List<CCSRead> CCSReads;
+
+       
 
         /// <summary>
         /// Make a new quality experiment
@@ -85,7 +88,7 @@ namespace VariantCaller.QualityExperiment
             foreach (var read in CCSReads)
             {
 				List<CCSSubRead> subReadList;
-				bool hasValue = subReadDict.TryGetValue(read.ZMW, out subReadList);
+				bool hasValue = subReadDict.TryGetValue(read.ZMWnumber, out subReadList);
 				if (!hasValue) {
 					missing++;
 					missingReads.Add (read);
@@ -165,11 +168,36 @@ namespace VariantCaller.QualityExperiment
             }
         }
 
+        /// <summary>
+        /// Because subreads are read from a fasta file produced by consensus tools, which
+        /// uses PacBio.IO, whilst we are now using PacBio.Data, they may not match.  Particularly
+        /// since the adapter finding step is unique to Pat's code.
+        /// 
+        /// This procedure matches the subreads from the fasta file with those from the 
+        /// PacBio.Data class, it makes sure the sequences match.
+        /// </summary>
+        /// <param name="read">Read.</param>
+        public  void ValidateSubReads(CCSRead read)
+        {
+            if (read.ZMW == null) {
+                read.ZMW = CCSRead.ParentExperiment.GetZMWforRead(read);
+            }
+
+            var fullRead = read.ZMW.FullRead;
+
+            foreach (var sub in read.SubReads) {
+
+            }
+
+
+        }
+
         public Zmw GetZMWforRead(CCSRead read)
         {
+
             foreach (var v in baseFileReaders) {
-                if (v.HasHoleNumber (read.ZMW)) {
-                    return v [read.ZMW];
+                if (v.HasHoleNumber (read.ZMWnumber)) {
+                    return v [read.ZMWnumber];
                 }
             }
             throw new BioinformaticsException ("The loaded experiment did not have data for that hole");

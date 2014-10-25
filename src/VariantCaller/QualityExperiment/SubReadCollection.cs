@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Bio;
 using Bio.IO.FastA;
 
-namespace VariantCaller.QualityExperiment
+namespace VariantCaller
 {
     /// <summary>
     /// A dictionary that maps ZMWs to a list of their subreads.

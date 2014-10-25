@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 
 
-namespace VariantCaller.QualityExperiment
+namespace VariantCaller
 {
     public class ZmwAndReference
     {
