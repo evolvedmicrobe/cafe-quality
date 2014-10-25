@@ -67,6 +67,9 @@
     <Compile Include="Variant\VariantType.cs" />
     <Compile Include="Variant\SNPVariant.cs" />
     <Compile Include="Variant\IndelVariant.cs" />
+    <Compile Include="ZMWRead.cs" />
+    <Compile Include="OutputAttributes.cs" />
+    <Compile Include="OutputHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\bio\Bio.csproj">
