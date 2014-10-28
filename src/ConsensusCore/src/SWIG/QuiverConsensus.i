@@ -56,7 +56,7 @@ namespace ConsensusCore {
     // ReadScorers for individual queries.
     //
     %template(SparseSseQvSumProductReadScorer) ReadScorer<SparseSseQvSumProductRecursor>;
-    %template(SparseSseQvMultiReadScorer) ReadScorer<SparseSseQvRecursor>;
+    %template(SparseSseQvReadScorer) ReadScorer<SparseSseQvRecursor>;
 
 
 

@@ -123,7 +123,7 @@ namespace ConsensusCore
     }
 
     typedef ReadScorer<SparseSseQvRecursor> \
-      SparseSseQvMultiReadScorer;
+      SparseSseQvReadScorer;
     typedef ReadScorer<SparseSseQvSumProductRecursor> \
       SparseSseQvSumProductReadScorer;
 
