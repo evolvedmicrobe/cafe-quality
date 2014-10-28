@@ -18,12 +18,14 @@ namespace VariantCaller
         {
             RefSeq = new Sequence(NoGapDnaAlphabet.Instance, seq.ToArray(), true);
             RefSeq.ID = seq.ID;
-            nucmer= new NucmerQueryable(RefSeq, 9);
+            nucmer= new NucmerQueryable(RefSeq, 8);
         }
 
 		public List<PairwiseAlignedSequence> AlignSequence(Sequence toAlign)
 		{
-            return nucmer.GetAlignments(toAlign);
+            var toR = nucmer.GetAlignments(toAlign);
+            toR.Sort ((x, y) => -x.Score.CompareTo (y.Score));
+            return toR;
 		}
 
         /// <summary>

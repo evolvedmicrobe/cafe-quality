@@ -28,6 +28,7 @@ namespace VariantCaller
             z => z.Average(p => (double) p)
         };
 
+
         /// <summary>
         /// Output the FieldInfos that will be used if this object is queried.
         /// </summary>
@@ -86,9 +87,15 @@ namespace VariantCaller
 
             foreach (var f in fields.ArrayFields) {
                 foreach (var s in Array_Funcs) {
-                    var value = f.GetValue (data) as IList<ValueType>;
-                    var res = s (value);
-                    dataFields.Add (res.ToString());
+                    try 
+                    {
+                        var value = f.GetValue (data) as IList<ValueType>;
+                        var res = s (value);
+                        dataFields.Add (res.ToString());
+                    }
+                    catch {
+                        dataFields.Add ("NaN");
+                    }
                 }
             }
             return dataFields;

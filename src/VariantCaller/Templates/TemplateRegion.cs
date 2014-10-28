@@ -7,8 +7,8 @@ using ConsensusCore;
 namespace VariantCaller
 {
 
-    enum ScoringResult { Success, NoOverlapOrAlignment, BadData, MysteriousFail }
-    enum ScoringMethod { SumProduct, Viterbi }
+    public enum ScoringResult { Success, NoOverlapOrAlignment, BadData, MysteriousFail }
+    public enum ScoringMethod { SumProduct, Viterbi }
     /// <summary>
     /// This class represents a section of a template.  It is designed 
     /// to be useful for examining how different reads align to different templates.
@@ -34,7 +34,13 @@ namespace VariantCaller
 
 
         private static QuiverConfig q_config;
-        public static TemplateRegion()
+
+
+        public static QuiverConfig GetQuiverConfig()
+        {
+            return q_config;
+        }
+        static TemplateRegion()
         {
             // This obviously can't stand.
             var ccsFileLocation = @"/Users/nigel/git/cafe-quality/data/CCSParameters.ini";
@@ -54,38 +60,38 @@ namespace VariantCaller
             Haplotype = refseq.RefSeq.GetSubSequence(start, end - start) as Sequence;
             StartRegion = start;
             EndRegion = end;
-            ReadScorer rs = new ReadScorer (q_config);
-              
-        }
+         }
 
         public ScoringResult ScoreReadAgainstTemplateRegion(CCSRead read, ScoringMethod method, out float logScore)
         {
-            if (read.AssignedReference != RefSeq) {
-                return ScoringResult.NoOverlapOrAlignment;
-            } else if (read.ZMW == null) {
-                return ScoringResult.BadData;
-            }
-
-            // First we want to align the sequence and see if we have overlap with reference.
-            var cdata = read.ZMW.FullRead;
-
-            //Val
-
-            read.ZMW.FullRead;
-
-            var score = new SparseSseQvMultiReadScorer (q_config);
-            //score.Score(
-
-
-
-            //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
-            //using (var read = new Read(qsf, name, chem))
-
-
+            logScore = Single.NegativeInfinity;
+            return ScoringResult.MysteriousFail;
+//            logScore = Single.NegativeInfinity;
+//            if (read.AssignedReference != RefSeq) {
+//                return ScoringResult.NoOverlapOrAlignment;
+//            } else if (read.ZMW == null) {
+//                return ScoringResult.BadData;
+//            }
+//
+//            // First we want to align the sequence and see if we have overlap with reference.
+//            var cdata = read.ZMW.FullRead;
+//
+//            //Val
+//
+//
+//            var score = new SparseSseQvMultiReadScorer (q_config);
+//            //score.Score(
+//
+//
+//
+//            //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
+//            //using (var read = new Read(qsf, name, chem))
+//
+//            return ScoringResult.MysteriousFail;
                
         }
 
-        private void Validate
+
 
 
     }

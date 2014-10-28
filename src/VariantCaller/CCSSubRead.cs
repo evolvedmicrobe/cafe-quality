@@ -11,6 +11,9 @@ namespace VariantCaller
 {
     public class CCSSubRead
     {
+        /// <summary>
+        /// Zero indexed, non-inclusive 
+        /// </summary>
         public readonly uint Start, End;
         public readonly byte[] Seq;
         public readonly float RQ;
