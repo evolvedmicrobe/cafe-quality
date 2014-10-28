@@ -126,5 +126,7 @@ namespace ConsensusCore
       SparseSseQvReadScorer;
     typedef ReadScorer<SparseSseQvSumProductRecursor> \
       SparseSseQvSumProductReadScorer;
-
+    
+    template class ReadScorer<SparseSseQvSumProductRecursor>;
+    template class ReadScorer<SparseSseQvRecursor>;
 }

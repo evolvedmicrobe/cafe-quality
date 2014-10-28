@@ -52,19 +52,19 @@ namespace ConsensusCore
     public:
         explicit ReadScorer(QuiverConfig& config);
 
-        virtual float Score
+        float Score
         (const std::string& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
-        virtual const PairwiseAlignment* Align
+        const PairwiseAlignment* Align
         (const std::string& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
-        virtual const SparseMatrix* Alpha
+        const SparseMatrix* Alpha
         (const std::string& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
-        virtual const SparseMatrix* Beta
+        const SparseMatrix* Beta
         (const std::string& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
