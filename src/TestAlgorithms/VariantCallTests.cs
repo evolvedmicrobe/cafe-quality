@@ -61,6 +61,17 @@ CACCCTCATGTTCATACACCTATCCCCCATTCTCCTCCTATCCCTCAACCCCGACATCAT".Replace("\n","").R
 
         }
 
+        [TestMethod]
+        public void TestMatch()
+        {
+            var r = new Sequence (DnaAlphabet.Instance, "CCCGGGGATCCTCTAGAATGCATCAGTAGAGTACGATGCTACAGCTGTGACTGTGCGCACTGCTGAGTCTGTCACTCATGTATCTGCTACGTCGTCTCACGCATACTAGACGACATGAGCGCTACGTCGAGCGTAGCAGAGATAGTATGACTCTCAGTCATATACACACATCGTGACGATGCAGAGCGATCTATCGCGCTCGCATATAGTGTGATCAAGCTTGCTGAGGACTAGTAGCTTC");
+            var q = new Sequence (DnaAlphabet.Instance,    "TGGGATCCTCTAGAATGCATCAGTAGAGTACGATGCTACAGCTGTGACTGTGCGCACTGCTGAGTCTGTCAC");
+
+            var r2 = new Reference (r);
+            var a2 = r2.AlignSequence (q);
+            var i = a2 [0].FindQueryPositionCorrespondingtoReferencePosition (5);
+            Assert.AreEqual<int>(2, i);
+        }
 
 
     }
