@@ -93,8 +93,10 @@ namespace VariantCaller
             // do while loop because some downstream left alignments open up
             // further ones upstream, even though this is rare.
             int change_count = 0;
+            int loopsThrough = 0;
             do
             {
+                loopsThrough++;
                 change_count = 0;
                 for (int i = 1; i < refseq.Length; i++)
                 {
@@ -102,8 +104,8 @@ namespace VariantCaller
                     {
                         int len = getGapLength(i, refseq);
                         int left_side = i - 1;
-                        int right_side = i - 1 + len;
-                        while (left_side >= 0 && (refseq[left_side] == query[right_side]))
+                        int right_side = i  - 1 + len;
+                        while (left_side >= 0 && refseq[left_side] != gap && (refseq[left_side] == query[right_side]))
                         {
                             // Move the gap left.
                             refseq[right_side] = refseq[left_side];
@@ -112,13 +114,22 @@ namespace VariantCaller
                             right_side--;
                             change_count++;
                         }
+                        if (loopsThrough > 50) {
+
+                            var s1 = new Sequence(DnaAlphabet.Instance, query);
+                            var s2 = new Sequence(DnaAlphabet.Instance, refseq);
+                            Console.WriteLine(change_count.ToString() +" query");
+                            Console.WriteLine(s2.ConvertToString());
+                            Console.WriteLine(s1.ConvertToString());
+                        }
                     }
                     else if (query[i] == gap)
                     {
+
                         int len = getGapLength(i, query);
                         int left_side = i - 1;
                         int right_side = i - 1 + len;
-                        while (left_side >= 0 && (query[left_side] == refseq[right_side]))
+                        while (left_side >= 0 && query[left_side] != gap && (query[left_side] == refseq[right_side]))
                         {
                             // Move the gap left.
                             query[right_side] = query[left_side];
@@ -126,6 +137,14 @@ namespace VariantCaller
                             left_side--;
                             right_side--;
                             change_count++;
+                        }
+                        if (loopsThrough > 50) {
+
+                            var s1 = new Sequence(DnaAlphabet.Instance, query);
+                            var s2 = new Sequence(DnaAlphabet.Instance, refseq);
+                            Console.WriteLine(change_count.ToString() +" query");
+                            Console.WriteLine(s2.ConvertToString());
+                            Console.WriteLine(s1.ConvertToString());
                         }
                     }
                 }
