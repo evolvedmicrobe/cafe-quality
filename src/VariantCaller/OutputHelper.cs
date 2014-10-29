@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace VariantCaller
 {
@@ -13,6 +14,7 @@ namespace VariantCaller
             NonArrayFields = nonarrayfields;
             ArrayFields = arrayfields;
         }
+      
     }
 
     public class OutputHelper
@@ -22,13 +24,16 @@ namespace VariantCaller
         /// </summary>
         public static readonly string[] Array_Covariate_Prefixes = new [] {"Max_","Min_","Mean_"};
 
-        public static readonly Func<IList<System.ValueType>, double>[] Array_Funcs = new Func<IList<ValueType>, double>[] {
-            x => x.Max(p => (double) p),
-            y => y.Min(p => (double) p),
-            z => z.Average(p => (double) p)
+        public static readonly Func<byte[], double>[] Array_Funcs_Byte = new Func<byte[], double>[] {
+            x => x.Max(),
+            y => y.Min(),
+            z => z.Average( x=> (double)x)
         };
-
-
+        public static readonly Func<short[], double>[] Array_Funcs_Short = new Func<short[], double>[] {
+            x => x.Max(),
+            y => y.Min(),
+            z => z.Average(x => (double)x)
+        };
         /// <summary>
         /// Output the FieldInfos that will be used if this object is queried.
         /// </summary>
@@ -86,14 +91,36 @@ namespace VariantCaller
             }
 
             foreach (var f in fields.ArrayFields) {
-                foreach (var s in Array_Funcs) {
-                    try 
-                    {
-                        var value = f.GetValue (data) as IList<ValueType>;
-                        var res = s (value);
-                        dataFields.Add (res.ToString());
+                var value = f.GetValue (data);
+                if (value != null) {
+                    // TODO: Clean up this code repetition.
+                    var as_byte = value as byte[];
+                    var as_short = value as short[];
+                    if (as_byte != null) {
+                        foreach (var s in Array_Funcs_Byte) {
+                            try {
+                                var res = s (as_byte);
+                                dataFields.Add (res.ToString ());
+                            } catch {
+                                dataFields.Add ("NaN");
+                            }
+                        }
+                    } else if (as_short != null) {
+                        foreach (var s in Array_Funcs_Short) {
+
+                            try {
+                                var res = s (as_short);
+                                dataFields.Add (res.ToString ());
+                            } catch {
+                                dataFields.Add ("NaN");
+                            }
+                        }
+
+                    } else {
+                        throw new Bio.BioinformaticsException ("missing converter");
                     }
-                    catch {
+                } else {
+                    for (int i = 0; i < Array_Funcs_Byte.Length; i++) {
                         dataFields.Add ("NaN");
                     }
                 }

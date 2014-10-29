@@ -117,9 +117,8 @@ namespace VariantCaller
                 var c = counts [i];
                 percMissing = c / (double) CCSReads.Count;
                 Console.WriteLine ("Assigned to " + References[i].RefSeq.ID + ": " + c.ToString () + " reads (" + percMissing.ToString("f4") +"%)");
-
             }
-
+            CCSRead.ParentExperiment = this;
         }
         /// <summary>
         /// Naive temporary implementation, where we assign on size.
@@ -182,13 +181,6 @@ namespace VariantCaller
             if (read.ZMW == null) {
                 read.ZMW = CCSRead.ParentExperiment.GetZMWforRead(read);
             }
-
-            var fullRead = read.ZMW.FullRead;
-
-            foreach (var sub in read.SubReads) {
-
-            }
-
 
         }
 

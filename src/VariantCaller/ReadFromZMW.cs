@@ -49,6 +49,10 @@ namespace VariantCaller
         [OutputAttribute]
         public int OriginalSubReadLength;
         [OutputAttribute]
+        public int SubReadNumber;
+        [OutputAttribute]
+        public int HPSectionLength;
+        [OutputAttribute]
         public float RQ;
         [OutputAttribute]
         public int Zmw;
@@ -57,7 +61,7 @@ namespace VariantCaller
         public ReadFromZMW()
         {
         }
-
+        // End output section
 
         public ReadFromZMW (ZmwRead baseRead )
         {
@@ -104,7 +108,6 @@ namespace VariantCaller
             var pwif = PulseWidthInFrames.Slice (start, length);
             var delt = DeletionTag.Slice (start, length);
 
-
             // Return new subread
             return new ReadFromZMW (dqv, ipdif, bc, iqv, mqv, subqv, pwif, delt);
         }
@@ -139,8 +142,7 @@ namespace VariantCaller
                 MergeQV.Reverse ().ToArray (),
                 SubstitutionQV.Reverse ().ToArray (),
                 PulseWidthInFrames.Reverse ().ToArray (),
-                DeletionTag.Reverse().ToArray());
-                         
+                DeletionTag.Reverse().ToArray());                         
         }
          
     }
