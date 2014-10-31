@@ -53,3 +53,7 @@ src/ConsensusCore/Debug/*
 # Executables
 *.out
 *.app
+
+data/.RData
+
+data/.Rhistory

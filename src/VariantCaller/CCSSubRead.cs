@@ -14,7 +14,7 @@ namespace VariantCaller
         /// <summary>
         /// Zero indexed, non-inclusive 
         /// </summary>
-        public readonly uint Start, End;
+        public readonly int Start, End;
         public readonly byte[] Seq;
         public readonly float RQ;
         public readonly int ParentZMW;
@@ -52,8 +52,8 @@ namespace VariantCaller
 			var rq_s = right.Substring (pos_equals + 1, right.Length - pos_equals - 1);
 
             RQ = Convert.ToSingle(rq_s);
-			Start = Convert.ToUInt32(start_s);
-			End = Convert.ToUInt32(end_s);
+			Start = Convert.ToInt32(start_s);
+			End = Convert.ToInt32(end_s);
         }
     }
 }
