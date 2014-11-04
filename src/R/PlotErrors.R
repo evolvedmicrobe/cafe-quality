@@ -55,7 +55,7 @@ merrors = aggregate(NumErrors~NumSubReads+Reference,data=rd[rd$NumSubReads > 2,]
 
 ggplot(merrors,aes(x=NumSubReads , y = NumErrors, group=Reference, colour = Reference)) +
   geom_line()+geom_point()+theme_classic(base_size=14)+
-  labs(x="Number of Sub Reads",y = "Number of Errors", title="Errors by Reference/Subreads")
+  labs(x="Number of Sub Reads",y = "Mean Number of Errors", title="Errors by Reference/Subreads")
 
 hp = rd[rd$Reference=="HP.V1.02",]
 h2 = hp[hp$NumSubReads==100 ,]

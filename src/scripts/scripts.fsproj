@@ -95,8 +95,8 @@
     <None Include="GenerateReferences.fsx" />
     <None Include="CallAllErrors.fsx" />
     <Compile Include="ExamineHP.fs" />
-    <Compile Include="ExamineQVValues.fs" />
-    <Compile Include="MakeCSVForJohn.fs" />
+    <None Include="ExamineQVValues.fs" />
+    <None Include="MakeCSVForJohn.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\bio\Bio.csproj">
