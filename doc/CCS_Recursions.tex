@@ -1,0 +1,233 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% Preamble
+\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage{fourier}
+
+\usepackage[english]{babel}															% English language/hyphenation
+\usepackage[protrusion=true,expansion=true]{microtype}	
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage[pdftex]{graphicx}	
+\usepackage{url}
+
+%% BEGIN ADDED FOR FAQ Section
+\usepackage[margin=1in]{geometry} % Required to make the margins smaller to fit more content on each page
+\usepackage[linkcolor=blue]{hyperref} % Required to create hyperlinks to questions from elsewhere in the document
+\hypersetup{pdfborder={0 0 0}, colorlinks=true, urlcolor=blue} % Specify a color for hyperlinks
+\usepackage{todonotes} % Required for the boxes that questions appear in
+\usepackage{tocloft} % Required to give customize the table of contents to display questions
+\usepackage{microtype} % Slightly tweak font spacing for aesthetics
+
+% Create the command used for questions
+\newcommand{\question}[1] % This is what you will use to create a new question
+{
+\refstepcounter{questions} % Increases the questions counter, this can be referenced anywhere with \thequestions
+\par\noindent % Creates a new unindented paragraph
+\phantomsection % Needed for hyperref compatibility with the \addcontensline command
+\addcontentsline{faq}{questions}{#1} % Adds the question to the list of questions
+\todo[inline, color=gray!10]{\textbf{#1}} % Uses the todonotes package to create a fancy box to put the question
+\vspace{1em} % White space after the question before the start of the answer
+}
+%% END QUESTION ADD
+
+% Algorithms package
+\usepackage{fancybox}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+
+
+%%% Custom sectioning
+\usepackage{sectsty}
+\allsectionsfont{\centering \normalfont\scshape}
+
+
+%%% Custom headers/footers (fancyhdr package)
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\fancyhead{}											% No page header
+\fancyfoot[L]{}											% Empty 
+\fancyfoot[C]{}											% Empty
+\fancyfoot[R]{\thepage}									% Pagenumbering
+\renewcommand{\headrulewidth}{0pt}			% Remove header underlines
+\renewcommand{\footrulewidth}{0pt}				% Remove footer underlines
+\setlength{\headheight}{13.6pt}
+
+
+%%% Equation and float numbering
+\numberwithin{equation}{section}		% Equationnumbering: section.eq#
+\numberwithin{figure}{section}			% Figurenumbering: section.fig#
+\numberwithin{table}{section}				% Tablenumbering: section.tab#
+
+
+%%% Maketitle metadata
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
+
+\title{
+		%\vspace{-1in} 	
+		\usefont{OT1}{bch}{b}{n}
+		\normalfont \normalsize \textsc{PacBio Variant Calling Group} \\ [25pt]
+		\horrule{0.5pt} \\[0.4cm]
+		\huge The ConsensusCore Scoring Model \\
+		\horrule{2pt} \\[0.5cm]
+}
+\author{
+		\normalfont 								\normalsize
+        Nigel Delaney\\[-3pt]		\normalsize
+        \today
+}
+\date{}
+
+
+%%% Begin document
+\begin{document}
+\maketitle
+\section{Introduction}
+
+The ConsensusCore scoring model calculates the score that a read comes from a particular template.  It calculates this for a given template based on a read as well as its associated QV and Tag values.  The scoring algorithm implements dynamic programming to find the score either through all paths, or through the single best pass.
+
+  
+
+\section{ Recursion Explanation} 
+
+Given a template \( T \) of length \(J\), and a read \(R\) of length \(I\), with associated DeletionQV \(DelQV\), DeletionTag\(DT\)
+
+\subsection*{Initial Conditions}
+
+Set the upper right corner of the matrix to zero (\(M_{1,1} = 0 \)).
+
+\subsection*{Recursion}
+
+\begin{enumerate}
+ \item Deletion = if start or end, 0, else if template base matches deletion base, deletion tag
+ \item Match = if match, then fixed match parameter, else SubstitutionQV
+ \item Merge = if current read base equals template base and current current read base equals next template base, 
+ 	-Inf, else the MergeQV for that template base (A,C,G,T)
+\item Insertion = if the read base matches the next template base, then InsQV with branch recalibration. else, with Nce recalibration.
+
+
+\begin{algorithm}
+\caption{Calculate Score}
+\label{calcScore}
+\begin{algorithmic}
+\FOR{$j=0$ to J}
+\FOR{$i=0$ to I}
+\IF{ $i =0\ \& j =0 $}
+	\STATE $A[i,j] = 0$
+	\ELSE
+	\STATE \[
+ 	A[i,j] = \text{max}
+  	\begin{cases}
+   	\text{DeletionScore \\
+   	1       & \text{if } x < 0
+  	\end{cases}
+	\]
+	\ENDIF
+	
+\ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{align} 
+	\begin{split}
+	(x+y)^3 	&= (x+y)^2(x+y)\\
+					&=(x^2+2xy+y^2)(x+y)\\
+					&=(x^3+2x^2y+xy^2) + (x^2y+2xy^2+y^3)\\
+					&=x^3+3x^2y+3xy^2+y^3
+	\end{split}					
+\end{align}
+Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies 
+
+\subsection{Heading on level 2 (subsection)}
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. 
+\begin{align}
+	A = 
+	\begin{bmatrix}
+	A_{11} & A_{21} \\
+  	A_{21} & A_{22}
+	\end{bmatrix}
+\end{align}
+Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
+
+\subsubsection{Heading on level 3 (subsubsection)}
+Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim.
+
+\paragraph{Heading on level 4 (paragraph)}
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. 
+
+
+\section{Lists}
+
+\subsection{Example for list (3*itemize)}
+\begin{itemize}
+	\item First item in a list 
+		\begin{itemize}
+		\item First item in a list 
+			\begin{itemize}
+			\item First item in a list 
+			\item Second item in a list 
+			\end{itemize}
+		\item Second item in a list 
+		\end{itemize}
+	\item Second item in a list 
+\end{itemize}
+
+\subsection{Example for list (enumerate)}
+\begin{enumerate}
+	\item First item in a list 
+	\item Second item in a list 
+	\item Third item in a list
+\end{enumerate}
+
+\newpage
+
+\newlistof{questions}{faq}{\large } % This creates a new table of contents-like environment that will output a file with extension .faq
+\setlength\cftbeforefaqtitleskip{4em} % Adjusts the vertical space between the title and subtitle
+\setlength\cftafterfaqtitleskip{1em} % Adjusts the vertical space between the subtitle and the first question
+\setlength\cftparskip{.3em} % Adjusts the vertical space between questions in the list of questions
+
+%----------------------------------------------------------------------------------------
+%	TITLE AND LIST OF QUESTIONS
+%----------------------------------------------------------------------------------------
+
+\begin{center}
+\Huge{\bf \emph{Important Questions}} % Main title
+\end{center}
+\listofquestions % This prints the subtitle and a list of all of your questions
+
+
+%----------------------------------------------------------------------------------------
+%	QUESTIONS AND ANSWERS
+%----------------------------------------------------------------------------------------
+
+\question{What information from a read is used to calculate a score given a template?}\label{new-question}
+
+All the features in QvSequenceFeatures class (Features.hpp)
+
+\begin{itemize}
+	\item BaseCalls
+	\item DeletionQV 
+	\item DeletionTag
+	\item SubsQV
+	\item InsQV
+	\item MergeQV
+\end{itemize}	
+
+
+%------------------------------------------------
+
+\question{Will the reverse complement of a read/template give the same score?}\label{labels}
+
+\textbf{No}.  Because the affine transformation of QV scores is specific to the type of base (A, C, G or T), strand matters.  This reflects the biological reality of the enzyme.
+
+\question{What are the typical ranges of and relationships between different QV values?}
+
+safa
+
+
+%%% End document
+\end{document}
