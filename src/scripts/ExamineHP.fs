@@ -14,10 +14,10 @@ open PacBio.Consensus
 
 
 // The correct and most commonly incorrect template version
-//let correct =   "TATACGGGGGGGGGGCACATCA"
-//let incorrect = "TATACGGGGGGGGGCACATCA"
-let correct =   "CACTGGGGGATAC"
-let incorrect = "CACTGGGGATAC"
+let correct =   "TATACGGGGGGGGGGCACATCA"
+let incorrect = "TATACGGGGGGGGGCACATCA"
+//let correct =   "CACTGGGGGATAC"
+//let incorrect = "CACTGGGGATAC"
 
 
 let correctTemplate = new Sequence(DnaAlphabet.Instance, correct ) //Sequence starts after forty characters, is 22 long
@@ -35,7 +35,7 @@ let DeletionSize (sub:Sequence) =
    if alns.Length  = 0 then "NaN" else
        let best = alns.[0]       
        let variants = VariantCaller.CallVariants (best, hpRef.RefSeq)
-       let bad = variants |> Seq.where (fun u -> u.StartPosition = 29) |> Seq.toArray
+       let bad = variants |> Seq.where (fun u -> u.StartPosition = 44) |> Seq.toArray
        if bad.Length = 0 then "0" else
            if bad.[0].Type = VariantType.SNP then "SNP" else
                let mut = bad.[0] :?> IndelVariant
@@ -64,8 +64,8 @@ let getHPSection (parentRead : ReadFromZMW) (subRead : CCSSubRead) =
         //   zmwSection <- zmwSection.GetReverseComplement()
         //   top <- hpRef.AlignSequence( (toAlign.GetReverseComplementedSequence() :?> Sequence )).[0];
        //See if it overlaps with 5 bp homopolymer and output if so.
-       let start_pos = top.FindQueryPositionCorrespondingtoReferencePosition(26) 
-       let end_pos = top.FindQueryPositionCorrespondingtoReferencePosition(26+11) 
+       let start_pos = top.FindQueryPositionCorrespondingtoReferencePosition(40) 
+       let end_pos = top.FindQueryPositionCorrespondingtoReferencePosition(40+22) 
        if start_pos.HasValue && end_pos.HasValue then
            let start = int start_pos.Value
            let endi = int end_pos.Value
@@ -95,7 +95,7 @@ type csv_writer (fname:string) =
    
    member this.Close = sw.Close()
 
-let outFile = csv_writer("/Users/nigel/git/cafe-quality/data/homopolymerDeepDive5bpLong.csv")
+let outFile = csv_writer("/Users/nigel/git/cafe-quality/data/homopolymerDeepDive10bpLong.csv")
 
 
 

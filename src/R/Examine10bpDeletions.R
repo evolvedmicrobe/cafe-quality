@@ -6,8 +6,7 @@ library(ggplot2)
 library(car)
 # First to load the data. 
 setwd("/Users/nigel/git/cafe-quality/data/")
-#sd = read.csv("homopolymerDeepDive3.csv")
-d = read.csv("homopolymerDeepDive5bpLong.csv")
+d = read.csv("homopolymerDeepDive10bpLong.csv")
 head(d)
 nrow(d)
 
@@ -48,7 +47,7 @@ gd$HPSizeGroup = factor(sapply(gd$HomopolymerLength,cate), levels= c("Below -2",
 
 b=summary(gd$HPSizeGroup)
 b= data.frame(HPSize=factor(names(b), levels= c("Below -2","-2","-1","0","1","2","Above 2","SNP")) ,Count=b)
-ggplot(b,aes(x=HPSize,y=Count))+geom_bar(stat="identity")+theme_classic(base_size=16)
+ggplot(b,aes(x=HPSize,y=Count))+geom_bar(stat="identity")+theme_classic(base_size=16)+labs(x="Subread Homopolymer Size Difference")
 
 v=aggregate(Zmw~HPSizeGroup+Correct,gd,FUN=length)
 ggplot(v,aes(x=HPSizeGroup,y=Zmw,group=Correct,fill=Correct))+geom_bar(stat="identity",position=position_dodge())+theme_classic(base_size=16)+labs(x="Indel Size Relative to Correct Read")
@@ -114,9 +113,7 @@ abline(0,1)
 hist(tmp2$PD,50)
 
 # how does the plus one minus one rule stack up?
-rule = rep(-999,nrow(gd))
-sub = gd$Correct==TRUE
-vals = gd[!sub,]
+vals = gd[gd$ConsensusIndelSize=="-1",]
 cntinc <- function(x) {
   r1 = sum(x == "-2")
   r2 = sum(x == "0")
@@ -128,13 +125,12 @@ cntcor <- function(x) {
   r1/(r2+r1)  
 }
 set1 = aggregate(HPSizeGroup~Zmw,data=vals,FUN=cntinc)
-set1$Correct = rep(FALSE,nrow(set1))
-vals2 = gd[sub,]
+set1$HPSize = rep("-1",nrow(set1))
+vals2 = gd[gd$ConsensusIndelSize =="0",]
 set2 = aggregate(HPSizeGroup~Zmw,data=vals2,FUN=cntcor)
-set2$Correct = rep(TRUE,nrow(set2))
+set2$HPSize = rep("0",nrow(set2))
 tmp = rbind(set1,set2)
-ggplot(tmp,aes(x=HPSizeGroup,colour=Correct))+geom_histogram(aes(y=..density..))+facet_grid(.~Correct)+labs(x="Nigel's `Your Wrong` Score")
-ggplot(tmp,aes(x=HPSizeGroup,fill=Correct))+geom_density(aes(y=..density..))+labs(x="Read Bias Score", title = "Read Bias by Length")+theme_bw(base_size=12)
+ggplot(tmp,aes(x=HPSizeGroup,fill=HPSize))+geom_density(aes(y=..density..),alpha=.8)+labs(x="Read Bias Score", title = "Read Bias by CCS Outcome")+theme_bw(base_size=16)
 
 #Count Fixes
 sum(set1$HPSizeGroup > .5)/nrow(set1)
