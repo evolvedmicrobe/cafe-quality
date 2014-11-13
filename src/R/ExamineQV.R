@@ -106,7 +106,8 @@ vd2 = vd[,c(3,5,7,8,9,10,11,12)]
 vd2$row = 1:nrow(vd2)
 vd3 = melt(vd2,id="row")
 n=1000
-matchVal=.494617
+matchVal = .494617
+delNVal = -3.07623 
 #fakeData=data.frame(row=(nrow(vd3):(nrow(vd3)+n-1)),variable=rep("Match",n),value=rep(matchVal,n)+rnorm(0,0.01))
 #vd4=rbind(vd3,fakeData)
 #head(vd4)
@@ -114,4 +115,9 @@ matchVal=.494617
 tooMany = (1:nrow(vd3))[vd3$variable=="SubsQv" & vd3$value==median(vd$SubsQv)]
 rm = sample(tooMany,length(tooMany)*.95)
 vd4=vd3[-rm,]
-ggplot(vd4,aes(variable,value))+geom_violin()+theme_classic(base_size=16)+labs(y="Recalibrated Score",x="Variable",title="Violin Plot of Scores")+geom_abline(intercept=matchVal,slope=0,colour="red")+ scale_y_continuous(limits=c(-8, .5))
+pdf("../doc/qv_violin.pdf",width=6,height=5)
+ggplot(vd4,aes(variable,value,fill=variable))+geom_violin(show_guide=FALSE)+theme_classic(base_size=10)+labs(y="Recalibrated Score",x="",title="Distribution of Quality Scores at Bases")+
+  geom_hline(yintercept=matchVal,colour="red")+ scale_y_continuous(limits=c(-9, .5)) +
+  geom_hline(yintercept=delNVal,colour="blue") + 
+  geom_hline(yintercept=delNVal+matchVal,colour="blue",linetype="dotted")
+dev.off()
