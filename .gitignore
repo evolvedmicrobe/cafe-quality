@@ -85,3 +85,5 @@ src/bio/obj/Debug/Bio.SimilarityMatrices.Resources.SimilarityMatrixResources.res
 src/bio/obj/Release/Bio.Properties.Resource.resources
 
 data/tmp.fasta
+
+src/bio/obj/Release/Bio.Properties.Resource.resources
