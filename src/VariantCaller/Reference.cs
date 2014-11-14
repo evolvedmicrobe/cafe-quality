@@ -6,9 +6,11 @@ using Bio;
 using Bio.Algorithms.MUMmer;
 using Bio.Algorithms.Alignment;
 using Bio.Extensions;
+using System.Diagnostics;
 
 namespace VariantCaller
 {
+    [DebuggerDisplay("{RefSeq.ID}")]
     public class Reference
     {
         NucmerQueryable nucmer;

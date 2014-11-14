@@ -29,7 +29,7 @@ type CCSWriter (fname:string) =
                       | null -> "None"
                       | _ -> read.AssignedReference.RefSeq.ID
             
-            let toOut = [| read.ZMW.ToString();
+            let toOut = [| read.ZMWnumber.ToString();
                            read.AssignedReference.RefSeq.ID;
                            read.SubReads.Count.ToString();
                            vars.Count.ToString();
@@ -83,14 +83,14 @@ type VariantWriter (fname:string) =
                         | :? SNPVariant as snp -> "N"
                         | _ -> failwith "type miss"
 
-        let toWrite : Object[] = [| variant.RefSeq.ID; variant.StartPosition; read.ZMW; vtype; read.Seq.Count; read.SubReads.Count; homopolymerLength; homoChar; indelLength; indeltype|]
+        let toWrite : Object[] = [| variant.RefSeq.ID; variant.StartPosition; read.ZMWnumber; vtype; read.Seq.Count; read.SubReads.Count; homopolymerLength; homoChar; indelLength; indeltype|]
 
         let toOut = join toWrite
         sw.WriteLine(toOut)
     member this.Close = sw.Close()
 
-let vwriter = new VariantWriter("/Users/nigel/git/cafe-quality/data/variants.csv")
-let cwriter = new CCSWriter("/Users/nigel/git/cafe-quality/data/ccs.csv")
+let vwriter = new VariantWriter("/Users/nigel/git/cafe-quality/data/variants_ratioRef.csv")
+let cwriter = new CCSWriter("/Users/nigel/git/cafe-quality/data/ccs_ratioRef.csv")
 let mutable totWithVariants = 0;
 
 let vempty = new List<Variant>()
@@ -112,7 +112,7 @@ let outputRead (read:CCSRead) =
 [<EntryPoint>]
 let main args =
     let sw = System.Diagnostics.Stopwatch.StartNew()
-    LoadZMWs.ccs_data.CCSReads  |> Seq.iter outputRead
+    LoadZMWs.ccs_data.CCSReads  |>Seq.iter outputRead
     sw.Stop()
     printfn "%f" sw.Elapsed.TotalMilliseconds
     cwriter.Close

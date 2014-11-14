@@ -27,83 +27,6 @@
 
 \section{DAGCon: A Directed Acyclic Graph Based Consensus Algorithm}
 
-We describe an algorithm of constructing directed acyclic graph from existing pairwise alignments used for the pre-assembly step in the current implementation for the hierarchical genome assembly process. The algorithm presented here is motived by the original idea representing multiple sequence alignment as a directed acyclic graph proposed by Lee \cite{Lee01032002}. In Lee's paper, the input data is just a collection of sequences and the partial order alignment (POA) is constructed by aligning the POA graph to a new added sequence in each iteration.  In our applications, we usually know about a candidate or a reference sequence and the goal is to identify differences between sequencing reads and the reference sequence. The alignments between the sequence reads and the reference are usually available from the earlier stages of the data processing pipeline by high performance alignment software to map the reads to the reference.  Such alignment data between the reads and a reference is the input to the algorithm and is used to construct a directed acyclic graph denoted as the sequence alignment graph (SAG). A SAG summarize all alignments from the reads to the reference sequence and is used to use to generate a consensus sequence that may be different from the reference. 
-
-Under the assumptions that (1) the majority of variants are substitutions and (2) the sequencing errors are usually mis-matches, a variant can be called by easily counting the read bases mapping the a particular position in the reference sequence and a consensus sequence can be constructed by using the variant call and the reference sequence. When the characteristics sequencing data does not satisfy the assumptions (1) and (2), e.g. when insertions and deletions instead of mismatches become the dominant error mode, it is necessary to go beyond counting the mismatches of each reference base. Instead, a multiple sequence alignment (MSA) is constructed and used to call variants and build the consensus sequence. Complete optimized MSA construction is usually computationally expensive. Most MSA construction algorithms reported in the literature are mostly focusing on constructing a MSA within the context that there exist some evolution relations among the sequences \cite{Edgar01032004}\cite{Larkin01112007}.  This may not be applicable to DNA sequencing application where the difference among the reads are due to random independent errors caused by the sequencing reaction rather than some biological changes during the course of evolutional history.  It is therefore desirable to constructed a MSA to reflect such property of the sequencing read data. For example, a consistency based multi-read alignment algorithm was developed for short read assembly by Rausch et. al.\cite{Rausch01052009}. The construction of the SAG described here uses only the alignments of the reads and the references such that all reads are treated equivalently in constructing the MSA. This is more suitable for generating consensus where all reads should be treated equally.
-
-\subsection{Outline of the SAG construction algorithm}
-
-The input of the algorithm is the collections $(\{a_i, r_i\}|_{i=1\cdots N}, R)$ where $a_i$ is the alignment of a read $r_i$ to a reference sequence $R$.  The output is a graph $G=\{V,E\}$ where $V$ is the nodes labeled by the DNA bases A,C,G or T and $E$ are the edges that represent the connection of the consecutive bases in the reads.  Each read can be represented as a unique path in graph $g_r=\{v_r, e_r\}$.  Each node has an associated set of reads $r_v=\{r|v \in g_r\} $ that pass through it. Each edge also has an associated set $r_e=\{r|e \in g_r\}$ of reads that pass through it.
-
-Here is the outline of the algorithm for constructing the SAG
-\begin{enumerate}
-\item Normalize mismatches and degenerated alignment positions as shown in figure \ref{fig:shift_gap}
-\item Setup an initial graph from the reference sequence as shown in figure \ref{fig:DAGCon}(a) 
-\item Construct a multigraph (a graph that permits multiple edges connecting the same two nodes) from the alignments and merge the edges that are connecting the same nodes as shown in figures \ref{fig:DAGCon}(b) to \ref{fig:DAGCon}(d)
-\item According to the topological order of the node in the graph, systematically (1) merge nodes that have the same label and are connected to the same node and (2) merge nodes that have the same label and are connected from the same node as shown in figures \ref{fig:DAGCon}(d) to \ref{fig:DAGCon}(f)  
-\end{enumerate}
-
-
-\begin{figure}[h]
-\subfloat[Change mismatches into indels] {
-\tt
-\begin{tabular*}{8cm}{ r l l l }
-  read: & CAC &               & C-AC \\
-        & | | & $\rightarrow$ & |\ \ | \\
-   ref: & CGC &               & CG-C 
-\end{tabular*}
-}
-\subfloat[Shift the equivalent gaps to the right in the reference] {
-\tt
-\begin{tabular*}{8cm}{ r l l l }
-  read: & CAACAT &               & CAACAT \\
-        & |\ |\ || & $\rightarrow$ & |||\ \ | \\
-   ref: & C-A-AT &               & CAA--T 
-\end{tabular*}
-}
-
-\subfloat[Shift the equivalent gaps to the right in the read] {
-\tt
-\begin{tabular*}{8cm}{ r l l l }
-  read: & -C--CGT &               & CCG--T \\
-        & \ |\ \ | | & $\rightarrow$ & |||\ \ | \\
-   ref: & CCGAC-T &               & CCGACT 
-\end{tabular*}
-}
-
-\caption{Examples of normalization of gaps in the alignment}
-\label{fig:shift_gap}
-\end{figure}
-
-
-\begin{figure}
-
-\centering
-\includegraphics[width=6in]{DAGCon.pdf}
-\caption{(a) A backbone linear graph $G_{\rm B}$. The special nodes ``Begin'' and ``End'' are not shown.
-         (b) The sequence alignment graph before the edges are merged when the first alignment is added to the group.
-         (c) The intermediate sequence alignment graph $G_{\rm I}$ after the first alignment is added. The numbers on those directed edges indicate the number of ``reads'' (including the backbone) that pass through them.
-         (d) The intermediate sequence alignment graph $G_{\rm I}$ after the 4 alignments are added. The initial pairwise alignments between the reads to the backbone reference sequence are shown on the right. The nodes labelled with `a', `b', and `c' can be further merged according the merging rules.
-         (e) The final sequence alignment graph $G_{\rm S}$ after node merging.
-         (f) The consensus path of $G_{\rm S}$ is highlighted with the thicker directed edges and the thicker circles.}
-\label{fig:DAGCon}
-\end{figure}
-
-
-\subsection{Normalize mismatches and degenerated alignment positions}
-
-When representing an alignment as a directed graph, each node only has one label which is the base that aligned with the node. Mismatches between two sequences are indistinguishable from a nearby insertion-deletion pair. To simplify the construction of the SAG, one can convert all mis-matches to local insertion-deletion pairs in the alignment. Moreover, there are cases where there are multiple ways to place gaps in an alignment as shown in figure \ref{fig:shift_gap}.  As an optional step, to ensure getting consistent results of the SAG, we normalize the alignment by moving all gaps to the right most equivalent positions as shown in figure \ref{fig:shift_gap}. One reason for normalizing the gap placement in the alignments is to take into account somewhat arbitrary rules for resolving alignment degeneracy reported by an aligner. For example, if a read is aligned in a reversed orientation first, the result could be different from aligning the read in the forward direction and then reverse the final alignment string after the alignment process. A procedure to normalize the placement of the gaps will reduce such potential inconsistency and improve the final consensus accuracy.
-
-
-\subsection{Setup an initial graph from the reference sequence}
-
-The first step to construct an alignment graph is to use the reference sequence to build a backbone linear graph $G_{\rm B}$ that simply connects each base in the reference within two special nodes: ``Begin'' and ``End'' nodes. Namely the initial backbone graph consists of the nodes (1) $v_i$ for $i \in [0, |R| -1]$, $v_{\rm B}$, and $v_{\rm E}$ where
-${\rm label}(v_i) = R_i$, where  $R_i$ indicates the base label of the reference at position $i$ and the edges $e_{i,j} : v_i \rightarrow v_{j=i+1}$ for $i \in [0, |R|-2]$ , $e_{{\rm B} 0}: v_{\rm B} \rightarrow v_0$ and $e_{{|R|-1},{\rm E}}: v_{|R|-1} \rightarrow v_{\rm E}$.  
-
-\subsection{Construct the multigraph from the alignments and merge the edges}
-
-Conceptually, the multigraph is constructed iteratively when a new alignment represents a list of pair of bases and indel symbol $A = \{(q_i, r_i)| q_i,r_i \in {\rm A,C,G,T,-}\}$ is added into the graph. We start from the $v_{\rm B}$ node as the initial node, and scan through each alignment position between a read and the reference. When there is a match between the read and the reference, we connect the previous node to the reference node in the backbone graph. If there is an insertion in the read, we create a new node labelled by the read base, and a new edge pointing from the previous node to the new node is created.  Once all alignments are added, we merge all edges that are connecting the same two nodes into a single edge to convert the multigraph into a regular graph.  In fact, the merge step can be integrated at the time when the alignment is added. The pseudo-code for constructing the intermediate graph $G_{\rm I} = (V_{\rm I}, E_{\rm I})$ is listed in Algorithm \ref{algGI}.
-
 \begin{algorithm}[H]
 \caption{Generate $G_{\rm I}$ from the alignments}          
 \label{algGI}
@@ -243,30 +166,7 @@ The next step to reduce the complexity of $G_{\rm I}$ is to find those nodes whi
 
 Here we show a short code snippet on building $G_{\rm S}$ with a python implementation.
 
-\begin{minted}[mathescape,
-               linenos,
-               numbersep=5pt,
-               gobble=2,
-               frame=lines,
-               framesep=2mm]{python}
-                  
-  from aligngraph.aligngraph import AlnGraph
-  backbone_seq = "ATATTAGGC" #the backbone_seq is the reference sequence
-  aln_graph = AlnGraph(backbone_seq) 
-  # each alignment is represented as (q_start, q_end, q_aln_seq),(r_start, r_end, r_aln_seq),
-  alignments = [((0,  9, 'A-TAGCCGGC'),   
-                 (2,  9, 'ATTA---GGC')), 
-                ((0, 10, 'ATA-TACCGAG-'), 
-                 (0,  9, 'ATATTA--G-GC')), 
-                ((0, 10, 'ATCATCC--GGC'), 
-                 (0,  9, 'AT-AT--TAGGC')), 
-                ((0,  9, 'ATA-TACGGC'),   
-                 (0,  9, 'ATATTA-GGC'))]  
-  for aln in alignments:
-      aln_graph.add_alignment( aln ) #add alignment information to graph to construct $G_{\rm I}$
-  aln_graph.merge_nodes() #convert $G_{\rm I}$ to $G_{\rm S}$
-  s, c = aln_graph.generate_consensus() #generate consensus sequence from $G_{\rm S}$
-\end{minted}
+
 
 \subsection{Generate consensus sequence from $G_{\rm s}$}
 
@@ -370,68 +270,7 @@ These alignments were used to arrange reads in AMOS layout messages, which were 
 
 The resulting consensus sequences were trimmed to regions with greater than 59.5 average QV (as called by the make-consensus algorithm) and greater than 500bp in length. These pre-assembled reads were evaluated and further assembled into contigs using the Celera Assembler and corrected using Quiver in a manner identical to the other pre-assembled read data sets in Supplementary Table 1. The software used to perform the read pre-assembly will be available as a command line tool and a SMRT Portal protocol in the 1.4 release of Pacific Biosciences SMRT Analysis software. The SMRT Pipe parameter file necessary for regenerating these results is included here:
 
-\begin{minted}[mathescape,
-               linenos,
-               numbersep=5pt,
-               gobble=2,
-               frame=lines,
-               framesep=2mm]{xml}
- \<smrtpipeSettings>
-    <module name="P_Fetch"/>
-    <module name="P_Filter">
-        <param name="minLength">
-            <value>50</value>
-        </param>
-        <param name="minSubReadLength">
-            <value>500</value>
-        </param>
-        <param name="readScore">
-            <value>0.80</value>
-        </param>
-    </module>
-    <module name="P_FilterReports"/>
-    <module name="P_ErrorCorrection">
-        <param name="useFastqAsShortReads">
-            <value>False</value>
-        </param>
-        <param name="useFastaAsLongReads">
-            <value>False</value>
-        </param>
-        <param name="useLongReadsInConsensus">
-            <value>False</value>
-        </param>
-        <param name="useUnalignedReadsInConsensus">
-            <value>False</value>
-        </param>
-        <param name="useCCS">
-            <value>False</value>
-        </param>
-        <param name="minLongReadLength">
-            <value>5000</value>
-        </param>
-        <param name="blasrOpts">
-            <value> -minReadLength 200 -minPctIdentity 75 -maxScore -100 -bestn 24 
-                    -maxLCPLength 16 -nCandidates 24 </value>
-        </param>
-        <param name="consensusOpts">
-            <value> -L </value>
-        </param>
-        <param name="layoutOpts">
-            <value> --overlapTolerance 100 --trimHit 50 </value>
-        </param>
-        <param name="consensusChunks">
-            <value>60</value>
-        </param>
-        <param name="trimFastq">
-            <value>True</value>
-          </param>
-        <param name="trimOpts">
-            <value> --qvCut=59.5 --minSeqLen=500 </value>
-        </param>
-    </module>
- \</smrtpipeSettings>
-\end{minted}
-
+\
 The system requirements and installation instructions for the SMRTPipe V.1.4 software can be found at
 {\tt https://github.com/PacificBiosciences/SMRT-Analysis/wiki/\\
 SMRT-Analysis-Software-Installation-(v1.4.0)}. A benchmark run was performed using the P. heparinus dataset (7 SMRT Cells) on the PacBio internal cluster (consisting of 27 nodes, ranging from 16-24 processing units with 32GB of RAM).  Pre-assembly took 2 hours and 16 minutes (wall time) using 69 core$\times$cpu hours, Celera Assembler took 3 hours and 50 minutes (wall time), while the re-sequencing (including quiver refinement) stage took 63 minutes (wall time) using 10.78 core$\times$cpu hours.

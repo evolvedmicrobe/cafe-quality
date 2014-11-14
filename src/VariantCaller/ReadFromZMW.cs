@@ -47,6 +47,10 @@ namespace VariantCaller
         [OutputAttribute]
         public float OneDeletionErrorViterbiScore;
         [OutputAttribute]
+        public float FullLengthCorrectSumProductScore;
+        [OutputAttribute]
+        public float FullLengthIncorrectSumProductScore;
+        [OutputAttribute]
         public int OriginalSubReadLength;
         [OutputAttribute]
         public int SubReadNumber;
@@ -57,7 +61,15 @@ namespace VariantCaller
         [OutputAttribute]
         public int Zmw;
         [OutputAttribute]
+        public int SpikeMergeQVCount;
+        [OutputAttribute]
         public string HomopolymerLength;
+        [OutputAttribute]
+        public int SubRead;
+        [OutputAttribute]
+        public float SummedPulseWidthForHP;
+
+
         public ReadFromZMW()
         {
         }

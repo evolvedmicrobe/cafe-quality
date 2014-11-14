@@ -90,8 +90,6 @@
     <None Include="Script.fsx" />
     <Compile Include="LoadZMWs.fs" />
     <None Include="AssignZMWs.fsx" />
-    <Compile Include="DemoAligner.fs" />
-    <None Include="Csv.fsx" />
     <None Include="GenerateReferences.fsx" />
     <None Include="CallAllErrors.fsx" />
     <Compile Include="ExamineHP.fs" />

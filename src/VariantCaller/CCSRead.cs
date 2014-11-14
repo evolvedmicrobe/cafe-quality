@@ -39,7 +39,7 @@ namespace VariantCaller
         public List<CCSSubRead> SubReads;
         public Sequence Seq;
         public Zmw ZMW;
-
+        public string OriginallyRevComped;
         
         /// <summary>
         /// The DNA this read is derived from.
@@ -56,7 +56,7 @@ namespace VariantCaller
             string[] sp = new string[3];
             Bio.Util.FastStringUtils.Split(read.ID,'/',sp);
             Movie = String.Intern (sp [0]);
-            read.ID = GENERIC_READ_NAME;
+            //read.ID = GENERIC_READ_NAME;
             ZMWnumber = Convert.ToInt32(sp[1]);
             Seq = read;
         } 

@@ -13,7 +13,8 @@ nrow(d)
 
 ## Now to count how many subreads have null bases, this occurs if any of the following occurs
 # 1 - The subread could not align to the reference
-# 2 - The subread aligned, but the alignment did not overlap with the homopolymer
+# 2 - The subread aligned, but the alignment did not overlap with the homopolymer13/59
+
 bad = d$BaseCalls=="NULL"
 percMissing = sum(bad)/nrow(d) # less than 5%
 percMissing
@@ -44,6 +45,16 @@ cate <- function(x) {
   return(res)
 }
 gd$HPSizeGroup = factor(sapply(gd$HomopolymerLength,cate), levels= c("Below -2","-2","-1","0","1","2","Above 2","SNP"))
+res = rep(NA,nrow(gd))
+for (i in 1:nrow(gd)) {
+  if(gd$ReverseComplementedOriginally[i]=="True") {c = 'C'} else {c = 'G'}
+  s = gd$BaseCalls[i]
+  s = as.character(s)
+  s2 <- gsub(c,"",as.character(s))
+  res[i]= (nchar(s) - nchar(s2))
+}
+gd$NumC = res
+aggregate(NumC~Correct,gd,mean)
 # FINISH DATA LOAD
 
 b=summary(gd$HPSizeGroup)
@@ -52,6 +63,12 @@ ggplot(b,aes(x=HPSize,y=Count))+geom_bar(stat="identity")+theme_classic(base_siz
 
 v=aggregate(Zmw~HPSizeGroup+Correct,gd,FUN=length)
 ggplot(v,aes(x=HPSizeGroup,y=Zmw,group=Correct,fill=Correct))+geom_bar(stat="identity",position=position_dodge())+theme_classic(base_size=16)+labs(x="Indel Size Relative to Correct Read")
+
+hd = gd[gd$ConsensusIndelSize=="-1",]
+bb=aggregate(HPSizeGroup~Zmw,hd,FUN=function(x) {sum(x=="0")/length(x)})
+hist(bb$HPSizeGroup,50)
+ggplot(bb,aes(x=HPSizeGroup,y=Zmw,group=Correct,fill=Correct))+geom_bar(stat="identity",position=position_dodge())+theme_classic(base_size=16)+labs(x="Indel Size Relative to Correct Read")
+
 
 #count number of errors
 t2 = aggregate(ConsensusIndelSize~Zmw+Correct,gd,FUN=length)
@@ -90,7 +107,7 @@ sum(q$Zmw)
 
 #how many would be fixed by simple voting?
 wrong = tmp$Correct==FALSE
-sum(tmp[wrong,"PD"]<.5) / length(wrong)
+sum(tmp[wrong,"PD"]<.5) / sum(wrong)
 
 
 #most frequent seems to be 120
@@ -136,6 +153,8 @@ tmp = rbind(set1,set2)
 ggplot(tmp,aes(x=HPSizeGroup,colour=Correct))+geom_histogram(aes(y=..density..))+facet_grid(.~Correct)+labs(x="Nigel's `Your Wrong` Score")
 ggplot(tmp,aes(x=HPSizeGroup,fill=Correct))+geom_density(aes(y=..density..))+labs(x="Read Bias Score", title = "Read Bias by Length")+theme_bw(base_size=12)
 
+jd = gd[gd$Zmw==15,]
+summary(jd$HPSizeGroup)
 #Count Fixes
 sum(set1$HPSizeGroup > .5)/nrow(set1)
 
@@ -248,6 +267,10 @@ summary(y)
 
 hist(gds$NoErrorViterbiScore - gds$OneDeletionErrorViterbiScore,500)
 
+
+# Now too look at PWIF
+head(gd)
+ggplot(gd,aes(x=Mean_PulseWidthInFrames,colour=HPSizeGroup)) + geom_density()
 
 plot(gds$ViterbiDifference, gds$HPSectionLength)
 

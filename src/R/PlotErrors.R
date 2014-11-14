@@ -2,7 +2,7 @@ library(ggplot2)
 setwd("/Users/nigel/git/cafe-quality/data")
 
 #Section to plot the variant data.
-d = read.csv("variants.csv")
+d = read.csv("variants_corrected.csv")
 head(d)
 #how many errors are G indels?
 ng = sum(d$type=="Indel" & d$homopolymerChar=="G" & d$indeltype == "Deletion" & d$homopolymerLength > 1)

@@ -14,11 +14,14 @@ open PacBio.Consensus
 
 
 // The correct and most commonly incorrect template version
-let correct =   "TATACGGGGGGGGGGCACATCA"
-let incorrect = "TATACGGGGGGGGGCACATCA"
-//let correct =   "CACTGGGGGATAC"
-//let incorrect = "CACTGGGGATAC"
-
+//let correct =   "TATACGGGGGGGGGGCACATCA"
+//let incorrect = "TATACGGGGGGGGGCACATCA"
+let ref_str = "CCCGGGGATCCTCTAGAATGCTCATACACTGGGGGATACATATACGGGGGGGGGGCACATCATCTAGACAGACGACTTTTTTTTTTCGAGCGCAGCTTTTTGAGCGACGCACAAGCTTGCTGAGGACTAGTAGCTTC"
+let correct =   "CACTGGGGGATAC"
+let incorrect = "CACTGGGGATAC"
+let start_index = 29
+//let correct =   "CAGCTTTTTGAGC"
+//let incorrect = "CAGCTTTTGAGC"
 
 let correctTemplate = new Sequence(DnaAlphabet.Instance, correct ) //Sequence starts after forty characters, is 22 long
 let deletedTemplate = new Sequence(DnaAlphabet.Instance, incorrect)
@@ -26,7 +29,14 @@ let correct_rc = correctTemplate.GetReverseComplementedSequence().ConvertToStrin
 let incorrect_rc = deletedTemplate.GetReverseComplementedSequence().ConvertToString()
 
 // The reference everything is aligned to.
-let hpSeq = new Sequence(DnaAlphabet.Instance, "CCCGGGGATCCTCTAGAATGCTCATACACTGGGGGATACATATACGGGGGGGGGGCACATCATCTAGACAGACGACTTTTTTTTTTCGAGCGCAGCTTTTTGAGCGACGCACAAGCTTGCTGAGGACTAGTAGCTTC")
+let hpSeq = new Sequence(DnaAlphabet.Instance,         "CCCGGGGATCCTCTAGAATGCTCATACACTGGGGGATACATATACGGGGGGGGGGCACATCATCTAGACAGACGACTTTTTTTTTTCGAGCGCAGCTTTTTGAGCGACGCACAAGCTTGCTGAGGACTAGTAGCTTC")
+let deletionHPSeq = new Sequence(DnaAlphabet.Instance, "CCCGGGGATCCTCTAGAATGCTCATACACTGGGGATACATATACGGGGGGGGGGCACATCATCTAGACAGACGACTTTTTTTTTTCGAGCGCAGCTTTTTGAGCGACGCACAAGCTTGCTGAGGACTAGTAGCTTC")
+
+let fullCorrect = hpSeq.ConvertToString()
+let fullCorrect_rc = hpSeq.GetReverseComplementedSequence().ConvertToString()
+let full_deletion = deletionHPSeq.ConvertToString()
+let full_deletion_rc = deletionHPSeq.GetReverseComplementedSequence().ConvertToString()
+
 let hpRef = new  Reference(hpSeq);
 
 // Calculate the size of the indel in the 5 bp homopolymer
@@ -34,8 +44,9 @@ let DeletionSize (sub:Sequence) =
    let alns = hpRef.AlignSequence (sub) |> Seq.toArray
    if alns.Length  = 0 then "NaN" else
        let best = alns.[0]       
+       //Console.WriteLine(best.ToString())
        let variants = VariantCaller.CallVariants (best, hpRef.RefSeq)
-       let bad = variants |> Seq.where (fun u -> u.StartPosition = 44) |> Seq.toArray
+       let bad = variants |> Seq.where (fun u -> u.StartPosition = start_index ) |> Seq.toArray
        if bad.Length = 0 then "0" else
            if bad.[0].Type = VariantType.SNP then "SNP" else
                let mut = bad.[0] :?> IndelVariant
@@ -55,7 +66,10 @@ let cntMergeSpikes (read: ReadFromZMW)  =
 let getHPSection (parentRead : ReadFromZMW) (subRead : CCSSubRead) = 
    let toAlign = new Sequence(DnaAlphabet.Instance, subRead.Seq,false)
    let mutable alns = hpRef.AlignSequence(toAlign)
-   if alns.Count = 0 then None else
+   if alns.Count = 0 then 
+       None else
+       //Console.Write("Full")
+       //Console.WriteLine(alns.[0].ToString())
        let mutable top = alns.[0]
        //Flip the read if necessary
        let revComp = top.SecondSequence.Metadata.ContainsKey("+isReversed")
@@ -64,8 +78,8 @@ let getHPSection (parentRead : ReadFromZMW) (subRead : CCSSubRead) =
         //   zmwSection <- zmwSection.GetReverseComplement()
         //   top <- hpRef.AlignSequence( (toAlign.GetReverseComplementedSequence() :?> Sequence )).[0];
        //See if it overlaps with 5 bp homopolymer and output if so.
-       let start_pos = top.FindQueryPositionCorrespondingtoReferencePosition(40) 
-       let end_pos = top.FindQueryPositionCorrespondingtoReferencePosition(40+22) 
+       let start_pos = top.FindQueryPositionCorrespondingtoReferencePosition(26) 
+       let end_pos = top.FindQueryPositionCorrespondingtoReferencePosition(26 + 11) 
        if start_pos.HasValue && end_pos.HasValue then
            let start = int start_pos.Value
            let endi = int end_pos.Value
@@ -95,7 +109,7 @@ type csv_writer (fname:string) =
    
    member this.Close = sw.Close()
 
-let outFile = csv_writer("/Users/nigel/git/cafe-quality/data/homopolymerDeepDive10bpLong.csv")
+let outFile = csv_writer("/Users/nigel/git/cafe-quality/data/homopolymerDeepDiveDiagnostics.csv")
 
 
 
@@ -120,7 +134,9 @@ let ProcessRead (read:CCSRead) =
        let hps = read.SubReads |> Seq.truncate 126 |> Seq.map procesSubRead |> Seq.toArray
        let mutable subRead = 0
        for region in hps do
+           let cSubRead = read.SubReads.[subRead]
            subRead <- subRead + 1
+           let fread = makeQuiverRead (readzmw.GetSubRead(cSubRead))
            if region.IsSome then
                let v = region.Value
                v.ConsensusIndelSize <- del_size
@@ -133,12 +149,17 @@ let ProcessRead (read:CCSRead) =
                        v.OneDeletionErrorViterbiScore <- viterbi.Score(incorrect, qread)
                        v.NoErrorSumProductScore <- sumproduct.Score(correct, qread)
                        v.OneDeletionSumProductScore <- sumproduct.Score(incorrect,qread)
+                       v.FullLengthCorrectSumProductScore <- sumproduct.Score(fullCorrect, fread)
+                       v.FullLengthIncorrectSumProductScore <- sumproduct.Score(full_deletion, fread)
+                       v.SummedPulseWidthForHP <- v.BaseCalls |> Seq.mapi (fun i c -> if c = 'G' then (float32)v.IpdInFrames.[i] else 0.0f) |> Seq.sum
                     else
                        v.NoErrorViterbiScore <- viterbi.Score(correct_rc, qread)
                        v.OneDeletionErrorViterbiScore <- viterbi.Score(incorrect_rc, qread)
                        v.NoErrorSumProductScore <- sumproduct.Score(correct_rc, qread)
                        v.OneDeletionSumProductScore <- sumproduct.Score(incorrect_rc,qread)
-                   
+                       v.FullLengthCorrectSumProductScore <- sumproduct.Score(fullCorrect_rc, fread)
+                       v.FullLengthIncorrectSumProductScore <- sumproduct.Score(full_deletion_rc, fread)
+                       v.SummedPulseWidthForHP <- v.BaseCalls |> Seq.mapi (fun i c -> if c = 'C' then (float32)v.IpdInFrames.[i] else 0.0f) |> Seq.sum
                 with
                     | _ -> ()
                let outData = OutputHelper.CalculateDataLines(v)
