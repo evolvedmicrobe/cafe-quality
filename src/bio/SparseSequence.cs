@@ -408,6 +408,12 @@ namespace Bio
             seq.CopyTo(byteArray, start, count);
         }
 
+        public string ConvertToString()
+        {
+            Sequence seq = (Sequence)this.GetSubSequence(0, this.sparseSeqItems.Count);
+            return seq.ConvertToString ();
+        }
+
         /// <summary>
         /// Gets the index of first non gap character.
         /// </summary>

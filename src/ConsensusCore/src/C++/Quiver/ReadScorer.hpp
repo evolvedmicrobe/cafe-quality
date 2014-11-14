@@ -46,7 +46,7 @@ namespace ConsensusCore
     // A ReadScorer provides a simple but inefficient means of scoring
     // a single read against a template.  This is only to be used for
     // testing, not in production code.
-
+    template<typename R>
     class ReadScorer
     {
     public:

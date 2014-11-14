@@ -465,6 +465,11 @@ namespace Bio.Algorithms.Kmer
             return !self.Equals(other);
         }
 
+        public override int GetHashCode()
+        {
+            return this.KmerData.GetHashCode();
+        }
+
 
     }
 }

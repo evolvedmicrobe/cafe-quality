@@ -19,83 +19,34 @@ namespace VariantCaller
     {
         private NUCmer nucmer;
         private Sequence ReferenceSequence;
-        #region NUCMER STUFF
 
-
-        /// <summary>
-        /// Use all anchor matches regardless of their uniqueness.
-        /// </summary>
-        public static bool MaxMatch = true;
-
-        /// <summary>
-        /// Distance an alignment extension will attempt to extend poor scoring regions before giving up (default 200).
-        /// </summary>
-        public static int BreakLength = 200;
-
-        /// <summary>
-        /// Minimum cluster length (default 65).
-        /// </summary>
-        public static int MinCluster = 35;
-        /// <summary>
-        /// Maximum diagonal difference factor for clustering, i.e. diagonal difference / match separation (default 0.12).
-        /// </summary>
-        public static double DiagFactor = 0.12;
-
-        /// <summary>
-        /// Maximum gap between two adjacent matches in a cluster (default 90).
-        /// </summary>
-        public static int MaxGap = 90;
-
-        /// <summary>
-        /// Minimum length of an maximal exact match (default 20).
-        /// </summary>
-        public static int MinMatch = 20;
-
-        /// <summary>
-        /// Align only the reverse strand of the query sequence to the forward strand of the reference.
-        /// </summary>
-        public static bool Reverse = false;
-
-        /// <summary>
-        /// Toggle the outward extension of alignments from their anchoring clusters. Setting --noextend will 
-        /// prevent alignment extensions but still align the DNA between clustered matches and create the .delta file 
-        /// (default --extend).
-        /// </summary>
-        public static bool NotExtend = false;
-
-        /// <summary>
-        ///  Gets or sets maximum fixed diagonal difference
-        /// </summary>
-        public static int FixedSeparation = 5;
-        #endregion 
-		public NucmerQueryable(Sequence touse, int lengthOfMUM = 20)
+        public NucmerQueryable(Sequence touse, int lengthOfMUM = 20)
         {
             ReferenceSequence = touse;
+            // Note: There are lots of parameters here that could be tuned.
             nucmer= new NUCmer(ReferenceSequence)
            {
-                    FixedSeparation = FixedSeparation,
-                    BreakLength = BreakLength,
-                    LengthOfMUM = lengthOfMUM,
-                    MaximumSeparation = MaxGap,
-                    MinimumScore = MinCluster,
-                    SeparationFactor = (float) DiagFactor,
-					
-
+                LengthOfMUM = lengthOfMUM,
+				MinimumScore = (int)(touse.Count * .2),
             };
-
         }
-
-
-
 
 		public List<PairwiseAlignedSequence> GetAlignments(Sequence toAlign)
 		{
+            if (Math.Min (toAlign.Count, ReferenceSequence.Count) < nucmer.MinimumScore) {
+                var msg = "Bad parameter settings for NucmerPairwiseAligner. " +
+                    "Tried to align a reference of length " +ReferenceSequence.Count.ToString() +
+                    " to a sequence of length " + toAlign.Count.ToString() +
+                    " while requiring a minimum score of MinimumScore = " + nucmer.MinimumScore +
+                    ". This will prevent any alignments from being returned.";
+                throw new ArgumentException (msg);
+            }
 			var delts = GetDeltaAlignments (toAlign)
 				.SelectMany (x => x);
 			var alns = NucmerPairwiseAligner.ConvertDeltaToAlignment (delts).ToList();
 			//Now to score them
 			alns.ForEach (z => {
-				z.Score = CalculateScore (ReferenceSequence, toAlign);
+                z.Score = CalculateScore ( (Sequence)z.FirstSequence, (Sequence) z.SecondSequence);
 			});
 			return alns;
 		}
@@ -105,7 +56,7 @@ namespace VariantCaller
             IEnumerable<ISequence> querySequences = AddReverseComplementsToSequenceList(querySequence);
             foreach (ISequence qs in querySequences)
             {
-                yield return nucmer.GetDeltaAlignments(qs, !MaxMatch, qs.IsMarkedAsReverseComplement());
+                yield return nucmer.GetDeltaAlignments(qs, false, qs.IsMarkedAsReverseComplement());
             }
             
         }

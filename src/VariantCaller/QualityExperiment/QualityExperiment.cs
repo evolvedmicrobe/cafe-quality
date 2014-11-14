@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 using Bio;
 using Bio.IO.FastA;
-using PacBio.IO;
+using PacBio.Data;
 
-namespace VariantCaller.QualityExperiment
+namespace VariantCaller
 {
+
     /// <summary>
     /// This class represents an experiment designed to evaluate the accuracy of CCS reads.  
     /// It consists of several pulse file and references.
@@ -21,15 +22,20 @@ namespace VariantCaller.QualityExperiment
         /// All references used in experiment
         /// </summary>
         public List<Reference> References;
+
         /// <summary>
         /// Original base files used.  
         /// </summary>
-        public List<FileInfo> BaseFiles;
+        public List<FileInfo> BaseFileNames;
+
+        private List<BaxH5Reader> baseFileReaders;
 
         /// <summary>
         /// A list of CCS Reads.
         /// </summary>
         public List<CCSRead> CCSReads;
+
+       
 
         /// <summary>
         /// Make a new quality experiment
@@ -50,6 +56,7 @@ namespace VariantCaller.QualityExperiment
                     if (fss.Any(p => !(new FileInfo(p)).Exists))
                     {
                         throw new FileNotFoundException(names[i]);
+               
                     }
                 }
             }
@@ -57,7 +64,8 @@ namespace VariantCaller.QualityExperiment
             // Load Base files if present
             if (baseFiles != null)
             {
-                BaseFiles = baseFiles.Select(x => new FileInfo(x)).ToList();
+                BaseFileNames = baseFiles.Select(x => new FileInfo(x)).ToList();
+                baseFileReaders = BaseFileNames.Select (x => new PacBio.Data.BaxH5Reader(x.FullName)).ToList ();
             }
 
             References = (new FastAParser(referenceFile)).Parse().Select(x => new Reference((Sequence)x)).ToList();
@@ -80,7 +88,7 @@ namespace VariantCaller.QualityExperiment
             foreach (var read in CCSReads)
             {
 				List<CCSSubRead> subReadList;
-				bool hasValue = subReadDict.TryGetValue(read.ZMW, out subReadList);
+				bool hasValue = subReadDict.TryGetValue(read.ZMWnumber, out subReadList);
 				if (!hasValue) {
 					missing++;
 					missingReads.Add (read);
@@ -88,8 +96,46 @@ namespace VariantCaller.QualityExperiment
 					read.SubReads = subReadList;
 				}
             }
-			Console.WriteLine ("Missing: " + missing.ToString () + " reads");
+			
+
+            assignCCSReadsToReference ();
+
+            var numMissing = CCSReads.Count ( x => x.AssignedReference == null);
+            Console.WriteLine ("Total Reads: " + CCSReads.Count.ToString ());
+            Console.WriteLine ("Unmatched between CCS and subreads (missing): " + missing.ToString () + " reads");
+            var percMissing = numMissing / (double) CCSReads.Count;
+            Console.WriteLine ("Not Assigned to References: " + numMissing.ToString () + " reads (" + percMissing.ToString("f4") +"%)");
+            var counts = new int[References.Count];
+            foreach (var read in CCSReads) {
+                for(int j =0; j < counts.Length; j++) {
+                    if (read.AssignedReference == References[j]) {
+                        counts [j]++;
+                    }
+                }
+            }
+            for (int i = 0; i < References.Count; i++) {
+                var c = counts [i];
+                percMissing = c / (double) CCSReads.Count;
+                Console.WriteLine ("Assigned to " + References[i].RefSeq.ID + ": " + c.ToString () + " reads (" + percMissing.ToString("f4") +"%)");
+            }
+            CCSRead.ParentExperiment = this;
         }
+        /// <summary>
+        /// Naive temporary implementation, where we assign on size.
+        /// TODO: Improvements needed!
+        /// </summary>
+        private void assignCCSReadsToReference()
+        {
+            foreach (var v in CCSReads) {
+                foreach (var r in References) {
+                    if (Math.Abs (r.RefSeq.Count - v.Seq.Count) < 25) {
+                        v.AssignedReference = r;
+                        break;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Load the subreads in parallel.
         /// </summary>
@@ -110,21 +156,44 @@ namespace VariantCaller.QualityExperiment
             return mainDictionary;
         }
 
-        public IEnumerable<IZmwBases> GetZMWReads()
+        public IEnumerable<Zmw> GetZMWSequencingReads()
         {
-            foreach (var bas in BaseFiles)
+            foreach (var bas in baseFileReaders)
             {
-
-                var br = BaseReader.CreateSource(bas.FullName);
-                // null range apparently selects all
-                foreach (var zmw in br.ByHoleNumberRange(null))
+                foreach (var zmw in bas.SequencingZmws)
                 {
                     yield return zmw;
                 }
             }
         }
 
-    }
+        /// <summary>
+        /// Because subreads are read from a fasta file produced by consensus tools, which
+        /// uses PacBio.IO, whilst we are now using PacBio.Data, they may not match.  Particularly
+        /// since the adapter finding step is unique to Pat's code.
+        /// 
+        /// This procedure matches the subreads from the fasta file with those from the 
+        /// PacBio.Data class, it makes sure the sequences match.
+        /// </summary>
+        /// <param name="read">Read.</param>
+        public  void ValidateSubReads(CCSRead read)
+        {
+            if (read.ZMW == null) {
+                read.ZMW = CCSRead.ParentExperiment.GetZMWforRead(read);
+            }
 
-    
+        }
+
+        public Zmw GetZMWforRead(CCSRead read)
+        {
+
+            foreach (var v in baseFileReaders) {
+                if (v.HasHoleNumber (read.ZMWnumber)) {
+                    return v [read.ZMWnumber];
+                }
+            }
+            throw new BioinformaticsException ("The loaded experiment did not have data for that hole");
+        }
+
+    }    
  }

@@ -51,15 +51,17 @@ using std::endl;
 
 namespace ConsensusCore
 {
-    ReadScorer::ReadScorer(QuiverConfig& config)
+    template<typename R>
+    ReadScorer<R>::ReadScorer(QuiverConfig& config)
         : _quiverConfig(config)
     {}
 
-    float ReadScorer::Score(const string& tpl, const Read& read) const
+    template<typename R>
+    float ReadScorer<R>::Score(const string& tpl, const Read& read) const
         throw(AlphaBetaMismatchException)
     {
         int I, J;
-        SparseSseQvRecursor r(_quiverConfig.MovesAvailable, _quiverConfig.Banding);
+        R r(_quiverConfig.MovesAvailable, _quiverConfig.Banding);
         QvEvaluator e(read, tpl, _quiverConfig.QvParams);
 
         I = read.Length();
@@ -70,12 +72,13 @@ namespace ConsensusCore
         return beta(0, 0);
     }
 
+    template<typename R>
     const PairwiseAlignment*
-    ReadScorer::Align(const string& tpl, const Read& read) const
+    ReadScorer<R>::Align(const string& tpl, const Read& read) const
         throw(AlphaBetaMismatchException)
     {
         int I, J;
-        SparseSseQvRecursor r(_quiverConfig.MovesAvailable, _quiverConfig.Banding);
+        R r(_quiverConfig.MovesAvailable, _quiverConfig.Banding);
         QvEvaluator e(read, tpl, _quiverConfig.QvParams);
 
         I = read.Length();
@@ -85,12 +88,13 @@ namespace ConsensusCore
         return r.Alignment(e, alpha);
     }
 
+    template<typename R>
     const SparseMatrix*
-    ReadScorer::Alpha(const string& tpl, const Read& read) const
+    ReadScorer<R>::Alpha(const string& tpl, const Read& read) const
         throw(AlphaBetaMismatchException)
     {
         int I, J;
-        SparseSseQvRecursor r(_quiverConfig.MovesAvailable, _quiverConfig.Banding);
+        R r(_quiverConfig.MovesAvailable, _quiverConfig.Banding);
         QvEvaluator e(read, tpl, _quiverConfig.QvParams);
 
         I = read.Length();
@@ -101,12 +105,13 @@ namespace ConsensusCore
         return alpha;
     }
 
+    template<typename R>
     const SparseMatrix*
-    ReadScorer::Beta(const string& tpl, const Read& read) const
+    ReadScorer<R>::Beta(const string& tpl, const Read& read) const
         throw(AlphaBetaMismatchException)
     {
         int I, J;
-        SparseSseQvRecursor r(_quiverConfig.MovesAvailable, _quiverConfig.Banding);
+        R r(_quiverConfig.MovesAvailable, _quiverConfig.Banding);
         QvEvaluator e(read, tpl, _quiverConfig.QvParams);
 
         I = read.Length();
@@ -117,5 +122,11 @@ namespace ConsensusCore
         return beta;
     }
 
-
+    typedef ReadScorer<SparseSseQvRecursor> \
+      SparseSseQvReadScorer;
+    typedef ReadScorer<SparseSseQvSumProductRecursor> \
+      SparseSseQvSumProductReadScorer;
+    
+    template class ReadScorer<SparseSseQvSumProductRecursor>;
+    template class ReadScorer<SparseSseQvRecursor>;
 }

@@ -412,6 +412,16 @@ namespace Bio.Algorithms.Alignment
 
                 foreach (ISequence querySequence in querySequenceList)
                 {
+					//  Check for parameters that would prevent an alignment from being returned.
+					if (Math.Min (querySequence.Count, refSequence.Count) < MinimumScore) {
+						var msg = "Bad parameter settings for NucmerPairwiseAligner. " +
+								   "Tried to align a reference of length " +refSequence.Count.ToString() +
+							       " to a sequence of length " + querySequence.Count.ToString() +
+							       " while requiring a minimum score of MinimumScore = " + MinimumScore +
+                                   ". This will prevent any alignments from being returned.";
+
+                        throw new ArgumentException (msg);
+					}
                     IEnumerable<DeltaAlignment> deltaAlignment = this.nucmerAlgo.GetDeltaAlignments(querySequence, !MaxMatch, querySequence.IsMarkedAsReverseComplement());
                     deltas.AddRange(deltaAlignment);
                 }
@@ -518,7 +528,11 @@ namespace Bio.Algorithms.Alignment
 
                 // Find the offsets
                 long referenceStart = deltaAlignment.FirstSequenceStart;
+                alignedSequence.FirstSequenceStart = referenceStart;
+
                 long queryStart = deltaAlignment.SecondSequenceStart;
+                alignedSequence.SecondSequenceStart = queryStart;
+
                 long difference = referenceStart - queryStart;
                 if (0 < difference)
                 {

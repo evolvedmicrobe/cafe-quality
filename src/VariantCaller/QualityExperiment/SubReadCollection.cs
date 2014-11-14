@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using Bio;
 using Bio.IO.FastA;
 
-namespace VariantCaller.QualityExperiment
+namespace VariantCaller
 {
     /// <summary>
-    /// A dictionary that maps ZMWs to a list of their subreads.
+    /// A dictionary that maps ZMWs to a list of their subreads. This is used when constructing the database from two fasta files.
     /// </summary>
     public class SubReadCollection : IEnumerable<KeyValuePair<int,List<CCSSubRead>>>
     {

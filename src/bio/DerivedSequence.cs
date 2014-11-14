@@ -286,6 +286,12 @@ namespace Bio
             return sb.ToString();
         }
 
+        public string ConvertToString()
+        {
+            return ConvertToString (0, this.Count);
+        }
+
+
         /// <summary>
         /// Copies all items from the sequence to a pre allocated array.
         /// </summary>

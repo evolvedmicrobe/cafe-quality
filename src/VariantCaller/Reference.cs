@@ -6,22 +6,28 @@ using Bio;
 using Bio.Algorithms.MUMmer;
 using Bio.Algorithms.Alignment;
 using Bio.Extensions;
+using System.Diagnostics;
 
 namespace VariantCaller
 {
+    [DebuggerDisplay("{RefSeq.ID}")]
     public class Reference
     {
         NucmerQueryable nucmer;
-        public readonly Sequence ReferenceSequence;
+        public readonly Sequence RefSeq;
+
         public Reference(Sequence seq)
         {
-            ReferenceSequence = new Sequence(DnaAlphabet.Instance, seq.ToArray(), false);
-            nucmer= new NucmerQueryable(ReferenceSequence,5);
+            RefSeq = new Sequence(NoGapDnaAlphabet.Instance, seq.ToArray(), true);
+            RefSeq.ID = seq.ID;
+            nucmer= new NucmerQueryable(RefSeq, 8);
         }
 
 		public List<PairwiseAlignedSequence> AlignSequence(Sequence toAlign)
 		{
-			return nucmer.GetAlignments (toAlign);
+            var toR = nucmer.GetAlignments(toAlign);
+            toR.Sort ((x, y) => -x.Score.CompareTo (y.Score));
+            return toR;
 		}
 
         /// <summary>
@@ -34,17 +40,17 @@ namespace VariantCaller
         {
             if (end > start)
             {
-                var seq = ReferenceSequence.GetSubSequence(start, (end - start + 1));
+                var seq = RefSeq.GetSubSequence(start, (end - start + 1));
                 seq.ID = "Ref:" + start.ToString() + "-" + end.ToString();
                 return new SectionOfReferenceGenome() { Start = start, End = end, Seq = seq as Sequence };
             }
             else
             {
-                var seq1 = ReferenceSequence.GetSubSequence(start, ReferenceSequence.Count - start);
-                var seq2 = ReferenceSequence.GetSubSequence(0, end);
+                var seq1 = RefSeq.GetSubSequence(start, RefSeq.Count - start);
+                var seq2 = RefSeq.GetSubSequence(0, end);
                 List<byte> seqs = new List<byte>(seq1);
                 seqs.AddRange(seq2);
-                var seq = new Sequence(DnaAlphabet.Instance,seqs.ToArray());
+                var seq = new Sequence(RefSeq.Alphabet, seqs.ToArray(), false);
                 seq.ID = "Ref:" + start.ToString() + "-" + end.ToString();
                 return new SectionOfReferenceGenome() {Start = start, End = end, Seq = seq};
             }

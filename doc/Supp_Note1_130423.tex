@@ -1,0 +1,412 @@
+\documentclass[11pt]{article}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{fullpage}
+\usepackage{minted}
+\usepackage{float}
+\usepackage{enumerate}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{float}
+\usepackage{pdflscape}
+
+\newfloat{algorithm}{t}{lop}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+
+\title{Supplementary Note 1 to Chin et al. ``Non-Hybrid, Finished Microbial Genome Assemblies from Long-Read SMRT Sequencing Data''}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+
+\tableofcontents 
+
+\section{DAGCon: A Directed Acyclic Graph Based Consensus Algorithm}
+
+\begin{algorithm}[H]
+\caption{Generate $G_{\rm I}$ from the alignments}          
+\label{algGI}
+\begin{algorithmic}[1]
+\State $G_{\rm I}\gets G_{\rm B}$
+\State $v_{\rm last} \gets v_{\rm B}$
+\For {$p = 0 \dots |A|$}
+	\State $q, r \gets q_p, r_p$
+	\If {$q = r$ and $q \neq {\rm ``-"}$ and $r \neq {\rm ``-"}$ } 
+		\State $v_{r_p} \gets \textrm{the node corresponding the reference base } r \textrm{ at alignment position } p $
+		\If  {$(e: v_{\rm last} \rightarrow v_{r_p}) \in E_{\rm I}$}
+			\State $\textrm{weight}(e) \gets \textrm{weight}(e) + 1$
+		\Else
+			\State create a new edge $(e: v_{\rm last} \rightarrow v_{r_p})$, and add it into $G_{\rm I}$
+		\EndIf
+		\State $v_{\rm last} \gets v_{r_p}$
+	\ElsIf {$q \neq {\rm ``-"}$ and $r = {\rm ``-"}$}
+		\State create a new node $v_{q_p}$
+		\State ${\rm lable}(v_{q_p}) \gets q$
+		\State crate a new edge $e: v_{\rm last} \rightarrow v_{q_p}$
+		\State add $e$ and $v_{q_p}$ into $G_{\rm I}$
+		\State $v_{\rm last} \gets v_{q_p}$
+	\EndIf
+	\If  {$(e: v_{\rm last} \rightarrow v_{\rm E}) \in E_{\rm I}$}
+		\State $\textrm{weight}(e) \gets \textrm{weight}(e) + 1$
+	\Else
+		\State create a new edge $(e: v_{\rm last} \rightarrow v_{\rm E})$, and add it into $G_{\rm I}$
+	\EndIf	
+\EndFor
+\end{algorithmic}
+\end{algorithm}  
+
+\subsection{Merge nodes}
+The next step to reduce the complexity of $G_{\rm I}$ is to find those nodes which are similar to each other in a local context and merge them in a way that preserves the directed acyclic property of the graph.  This is also analogous to a greedy local alignment for the reads with the same base from them before and after an alignment node. The general idea of the algorithm to generate the final sequence alignment graph $G_{\rm S}=(V_{\rm S}, E_{\rm S})$ is to define an order to go through the graph and merge the nodes according to their labels and connection to the other nodes. For example, we merge all nodes labeled by the same label and are connected to the same out-node, and we also merge all nodes with the same label that are connected from the same in-node.  The algorithm presented here is based on a variant of the topological sorting algorithm. The pseudocode is listed as Algorithm \ref{algGS},\ref{algGSMergeIn},\ref{algGSMergeOut}.  An example of showing the process is shown in figures \ref{fig:DAGCon}(d) to (f).
+
+\begin{algorithm}[H]
+
+\caption{Generate $G_{\rm S}$ from $G_{\rm I}$}          
+\label{algGS}
+\begin{algorithmic}[1]
+\Function {in\_edges}{$v$}
+	\State \Return $\{e|u \in V_{\rm S}, (e:u\rightarrow v) \in E_{\rm S} \} $
+\EndFunction
+\Function {out\_edges}{$v$}
+	\State \Return $\{e|u \in V_{\rm S}, (e:v\rightarrow u) \in E_{\rm S} \} $
+\EndFunction
+\Function {out\_nodes}{$v$}
+	\State \Return $\{u|u \in V_{\rm S}, (e:u\rightarrow v) \in \Call{in\_edges}{v} \} $
+\EndFunction
+\Function {in\_nodes}{$v$}
+	\State \Return $\{u|u \in V_{\rm S}, (e:v\rightarrow u) \in \Call{out\_edges}{u} \} $
+\EndFunction
+
+\State $ G_{\rm S}\gets G_{\rm I} $
+\ForAll {$e \in G_{\rm I}$ }
+	\State ${\rm visited}(e) \gets False$
+\EndFor
+\State $s \gets \textrm{an empty FIFO queue}$
+\For { $v \in V_{\rm S}$ }
+	\If { $|$ \Call{in\_edges}{$v$} $| = 0 $ }
+		\State push $v$ into $s$
+	\EndIf
+\EndFor 
+\While{$|s| \neq 0$}
+	\State $v \gets \textrm{pop}(s)$
+	\State \Call{merge\_in\_node}{$v$}
+	\State \Call{merge\_out\_node}{$v$}
+	\ForAll { $e \in \Call{out\_edges}{v}$}
+		\State $ {\rm visited}(e) \gets True $
+	\EndFor
+	\ForAll { $u \in \Call{out\_nodes}{v} $ }
+		\If { $|\{ e | e\in \Call{in\_edges}{u}, \textrm{visited}(e) = False \} | = 0 $}
+			\State push $u$ into $s$
+		\EndIf
+	\EndFor
+\EndWhile
+\end{algorithmic}
+\end{algorithm}  
+
+
+\begin{algorithm}[H]
+\caption{Merge in-nodes for the node $v$}          
+\label{algGSMergeIn}
+\begin{algorithmic}[1]
+\Function {merge\_in\_node}{$v$}
+\For { $l \in \{\textrm{A, C, G, T}$\} }
+	\State $U_l \gets \{u|u \in \Call{in\_nodes}{v}, |\Call{out\_edge}{u} | = 1, \textrm{label}(u) = l\}$ 
+	\State $\textrm{label}(u_l) \gets l$
+	\State add $(e:u_l \rightarrow v)$ to $G_{\rm s}$
+	\State $\textrm{visited}(e:u_l \rightarrow v) \gets True$
+	\ForAll { $u \in U_l$ }
+		\State $\textrm{weight}(e:u_l \rightarrow v) \gets \textrm{weight}(e:u_l \rightarrow v) + \textrm{weight}(e:u \rightarrow v)$
+		
+		\ForAll { $u^\prime \in \Call{in\_nodes}{u}$ }
+			\State add $(e:u^\prime \rightarrow u_l)$ to $G_{\rm s}$
+			\State $\textrm{visited}(e:u^\prime \rightarrow u_l) \gets True$
+			\State $\textrm{weight}(e:u^\prime \rightarrow u_l) \gets \textrm{weight}(e:u^\prime \rightarrow u_l) +  \textrm{weight}(e:u^\prime \rightarrow u)$
+			\State remove $(e:u^\prime \rightarrow u)$ from $G_{\rm s}$ 
+		\EndFor
+		\State remove $u$ from $G_{\rm s}$ 
+	\EndFor 
+	\State add $u_l$ to $G_{\rm s}$
+	\State \Call{merge\_in\_node}{$u_l$} \Comment{Recursively merge upstream nodes}
+\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}  
+
+\begin{algorithm}[H]
+\caption{Merge out-nodes of the node $v$}          
+\label{algGSMergeOut}
+\begin{algorithmic}[1]
+\Function {merge\_out\_node}{$v$}
+\For { $l \in \{\textrm{A, C, G, T}$\} }
+	\State $U_l \gets \{u|u \in \Call{out\_nodes}{v}, |\Call{in\_edge}{u} | = 1, \textrm{label}(u) = l\}$
+	\State $\textrm{label}(u_l) \gets l$
+	\State add $(e:v \rightarrow u_l)$ to $G_{\rm s}$
+	\State $\textrm{visited}(e:v \rightarrow u_l) \gets True$
+	\ForAll { $u \in U_l$ }
+		\State $\textrm{weight}(e:v \rightarrow u_l) \gets \textrm{weight}(e:v \rightarrow u_l) + \textrm{weight}(e:v \rightarrow u_l)$
+		\ForAll { $u^\prime \in \Call{out\_nodes}{u}$ }
+			\State add $(e:u_l \rightarrow u^\prime)$ to $G_{\rm s}$
+			\State $\textrm{visited}(e:u_l \rightarrow u^\prime) \gets True$
+			\State $\textrm{weight}(e:u_l \rightarrow u^\prime) \gets \textrm{weight}(e:u_l \rightarrow u^\prime) + \textrm{weight}(e:u \rightarrow u^\prime)$
+			\State remove $(e:u \rightarrow u^\prime)$ from $G_{\rm s}$ 
+		\EndFor
+		\State remove $u$ from $G_{\rm s}$ 
+	\EndFor
+	\State add $u_l$ to $G_{\rm s}$
+	\State \Call{merge\_out\_node}{$u_l$} \Comment{Recursively merge downstream nodes}
+\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}  
+
+\subsection{A Python implementation}
+
+Here we show a short code snippet on building $G_{\rm S}$ with a python implementation.
+
+
+
+\subsection{Generate consensus sequence from $G_{\rm s}$}
+
+The consensus algorithm is listed in Algorithm \ref{consensus} and \ref{consensus2}. The basic idea for generating a consensus is (1) assigning a score for each node and (2) find a path that maximizes the sum of the score of the nodes in the path. Here we calculate the score of a node by checking the weight of the all out-edges of the node. If an edge takes more than half of the local coverage (which is equal to the maximum weight that an edge can have around the node), it gets a positive score. Otherwise, it gets a negative score. The score of any path in the graph is simply defined as the sum of the scores of the nodes in the path. The consensus is then built by finding the path that has the maximum path score in all possible paths. Since the graph is directed acyclic, such path can be found by simple dynamic programming and backtracking. The algorithms shown in Algorithm \ref{consensus} and \ref{consensus2} perform the topological sorting and calculate the best score and the best edge of each node at the same time. Additionally, backtracking is done to construct the best consensus path in the group. 
+
+\begin{algorithm}[H]
+\caption{Find the best path in $G_{\rm s}$ as the consensus sequence}          
+\label{consensus}
+\begin{algorithmic}[1]
+\State $s \gets \textrm{an empty FIFO queue}$
+\ForAll {$v \in V_{\rm s}$}
+	\If {$|\Call{out\_edges}{v}| = 0$}
+		\State put $v$ into $s$
+		\State $\textrm{best\_out\_edge}(v) \gets \emptyset$ 
+		\State $\textrm{best\_in\_edge}(v) \gets \emptyset$
+		\State $\textrm{node\_score}(v) \gets 0$  
+	\EndIf
+\EndFor	
+\ForAll {$e \in E_{\rm s}$}
+	\State $\textrm{visited}(e) \gets False$
+\EndFor	
+\While{$|s| \neq 0$}
+	\State $v \gets \textrm{pop}(s)$
+	\State $e_{\rm best} \gets \emptyset$
+	\State $score_{\rm best} \gets \emptyset$
+	\For { ($e_{\rm out}:v \rightarrow u) \in \Call{out\_edges}{v}$} \Comment{find the best out-edge for node $v$}
+		\State $score \gets \textrm{node\_score}(u)$
+		\State $coverage \gets  \textrm{the local coverage for the node } u$
+		\If{$u \in V_{\rm B}$}
+			\State $score_{\rm new} \gets score - \delta$ \Comment{ choose $\delta$ (default $\delta = 10$) to make the path along the reference  unfavorable} 
+		\Else
+			\State $score_{\rm new} \gets \textrm{weight}(e_{\rm out}) - coverage * 0.5 + score$
+		\EndIf
+		\If{$score_{\rm best}$ is $\emptyset$ or $score_{\rm new} > score_{\rm best}$}
+			\State $e_{\rm best} \gets e_{\rm out}$
+			\State $score_{\rm best} \gets score_{\rm new}$
+		\EndIf
+	\EndFor
+	\If{$e_{\rm best} \neq \emptyset$}
+		\State $\textrm{best\_score\_edge}(v) = e_{\rm best}$
+		\State $\textrm{node\_score}(v) \gets score_{\rm best}$ 
+	\EndIf
+	\For {$e \in \Call{in\_edges}{v}$}
+		\State $\textrm{visited}(e) \gets True$	
+	\EndFor
+	\ForAll { $u \in \Call{in\_nodes}{v} $ }
+		\If { $|\{ e | e\in \Call{out\_edges}{u}, \textrm{visited}(e) = False \} | = 0 $}
+			\State push $u$ into $s$
+		\EndIf
+	\EndFor
+\EndWhile
+\algstore{consensus}
+\end{algorithmic}
+\end{algorithm}  
+
+\begin{algorithm}[H]
+\caption{Find the best path in $G_{\rm s}$ as the consensus sequence (cont.)}          
+\label{consensus2}
+\begin{algorithmic}[1]
+\algrestore{consensus}
+\State $v \gets v_{\rm B}$
+\State $consensus\_path \gets \textrm{empty list}$
+\While{$True$}
+	\State append $v$ to $consensus\_path$
+	\If {$v$ has no best score edge}
+		\State Break
+	\Else
+		\State ($e_{\rm best\_out}:v \rightarrow u) \gets \textrm{best\_score\_edge}(v)$
+		\State $v \gets u$
+	\EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}  
+
+Such consensus algorithm is typically ``biased'' toward to the reference used in the alignment. If the real sample sequences have high variation from the reference sequence, then there will be opportunity for further improvement from the single-pass consensus algorithm.  One way to improve it is to use an iterative process to increase the final quality of the consensus sequence. Namely, one can take the consensus sequence as the reference sequence and align the reads back to the first iteration of the consensus sequence and repeatedly apply the consensus algorithm to generate the next iteration of the consensus sequences.  Such iteration process can reconstruct the regions that are very different from the original reference, although it is generally more computationally intensive. The other possible strategy is to identify the high variation region, then, rather than using the original reference, one uses one of the reads as the reference to reconstruct those regions to avoid the ``bias'' toward the original reference. 
+
+\section{Using DAGCon Algorithm to Generate Pre-assembled Reads}
+
+We first mapped all subreads to the long seeding set using blasr. We split the target seeding sequences into chunks for mapping other reads to them in parallel. In such case, we use the follow blasr options for mapping:  ``{\tt -nCandidates 50 -minMatch 12 -maxLCPLength 15 -bestn 5 -minPctIdentity 70.0 -maxScore -1000 -m 4}''.  After mapping, the blasr output files are parsed for each chunk and top 12 hits are selected for each query reads as default. The number of top hits could impact the quality of the pre-assembly reads and the ability to resolve very similar repeats. 
+
+For each seed read, we collect the all subreads aligned to it from the alignment output of the blasr program. Each subread are trimmed according to the alignment coordinates. For example, if blasr reports base $s_1$ to $s_2$ are aligned to the seed read, we will use base $s_1+\Delta$ to $s_2-\Delta$ for pre-assembly. We choose $\Delta$ to be 100 since the blasr aligner sometimes generate poor alignment at the ends such that chimera reads might still have good coverage across the chimeric junction. More aggressive trimming with a larger $\Delta$ will help to remove all chimeric reads at a cost losing useful bases. One can avoid losing base by choosing smaller $\Delta$.
+
+The trimmed subreads are then used with the seed read to generate the pre-assembled read with the DAGCon algorithm described in the previous section.
+
+A benchmark run was performed with Amazon EC2 cloud computing service. It took about 1.5 hours on a virtual cluster of 8 {\tt c1.xlarge} instances (8 virtual cores with 2.5 EC2 Compute Units each instance) for the mapping step between the reads using {\tt blasr} and 7 hours for the DAGCon step in the same virtual cluster for the 8 SMRTCell E. coli dataset.  The pure python based DAGCon code can be accelerated by declaring the type of each variable to reduce the dynamical typing resolution overhead with Cython (http://www.cython.org).  A test version of DAGCon implemented with Cython from the same code base used only 1 hour in the same cluster for the pre-assembly step.
+The detailed steps on how to set the running environment can be found at \\
+{\tt http://pacb.com/devnet/files/software/hgap/HGAP\_README.rst} and \\
+{\tt http://pacb.com/devnet/files/software/hgap/Starcluster\_instruction.rst}.
+
+\section{Alternative Pre-assembly Method Using AMOS}
+
+To demonstrate the generality of the HGAp methodology, we demonstrate that we can also use BLASR and tools from the AMOS assembly toolkit as part of the 1.4 Pacific Biosciences SMRT Analysis software package to test it on the Pedobacter heparinus genome. 
+
+In this process, all continuous long reads from {\it E. coli} (8 SMRT cells),  {\it M. ruber} (4 SMRT cells), and {\it P. heparinus} (7 SMRT cells) genomes were aligned to those reads of length greater than 5kb using BLASR with the following options:  
+
+\begin{verbatim}
+-minReadLength 200 -maxScore -1000 -bestn 24 -maxLCPLength 16 -nCandidates 24
+\end{verbatim}
+
+These alignments were used to arrange reads in AMOS layout messages, which were uploaded to an AMOS bank along with the read sequences and quality values. Importantly, the layouts contained only the portion of each read that aligned to that particular CLR seed read, trimmed by 50bp on each side of the alignment. Reads were kept in the same layout if these trimmed aligned portions overlapped by at least 100bp, otherwise they were split into multiple layouts. Consensus sequence was generated using the off-the-shelf AMOS executable make-consensus with the following option: -L.
+
+The resulting consensus sequences were trimmed to regions with greater than 59.5 average QV (as called by the make-consensus algorithm) and greater than 500bp in length. These pre-assembled reads were evaluated and further assembled into contigs using the Celera Assembler and corrected using Quiver in a manner identical to the other pre-assembled read data sets in Supplementary Table 1. The software used to perform the read pre-assembly will be available as a command line tool and a SMRT Portal protocol in the 1.4 release of Pacific Biosciences SMRT Analysis software. The SMRT Pipe parameter file necessary for regenerating these results is included here:
+
+\
+The system requirements and installation instructions for the SMRTPipe V.1.4 software can be found at
+{\tt https://github.com/PacificBiosciences/SMRT-Analysis/wiki/\\
+SMRT-Analysis-Software-Installation-(v1.4.0)}. A benchmark run was performed using the P. heparinus dataset (7 SMRT Cells) on the PacBio internal cluster (consisting of 27 nodes, ranging from 16-24 processing units with 32GB of RAM).  Pre-assembly took 2 hours and 16 minutes (wall time) using 69 core$\times$cpu hours, Celera Assembler took 3 hours and 50 minutes (wall time), while the re-sequencing (including quiver refinement) stage took 63 minutes (wall time) using 10.78 core$\times$cpu hours.
+ 
+Detailed step-by-step instructions about how to execute pre-assembly module with the SMRTAnalysis v.1.4 are at \\
+{\tt https://github.com/PacificBiosciences/Bioinformatics-Training/wiki/HGAP} and \\
+{\tt https://github.com/PacificBiosciences/Bioinformatics-Training/tree/master/hgap}
+
+\section{Quiver Consensus Algorithm}
+
+The Quiver algorithm was originally developed for Pacific Biosciences' Circular Consensus Sequencing (CCS) analysis mode, and is now available for multimolecule consensus analyses.  With coverage levels of 60x, we have found that Quiver has reliably achieved accuracies exceeding Q50 (99.999\%) in a number of de novo assembly projects.
+
+We describe the details of the Quiver algorithm below.
+
+\subsection{Outline of the algorithm}
+
+Given a vector of reads $\mathbf{R}$ from a single (unknown) template $T$, Quiver uses a greedy algorithm to maximize the likelihood $\Pr(\mathbf{R} \mid T)$ for the unknown $T$. We develop a likelihood function $\Pr(\mathbf{R} \mid T)$ which encodes the sequencing error model and is specific to a particular sequencing chemistry and enzyme.  The parameters within the model are derived using a training step that learns an error model from SMRT sequencing data on a known template. This is performed in-house at Pacific Biosciences.
+
+For a long reference, we process the consensus with tiling windows across the reference to limit the amount of memory used. Here is a rough sketch of the $\mathrm{QuiverConsensus}$ algorithm for reference window $W$:\begin{enumerate}
+   \item Use reference alignment to identify reads $\mathbf{R}=\{R_1, R_2, \ldots R_K\}$ corresponding to $W$
+   \item Create a candidate template sequence using $\hat{T_1} \leftarrow \mathrm{POAConsensus}(\mathbf{R})$. (Note that the original reference is not used as the candidate template sequence.)
+   \item Repeat until convergence: $$\hat{T}_{s+1} \leftarrow \hat{T_{s}} + \mu$$ where $\mu$ is a single base mutation to the template (any possible single-base substitution, insertion, or deletion) that increases the likelihood:
+     $$\Pr(\mathbf{R} \mid \hat{T_s} + \mu) > \Pr(\mathbf{R} \mid \hat{T_s})$$
+
+\end{enumerate}
+
+\subsection{Pulse metrics}
+
+In addition to basecalls, the basecaller software includes metrics
+reflecting its confidence against the various types of errors.  The
+pulse metrics, or \emph{QV} features, are encoded using the standard
+Phred-scaling convention,
+
+$$QV = -10 \log_{10} p_{error}.$$
+
+The pulse metrics we use are as follows:
+\begin{enumerate}
+   \item \textsf{InsertionQV}, \textsf{SubstitutionQV}: Probability
+     that this base call is actually an insertion (substitution)
+     relative to the true template.
+   \item \textsf{DeletionQV}: Probability that the basecaller omitted
+     a base relative to the true template, \emph{prior} to this
+     basecall.  The maximum likelihood missed base is encoded (as an
+     ASCII character) in the \textsf{DeletionTag} feature.
+   \item \textsf{MergeQV}: Probability that the basecaller merged
+     together two identical adjacent template bases into this
+     basecall.
+\end{enumerate}
+
+\subsection{Computing the template likelihood function, $\Pr(\mathbf{R} \mid T)$}
+Reads are assumed independent, so we have
+$$\Pr(\mathbf{R} \mid T) = \prod_{k=1}^{K}\Pr(R_k \mid T)$$
+
+In PacBio reads, indel errors are the dominant mode, so the model needs to consider the possible \emph{alignments}---the ways $T$ can be construed to have generated $R_k$:
+$$\Pr(R_k \mid T) = \sum_\mathcal{A} \Pr(R_k, \mathcal{A} \mid T) $$
+
+Where $\mathcal{A}$ represents the alignment between the read and template sequences. This summation can be computed efficiently using a standard Sum-Product dynamic programming approach.  In practice we use the Viterbi algorithm, which maximizes over the unknown alignment $\mathcal{A}$ rather than summing. Our experience has shown the Viterbi algorithm to be substantially more computationally efficient with no impact on accuracy.
+
+\subsection{Sketch of dynamic programming}
+The Sum-Product recursions build up the forward matrix $A$ and backward matrix $B$ of probabilities defined by
+\begin{align}
+  A_{ij} \doteq & \text{ marginal prob. of an alignment of $R[0..(i-1)]$ to $T[0..(j-1)]$}, \text{ and } \\
+  B_{ij} \doteq & \text{ marginal prob. of an alignment of $R[i:I-1]$ to $T[j:J-1]$}
+\end{align}
+where $S[p..r]$ denotes the substring $S_p S_{p+1} \cdots S_r$.
+
+The recursions are computed as
+\begin{align}
+   A_{ij} &= \sum_{m: (i',j') \to (i, j)}   (A_{i'j'} \times \mathrm{moveScore}(m)), \text{ and } \\
+   B_{ij} &= \sum_{m: (i, j)  \to (i', j')} (\mathrm{moveScore}(m) \times B_{i'j'})
+\end{align}
+
+For the Viterbi algorithm, replace \emph{marginal} by \emph{maximum}
+and \emph{sum} by \emph{max} in the above definitions.
+
+\subsection{Alignment moves}
+The moves $m$ considered in the above alignment recursions are the familiar Smith-Waterman alignment moves \textsf{Incorporate}, \textsf{Delete}, and \textsf{Extra}, and additionally a \textsf{Merge} move that is only available when $T[j] = T[j-1]$.  The \textsf{Merge} move allows us to model the pulse merging process independently from the spontaneous deletion process; the addition of this move has consistently shown improved accuracy results.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=3in]{moves.pdf}
+\caption{The alignment moves available in Quiver's probability model
+  $Pr(R \mid T)$.  In addition to the standard Smith-Waterman moves, a
+  \textsf{Merge} move is used to model the process of pulse merging in
+  homopolymer regions.}
+\label{fig:Quiver-alignment-moves}
+\end{figure}
+
+
+\subsection{Efficiently computing $\Pr(R_k \mid T + \mu)$ }
+The main loop of Quiver requires testing the likelihood of all possible single-base point mutations to a template.  We represent a single base mutation $\mu$ to a template sequence $T$ as $T + \mu$. It is essential that we can compute $\Pr(R_k \mid T + \mu)$ very rapidly, given the $A$ and $B$ matrices used to compute $\Pr(R_k \mid T)$.
+
+To do so we exploit the ``forward-backward trick'', which in our notation amounts to the identity
+\begin{align}
+  \Pr(R \mid T) =& A_{IJ} = B_{00} \nonumber \\ 
+     =& \max_{m: (i',j') \to (i, j)} A_{i'j'} \times B_{ij},
+     \text{ for \bf{any} $j$}, \label{eqn:forward-backward} 
+\end{align}
+so that the likelihood can be computed directly from two consecutive columns of the $A$ matrix and the following column of the $B$ matrix. Modification of the template via a single base substitution $\mu$ at
+postition $j$ induces new forward-backward matrices $A'$ and $B'$, where only columns $\{j+1, \ldots, J\}$ of $A$ and $A'$, and columns $\{0, 1, \ldots, j\}$ of $B$ and $B'$, disagree.  To compute $\Pr(R \mid T + \mu)$, we thus need only compute columns $j+1$ and $j+2$ of $A'$, and use them together with column $j+3$ of $B'$ (which can be taken directly from $B$) in Equation~\ref{eqn:forward-backward} to compute the likelihood.  An analogous calculation is performed in the case of insertions and deletions.
+
+Using this optimization, computing the likelihood for each single-base point mutation requires $O(L)$ time and space, naively, where we use $L$ to denote the template length.  Using the further banding optimization described below, the space and time requirements are both reduced to $O(1)$.
+
+
+\subsection{Banding optimization}
+To reduce the computational time and storage requirements to manageable levels, the dynamic programming algorithm is approximated using a banding heuristic.  In short, rather than computing full columns of the forward and backward matrices, we only compute a narrow band of high-scoring rows within each column.  This approach is commonplace in modern aligners.  Adopting this heuristic reduces the runtime for the initial computation of $A$ and $B$ to $O(L)$ (down from $O(L^2)$, without banding), and the runtime for computing a mutation score to $O(1)$ (from $O(L)$, without banding).
+
+Since we only compute a band of each column, it is natural to avoid \emph{storing} the entire column as well.  We store only the high scoring bands of $A$ and $B$, reducing their storage requirement from $O(L^2)$ to $O(L)$.
+
+Given that the typical template span we consider in Quiver is $\sim$1000bp, these optimizations yield massive performance improvements.  
+
+\section{Evaluation of The Concordance of The Assemblies to The References}
+
+For evaluation of the consensus concordance, we focus on the SNPs and small indel differences between the assembly and the reference to avoid confounding factors like the assembly contig ends may not be trimming correctly. Mummer3 package\cite{Kurtz14759262} is used for alignment and calling the difference.
+
+The following commands are used to calculate the difference. 
+ 
+\begin{verbatim}
+nucmer -mum reference.fasta assembly.fa -p asm    # alignment
+show-snps -C -x 10 -T -H asm.delta  | wc          # get the number of SNPs
+\end{verbatim}
+
+Larger indel differences between our assemblies and the references may not be caught by the above commands. SNPs from alignments with an ambiguous mapping are not reported.
+
+\section{Gene Prediction Evaluation}
+
+For evaluation on predicting genes from an assembly against the same process form a reference genome, we use Prodigal\cite{Hyatt20211023} for gene prediction. We first predict code region sequences from the assembly and the reference genome, then we align the predict coding region sequence to count how many predictions in the assembly have the same predict length in the reference genome. The following commands are used for such assessment:
+
+\begin{verbatim}
+prodigal.v2_60.linux -i assembly.fa -d  asm_gene.fa
+prodigal.v2_60.linux -i reference.fa -d  ref_gene.fa
+blasr asm_gene.fa ref_gene.fa -bestn 5 -m 4 -nproc 24 -out asm_gene.m4
+#count how many full length alignments
+cat asm_gene.m4 | awk '$8==$7-$6 && $12==$11-$10 {print $2}' | sort -u | wc  
+\end{verbatim}
+\bibliography{ref}{}
+\bibliographystyle{cell}
+
+\end{document}

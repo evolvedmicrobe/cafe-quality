@@ -453,7 +453,7 @@ namespace Bio.Algorithms.SuffixTree
             // If base alphabets are not same then throw the exception.
             if (searchSeqBaseAlphabet != this._supportedBaseAlphabet)
             {
-                throw new ArgumentException(Properties.Resource.AlphabetMisMatch);
+                throw new ArgumentException("Alphabet mismatch!");
             }
 
             ISequence convertedSearchSeq = ProcessQuerySequence(searchSequence, noambiguity);
@@ -464,8 +464,6 @@ namespace Bio.Algorithms.SuffixTree
 
             MultiWaySuffixEdge edge = this._rootEdge;
             MultiWaySuffixEdge previousIntermediateEdge = this._rootEdge;
-			Console.WriteLine ( previousIntermediateEdge.StartIndex );
-			Console.WriteLine (this._rootEdge.StartIndex);
 			if (previousIntermediateEdge.StartIndex != this._rootEdge.StartIndex) {
 				throw new Exception ("Compiler error");
 			}

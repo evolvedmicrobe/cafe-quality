@@ -1153,6 +1153,12 @@ namespace Bio
             }
         }
 
+        public string ConvertToString()
+        {
+            return this.ToString ();
+        }
+
+
         /// <summary>
         /// Gets an enumerator to the bytes present symbols in this sequence.
         /// </summary>

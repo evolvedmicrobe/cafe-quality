@@ -160,6 +160,9 @@ namespace Bio.Algorithms.Alignment
 
         /// <summary>
         /// Gets or sets Offset of FirstSequence.
+        /// 
+        /// Danger!  This is not the start position of the alignment, it is some goofy
+        /// difference in start positions.
         /// </summary>
         public long FirstOffset
         {
@@ -182,9 +185,63 @@ namespace Bio.Algorithms.Alignment
                 Metadata[FirstOffsetKey] = value;
             }
         }
+        /// <summary>
+        /// Converts a query positiion (0-indexed) to a refernce position, or returns null if no overlap.
+        /// For example:
+        ///         0123456     7
+        /// Ref:    AAAAAAA-----AAA----
+        /// Query:  AAAAAAACCCCCA
+        ///         0123456789012
+        /// 
+        /// Returns 12 when given .  Note: it will account for clipping if this is a local alignment (that is it will return global coordinates).
+        /// </summary>
+        /// <returns>The query position correspondingto reference position.</returns>
+        /// <param name="refPos">Reference position.</param>
+        public long? FindQueryPositionCorrespondingtoReferencePosition(int refPos)
+        {
+            if (!FirstSequenceStart.HasValue || !SecondSequenceStart.HasValue) {
+                throw new BioinformaticsException ("");
+            }
+
+            var gap = DnaAlphabet.Instance.Gap;
+            int r_pos = (int) FirstSequenceStart.Value - 1;
+            int q_pos = (int)SecondSequenceStart.Value - 1;
+
+            int start = r_pos;
+            int end = r_pos + (int)FirstSequence.Count;
+            if (refPos < start || refPos > end) {
+                return null;
+            }
+
+            for (int i = 0; i < FirstSequence.Count; i++) {
+                if (FirstSequence [i] != gap) {
+                    r_pos++;
+                }
+                if (SecondSequence [i] != gap) {
+                    q_pos++;
+                }
+                if (r_pos == refPos) {
+                    if (SecondSequence [i] != gap) {
+                        return q_pos;
+                    }
+                    break;
+                }
+            }
+            return null;       
+        }
+
+      
+
+        /// <summary>
+        /// The first 0 indexed base of the alignment.  INCLUSIVE
+        /// </summary>
+        public long? FirstSequenceStart;
+        public long? SecondSequenceStart;
 
         /// <summary>
         /// Gets or sets Offset of SecondSequence.
+        /// Danger!  This is not the start position of the alignment, it is some goofy
+        /// difference in start positions.
         /// </summary>
         public long SecondOffset
         {
@@ -215,9 +272,13 @@ namespace Bio.Algorithms.Alignment
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
-            builder.AppendLine(this.Consensus.ToString());
-            builder.AppendLine(this.FirstSequence.ToString());
-            builder.AppendLine(this.SecondSequence.ToString());
+            builder.AppendLine ("Alignment to " + this.FirstSequence.ID);
+            builder.AppendLine ("Start Ref = " + this.FirstSequenceStart.ToString () + " ; Start Query = " + this.SecondSequenceStart.ToString ());
+            if (Consensus != null) {
+                builder.AppendLine (this.Consensus.ConvertToString ());
+            }
+            builder.AppendLine(this.FirstSequence.ConvertToString());
+            builder.AppendLine(this.SecondSequence.ConvertToString());
             return builder.ToString();
         }
     }

@@ -115,5 +115,10 @@ namespace Bio
         /// <param name="endPos">Index value below which to search for non-Gap symbol.</param>
         /// <returns>If found returns an zero based index of the last non gap symbol, otherwise returns -1.</returns>
         long LastIndexOfNonGap(long endPos);
+        /// <summary>
+        /// Convert into a string, with no gaps or formatting.
+        /// </summary>
+        /// <returns>The to string.</returns>
+        string ConvertToString();
     }
 }

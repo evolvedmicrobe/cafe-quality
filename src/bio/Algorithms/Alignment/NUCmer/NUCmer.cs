@@ -116,7 +116,6 @@ namespace Bio.Algorithms.Alignment
             GapOpenCost = DefaultGapOpenCost;
             GapExtensionCost = DefaultGapExtensionCost;
             LengthOfMUM = DefaultLengthOfMUM;
-
             // Set the ClusterBuilder properties to defaults
             FixedSeparation = ClusterBuilder.DefaultFixedSeparation;
             MaximumSeparation = ClusterBuilder.DefaultMaximumSeparation;
@@ -180,7 +179,10 @@ namespace Bio.Algorithms.Alignment
         public int MaximumSeparation { get; set; }
 
         /// <summary>
-        /// Gets or sets minimum output score
+        /// Gets or sets minimum score to output a cluster during the cluster step.
+		/// 
+		/// Typically, clusters of length < MinimumScore are not output.  For more details see
+		/// ClusterScoreMethod where this minimum is calculated. 
         /// </summary>
         public int MinimumScore { get; set; }
 
@@ -209,7 +211,13 @@ namespace Bio.Algorithms.Alignment
         /// <returns>Returns clusters.</returns>
         public IList<Cluster> GetClusters(ISequence querySequence, bool isUniqueInReference = true, bool isReversed = false)
         {
+
+            // This program performs two steps in Mummer that are performed by different programs.  To diagnose problems,
+            // Run either of the stand alone programs (mummer or mgaps) and compare the output found here.
+
+            // This is equivalent to the nucmer step that calls  MUMMER
             var internalMumList = GetMumList(querySequence, isUniqueInReference);
+            // equivalent to the call to mgaps.
             var clusterList = internalMumList.Count > 0 ? GetClusters(internalMumList, false) : new List<Cluster>();
             if (isReversed)
             {
@@ -536,6 +544,14 @@ namespace Bio.Algorithms.Alignment
 
         /// <summary>
         /// Extend the cluster in synteny
+        /// See original code in postnuc.cc According to the comments there:
+        /// Connect all the matches in every cluster between sequences A and B.
+        //  Also, extend alignments off of the front and back of each cluster to
+        //  expand total alignment coverage. When these extensions encounter an
+        //  adjacent cluster, fuse the two regions to create one single
+        //  encompassing region. This routine will create alignment objects from
+        //  these extensions and output the resulting delta information to the
+        //  delta output file.
         /// </summary>
         /// <param name="synteny">Synteny in which cluster needs to be extened.</param>
         /// <returns>List of delta alignments</returns>
@@ -549,10 +565,21 @@ namespace Bio.Algorithms.Alignment
             
             IList<Cluster> clusters = synteny.Clusters;
 
+            var pre_sort_start = clusters.Last ();
+
             // Sort the cluster by first sequence start
             clusters = SortCluster(clusters, FirstSequenceStart);
-
+            // TODO: This statement used to be before the sort but I moved it to match the original mummer code.  
+            // Make sure that was kosher, though I know it passes all tests.
+            // Also, the target should be at the end...
             Cluster targetCluster = synteny.Clusters.Last();
+
+            if (targetCluster != pre_sort_start) {
+                throw new BioinformaticsException( 
+                    @" Error thrown: Report Bug.  You changed the code to be in line with the mummmer 
+source and assign after sorting, but never verified this improved things (largely because it seemed to make no difference).
+This is an alignment where it could matter, so use this as a test case between implementations.");
+            }
 
             IEnumerator<Cluster> previousCluster = clusters.GetEnumerator();
             previousCluster.MoveNext();
@@ -598,9 +625,14 @@ namespace Bio.Algorithms.Alignment
 
                         // Find the MUM which is a good candidate for extension in reverse direction
                         DeltaAlignment targetAlignment = GetPreviousAlignment(deltaAlignments, deltaAlignment);
-                        if(targetAlignment!=deltaAlignment&&
-                          //TODO: NEED TO VERIFY THIS!!!
-                        //if (
+                        // if(targetAlignment != deltaAlignment &&
+                        /* TODO: Verify if including if statement above is allowed.  This shortcut prevents 
+                         * a long alignment being redone for each MUM, and so saves quite a bit of execution time.
+                         * However, it might goof up some more complex merging (it passes all current tests), so
+                         * I am taking it out for now.  
+                         * see my discussion here regarding this: https://bio.codeplex.com/workitem/8949
+                        */
+                        if (
                             ExtendToPreviousSequence(
                                 synteny.ReferenceSequence,
                                 synteny.QuerySequence,

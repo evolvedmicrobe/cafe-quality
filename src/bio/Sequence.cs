@@ -135,7 +135,7 @@ namespace Bio
                 // Validate sequence data
                 if (!alphabet.ValidateSequence(values, 0, values.Length))
                 {
-                    throw new ArgumentOutOfRangeException("values");
+                    throw new ArgumentOutOfRangeException("Sequence contains illegal characters");
                 }
             }
 
@@ -442,7 +442,7 @@ namespace Bio
         {
             if (this.Count > Helper.AlphabetsToShowInToString)
             {
-                return string.Format(CultureInfo.CurrentCulture, Properties.Resource.ToStringFormat,
+                return string.Format(CultureInfo.InvariantCulture, HardCodedProperties.ToStringFormat,
                                      new string(this._sequenceData.Take(Helper.AlphabetsToShowInToString).Select((a => (char)a)).ToArray()),
                                      (this.Count - Helper.AlphabetsToShowInToString));
             }
@@ -508,9 +508,7 @@ namespace Bio
         /// <summary>
         /// Danger!!! Do not mutate this array.  Should only be used to avoid a new memory allocation.
 		/// This is used by some of the built-in algorithms which access the data in a read-only fashion
-        /// to quickly grab a sequence of data without copying it.  It cannot be used outside Bio.dll
-        /// For outside users, use the CopyTo method.
-		/// 
+        /// to quickly grab a sequence of data without copying it.  
 		/// </summary>
         /// <returns></returns>
         public byte[] GetInternalArray()
