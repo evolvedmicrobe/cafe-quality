@@ -85,6 +85,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="build\CSharp\ConsensusCore_wrap.cxx" />
     <ClCompile Include="src\C++\AffineAlignment.cpp" />
     <ClCompile Include="src\C++\Checksum.cpp" />
     <ClCompile Include="src\C++\Coverage.cpp" />
