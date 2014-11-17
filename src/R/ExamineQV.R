@@ -10,6 +10,9 @@ d = read.csv("QVvalues.csv")
 head(d)
 
 head(d)
+
+
+head(d)
 nrow(d)
 
 dns = sample(1:nrow(d),1e4)
@@ -40,15 +43,37 @@ do.call(grid.arrange,g)
 sum(nd$DeletionTag==78)/nrow(nd)
 
 # Now to look at recalibration
-# intercept / slope
-recal = data.frame( Mismatch =c (-3.45427,-0.0199875), 
-                    Branch = c(-0.28307, -0.121895),
-                   DeletionWithTag  = c(-0.0134004, -0.0844901),
-                   Nce = c(-0.0213797,-0.175615),
-                   Merge_A =c ( -1.95056, -0.0357092),
-                  Merge_C = c(-0.0101704, -0.0878416),
-                  Merge_G = c(-0.225816, -0.0759892),
-                  Merge_T = c(-0.344726,-0.0570072))
+useChemP6=FALSE
+
+if(useChemP6) {
+  #p6_c4 parameters
+  v_lab = "- P6-C4 Chemistry"
+  v_name = "qv_violin_p6c4.pdf"
+  matchVal = .494617
+  delNVal = -3.07623 
+  recal = data.frame( Mismatch =c (-3.45427,-0.0199875), 
+                      Branch = c(-0.28307, -0.121895),
+                     DeletionWithTag  = c(-0.0134004, -0.0844901),
+                     Nce = c(-0.0213797,-0.175615),
+                     Merge_A =c ( -1.95056, -0.0357092),
+                    Merge_C = c(-0.0101704, -0.0878416),
+                    Merge_G = c(-0.225816, -0.0759892),
+                    Merge_T = c(-0.344726,-0.0570072))
+} else {
+## c2 Chemistry
+  v_lab = "- C2 Chemistry"
+  v_name = "qv_violin_c2.pdf"
+  delNVal   =  -2.740747389
+  matchVal  =   0.560464158
+  recal = data.frame( Mismatch    = c(-3.24367743, -0.066470768),
+                         Branch	=   c(-1.215244837, -0.101115918),                       
+                         DeletionWithTag	=c ( 0.049440612, -0.093502954),
+                         Nce =	c ( -0.251601059, -0.199185423),
+                         Merge_A	= c( -1.510719452, -0.035472633),
+                         Merge_C	=  c( 0.133876836,   -0.161696672),
+                         Merge_G	=  c(0.513768983, -0.181189888),
+                         Merge_T	=  c( -1.316929942, -0.287860148))
+}
 
 rd = nd
 head(rd)
@@ -106,8 +131,7 @@ vd2 = vd[,c(3,5,7,8,9,10,11,12)]
 vd2$row = 1:nrow(vd2)
 vd3 = melt(vd2,id="row")
 n=1000
-matchVal = .494617
-delNVal = -3.07623 
+
 #fakeData=data.frame(row=(nrow(vd3):(nrow(vd3)+n-1)),variable=rep("Match",n),value=rep(matchVal,n)+rnorm(0,0.01))
 #vd4=rbind(vd3,fakeData)
 #head(vd4)
@@ -115,9 +139,42 @@ delNVal = -3.07623
 tooMany = (1:nrow(vd3))[vd3$variable=="SubsQv" & vd3$value==median(vd$SubsQv)]
 rm = sample(tooMany,length(tooMany)*.95)
 vd4=vd3[-rm,]
-pdf("../doc/qv_violin.pdf",width=6,height=5)
-ggplot(vd4,aes(variable,value,fill=variable))+geom_violin(show_guide=FALSE)+theme_classic(base_size=10)+labs(y="Recalibrated Score",x="",title="Distribution of Quality Scores at Bases")+
-  geom_hline(yintercept=matchVal,colour="red")+ scale_y_continuous(limits=c(-9, .5)) +
-  geom_hline(yintercept=delNVal,colour="blue") + 
+low_y = min(min(vd4$value,na.rm=TRUE),delNVal)
+high_y = max(max(vd4$value,na.rm=TRUE),matchVal)
+pdf(paste("../doc/",v_name,sep=""),width=6,height=4.45)
+ggplot(vd4,aes(variable,value,fill=variable))+geom_violin(show_guide=FALSE)+theme_classic(base_size=10)+
+  labs(y="Recalibrated Score",x="",title=paste("Distribution of Quality Scores at Bases",v_lab))+
+  geom_hline(yintercept=matchVal,colour="red")+ scale_y_continuous(limits=c(low_y, high_y)) +
+  geom_hline(yintercept=delNVal,colour="blue") +
   geom_hline(yintercept=delNVal+matchVal,colour="blue",linetype="dotted")
 dev.off()
+
+b= aggregate(value~variable,vd4,median)
+
+#Calculate case 1, no tag deletion
+matchVal*3+delNVal
+matchVal*3+b[b[,1]=="InsQvBranch",2]
+
+#Case case 2, tag deletion
+matchVal*3+b[b[,1]=="DeletionQV",2]
+
+# Case 3, merge deletion
+matchVal*2+b[b[,1]=="Merge_G",2]
+matchVal*2+b[b[,1]=="Merge_A",2]
+
+
+# No Tag path
+matchVal*3 + (matchVal*3+b[b[,1]=="InsQvBranch",2]) #3 bp average score for two reads
+(matchVal*3+delNVal) + matchVal*4  # 4bp average
+
+# Tag score path
+matchVal*3 + (matchVal*3+b[b[,1]=="InsQvBranch",2]) # 3 bp score
+(matchVal*3+b[b[,1]=="DeletionQV",2]) + matchVal*4  # 4 bp score 
+
+# Merge score path
+matchVal*3 + (matchVal*3+b[b[,1]=="InsQvBranch",2]) # 3 bp score
+(matchVal*2+b[b[,1]=="Merge_G",2]) + matchVal*4  # 4 bp score 
+
+
+
+# intercept / slope

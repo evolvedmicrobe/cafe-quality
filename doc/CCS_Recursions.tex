@@ -87,7 +87,7 @@
 \maketitle
 \section{Introduction}
 
-The ConsensusCore scoring model calculates the score that a read comes from a particular template.  It calculates this for a given template and a read using information from the reads associated QV and Tag values.  The scoring algorithm implements dynamic programming to find the score either through all paths, or through the single best pass.  This algorithm is similar to standard dynamic programming routines, with some modifications described here. \footnote{If you are not familiar with these techniques, none of this will make sense.  The standard introduction to this material is the first 4 chapters of "Biological Sequence Analysis" by Durbin, Eddy, Krogh and Mitchison.}
+The ConsensusCore scoring model calculates the score that a read comes from a particular template.  It calculates this for a given template and a read using information from the reads associated QV and Tag values.  The scoring algorithm implements dynamic programming to find the score either through all paths, or through the single best path.  This algorithm is similar to standard dynamic programming routines, with some modifications described here. \footnote{If you are not familiar with these techniques, none of this will make sense.  The standard introduction to this material is the first 4 chapters of "Biological Sequence Analysis" by Durbin, Eddy, Krogh and Mitchison.}
 
 Each position in the read is associated with several QV values that affect the score, however these values are not used directly or interpreted as probabilities.  Prior to computing the score, each QV value undergoes an affine transformation using parameters specific to that chemistry and derived by a training step.  In the case of MergeQV values, this transformation is distinct for each of the 4 possible bases. Similarly, the InsertionQV values are transformed in one of two ways depending on the relationship between the read base and the template as described below.
  
@@ -211,7 +211,7 @@ The deletion score also differs from what is typical.  A small subset of bases i
 
 \[
 	\text{Merge Score} = \alpha_{i-1,j-2}  +  \begin{cases}
-							 \text{Merge score based on nucleotide in } R_{i}  & \text{if }  R_{i} = T_{j} \text{\& } R_{i} = T_{j-1} \\
+							 \text{Merge score based on nucleotide in } R_{i}  & \text{if }  R_{i} = T_{j} \text{ \& } R_{i} = T_{j-1} \\
 							 \text{A fixed constant (typically }-\infty\text{)} & \text{otherwise}
 							 \end{cases}
 \]
@@ -219,13 +219,14 @@ The deletion score also differs from what is typical.  A small subset of bases i
 The merge score is the most unusual aspect of this recursion relative to standard methods.  It is designed to account for the possibility that two bases were read simultaneously as one base (presumably because the enzyme acquired the next base before a break in the signal intensity was observed, and if this was the same base, this could be interpreted as one merged pulse).
 
 From an alignment perspective, this move is equivalent to a deletion followed by a match, but scored with a different penalty.  Combined with the other novelties in PacBio scoring, this makes the scoring of regions with homopolymers more complicated than in typical models.  For example, consider the alignment:
+
 \begin{center}
 \texttt{GGGG}
 
 \texttt{GG-G}
 \end{center}
 
-The deletion in this alignment can be explained by either a single merge move or a deletion move followed by a match.  Because deletions can be scored in one of two ways depending on the deletion tag values, this creates three separate possible scorings for the single deletion.  Based on typical values for QV scores, if there is a DeletionTag matching the deleted base available, the path with the deletion followed by match is preferred.  If not, then a merge is typically employed over a deletion and a match, provided the merge value is above the dotted blue line shown in figure ~\ref{fig:violin}.
+The deletion in this alignment can be explained by either a single merge move or a deletion move followed by a match.  Because deletions can be scored in one of two ways depending on the deletion tag values, this creates three separate possible scorings for the single deletion.  Based on typical values for QV scores, if there is a DeletionTag matching the deleted base is available, the path with the deletion followed by match is preferred.  If not, then a merge is typically employed over a deletion and a match, provided the merge value is above the dotted blue line shown in figure ~\ref{fig:violin}.
 
 \newpage
 
@@ -277,7 +278,7 @@ If when merging pulses into calls a segment less than 3 frames wide is encounter
 The violin plot below shows a sampling of P6-C4 QV scores from different ZMWs in the HQ region. The plot has been made after transforming the QV values into their actual scores using the affine recalibration implemented for CCS.  Only DeletionQV values when the DeletionTag was not an 'N' are shown.
 
 \begin{figure}[h] %% The [h] means place the figure about here.
-	\includegraphics{qv_violin}
+	\includegraphics{qv_violin_p6c4}
 		\caption{Violin plot of QV scores.  The horizontal lines represent fixed scoring constants, with blue being the deletion penalty, and red the match score.  The dotted blue line is the sum of the constant deletion and match penalties. The SubsQV violin plot has been rescaled in order to be visible, as approximately 95\% of all values are the lowest value shown, which makes it impossible to see the others.}	
 		\label{fig:violin}			
 \end{figure}
