@@ -249,16 +249,18 @@ namespace Bio.IO.BAM
 			IList<uint> binnumbers = Reg2Bins ((uint)start, (uint)end);
 			//now only get those that match
 			List<Chunk> chunks = refIndex.Bins.Where (B => binnumbers.Contains (B.BinNumber)).SelectMany (x => x.Chunks).ToList ();
-			//now use linear indexing to filter any chunks that end before the first start
+            //now use linear indexing to filter any chunks that end before the first start
 			if (refIndex.LinearIndex.Count > 0) {
 				var binStart = start >> 14;
 				FileOffset minStart;
-				if (refIndex.Bins.Count <= binStart) {
+                if (refIndex.LinearIndex.Count  > binStart) {
+                // if (refIndex.Bins.Count <= binStart) {
 					minStart = refIndex.LinearIndex [binStart];
 				} else {
+                    throw new BioinformaticsException ("Screw BAM indexing, positions shouldn't be out of the array.  Go figure out this undefined behavior.");
 					minStart = refIndex.LinearIndex.Last ();
 				}
-				chunks = chunks.Where (x => x.ChunkEnd >= minStart).ToList ();
+                chunks = chunks.Where (x =>  x.ChunkEnd >= minStart).ToList ();
 			}
 			return SortAndMergeChunks (chunks);
 		}
@@ -375,7 +377,7 @@ namespace Bio.IO.BAM
 		protected string getBAMIndexFileName (string BamFileToFindIndexOf)
 		{
 			//Try Name+".bai"
-			string possibleName = BamFileToFindIndexOf + Properties.Resource.BAM_INDEXFILEEXTENSION;
+            string possibleName = BamFileToFindIndexOf + ".bai";//Properties.Resource.BAM_INDEXFILEEXTENSION;
 			if (File.Exists (possibleName)) {
 				return possibleName;
 			}
