@@ -127,7 +127,7 @@ namespace PacBio.Consensus
                         paramSets[key] = Tuple.Create(rank, paramSet.ModelParams);
                 }
                 // otherwise if we've just the chemistry, then load just it
-                else if (String.IsNullOrEmpty(model))
+                else if (String.IsNullOrEmpty(model) && paramSet.SequencingChemistry == chemistry)
                 {
                     // if we don't have a key yet or our rank is superior, replace
                     if (!paramSets.ContainsKey("*") || paramSets["*"].Item1 > rank)
