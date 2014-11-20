@@ -39,13 +39,24 @@ namespace VariantCaller
         [OutputAttribute]
         public string ConsensusIndelSize;
         [OutputAttribute]
-        public float NoErrorSumProductScore;
+        public float NoErrorSumProductScoreP6;
         [OutputAttribute]
-        public float NoErrorViterbiScore;
+        public float NoErrorViterbiScoreP6;
         [OutputAttribute]
-        public float OneDeletionSumProductScore;
+        public float OneDeletionSumProductScoreP6;
         [OutputAttribute]
-        public float OneDeletionErrorViterbiScore;
+        public float OneDeletionErrorViterbiScoreP6;
+
+        [OutputAttribute]
+        public float NoErrorSumProductScoreC2;
+        [OutputAttribute]
+        public float NoErrorViterbiScoreC2;
+        [OutputAttribute]
+        public float OneDeletionSumProductScoreC2;
+        [OutputAttribute]
+        public float OneDeletionErrorViterbiScoreC2;
+
+
         [OutputAttribute]
         public float FullLengthCorrectSumProductScore;
         [OutputAttribute]
@@ -56,6 +67,7 @@ namespace VariantCaller
         public int SubReadNumber;
         [OutputAttribute]
         public int HPSectionLength;
+
         [OutputAttribute]
         public float RQ;
         [OutputAttribute]
@@ -63,7 +75,11 @@ namespace VariantCaller
         [OutputAttribute]
         public int SpikeMergeQVCount;
         [OutputAttribute]
-        public string HomopolymerLength;
+        public int HPDeletionTagNotNCount;
+        [OutputAttribute]
+        public string HomopolymerLengthFromAlignment;
+        [OutputAttribute]
+        public int HomopolymerLengthFromCounting;
         [OutputAttribute]
         public int SubRead;
         [OutputAttribute]

@@ -19,6 +19,7 @@ open PacBio.Consensus
 let ref_str = "CCCGGGGATCCTCTAGAATGCTCATACACTGGGGGATACATATACGGGGGGGGGGCACATCATCTAGACAGACGACTTTTTTTTTTCGAGCGCAGCTTTTTGAGCGACGCACAAGCTTGCTGAGGACTAGTAGCTTC"
 let correct =   "CACTGGGGGATAC"
 let incorrect = "CACTGGGGATAC"
+let hp_char = 'G'
 let start_index = 29
 //let correct =   "CAGCTTTTTGAGC"
 //let incorrect = "CAGCTTTTGAGC"
@@ -39,12 +40,16 @@ let full_deletion_rc = deletionHPSeq.GetReverseComplementedSequence().ConvertToS
 
 let hpRef = new  Reference(hpSeq);
 
-// Calculate the size of the indel in the 5 bp homopolymer
+(* Calculate the size of the indel in the 5 bp homopolymer
+   I am doing this two ways, one by aligning and calling variants, 
+   and a second by counting the homopolymers in the region, to account for SNPs within
+   which is much mor common than I would have thought.
+*)
 let DeletionSize (sub:Sequence) =
    let alns = hpRef.AlignSequence (sub) |> Seq.toArray
    if alns.Length  = 0 then "NaN" else
        let best = alns.[0]       
-       //Console.WriteLine(best.ToString())
+       // First get HP length determined by alignment
        let variants = VariantCaller.CallVariants (best, hpRef.RefSeq)
        let bad = variants |> Seq.where (fun u -> u.StartPosition = start_index ) |> Seq.toArray
        if bad.Length = 0 then "0" else
@@ -55,12 +60,39 @@ let DeletionSize (sub:Sequence) =
                    | IndelType.Insertion -> mut.InsertedOrDeletedBases.Length.ToString()
                    | _ -> failwith "bad"
 
-let cntMergeSpikes (read: ReadFromZMW)  =
+
+(* To avoid alignment issues, I am going to just grab the region, look for the longest continuous stretch of 
+    the homopolymer base, and count the number of merge spikes, deletion tags and its length *)
+type homoPolymerReport = { Length: int; MergeSpikes: int; DeletionTags: int}
+
+let cntHPEvents (read: ReadFromZMW)  =
+    // First task, where is the longest homopolymer stretch ?
     let bp = match read.ReverseComplementedOriginally with
-             | true -> 'G'
-             | false -> 'C'
-    // Now to find where the homopolymer is inside sequence
-    (read.BaseCalls, read.MergeQV) ||> Seq.map2 (fun x y -> x = bp && y > (byte 70)) |> Seq.where id |> Seq.length
+             | true -> 'C'
+             | false -> 'G'
+    let i = ref 0
+    // Count the start and length of each position for the homopolymer base
+    let groups = seq { while !i < read.BaseCalls.Length do
+                        if read.BaseCalls.[!i] = bp then
+                            let start = !i
+                            let cnt = ref 1
+                            i := !i + 1
+                            while !i < read.BaseCalls.Length && read.BaseCalls.[!i] = bp do
+                                cnt := !cnt + 1
+                                i := !i + 1
+                            yield (start, !cnt) else i := !i + 1 } |> Seq.toList
+    if groups.Length = 0 then
+        {Length = -99; MergeSpikes = -999; DeletionTags = -999} else
+        let (startHP, Length) = groups |> Seq.maxBy snd
+        // Now to find where the homopolymer is inside sequence
+        let hpRange = seq {startHP .. (startHP + Length - 1) } 
+        if (Seq.max hpRange) > read.BaseCalls.Length then failwith "Mother fucker"
+        let spikeCount =    hpRange |> 
+                                Seq.map (fun i -> read.BaseCalls.[i] = bp && read.MergeQV.[i] > (byte 70)) |> 
+                                Seq.where id |> Seq.length
+        let delTagCount = hpRange |> Seq.where (fun j -> (j+1) < read.BaseCalls.Length && read.DeletionTag.[j+1] = (byte)bp) |> Seq.length
+        {Length = Length; MergeSpikes = spikeCount; DeletionTags = delTagCount}
+
 
 (* Take a subread and only extract out the bit that matches the 5 bp homopolymer plus a window around the sides *)
 let getHPSection (parentRead : ReadFromZMW) (subRead : CCSSubRead) = 
@@ -88,9 +120,12 @@ let getHPSection (parentRead : ReadFromZMW) (subRead : CCSSubRead) =
                             | false -> zmwSection.GetSubSection(start, len)
                             | true -> zmwSection.GetSubSection((int subRead.Seq.Length) - len - start, len)
            subSection.ReverseComplementedOriginally <- revComp
-           subSection.SpikeMergeQVCount <- cntMergeSpikes subSection
+           let hpEvents = cntHPEvents subSection
+           subSection.SpikeMergeQVCount <- hpEvents.MergeSpikes
+           subSection.HPDeletionTagNotNCount <- hpEvents.DeletionTags
+           subSection.HomopolymerLengthFromCounting <- hpEvents.Length
            subSection.OriginalSubReadLength <- subRead.Seq.Length
-           subSection.HomopolymerLength <- (DeletionSize (new Sequence(DnaAlphabet.Instance, subRead.Seq, false)))
+           subSection.HomopolymerLengthFromAlignment <- (DeletionSize (new Sequence(DnaAlphabet.Instance, subRead.Seq, false)))
            subSection.RQ <- subRead.RQ
            subSection.Zmw <- subRead.ParentZMW
            Some(subSection) else
@@ -109,15 +144,20 @@ type csv_writer (fname:string) =
    
    member this.Close = sw.Close()
 
-let outFile = csv_writer("/Users/nigel/git/cafe-quality/data/homopolymerDeepDiveDiagnostics.csv")
+let outFile = csv_writer("/Users/nigel/git/cafe-quality/data/homopolymerDeepDiveDiagnostics5bpP6.csv")
 
 
 
 
 //Code to calculate various likelihoods.
-let qConfig = TemplateRegion.GetQuiverConfig()
-let viterbi = new SparseSseQvReadScorer(qConfig)
-let sumproduct = new SparseSseQvSumProductReadScorer(qConfig)
+let qConfigP6 = TemplateRegion.GetP6C4QuiverConfig()
+let viterbiP6 = new SparseSseQvReadScorer(qConfigP6)
+let sumproductP6 = new SparseSseQvSumProductReadScorer(qConfigP6)
+
+let qConfigC2 = TemplateRegion.GetC2QuiverConfig()
+let viterbiC2 = new SparseSseQvReadScorer(qConfigC2)
+let sumproductC2 = new SparseSseQvSumProductReadScorer(qConfigC2)
+
 let makeQuiverRead (read: ReadFromZMW) =
    let qs = new QvSequenceFeatures(read.BaseCalls,read.InsertionQV,read.SubstitutionQV, read.DeletionQV, read.DeletionTag, read.MergeQV)
    new Read(qs, "tmp", "P6-C4")
@@ -145,21 +185,35 @@ let ProcessRead (read:CCSRead) =
                v.HPSectionLength <-  v.BaseCalls.Length
                try
                    if not v.ReverseComplementedOriginally then
-                       v.NoErrorViterbiScore <- viterbi.Score(correct, qread)
-                       v.OneDeletionErrorViterbiScore <- viterbi.Score(incorrect, qread)
-                       v.NoErrorSumProductScore <- sumproduct.Score(correct, qread)
-                       v.OneDeletionSumProductScore <- sumproduct.Score(incorrect,qread)
-                       v.FullLengthCorrectSumProductScore <- sumproduct.Score(fullCorrect, fread)
-                       v.FullLengthIncorrectSumProductScore <- sumproduct.Score(full_deletion, fread)
+                       v.NoErrorViterbiScoreP6 <- viterbiP6.Score(correct, qread)
+                       v.OneDeletionErrorViterbiScoreP6 <- viterbiP6.Score(incorrect, qread)
+                       v.NoErrorSumProductScoreP6 <- sumproductP6.Score(correct, qread)
+                       v.OneDeletionSumProductScoreP6 <- sumproductP6.Score(incorrect,qread)
+                       v.FullLengthCorrectSumProductScore <- sumproductP6.Score(fullCorrect, fread)
+                       v.FullLengthIncorrectSumProductScore <- sumproductP6.Score(full_deletion, fread)
                        v.SummedPulseWidthForHP <- v.BaseCalls |> Seq.mapi (fun i c -> if c = 'G' then (float32)v.IpdInFrames.[i] else 0.0f) |> Seq.sum
+                    
+
+                       v.NoErrorViterbiScoreC2 <- viterbiC2.Score(correct, qread)
+                       v.OneDeletionErrorViterbiScoreC2 <- viterbiC2.Score(incorrect, qread)
+                       v.NoErrorSumProductScoreC2 <- sumproductC2.Score(correct, qread)
+                       v.OneDeletionSumProductScoreC2 <- sumproductC2.Score(incorrect,qread)
+                  
                     else
-                       v.NoErrorViterbiScore <- viterbi.Score(correct_rc, qread)
-                       v.OneDeletionErrorViterbiScore <- viterbi.Score(incorrect_rc, qread)
-                       v.NoErrorSumProductScore <- sumproduct.Score(correct_rc, qread)
-                       v.OneDeletionSumProductScore <- sumproduct.Score(incorrect_rc,qread)
-                       v.FullLengthCorrectSumProductScore <- sumproduct.Score(fullCorrect_rc, fread)
-                       v.FullLengthIncorrectSumProductScore <- sumproduct.Score(full_deletion_rc, fread)
+                       v.NoErrorViterbiScoreP6 <- viterbiP6.Score(correct_rc, qread)
+                       v.OneDeletionErrorViterbiScoreP6 <- viterbiP6.Score(incorrect_rc, qread)
+                       v.NoErrorSumProductScoreP6 <- sumproductP6.Score(correct_rc, qread)
+                       v.OneDeletionSumProductScoreP6 <- sumproductP6.Score(incorrect_rc,qread)
+                       v.FullLengthCorrectSumProductScore <- sumproductP6.Score(fullCorrect_rc, fread)
+                       v.FullLengthIncorrectSumProductScore <- sumproductP6.Score(full_deletion_rc, fread)
                        v.SummedPulseWidthForHP <- v.BaseCalls |> Seq.mapi (fun i c -> if c = 'C' then (float32)v.IpdInFrames.[i] else 0.0f) |> Seq.sum
+                
+                       v.NoErrorViterbiScoreC2 <- viterbiC2.Score(correct_rc, qread)
+                       v.OneDeletionErrorViterbiScoreC2 <- viterbiC2.Score(incorrect_rc, qread)
+                       v.NoErrorSumProductScoreC2 <- sumproductC2.Score(correct_rc, qread)
+                       v.OneDeletionSumProductScoreC2 <- sumproductC2.Score(incorrect_rc,qread)
+                     
+
                 with
                     | _ -> ()
                let outData = OutputHelper.CalculateDataLines(v)
@@ -176,7 +230,7 @@ let ProcessRead (read:CCSRead) =
 let main args =
    let sw = System.Diagnostics.Stopwatch.StartNew()
    LoadZMWs.ccs_data.CCSReads  |> Seq.where (fun z -> z.AssignedReference <> null && z.AssignedReference.RefSeq.ID = "HP.V1.02" && z.SubReads.Count > 126) 
-                               |> Seq.truncate 5000
+                               |> Seq.truncate 1000
                                |> Seq.toArray
                                //|> Array.iter (fun j -> ProcessRead j)
                                |> Array.Parallel.iter (fun j -> ProcessRead j)

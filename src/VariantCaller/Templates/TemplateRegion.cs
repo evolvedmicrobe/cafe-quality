@@ -33,19 +33,27 @@ namespace VariantCaller
         public Sequence Haplotype;
 
 
-        private static QuiverConfig q_config;
+        private static QuiverConfig q_config_p6c4;
+        private static QuiverConfig q_config_c2;
 
-
-        public static QuiverConfig GetQuiverConfig()
+        public static QuiverConfig GetP6C4QuiverConfig()
         {
-            return q_config;
+            return q_config_p6c4;
         }
+
+        public static QuiverConfig GetC2QuiverConfig()
+        {
+            return q_config_c2;
+        }
+
+
         static TemplateRegion()
         {
             // This obviously can't stand.
             var ccsFileLocation = @"/Users/nigel/git/cafe-quality/data/CCSParameters.ini";
-            var scoringConfig = ParameterLoading.LoadParametersFromFile(ccsFileLocation,"P6-C4");
-            q_config = scoringConfig.Parameters.At("P6-C4");
+            var scoringConfig = ParameterLoading.LoadParametersFromFile(ccsFileLocation);
+            q_config_p6c4 = scoringConfig.Parameters.At("P6-C4");
+            q_config_c2 = scoringConfig.Parameters.At ("C2");
         }
 
         /// <summary>
