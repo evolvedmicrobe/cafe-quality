@@ -624,8 +624,6 @@ namespace PacBio.Consensus
             }
             else
             {
-                //NIGEL TEMP ADDITION
-                return  ZmwConsensusBases.Null(bases.Zmw);
                 // Refine the initial guess using a more sophisticated scoring scheme
                 int maxIterations = 7;
                 int iterationsTaken = 0;
