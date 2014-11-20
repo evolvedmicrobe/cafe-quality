@@ -394,15 +394,17 @@ namespace PacBio.Consensus
             return ttpl;
         }
 
+     
         /// <summary>
         /// Main Quiver loop and QV estimation
         /// </summary>
         public static IZmwConsensusBases MultiReadConsensusAndQv(
             MultiReadMutationScorer scorer, List<AlignedSequenceReg> regions, 
-            ISequencingZmw zmw, int iterations, out int iterationsTaken)
+            ISequencingZmw zmw, int iterations, out int iterationsTaken, IZmwBases bases)
         {
             // Run the quiver refinement step
-            var result = InnerMultiReadConsensus(scorer, iterations, out iterationsTaken);
+            var result = InnerMultiReadConsensus(scorer, iterations, out iterationsTaken, regions, bases);
+
 
             // Sort the regions that will get reported in the bas.h5
             var sortedRegions = regions.Map(v => (DelimitedSeqReg) v).OrderBy(v => v.Start).ToArray();
@@ -417,7 +419,8 @@ namespace PacBio.Consensus
         /// </summary>
         public static Tuple<TrialTemplate, List<MutationScore>> InnerMultiReadConsensus(MultiReadMutationScorer scorer,
                                                                                         int iterations,
-                                                                                        out int iterationsTaken)
+                                                                                        out int iterationsTaken,
+                                                                                        List<AlignedSequenceReg> regions, IZmwBases bases)                                                                         
         {
 
             Func<Mutation, MutationScore> scoreMutation = 
@@ -512,9 +515,11 @@ namespace PacBio.Consensus
                     scorer.ApplyMutations(muts);
                 i++;
             }
-
-            iterationsTaken = i;
-            return new Tuple<TrialTemplate, List<MutationScore>>(tpl, allScores);
+            
+            iterationsTaken = i
+            // Now to polish homopolymers
+            var polished = HomopolymerPolisher.PolishHomopolymers(scorer.Template, regions, bases, allScores);
+            return polished;
         }
 
 

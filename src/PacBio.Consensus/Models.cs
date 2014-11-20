@@ -63,6 +63,16 @@ namespace PacBio.Consensus
             }
         }
 
+        public static ScorerConfig C2Parameters
+        {
+            get
+            {
+                var path = Path.Combine(InternalParameterDirectory, "CCSParameters.ini");
+                return LoadParametersFromFile(path, "C2");
+            }
+        }
+
+
         /// <summary>
         /// Model Types in order of preference (we are not chekcing the availability of the different QVs -- just assume everything is available)
         /// </summary>

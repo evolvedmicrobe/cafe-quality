@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Build">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -86,6 +86,7 @@
     <Compile Include="FineClustering.cs" />
     <Compile Include="GenerateBarcodes.cs" />
     <Compile Include="GenerateMutations.cs" />
+    <Compile Include="HomopolymerPolisher.cs" />
     <Compile Include="VariantDetection.cs" />
     <Compile Include="Models.cs" />
     <Compile Include="MultiTemplateConsensus.cs" />
@@ -109,6 +110,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -122,7 +124,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

@@ -624,8 +624,6 @@ namespace PacBio.Consensus
             }
             else
             {
-                //NIGEL TEMP ADDITION
-                return  ZmwConsensusBases.Null(bases.Zmw);
                 // Refine the initial guess using a more sophisticated scoring scheme
                 int maxIterations = 7;
                 int iterationsTaken = 0;
@@ -634,7 +632,7 @@ namespace PacBio.Consensus
                 using (var scorer = new MultiReadMutationScorer(regions, bases, initialTpl, ScConfig))
                 {
                     result = FindConsensus.MultiReadConsensusAndQv(scorer, regions, bases.Zmw,
-                        maxIterations, out iterationsTaken);
+                        maxIterations, out iterationsTaken, bases);
                 }
             }
 
