@@ -109,9 +109,7 @@ The inputs are a read of length, I, and a template of length J.  Each base in th
 \FOR{$j=1$ to J}
 \FOR{$i=1$ to I}
 \IF{ $i =0\ \& j =0 $}
-\STATE $A[i,j] = 0$
-\ELSIF {$i =0 \text{ or } j =0$}
-\STATE $A[i,j] = -\infty $
+\STATE $A[i,j] \leftarrow 0$
 \ELSE
 \STATE \[
 	A[i,j]  \leftarrow \text{max}
@@ -134,12 +132,12 @@ The inputs are a read of length, I, and a template of length J.  Each base in th
 
 
 \section{Scoring Steps in the Dynamic Programming Recursion}
-After the matrix is initialized, each element in the matrix is recursively populated by examining the available moves, either an insertion, deletion, match or merge.  If a particular step cannot be calculated because it is too close to the edge, it is skipped.  Each possible move is described next, and figure~\ref{fig:everything} shows the initial conditions as well as all positions in the matrix, read and template that are evaluated in order to calculate the value for a given score.
+After the matrix is initialized, each element in the matrix is recursively populated by examining the available moves, either an insertion, deletion, match or merge.  If a particular step cannot be calculated because it is too close to the edge, it is skipped.  Each possible move is described next, and figure~\ref{fig:everything} shows the positions in the matrix, read and template that are evaluated in order to calculate the value for a given score.  Top row and first column are initialized as deletions or insertions of the relevant length.
 
 
 \begin{figure}[H] %% The [h] means place the figure about here.
 	\includegraphics{Everything}
-		\caption{\textbf{Initial Conditions and Needed Information:} The information required for calculating the score for the matrix position denoted by the blue box.  Red boxes indicate values that must already be calculated, and colored bases indicate positions in the read and the template that are evaluated to determine the score.  The first row and column have also been filled with their initial values.}		
+		\caption{\textbf{Needed Information:} The information required for calculating the score for the matrix position denoted by the blue box.  Red boxes indicate values that must already be calculated, and colored bases indicate positions in the read and the template that are evaluated to determine the score.  The first row and column have also been filled with their initial values.}		
 		\label{fig:everything}		
 \end{figure}
 

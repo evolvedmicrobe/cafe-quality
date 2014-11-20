@@ -27,9 +27,6 @@ mkBase <- function(showInit=FALSE)  {
         if (ii==1 | jj==1) {
           if(ii==1 & jj==1)
           {grid.text(0, just=c("centre")) }
-          else {
-            grid.text(expression(-infinity), just=c("centre"))
-          }
         }
       }
       upViewport()
