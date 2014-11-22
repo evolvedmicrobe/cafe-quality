@@ -42,6 +42,55 @@
 		A66EA02E1A20142200FD66EE /* Utils.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A66EA00B1A20142200FD66EE /* Utils.hpp */; };
 		A66EA02F1A20142200FD66EE /* Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A66EA00C1A20142200FD66EE /* Version.cpp */; };
 		A66EA0301A20142200FD66EE /* Version.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A66EA00D1A20142200FD66EE /* Version.hpp */; };
+		A66EA0311A20161700FD66EE /* AffineAlignment.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FE51A20142200FD66EE /* AffineAlignment.hpp */; };
+		A66EA0321A20161700FD66EE /* Checksum.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FE71A20142200FD66EE /* Checksum.hpp */; };
+		A66EA0331A20161700FD66EE /* Coverage.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FE91A20142200FD66EE /* Coverage.hpp */; };
+		A66EA0341A20161700FD66EE /* Edna in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FEA1A20142200FD66EE /* Edna */; };
+		A66EA0351A20161700FD66EE /* Feature.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FEC1A20142200FD66EE /* Feature.hpp */; };
+		A66EA0361A20161700FD66EE /* Features.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FEE1A20142200FD66EE /* Features.hpp */; };
+		A66EA0371A20161700FD66EE /* Interval.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FEF1A20142200FD66EE /* Interval.hpp */; };
+		A66EA0381A20161700FD66EE /* LFloat.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FF01A20142200FD66EE /* LFloat.hpp */; };
+		A66EA0391A20161700FD66EE /* Logging in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FF11A20142200FD66EE /* Logging */; };
+		A66EA03A1A20161700FD66EE /* Matrix in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FF21A20142200FD66EE /* Matrix */; };
+		A66EA03B1A20161700FD66EE /* AbstractMatrix.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FF31A20142200FD66EE /* AbstractMatrix.hpp */; };
+		A66EA03C1A20161700FD66EE /* DenseMatrix-inl.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FF41A20142200FD66EE /* DenseMatrix-inl.hpp */; };
+		A66EA03D1A20161700FD66EE /* DenseMatrix.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FF61A20142200FD66EE /* DenseMatrix.hpp */; };
+		A66EA03E1A20161700FD66EE /* SparseMatrix-inl.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FF71A20142200FD66EE /* SparseMatrix-inl.hpp */; };
+		A66EA03F1A20161700FD66EE /* SparseMatrix.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FF91A20142200FD66EE /* SparseMatrix.hpp */; };
+		A66EA0401A20161700FD66EE /* SparseVector-inl.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FFA1A20142200FD66EE /* SparseVector-inl.hpp */; };
+		A66EA0411A20161700FD66EE /* SparseVector.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FFB1A20142200FD66EE /* SparseVector.hpp */; };
+		A66EA0421A20161700FD66EE /* Mutation-inl.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FFC1A20142200FD66EE /* Mutation-inl.hpp */; };
+		A66EA0431A20161700FD66EE /* Mutation.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66E9FFE1A20142200FD66EE /* Mutation.hpp */; };
+		A66EA0441A20161700FD66EE /* PairwiseAlignment.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66EA0001A20142200FD66EE /* PairwiseAlignment.hpp */; };
+		A66EA0451A20161700FD66EE /* Poa in Sources */ = {isa = PBXBuildFile; fileRef = A66EA0011A20142200FD66EE /* Poa */; };
+		A66EA0461A20161700FD66EE /* Quiver in Sources */ = {isa = PBXBuildFile; fileRef = A66EA0021A20142200FD66EE /* Quiver */; };
+		A66EA0471A20161700FD66EE /* Read.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66EA0041A20142200FD66EE /* Read.hpp */; };
+		A66EA0481A20161700FD66EE /* Sequence.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66EA0061A20142200FD66EE /* Sequence.hpp */; };
+		A66EA0491A20161700FD66EE /* Simulation in Sources */ = {isa = PBXBuildFile; fileRef = A66EA0071A20142200FD66EE /* Simulation */; };
+		A66EA04A1A20161700FD66EE /* Statistics in Sources */ = {isa = PBXBuildFile; fileRef = A66EA0081A20142200FD66EE /* Statistics */; };
+		A66EA04B1A20161700FD66EE /* Types.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66EA0091A20142200FD66EE /* Types.hpp */; };
+		A66EA04C1A20161700FD66EE /* Utils.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66EA00B1A20142200FD66EE /* Utils.hpp */; };
+		A66EA04D1A20161700FD66EE /* Version.hpp in Sources */ = {isa = PBXBuildFile; fileRef = A66EA00D1A20142200FD66EE /* Version.hpp */; };
+		A66EA04E1A20165200FD66EE /* AffineAlignment.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FE41A20142200FD66EE /* AffineAlignment.cpp */; };
+		A66EA04F1A20165200FD66EE /* Checksum.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FE61A20142200FD66EE /* Checksum.cpp */; };
+		A66EA0501A20165200FD66EE /* Coverage.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FE81A20142200FD66EE /* Coverage.cpp */; };
+		A66EA0511A20165200FD66EE /* Edna in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FEA1A20142200FD66EE /* Edna */; };
+		A66EA0521A20165200FD66EE /* Feature.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FEB1A20142200FD66EE /* Feature.cpp */; };
+		A66EA0531A20165200FD66EE /* Features.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FED1A20142200FD66EE /* Features.cpp */; };
+		A66EA0541A20165200FD66EE /* Logging in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FF11A20142200FD66EE /* Logging */; };
+		A66EA0551A20165200FD66EE /* Matrix in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FF21A20142200FD66EE /* Matrix */; };
+		A66EA0561A20165200FD66EE /* DenseMatrix.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FF51A20142200FD66EE /* DenseMatrix.cpp */; };
+		A66EA0571A20165200FD66EE /* SparseMatrix.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FF81A20142200FD66EE /* SparseMatrix.cpp */; };
+		A66EA0581A20165200FD66EE /* Mutation.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FFD1A20142200FD66EE /* Mutation.cpp */; };
+		A66EA0591A20165200FD66EE /* PairwiseAlignment.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66E9FFF1A20142200FD66EE /* PairwiseAlignment.cpp */; };
+		A66EA05A1A20165200FD66EE /* Poa in Headers */ = {isa = PBXBuildFile; fileRef = A66EA0011A20142200FD66EE /* Poa */; };
+		A66EA05B1A20165200FD66EE /* Quiver in Headers */ = {isa = PBXBuildFile; fileRef = A66EA0021A20142200FD66EE /* Quiver */; };
+		A66EA05C1A20165200FD66EE /* Read.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66EA0031A20142200FD66EE /* Read.cpp */; };
+		A66EA05D1A20165200FD66EE /* Sequence.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66EA0051A20142200FD66EE /* Sequence.cpp */; };
+		A66EA05E1A20165200FD66EE /* Simulation in Headers */ = {isa = PBXBuildFile; fileRef = A66EA0071A20142200FD66EE /* Simulation */; };
+		A66EA05F1A20165200FD66EE /* Statistics in Headers */ = {isa = PBXBuildFile; fileRef = A66EA0081A20142200FD66EE /* Statistics */; };
+		A66EA0601A20165200FD66EE /* Utils.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66EA00A1A20142200FD66EE /* Utils.cpp */; };
+		A66EA0611A20165200FD66EE /* Version.cpp in Headers */ = {isa = PBXBuildFile; fileRef = A66EA00C1A20142200FD66EE /* Version.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -107,10 +156,10 @@
 				A66E9FE41A20142200FD66EE /* AffineAlignment.cpp */,
 				A66E9FE51A20142200FD66EE /* AffineAlignment.hpp */,
 				A66E9FE61A20142200FD66EE /* Checksum.cpp */,
+				A66E9FEA1A20142200FD66EE /* Edna */,
 				A66E9FE71A20142200FD66EE /* Checksum.hpp */,
 				A66E9FE81A20142200FD66EE /* Coverage.cpp */,
 				A66E9FE91A20142200FD66EE /* Coverage.hpp */,
-				A66E9FEA1A20142200FD66EE /* Edna */,
 				A66E9FEB1A20142200FD66EE /* Feature.cpp */,
 				A66E9FEC1A20142200FD66EE /* Feature.hpp */,
 				A66E9FED1A20142200FD66EE /* Features.cpp */,
@@ -165,6 +214,26 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A66EA04E1A20165200FD66EE /* AffineAlignment.cpp in Headers */,
+				A66EA04F1A20165200FD66EE /* Checksum.cpp in Headers */,
+				A66EA0501A20165200FD66EE /* Coverage.cpp in Headers */,
+				A66EA0511A20165200FD66EE /* Edna in Headers */,
+				A66EA0521A20165200FD66EE /* Feature.cpp in Headers */,
+				A66EA0531A20165200FD66EE /* Features.cpp in Headers */,
+				A66EA0541A20165200FD66EE /* Logging in Headers */,
+				A66EA0551A20165200FD66EE /* Matrix in Headers */,
+				A66EA0561A20165200FD66EE /* DenseMatrix.cpp in Headers */,
+				A66EA0571A20165200FD66EE /* SparseMatrix.cpp in Headers */,
+				A66EA0581A20165200FD66EE /* Mutation.cpp in Headers */,
+				A66EA0591A20165200FD66EE /* PairwiseAlignment.cpp in Headers */,
+				A66EA05A1A20165200FD66EE /* Poa in Headers */,
+				A66EA05B1A20165200FD66EE /* Quiver in Headers */,
+				A66EA05C1A20165200FD66EE /* Read.cpp in Headers */,
+				A66EA05D1A20165200FD66EE /* Sequence.cpp in Headers */,
+				A66EA05E1A20165200FD66EE /* Simulation in Headers */,
+				A66EA05F1A20165200FD66EE /* Statistics in Headers */,
+				A66EA0601A20165200FD66EE /* Utils.cpp in Headers */,
+				A66EA0611A20165200FD66EE /* Version.cpp in Headers */,
 				A66EA00F1A20142200FD66EE /* AffineAlignment.hpp in Headers */,
 				A66EA01A1A20142200FD66EE /* AbstractMatrix.hpp in Headers */,
 				A66EA01B1A20142200FD66EE /* DenseMatrix-inl.hpp in Headers */,
@@ -267,6 +336,35 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A66EA0311A20161700FD66EE /* AffineAlignment.hpp in Sources */,
+				A66EA0321A20161700FD66EE /* Checksum.hpp in Sources */,
+				A66EA0331A20161700FD66EE /* Coverage.hpp in Sources */,
+				A66EA0341A20161700FD66EE /* Edna in Sources */,
+				A66EA0351A20161700FD66EE /* Feature.hpp in Sources */,
+				A66EA0361A20161700FD66EE /* Features.hpp in Sources */,
+				A66EA0371A20161700FD66EE /* Interval.hpp in Sources */,
+				A66EA0381A20161700FD66EE /* LFloat.hpp in Sources */,
+				A66EA0391A20161700FD66EE /* Logging in Sources */,
+				A66EA03A1A20161700FD66EE /* Matrix in Sources */,
+				A66EA03B1A20161700FD66EE /* AbstractMatrix.hpp in Sources */,
+				A66EA03C1A20161700FD66EE /* DenseMatrix-inl.hpp in Sources */,
+				A66EA03D1A20161700FD66EE /* DenseMatrix.hpp in Sources */,
+				A66EA03E1A20161700FD66EE /* SparseMatrix-inl.hpp in Sources */,
+				A66EA03F1A20161700FD66EE /* SparseMatrix.hpp in Sources */,
+				A66EA0401A20161700FD66EE /* SparseVector-inl.hpp in Sources */,
+				A66EA0411A20161700FD66EE /* SparseVector.hpp in Sources */,
+				A66EA0421A20161700FD66EE /* Mutation-inl.hpp in Sources */,
+				A66EA0431A20161700FD66EE /* Mutation.hpp in Sources */,
+				A66EA0441A20161700FD66EE /* PairwiseAlignment.hpp in Sources */,
+				A66EA0451A20161700FD66EE /* Poa in Sources */,
+				A66EA0461A20161700FD66EE /* Quiver in Sources */,
+				A66EA0471A20161700FD66EE /* Read.hpp in Sources */,
+				A66EA0481A20161700FD66EE /* Sequence.hpp in Sources */,
+				A66EA0491A20161700FD66EE /* Simulation in Sources */,
+				A66EA04A1A20161700FD66EE /* Statistics in Sources */,
+				A66EA04B1A20161700FD66EE /* Types.hpp in Sources */,
+				A66EA04C1A20161700FD66EE /* Utils.hpp in Sources */,
+				A66EA04D1A20161700FD66EE /* Version.hpp in Sources */,
 				A66EA0141A20142200FD66EE /* Feature.cpp in Sources */,
 				A66EA0121A20142200FD66EE /* Coverage.cpp in Sources */,
 				A66EA01C1A20142200FD66EE /* DenseMatrix.cpp in Sources */,
@@ -432,6 +530,7 @@
 				A66E9FDA1A2013D400FD66EE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A66E9FE11A2013F200FD66EE /* Build configuration list for PBXNativeTarget "ConsensusCoreXcode" */ = {
 			isa = XCConfigurationList;
@@ -440,6 +539,7 @@
 				A66E9FE31A2013F200FD66EE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
