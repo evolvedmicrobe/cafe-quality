@@ -5,16 +5,24 @@ setwd("/Users/nigel/git/cafe-quality/doc/")
 grid.newpage()
 pdf_width=7
 pdf_height=4
-tpl =     "CTGGGGC"
-read =    "CTGGGGC"
-rDelTag = "NNNNGNN"
+tpl =     "CTGGGTGCGGCGCCATCGCTAC"
+read =    "CTGGGTGCGGCGCCATCGCTAC"
+rDelTag = "NNNNGNNNNNNGNNNCNNYNCC"
 j = nchar(tpl)+1
 i = nchar(rDelTag)+1
 
 g_alpha =1
 # Make boxes
-mkBase <- function(showInit=FALSE)  {
+mkBase <- function(showInit=FALSE, showHEAD=TRUE)  {
   grid.newpage()
+  if(showHEAD) {
+    
+    lay = grid.layout(nrow=4,ncol=1, heights = unit( c(2,1,1,1), c("lines","lines","lines","null"))
+      pushViewport(viewport(layout=lay))
+      
+      
+  }
+  
   layout=grid.layout(nrow=3,ncol=4, widths=unit(c(5,1,.2,3),c("lines","null","null","mm")),heights=unit(c(3,1,3),c("lines","null","mm")))
   grid.rect()
   pushViewport(viewport(layout=layout,name="base"))
@@ -150,7 +158,7 @@ drawTriangle<-function(i,j,color) {
   seekViewport("base")
 }
 
-fillDiag <- function(i, j, color, size = 4) {
+fillDiag <- function(i, j, color, size = 16) {
   els = seq(0, size - 1)
   rows = i + els
   cols = j - els
@@ -171,9 +179,9 @@ drawArrow<- function(i1,j1,i2,j2) {
   seekViewport("base")  
 }
 
-sr = 4
-sc = 7
-pdf("sse_elements.pdf" , width = pdf_width, height = pdf_height)
+sr = 5
+sc = 19
+#pdf("sse_elements.pdf" , width = pdf_width, height = pdf_height)
 mkBase(FALSE)
 colors = brewer.pal(5,"Set1")# list("green", "red", "blue", "black", "black")
 fillDiag(sr,sc, colors[1])
@@ -182,14 +190,14 @@ fillDiag(sr,sc-1,colors[4]) #Deletion
 fillDiag(sr-1,sc-2,colors[5])
 fillDiag(sr-1,sc, colors[2])
 #now to manually add the split
-xs = sr + seq(0,2)
-ys = sc -1 - seq(0,2)
-for (q in seq(1,4)) { drawTriangle(xs[q],ys[q], colors[4])}
+xs = sr + seq(0,14)
+ys = sc -1 - seq(0,14)
+for (q in seq(1,15)) { drawTriangle(xs[q],ys[q], colors[4])}
 names = list("Current", "Insertion", "Match", "Deletion","Merge")
-drawArrow(i,2,i,sc)
-drawArrow(sr-2,2,sr-2,sc)
+drawArrow(i-1,2,i-1,sc)
+drawArrow(sr-3,2,sr-3,sc)
 mkLegend( names, colors  )
-dev.off()
+#dev.off()
 
 
 
