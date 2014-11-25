@@ -215,10 +215,12 @@ namespace ConsensusCore
     MultiReadMutationScorer<R>::ApplyMutations(const std::vector<Mutation>& mutations)
     {
         DEBUG_ONLY(CheckInvariants());
+        // Create a conversion vector
         std::vector<int> mtp = TargetToQueryPositions(mutations, fwdTemplate_);
+        // Change the template
         fwdTemplate_ = ConsensusCore::ApplyMutations(mutations, fwdTemplate_);
         revTemplate_ = ReverseComplement(fwdTemplate_);
-
+        // Apply conversion vector
         foreach (ReadStateType& rs, reads_)
         {
             try {

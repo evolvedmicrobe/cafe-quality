@@ -216,6 +216,16 @@ namespace PacBio.Consensus
     /// </summary>
     public class MultiReadMutationScorer : IDisposable
     {
+
+        /* TODO: These cannot be used in production code.  Only used presently 
+                 to track the state mutation in the C++ code */
+        private List<Mutation> appliedMutations = new List<Mutation>();
+        public IReadOnlyList<Mutation> AppliedMutations {
+            get { return appliedMutations.AsReadOnly (); }
+        }
+        public List<AlignedSequenceReg> OriginalRegions;
+
+
         private static PacBioLogger logger = PacBioLogger.GetLogger("MultiReadMutationScorer");
 
         private static void Log(LogLevel level, string msg)
@@ -272,9 +282,10 @@ namespace PacBio.Consensus
             {
                 throw new ApplicationException("unrecognized recursion algorthim");
             }
-
+            OriginalRegions = new List<AlignedSequenceReg> ();
             foreach (var r in regions)
             {
+                OriginalRegions.Add (r);
                 var name = TraceReference.CreateSpringfieldSubread(bases, r.Start, r.End);
                 var chem = config.HasChemistryOverride ? "*" : bases.Zmw.Movie.SequencingChemistry;
 
@@ -287,9 +298,7 @@ namespace PacBio.Consensus
                     {
                         #if DIAGNOSTIC
                         scorer.AddRead(mappedRead, 1.0f);
-
                         var prefix = name.Replace("/", ".");
-
                         WriteAlphaBetaMatrices(readBitmap.Count, prefix);
                         #else
                         Log(LogLevel.DEBUG, "Skipped adding read '{0}' -- more than {1}% of entries used.", name, AddThreshold * 100);
@@ -323,10 +332,11 @@ namespace PacBio.Consensus
             {
                 throw new ApplicationException("unrecognized recursion algorthim");
             }
-
+            OriginalRegions = new List<AlignedSequenceReg> ();
             foreach (var regAndBases in regions)
             {
                 var r = regAndBases.Item1;
+                OriginalRegions.Add (r);
                 var bases = regAndBases.Item2;
                 var name = TraceReference.CreateSpringfieldSubread(bases, r.Start, r.End);
                 var chem = config.HasChemistryOverride ? "*" : bases.Zmw.Movie.SequencingChemistry;
@@ -351,63 +361,6 @@ namespace PacBio.Consensus
                 }
             }
 
-        }
-
-
-        /// <summary>
-        /// Construct a mutation evalutor for the pulse observations in encapsulated by read, on template TrialTemplate.
-        /// </summary>
-        public MultiReadMutationScorer(IEnumerable<IAlnSummary> alignments, int referenceChunkStart,
-                                       TrialTemplate trialTemplate, ScorerConfig config)
-        {
-            StartAdapterBases = trialTemplate.StartAdapterBases;
-            EndAdapterBases = trialTemplate.EndAdapterBases;
-
-            var strandTpl = trialTemplate.GetSequence(Strand.Forward);
-
-            if (config.Algorithm == RecursionAlgo.Viterbi)
-            {
-                scorer = new SparseSseQvMultiReadMutationScorer(config.Parameters, strandTpl);
-            }
-            else if (config.Algorithm == RecursionAlgo.Prob)
-            {
-                scorer = new SparseSseQvSumProductMultiReadMutationScorer(config.Parameters, strandTpl);
-            }
-            else
-            {
-                throw new ApplicationException("unrecognized recursion algorthim");
-            }
-
-            var referenceChunkSize = trialTemplate.Sequence.Length;
-            var referenceChunkEnd = referenceChunkStart + referenceChunkSize;
-
-            foreach (var a in alignments)
-            {
-                // we have to subtract out the current referenceChunk start because the provided
-                // trialTemplate has already been chunked.
-                // TODO (lhepler) -- fix how this is handled, it is very inelegant at this moment
-                var templateStart = Math.Max(a.TemplateStart, referenceChunkStart) - referenceChunkStart;
-                var templateEnd = Math.Min(a.TemplateEnd, referenceChunkEnd) - referenceChunkStart;
-                var chem = config.HasChemistryOverride ? "*" : a.SequencingChemistry;
-
-                using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(referenceChunkStart, referenceChunkSize, a))
-                using (var read = new Read(qsf, a.ReadName, chem))
-                using (var mappedRead = new MappedRead(read, (StrandEnum)a.Strand, templateStart, templateEnd))
-                {
-                    if (!scorer.AddRead(mappedRead, AddThreshold))
-                    {
-                        #if DIAGNOSTIC
-                        scorer.AddRead(mappedRead, 1.0f);
-
-                        var prefix = name.Replace("/", ".");
-
-                        WriteAlphaBetaMatrices(readBitmap.Count, prefix);
-                        #else
-                        Log(LogLevel.DEBUG, "Skipped adding read '{0}' -- more than {1}% of entries used.", a.ReadName, AddThreshold * 100);
-                        #endif
-                    }
-                }
-            }
         }
 
 
@@ -686,6 +639,8 @@ namespace PacBio.Consensus
         /// </summary>
         public void ApplyMutations(List<Mutation> mutations)
         {
+            appliedMutations.AddRange (mutations);
+           
             // Convert to the CC mutation type
             // NOTE - you must ensure that the CC mutations are not GC'd/deleted before the C++ ApplyMutations method is finished.
             var ccMuts =
@@ -710,9 +665,15 @@ namespace PacBio.Consensus
         private void ApplyToScorer(IEnumerable<ConsensusCore.Mutation> muts)
         {
             var mutVect = new MutationVector();
-            foreach(var m in muts)
-                mutVect.Add(m);
-
+            foreach (var m in muts) {
+                mutVect.Add (m);
+            }
+            // Now update the regions, also done internally in C++ code
+            var convertTable = ConsensusCore.ConsensusCore.TargetToQueryPositions (mutVect, scorer.Template ());
+            foreach (var r in OriginalRegions) {
+                r.TemplateStart = convertTable [r.TemplateStart];
+                r.TemplateEnd = convertTable [r.TemplateEnd];
+            }
             scorer.ApplyMutations(mutVect);
         }
 

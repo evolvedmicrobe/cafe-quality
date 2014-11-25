@@ -403,7 +403,7 @@ namespace PacBio.Consensus
             ISequencingZmw zmw, int iterations, out int iterationsTaken, IZmwBases bases)
         {
             // Run the quiver refinement step
-            var result = InnerMultiReadConsensus(scorer, iterations, out iterationsTaken, regions, bases);
+            var result = InnerMultiReadConsensus(scorer, iterations, out iterationsTaken, bases);
 
 
             // Sort the regions that will get reported in the bas.h5
@@ -420,7 +420,7 @@ namespace PacBio.Consensus
         public static Tuple<TrialTemplate, List<MutationScore>> InnerMultiReadConsensus(MultiReadMutationScorer scorer,
                                                                                         int iterations,
                                                                                         out int iterationsTaken,
-                                                                                        List<AlignedSequenceReg> regions, IZmwBases bases)                                                                         
+                                                                                        IZmwBases bases)                                                                         
         {
 
             Func<Mutation, MutationScore> scoreMutation = 
@@ -516,9 +516,9 @@ namespace PacBio.Consensus
                 i++;
             }
             
-            iterationsTaken = i
+            iterationsTaken = i;
             // Now to polish homopolymers
-            var polished = HomopolymerPolisher.PolishHomopolymers(scorer.Template, regions, bases, allScores);
+            var polished = HomopolymerPolisher.PolishHomopolymers(scorer.Template, scorer, bases, allScores);
             return polished;
         }
 

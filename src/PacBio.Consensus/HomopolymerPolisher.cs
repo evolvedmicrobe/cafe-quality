@@ -16,13 +16,13 @@ namespace PacBio.Consensus
     {
       
         internal static Tuple<TrialTemplate, List<MutationScore>> PolishHomopolymers(TrialTemplate tpl,
-                                                            List<AlignedSequenceReg> regions,
+                                                            MultiReadMutationScorer oldScorer,
                                                             IZmwBases bases,
                                                             List<MutationScore> allScores)
         {
             var scConfig = ParameterLoading.C2Parameters;
             scConfig.Algorithm = RecursionAlgo.Prob;
-            var scorer = new MultiReadMutationScorer(regions, bases, tpl, scConfig);
+            var scorer = new MultiReadMutationScorer(oldScorer.OriginalRegions, bases, tpl, scConfig);
             Func<Mutation, MutationScore> scoreMutation =
                 m => new MutationScore { Score = scorer.ScoreMutation(m), Mutation = m, Exists = true };
             double score;

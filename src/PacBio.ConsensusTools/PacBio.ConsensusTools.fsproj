@@ -36,8 +36,7 @@
     </PlatformTarget>
     <Tailcalls>true</Tailcalls>
     <ConsolePause>false</ConsolePause>
-    <Commandlineparameters>CircularConsensus -n 8 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  -csv.
-</Commandlineparameters>
+    <Commandlineparameters>CircularConsensus -n 8 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  -csv</Commandlineparameters>
     <EnvironmentVariables>
       <EnvironmentVariables>
         <Variable name="LD_LIBRARY_PATH" value="/Users/nigel/lib/lib" />
