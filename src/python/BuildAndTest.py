@@ -4,10 +4,19 @@
 
 import os
 import subprocess
+import sys
 
+plat = sys.platform
 # Hard coded paths
-test_top_dir = "/Users/nigel/CCS_P6_C4/TestRun/"
-fofn = "/Users/nigel/CCS_P6_C4/input.fofn"
+if plat=="darwin":
+    print "Running on Mac"
+    test_top_dir = "/Users/nigel/CCS_P6_C4/TestRun/"
+    fofn = "/Users/nigel/CCS_P6_C4/input.fofn"
+elif plat=="linux2":
+    print "Running on Unix"
+    fofn = "/home/UNIXHOME/ndelaney/ccswork/CCS_P6_C4/input.fofn"
+    test_top_dir = "/home/UNIXHOME/ndelaney/ccswork/CCS_P6_C4"
+
 
 # should be /Users/nigel/git/cafe-quality/src/python
 start_dir = os.getcwd()
