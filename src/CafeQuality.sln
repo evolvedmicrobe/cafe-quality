@@ -17,8 +17,6 @@ Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "PacBio.ConsensusTools", "Pa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PacBio.Consensus", "PacBio.Consensus\PacBio.Consensus.csproj", "{D3A49F4E-1139-4782-A72A-599CCE57D715}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tmp", "tmp\tmp.csproj", "{F618F3E7-3661-4E66-99F5-651B1B679EC7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HPcorrector", "HPcorrector\HPcorrector.csproj", "{7A5CCB0D-1CB1-438E-9A9B-959CDD50C292}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{CE75E5E6-A0E1-4F9B-AB91-813ECE59912B}"
