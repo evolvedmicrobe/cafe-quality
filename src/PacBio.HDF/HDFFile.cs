@@ -1512,11 +1512,11 @@ namespace PacBio.HDF
     public class HDFDatasetCreateProperty : HDFProperty
     {
         public HDFDatasetCreateProperty()
-            : base("H5P_CLS_DATASET_CREATE")
+            : base("H5P_CLS_DATASET_CREATE_ID")
         {
         }
 
-        public HDFDatasetCreateProperty(int id) : base("H5P_CLS_DATASET_CREATE", id)
+        public HDFDatasetCreateProperty(int id) : base("H5P_CLS_DATASET_CREATE_ID", id)
         {
         }
 
@@ -1566,7 +1566,7 @@ namespace PacBio.HDF
     public class HDFDatasetAccessProperty : HDFProperty
     {
         public HDFDatasetAccessProperty()
-            : base("H5P_CLS_DATASET_ACCESS")
+            : base("H5P_CLS_DATASET_ACCESS_ID")
         {
         }
 
