@@ -79,9 +79,6 @@
     <Reference Include="PacBio.FSharp.Utils">
       <HintPath>..\..\lib\PacBio.FSharp.Utils.dll</HintPath>
     </Reference>
-    <Reference Include="PacBio.HDF">
-      <HintPath>..\..\lib\PacBio.HDF.dll</HintPath>
-    </Reference>
     <Reference Include="PacBio.IO">
       <HintPath>..\..\lib\PacBio.IO.dll</HintPath>
     </Reference>
@@ -101,6 +98,10 @@
     <Reference Include="NDesk.Options">
       <HintPath>..\..\lib\NDesk.Options.dll</HintPath>
     </Reference>
+    <ProjectReference Include="..\PacBio.HDF\PacBio.HDF.csproj">
+      <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
+      <Name>PacBio.HDF</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
   </PropertyGroup>
