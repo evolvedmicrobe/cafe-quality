@@ -72,50 +72,27 @@ namespace PacBio.HDF
 
         public static readonly Platform RunningPlatform = GetRunningPlatform();
 
-
-        //The actual DLL this comes from is msvcrt80 but it seems that the .net loader knows this 'magic' name
-        
-        private const string LinuxRuntimeName = "libc.so.6";
-
         /// <summary>
-        /// C library free() routine
+        /// Call to free HDF5 memory
+        /// H5_DLL herr_t H5free_memory(void *mem);
+        /// 
         /// </summary>
         /// <param name="addr"></param>
         /// <returns></returns>
-        [DllImport(LinuxRuntimeName, EntryPoint = "free", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void free_Linux(IntPtr addr);
+        [DllImport(HDFGlue.hdfPInvokeName, CallingConvention = CallingConvention.Cdecl)]
+        static extern int H5free_memory(IntPtr addr);
 
-
-        private const string WindowsRuntimeName = "hdf5.dll";
 
         /// <summary>
-        /// C library free() routine. Same heap as the one used by hdf5
+        /// Frees memory by calling the H5 free function.
         /// </summary>
-        /// <param name="addr"></param>
-        /// <returns></returns>
-        [DllImport("msvcr100.dll", EntryPoint = "free", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void free_Windows(IntPtr addr);
-
-
-        private const string MacRuntimeName = "libc.dylib";
-
-        [DllImport(MacRuntimeName, EntryPoint = "free", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void free_Mac(IntPtr addr);
-
-
+        /// <param name="addr">Address.</param>
         public static void free(IntPtr addr)
         {
-            if (RunningPlatform == Platform.Windows)
-            {
-                free_Windows(addr);
-            }
-            else if (RunningPlatform == Platform.Linux)
-            {
-                free_Linux(addr);
-            }
-            else
-            {
-                free_Mac(addr);
+
+            var res = H5free_memory (addr);
+            if (res < 0) {
+                throw new InvalidOperationException ("Freeing memory in HDF5 Library Failed. Addr: " + addr.ToString ());
             }
         }
 
