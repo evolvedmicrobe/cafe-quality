@@ -49,7 +49,7 @@ type CircularConsensus() as this =
     override this.Run(args) =
         this.PrepareOutputDirectory !outputPath
 
-        let processMoviePart basFile ccsH5 fasta fastq csv =
+        let processMoviePart basFile ccsH5 fasta fastq csv compileRun =
             let basReader = BaseReader.CreateSource basFile
             let pulseFeatures = Set.empty // FIXME: okay for now, but should use PacBio.Data APIs in the future
             let chemistries = Set.singleton basReader.SequencingChemistry
@@ -85,7 +85,11 @@ type CircularConsensus() as this =
                 ()
 
             try
-                toProcess |> Seq.parMap (fun x -> (x, stream.Map x)) |> Seq.iter sinkFunc
+                let mapFun = (fun x -> (x, stream.Map x))
+                if not compileRun then 
+                        toProcess |> Seq.parMap mapFun |> Seq.iter sinkFunc 
+                    else
+                        toProcess |> Seq.take 20 |> Seq.map mapFun |> Seq.iter sinkFunc
                 fastaSink.OnComplete()
                 h5Sink.OnComplete()
                 csvSink.OnComplete()
@@ -124,6 +128,7 @@ type CircularConsensus() as this =
 
             this.logf Info "Processing bas.h5 file: '%s'" basFile
 
-            processMoviePart basFile ccsH5 fasta fastq csv
+            processMoviePart basFile ccsH5 fasta fastq csv true
+            processMoviePart basFile ccsH5 fasta fastq csv false
 
         int ProcessExitCode.Success
