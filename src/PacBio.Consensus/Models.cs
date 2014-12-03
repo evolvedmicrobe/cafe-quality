@@ -34,7 +34,7 @@ namespace PacBio.Consensus
             get
             {
                 var path = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
-                return Path.Combine(path, "Test");
+                return Path.Combine(path, "Chemistry");
             }
         }
 
