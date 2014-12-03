@@ -954,8 +954,8 @@ namespace PacBio.HDF
                 {
                     // Grow our dataset dims to be at least as large as the file dimensions (the user will use the hyperslab
                     // for smaller reads)
-                    using (var space = Dataspace)
-                        ((HDFDataspace)filedataspace).Dimensions = space.Dimensions;
+                    var space = Dataspace;
+                    ((HDFDataspace)filedataspace).Dimensions = space.Dimensions;
                 }
 
                 if (target.Length > 0)
