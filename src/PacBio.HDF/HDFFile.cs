@@ -854,91 +854,87 @@ namespace PacBio.HDF
         void ReadRowMajor(ref Array target, IDataspace filedataspace)
         {
             // The datatype we should use to match the layout of .net objects
-            using (var datasetType = (HDFDatatype) Datatype)
-            using (var hdfNativeType = datasetType.MapToNativeType())
+            var datasetType = (HDFDatatype)Datatype;
+            var hdfNativeType = datasetType.MapToNativeType ();           
+            // We try to have HDF do any necessary int size conversion for us,
+            // but we can't do that if we are reading pointer based objects (arrays of strings etc)
+            Type outputArrayType = target.GetType().GetElementType();
+
+            // We can not automatically convert _to IntPtrs_ or _from strings/refs_.
+            Type fromType = hdfNativeType.NativeType;
+            bool isSimpleType = (outputArrayType != typeof(IntPtr)) && (fromType != typeof(string)) && (fromType != typeof(H5R.RegRef));
+
+            // Size our memory dataspace by looking at the dimensions of the array that was passed in
+            Tuple<Type, HDFDataspace> tu = GetElementType(target, filedataspace);
+            var memdataspace = tu.Item2;
+            HDFDatatype dtypeInRAM = isSimpleType ? new HDFDatatype(outputArrayType) : new HDFDatatype(H5T.copy(hdfNativeType.Id));
+
+            // Read our data into a 1d array of bytes
+            Array linear = target;
+
+            // Don't let this buffer move
+            GCHandle pinArray = GCHandle.Alloc(linear, GCHandleType.Pinned);
+
+            try
             {
-                // We try to have HDF do any necessary int size conversion for us,
-                // but we can't do that if we are reading pointer based objects (arrays of strings etc)
-                Type outputArrayType = target.GetType().GetElementType();
+                IntPtr bytes = Marshal.UnsafeAddrOfPinnedArrayElement(linear, 0);
 
-                // We can not automatically convert _to IntPtrs_ or _from strings/refs_.
-                Type fromType = hdfNativeType.NativeType;
-                bool isSimpleType = (outputArrayType != typeof(IntPtr)) && (fromType != typeof(string)) && (fromType != typeof(H5R.RegRef));
+                ReadLow(dtypeInRAM, memdataspace, (HDFDataspace) filedataspace, bytes);
 
-                // Size our memory dataspace by looking at the dimensions of the array that was passed in
-                Tuple<Type, HDFDataspace> tu = GetElementType(target, filedataspace);
-                using (var memdataspace = tu.Item2)
-                using (HDFDatatype dtypeInRAM = isSimpleType ? new HDFDatatype(outputArrayType) : new HDFDatatype(H5T.copy(hdfNativeType.Id)))
+                // Copy our bytes into our structured array
+                // No longer needed now that we read in place
+                // Buffer.BlockCopy(linear, 0, target, 0, nbytes);
+
+                // If our array is an array of pointers, we'll need to create objects of the correct type and copy those objects over
+                Type desiredType = dtypeInRAM.NativeType;
+
+                if (!desiredType.IsPrimitive)   // Was !IsValueType
                 {
-                    // Read our data into a 1d array of bytes
-                    Array linear = target;
+                    Array newArray = CreateArray(false);
 
-                    // Don't let this buffer move
-                    GCHandle pinArray = GCHandle.Alloc(linear, GCHandleType.Pinned);
+                    int srcoffset = 0;
+                    int elemSize = dtypeInRAM.ValueSize;
 
-                    try
+                    foreach (long[] index in newArray.EnumerateIndicies()) // i = 0; i < newArray.Length; i++)
                     {
-                        IntPtr bytes = Marshal.UnsafeAddrOfPinnedArrayElement(linear, 0);
+                        object newval;
 
-                        ReadLow(dtypeInRAM, memdataspace, (HDFDataspace) filedataspace, bytes);
-
-                        // Copy our bytes into our structured array
-                        // No longer needed now that we read in place
-                        // Buffer.BlockCopy(linear, 0, target, 0, nbytes);
-
-                        // If our array is an array of pointers, we'll need to create objects of the correct type and copy those objects over
-                        Type desiredType = dtypeInRAM.NativeType;
-
-                        if (!desiredType.IsPrimitive)   // Was !IsValueType
+                        if (desiredType == typeof(string))
                         {
-                            Array newArray = CreateArray(false);
-
-                            int srcoffset = 0;
-                            int elemSize = dtypeInRAM.ValueSize;
-
-                            foreach (long[] index in newArray.EnumerateIndicies()) // i = 0; i < newArray.Length; i++)
+                            if (elemSize == 0)   // We must be using ptrs
                             {
-                                object newval;
-
-                                if (desiredType == typeof(string))
-                                {
-                                    if (elemSize == 0)   // We must be using ptrs
-                                    {
-                                        var inarg = (IntPtr) target.GetValue(srcoffset);
-                                        newval = Marshal.PtrToStringAnsi(inarg);
-                                        HDFFree(inarg);
-                                    }
-                                    else
-                                    {
-                                        // copy from in place
-                                        var btarget = (byte[]) target;
-                                        // cut off the tring with the null terminator -- crap was getting appended
-                                        var str = fromAscii.GetString(btarget, srcoffset, elemSize);
-
-                                        if (str.IndexOf((char) 0) > 0)
-                                            newval = str.Substring(0, str.IndexOf((char) 0));
-                                        else
-                                            newval = str;
-                                    }
-                                }
-                                else
-                                {
-                                    Debug.Assert(desiredType.IsValueType);  // If not a string, the type better be a struct
-                                    IntPtr srcptr = Marshal.UnsafeAddrOfPinnedArrayElement(linear, srcoffset);
-                                    newval = Marshal.PtrToStructure(srcptr, desiredType);
-                                }
-
-                                newArray.SetValue(newval, index);
-                                srcoffset += (elemSize != 0) ? elemSize : 1;
+                                var inarg = (IntPtr) target.GetValue(srcoffset);
+                                newval = Marshal.PtrToStringAnsi(inarg);
+                                HDFFree(inarg);
                             }
-                            target = newArray;
+                            else
+                            {
+                                // copy from in place
+                                var btarget = (byte[]) target;
+                                // cut off the tring with the null terminator -- crap was getting appended
+                                var str = fromAscii.GetString(btarget, srcoffset, elemSize);
+
+                                if (str.IndexOf((char) 0) > 0)
+                                    newval = str.Substring(0, str.IndexOf((char) 0));
+                                else
+                                    newval = str;
+                            }
                         }
+                        else
+                        {
+                            Debug.Assert(desiredType.IsValueType);  // If not a string, the type better be a struct
+                            IntPtr srcptr = Marshal.UnsafeAddrOfPinnedArrayElement(linear, srcoffset);
+                            newval = Marshal.PtrToStructure(srcptr, desiredType);
+                        }
+                        newArray.SetValue(newval, index);
+                        srcoffset += (elemSize != 0) ? elemSize : 1;
                     }
-                    finally
-                    {
-                        pinArray.Free();
-                    }
+                    target = newArray;
                 }
+            }
+            finally
+            {
+                pinArray.Free();
             }
         }
 
@@ -949,10 +945,11 @@ namespace PacBio.HDF
         /// <param name="filedataspace">a dataspace defining what data we want to read</param>
         public void Read(ref Array target, IDataspace filedataspace)
         {
-#pragma warning disable 168
-            using (var leakCheck = new HDFLeakChecker((HDFFile) File))
-#pragma warning restore 168
+            try 
             {
+                var leakCheck = new HDFLeakChecker((HDFFile) File);
+
+            
                 if (filedataspace != null)
                 {
                     // Grow our dataset dims to be at least as large as the file dimensions (the user will use the hyperslab
@@ -966,12 +963,18 @@ namespace PacBio.HDF
                     ReadRowMajor(ref target, filedataspace);
                 }
             }
+
+            catch(Exception thrown)
+            {
+                throw new HDFException ("Row read fail:" + thrown.Message, thrown); 
+            }
         }
 
 
         public object Read()
         {
-            using (var leakCheck = new HDFLeakChecker((HDFFile)File))
+            var leakCheck = new HDFLeakChecker ((HDFFile)File);
+            try 
             {
                 Array array = CreateArray(true);
 
@@ -980,16 +983,20 @@ namespace PacBio.HDF
                 object result = array;
 
                 // If the dataspace is actually for a scalar field, just return the first field of the array
-                using (var dspace = Dataspace)
-                    if (dspace.Dimensions.Length == 0)
-                        result = array.GetValue(0);
-
+                var dspace = Dataspace;
+                if (dspace.Dimensions.Length == 0)
+                    result = array.GetValue(0);
                 // If the result is a raw hdf reference ptr, convert it to our high level class
                 if (result is H5R.RegRef)
                     result = new HDFReference((HDFFile)File, (H5R.RegRef)result);
 
                 return result;
             }
+            catch(Exception thrown)
+            {
+                throw new HDFException ("Read row failed: " + thrown.Message);
+            }
+
         }
 
         public override string ToString()

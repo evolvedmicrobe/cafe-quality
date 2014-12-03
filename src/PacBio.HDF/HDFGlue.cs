@@ -989,6 +989,7 @@ namespace PacBio.HDF
             : base(msg)
         {
         }
+        public HDFException(string msg, Exception inner) :base(msg, inner){}
 
         public string Description;
         public string MajorMessage;
