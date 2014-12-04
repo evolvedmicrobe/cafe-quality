@@ -69,7 +69,8 @@ type CircularConsensus() as this =
            
             try
                 let mapFun = (fun x -> (x, stream.Map x))
-                toProcess |> Seq.parMap mapFun |> ignore
+                let cnt = toProcess |> Seq.parMap mapFun |> Seq.length
+                System.Console.WriteLine(cnt)
             with
                 | ex ->
                     reraise ()
