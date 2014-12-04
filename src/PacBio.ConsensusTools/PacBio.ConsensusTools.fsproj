@@ -36,8 +36,7 @@
     </PlatformTarget>
     <Tailcalls>true</Tailcalls>
     <ConsolePause>false</ConsolePause>
-    <Commandlineparameters>CircularConsensus -n 8 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  -csv
-</Commandlineparameters>
+    <Commandlineparameters>/Users/nigel/CCS_P6_C4/input.fofn</Commandlineparameters>
     <EnvironmentVariables>
       <EnvironmentVariables>
         <Variable name="LD_LIBRARY_PATH" value="/Users/nigel/lib/lib" />
@@ -55,7 +54,6 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.fs" />
-    <Compile Include="ConsensusSubCommand.fs" />
     <Compile Include="CircularConsensus.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
@@ -88,12 +86,6 @@
     </Reference>
     <Reference Include="PacBio.Utils">
       <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
-    </Reference>
-    <Reference Include="ManyConsole">
-      <HintPath>..\..\lib\ManyConsole.dll</HintPath>
-    </Reference>
-    <Reference Include="NDesk.Options">
-      <HintPath>..\..\lib\NDesk.Options.dll</HintPath>
     </Reference>
     <ProjectReference Include="..\PacBio.HDF\PacBio.HDF.csproj">
       <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>

@@ -79,10 +79,8 @@ def MoveChemistry(test_dir):
 
    
 def RunTest(dir_to_run, fofn):
-    cmd_base = "mono PacBio.ConsensusTools.exe CircularConsensus -n 8"
-    outName = dir_to_run.split("/")[-1]
-    cmd_base += " -o " + outName
-    cmd_base += " -fofn=" + fofn
+    cmd_base = "mono PacBio.ConsensusTools.exe"
+    cmd_base += " " + fofn
     os.chdir(dir_to_run)
     res = os.system(cmd_base)
     if res != 0:

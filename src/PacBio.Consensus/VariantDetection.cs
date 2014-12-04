@@ -33,7 +33,6 @@ namespace PacBio.Consensus
     // Epub 2012 Oct 12. PubMed PMID: 23066108; PubMed Central PMCID: PMC3526318.
     public class VariantDetection
     {
-        private static readonly PacBioLogger Logger = PacBioLogger.GetLogger("VariantDetection");
         private readonly VariantDetectionConfig _config;
         private double[,] _parameters;
 
@@ -45,17 +44,7 @@ namespace PacBio.Consensus
         }
 
 
-        private static void Log(LogLevel level, string msg)
-        {
-            Logger.Log(level, msg);
-        }
-
-
-        private static void Log(LogLevel level, string msg, params object[] args)
-        {
-            Logger.Log(level, String.Format(msg, args));
-        }
-
+       
 
         public struct SiteCount
         {
@@ -215,9 +204,7 @@ namespace PacBio.Consensus
 
                     var seqByPos = ReadByTemplateIndex(alnSummary).ToList();
 
-                    if (idx%100 == 0)
-                        Log(LogLevel.DEBUG, "Processing seq {0}", idx + 1);
-
+            
                     for (int siteIdx = 0; siteIdx < template.Length; siteIdx++)
                     {
                         var windowStart = Math.Max(0, siteIdx - windowRadius) + templateStart;
@@ -562,8 +549,7 @@ namespace PacBio.Consensus
                 var srcParameters = iter%2 == 0 ? parameters.Item1 : parameters.Item2;
                 var dstParameters = iter%2 == 0 ? parameters.Item2 : parameters.Item1;
 
-                Log(LogLevel.INFO, String.Format("EM iteration {0}.", iter + 1));
-
+           
                 // Except given our model parameters, then maximize parameters given our expectations
                 Expect(siteCounts, srcParameters, isError, config.BinomialTestThreshold, config.MinErrorRate);
                 Maximize(siteCounts, isError, dstParameters, tmp, config.MinCoverage);
@@ -583,21 +569,14 @@ namespace PacBio.Consensus
             // predict using final parameter set (likely overkill)
             Expect(siteCounts, finalParameters, isError, config.BinomialTestThreshold, config.MinErrorRate);
 
-            // log the parameters for posterity
-            Log(LogLevel.INFO, "Parameter set:");
-
+        
             for (var from = 0; from < nBases; from++)
             {
                 for (var to = 0; to < nBases; to++)
                 {
                     if (from == to)
                         continue;
-
-                    Log(LogLevel.INFO, String.Format("  {0} -> {1} : {2:0.00000}",
-                        IndexToNuc((Nucleotide) from),
-                        IndexToNuc((Nucleotide) to),
-                        finalParameters[from, to]));
-                }
+                     }
             }
 
             return ComputeVariants(siteCounts, finalParameters, isError, template,

@@ -47,9 +47,6 @@
     <Reference Include="MathNet.Numerics">
       <HintPath>..\..\lib\MathNet.Numerics.dll</HintPath>
     </Reference>
-    <Reference Include="NLog">
-      <HintPath>..\..\lib\NLog.dll</HintPath>
-    </Reference>
     <Reference Include="PacBio.Align">
       <HintPath>..\..\lib\PacBio.Align.dll</HintPath>
     </Reference>
@@ -70,9 +67,6 @@
     </Reference>
     <Reference Include="PacBio.FSharp.Utils">
       <HintPath>..\..\lib\PacBio.FSharp.Utils.dll</HintPath>
-    </Reference>
-    <Reference Include="INIFileParser">
-      <HintPath>..\..\lib\INIFileParser.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
