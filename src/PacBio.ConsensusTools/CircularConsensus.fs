@@ -20,7 +20,6 @@ type CircularConsensus() =
     member this.Run (args : string[]) =
         // CircularConsensus -n 8 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  -csv
         fofn := args.[0]
-
        
         let processMoviePart basFile =
             let basReader = BaseReader.CreateSource basFile
