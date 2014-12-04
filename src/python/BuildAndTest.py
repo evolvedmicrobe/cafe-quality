@@ -57,12 +57,6 @@ def BuildManaged(outputDir):
     for j in releaseDirs:
         os.system("cp -r " + j + "/* " + test_dir + "/")
         
-def BuildUnmanaged():
-    cc_dir = os.path.join(src_dir, "ConsensusCore")
-    os.chdir(cc_dir)
-    res = os.system("make")
-    if res != 0:
-        raise "Failed to build unmanaged code"
 
 def MoveChemistry(test_dir):
     os.chdir(src_dir)
@@ -83,16 +77,7 @@ def MoveChemistry(test_dir):
     if res != 0:
         raise "Failed to move parameter file"
 
-def MoveCore(test_dir):
-    os.chdir(src_dir)
-    mp_name = "libConsensusCore.so"
-    np = os.path.join(test_dir,mp_name)
-    op = "../lib/" + mp_name
-    cmd = "cp " + op + "  " + np
-    res = os.system(cmd)
-    if res != 0:
-        raise "Failed to move ConsensusCore  file"
-    
+   
 def RunTest(dir_to_run, fofn):
     cmd_base = "mono PacBio.ConsensusTools.exe CircularConsensus -n 8"
     outName = dir_to_run.split("/")[-1]
@@ -105,9 +90,7 @@ def RunTest(dir_to_run, fofn):
 
 
 test_dir = CreateTestDirectory() 
-BuildUnmanaged()
 BuildManaged(test_dir)
 MoveChemistry(test_dir)
-MoveCore(test_dir)
 RunTest(test_dir, fofn)
 
