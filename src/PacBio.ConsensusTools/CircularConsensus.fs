@@ -66,38 +66,12 @@ type CircularConsensus() as this =
             let toProcess = basReader.ByHoleNumberRange range
 
             let stream = new CCSStream (config)
-
-            let fastaSink = new FastaSink<IZmwConsensusBases> (basReader.Movie, fasta, fastq)
-            let h5Sink = new ConsensusBaseSink (ccsH5, basReader.Movie.ScanDataGroup, "ConsensusBaseCalls")
-            let csvSink = new CsvSink (csv)
-
-            if String.empty this.ChemistryModelOverride then
-                let chemInfo = basReader.ChemistryBarcode
-                this.logf Info "Got SequencingChemistry '%s' from ba[sx].h5/metadata.xml" basReader.SequencingChemistry
-                h5Sink.AddChemistryInformation (chemInfo.BindingKit, chemInfo.SequencingKit, chemInfo.ChangelistID)
-            else
-                h5Sink.AddChemistryInformation this.ChemistryModelOverride
-
-            let sinkFunc (rawBases, consensusBases) =
-                fastaSink.OnNext consensusBases
-                h5Sink.OnNext consensusBases
-                csvSink.OnNext (rawBases, consensusBases)
-                ()
-
+           
             try
                 let mapFun = (fun x -> (x, stream.Map x))
-                if not compileRun then 
-                        toProcess |> Seq.parMap mapFun |> Seq.iter sinkFunc 
-                    else
-                        toProcess |> Seq.take 20 |> Seq.map mapFun |> Seq.iter sinkFunc
-                fastaSink.OnComplete()
-                h5Sink.OnComplete()
-                csvSink.OnComplete()
+                toProcess |> Seq.parMap mapFun |> ignore
             with
                 | ex ->
-                    fastaSink.OnError(ex)
-                    h5Sink.OnError(ex)
-                    csvSink.OnError(ex)
                     reraise ()
 
         let basFiles =
