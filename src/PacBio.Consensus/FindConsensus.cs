@@ -119,48 +119,9 @@ namespace PacBio.Consensus
             return Sequence.Substring(StartAdapterBases, Sequence.Length - StartAdapterBases - EndAdapterBases);
         }
 
-        /// <summary>
-        /// Return a new TrialTemplate, with the template mutation m applied
-        /// </summary>
-        /// <param name="m">The mutation to apply to the template</param>
-        /// <returns>A fresh TrialTemplate struct</returns>
-        public TrialTemplate Mutate(Mutation m)
-        {
-            return new TrialTemplate
-                       {
-                           EndAdapterBases = EndAdapterBases,
-                           Sequence = m.Apply(Sequence),
-                           StartAdapterBases = StartAdapterBases,
-                       };
-        }
+      }
 
-        /// <summary>
-        /// Simultaneously apply a set of mutations to the TrialTemplate and return a fresh TrialTemplate
-        /// </summary>
-        /// <param name="muts">A sequence of mutations</param>
-        /// <returns>A fresh TrialTemplate with the mutations applied</returns>
-        public TrialTemplate Mutate(IEnumerable<Mutation> muts)
-        {
-            return new TrialTemplate
-            {
-                EndAdapterBases = EndAdapterBases,
-                Sequence = Mutation.ApplyMany(muts.ToList(), Sequence),
-                StartAdapterBases = StartAdapterBases
-            };
-        }
-    }
-
-    /// <summary>
-    /// A simple struct for tracking how beneficial a mutation is to the CRF likelihood.  
-    /// When creating a MutationScore, set it's Exists field to true, so that we can use struct semantics and have an existence check.
-    /// </summary>
-    public struct MutationScore
-    {
-        public Mutation Mutation;
-        public float Score;
-        public bool Exists;
-    }
-
+  
     /// <summary>
     /// A collection of methods for finding the consensus of bunch of reads from their pulse data using
     /// a probabilistic alignment model.
@@ -396,48 +357,5 @@ namespace PacBio.Consensus
        
     
      
-  /// <summary>
-        /// Generate a list of beneficial template mutations, given an initial trial template, a series of PulsePassModels, and some
-        /// constraints on the density and score of the returned mutations
-        /// </summary>
-        public static List<Mutation> FindMutations(IEnumerable<Mutation> mutations, 
-            Func<Mutation, MutationScore> scoreMutation, out double score, int minSpacing, float minScore)
-        {
-            // Generate all possible mutations of the template.  GenerateAllMutations will not generate mutations
-            // in the adapter regions. Filter out mutations that don't meet the minimum score threshold.
-            var possibleMutations = mutations.Select(scoreMutation).Where(ms => ms.Score > minScore).ToList();
-
-            // Find the set of mutations with at minSpacing template bases between mutations with the highest total score
-            var bestMutations = SpacedSelector.BestMutations(possibleMutations, minSpacing);
-            
-            // Get the total score of the selected mutations
-            score = bestMutations.Select(ms => ms.Score).Sum();
-            // Return the muatations
-            var selectedMutations = bestMutations.Select(s => s.Mutation).ToList();
-            return selectedMutations;
-        }
-
-        /// <summary>
-        /// Generate a list of beneficial template mutations, given an initial trial template, a series of PulsePassModels, and some
-        /// constraints on the density and score of the returned mutations
-        /// </summary>
-        static List<MutationScore> UniqueMutationsScores(Func<Mutation, MutationScore> scoreMutation, TrialTemplate tpl)
-        {
-            // Generate all possible mutations of the template.  GenerateAllMutations will not generate mutations
-            // in the adapter regions. Filter out mutations that don't meet the minimum score threshold.
-            return GenerateMutations.GenerateUniqueMutations(tpl).Select(
-                m =>
-                    {
-                        if (m.IsSynonymous(tpl))
-                            return new MutationScore
-                                {
-                                    Exists = true,
-                                    Mutation = m,
-                                    Score = 0
-                                };
-                        else
-                            return scoreMutation(m);
-                    }).ToList();
-        }
     }
 }

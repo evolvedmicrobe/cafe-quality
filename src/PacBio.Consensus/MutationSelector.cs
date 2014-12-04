@@ -13,15 +13,7 @@ namespace PacBio.Consensus
     /// </summary>
     public class SpacedSelector
     {
-        /// <summary>
-        /// A convenience function for finding the best set of mutations that are spaced by at least <code>spacing</code>
-        /// template positions
-        /// </summary>
-        public static List<MutationScore> BestMutations(List<MutationScore> mutations, int spacing)
-        {
-            return BestItems(mutations, ms => ms.Mutation.TemplatePosition, ms => ms.Score, spacing);
-        }
-
+       
         /// <summary>
         /// Internal class to aid in the BestItems method below.
         /// </summary>
