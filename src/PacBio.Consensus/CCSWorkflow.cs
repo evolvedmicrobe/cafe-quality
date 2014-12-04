@@ -13,77 +13,17 @@ namespace PacBio.Consensus
 {
 
 
-     public class ConsensusConfig
-    {
-        /// <summary>
-        /// Quiver parameters
-        /// </summary>
-        public ScorerConfig ScConfig;
-
-        /// <summary>
-        /// Minimum number of full passes for CCS reads. Must replace default value
-        /// </summary>
-        public int MinFullPasses = int.MaxValue;
-
-        /// <summary>
-        /// Minimum predicted accuracy for CCS reads. Must replace default value.
-        /// </summary>
-        public float MinPredictedAccuracy = 1.0f;
-
-        /// <summary>
-        /// Minimum length of CCS reads.
-        /// </summary>
-        public int MinLength = 1;
-
-        /// <summary>
-        /// Maximum length of CCS reads.
-        /// </summary>
-        public int MaxLength = int.MaxValue;
-
-        public SnrCut SnrCut = SnrCut.PassAll;
-    }
-
+  
 
     /// <summary>
     /// Pipeline stage implementing CircularConsensus Sequencing.  For each ZMW the inputs are IZmwPulses, and IZmwBases.
     /// The output is IZmwConsensusBases
     /// </summary>
-    public class CCSStream : PipelineMapper<ConsensusConfig, IZmwBases, IZmwConsensusBases>
+    public class CCSStream 
     {
-        /// <summary>
-        /// Instantiate the CCS algo with standard parameters
-        /// </summary>
-        public static CCSStream DefaultConfig
-        {
-            get
-            {
-                var cfg = new ConsensusConfig
-                {
-                    MinFullPasses = 2,
-                    MinPredictedAccuracy = 0.9f
-                };
 
-                return new CCSStream(cfg);
-            }
-        }
 
-        /// <summary>
-        /// Instantiate the CCS algo with standard parameters
-        /// </summary>
-        public static CCSStream TrainingConfig
-        {
-            get
-            {
-                var cfg = new ConsensusConfig
-                {
-                    MinFullPasses = 0,
-                    MinPredictedAccuracy = 0.1f
-                };
-
-                return new CCSStream(cfg);
-            }
-        }
-
+     
 
         public int AdapterPadBases { get; private set; }
         public string Adapter { get; private set; }
@@ -93,34 +33,28 @@ namespace PacBio.Consensus
         public ScorerConfig ScConfig;
 
 
-        public CCSStream(ConsensusConfig config)
+        public CCSStream()
         {
-            Config = config;
 
-            Log(LogLevel.INFO, "Initializing Circular Consensus...");
-            Log(LogLevel.INFO, "CCS Filter Settings -- MinPredictedAccuracy: {0}, MinFullPasses: {1}",
-                Config.MinPredictedAccuracy, Config.MinFullPasses);
-            //var algo = RecursionAlgo.Viterbi;
 
             // FIXME -- pipe in adapter
             Adapter = "ATCTCTCTCttttcctcctcctccgttgttgttgttGAGAGAGAT".ReverseComplement();
             partitioner = new ReadPartition(Adapter);
             AdapterPadBases = 8;
-            ScConfig = config.ScConfig;
         }
 
 
 
-        public override bool Map(IZmwBases bases)
+        public bool Map(IZmwBases bases)
         {
-            var zmw = bases.Zmw;
+
            try
             {
                 return InnerMap(bases);
             }
             catch (Exception e)
             {
-                return false
+                return false;
             }
         }
 
@@ -137,7 +71,7 @@ namespace PacBio.Consensus
                 return 1.0f - (float) qvs.Select(QVs.PhredProb).Average();
             };
 
-            var bestRegion = regions.OrderByDescending(r => r.Length).FirstOrDefault(r => getAccPred(r) > Config.MinPredictedAccuracy);
+            var bestRegion = regions.OrderByDescending(r => r.Length).FirstOrDefault(r => getAccPred(r) > 3);
 
             if (bestRegion == null)
             {
@@ -161,9 +95,7 @@ namespace PacBio.Consensus
                 return false;
 
 
-            if (!Config.SnrCut.Contains(bases.Metrics.HQRegionSNR))
-                return false;
-
+           
 
             // Find adapters
             var readRegions = partitioner.GetPartition(bases, AdapterPadBases);
@@ -177,7 +109,7 @@ namespace PacBio.Consensus
             // If there is not 1 full pass, just report the stats, not the sequence of the longest subread.
             // We will run CCS on everything else.  If it dones't make the 90% threshold, then we will not report any sequence for it, but we will report the metics.
 
-            if (readRegions.InsertRegions.Count(r => r.AdapterHitAfter && r.AdapterHitBefore) < Config.MinFullPasses)
+            if (readRegions.InsertRegions.Count(r => r.AdapterHitAfter && r.AdapterHitBefore) < 3)
             {
                 return false;
             }
@@ -248,7 +180,7 @@ namespace PacBio.Consensus
             // If there is not 1 full pass, just report the stats, not the sequence of the longest subread.
             // We will run CCS on everything else.  If it dones't make the 90% threshold, then we will not report any sequence for it, but we will report the metics.
 
-            if (readRegions.InsertRegions.Count < Config.MinFullPasses)
+            if (readRegions.InsertRegions.Count < 3)
             {
                 ZmwConsensusBases.Null(bases.Zmw);
             }

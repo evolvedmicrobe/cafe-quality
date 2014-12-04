@@ -91,8 +91,6 @@
     <Compile Include="PartialOrderAlignment.cs" />
     <Compile Include="PoaLocal.cs" />
     <Compile Include="ReadPartition.cs" />
-    <Compile Include="ConsensusTrain.cs" />
-    <Compile Include="ConsensusTrainExamples.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
@@ -103,11 +101,6 @@
       <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
       <Name>PacBio.HDF</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="MathNet.Numerics.OpenBLAS.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

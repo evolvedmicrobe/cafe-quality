@@ -25,7 +25,6 @@ type CircularConsensus() as this =
     let maxLength = ref System.Int32.MaxValue
     let doDirectional = ref false
     let doOutputCsv = ref false
-    let snrCut = ref SnrCut.PassAll
 
     do
         this.optA "o|output=" outputPath "Directory to write results files. Will be created if it doesn't exist."
@@ -49,23 +48,14 @@ type CircularConsensus() as this =
     override this.Run(args) =
         this.PrepareOutputDirectory !outputPath
 
-        let processMoviePart basFile ccsH5 fasta fastq csv compileRun =
+        let processMoviePart basFile ccsH5 fasta fastq csv =
             let basReader = BaseReader.CreateSource basFile
             let pulseFeatures = Set.empty // FIXME: okay for now, but should use PacBio.Data APIs in the future
-            let chemistries = Set.singleton basReader.SequencingChemistry
-            use scorerConfig = this.LoadQuiverConfig paramsFile pulseFeatures chemistries
-
-            let config = new ConsensusConfig(MinPredictedAccuracy = !minPredictedAccuracy / 100.0f,
-                                             MinFullPasses = !minFullPasses,
-                                             MinLength = !minLength,
-                                             MaxLength = !maxLength,
-                                             ScConfig = scorerConfig,
-                                             SnrCut = !snrCut)
-
+           
             let range = new ZmwRange(Start = !zmwStart, Count = !zmwCount, Block = 1, Stride = 1)
             let toProcess = basReader.ByHoleNumberRange range
 
-            let stream = new CCSStream (config)
+            let stream = new CCSStream ()
            
             try
                 let mapFun = (fun x -> (x, stream.Map x))
@@ -103,7 +93,6 @@ type CircularConsensus() as this =
 
             this.logf Info "Processing bas.h5 file: '%s'" basFile
 
-            processMoviePart basFile ccsH5 fasta fastq csv true
-            processMoviePart basFile ccsH5 fasta fastq csv false
+            processMoviePart basFile ccsH5 fasta fastq csv
 
         int ProcessExitCode.Success
