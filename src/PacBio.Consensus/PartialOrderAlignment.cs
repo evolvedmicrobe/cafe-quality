@@ -11,8 +11,7 @@ using QuickGraph.Algorithms;
 
 namespace PacBio.Consensus
 {
-    using MutationType = ConsensusCore.MutationType;
-    using PartialOrderPath = PacBio.Consensus.PartialOrderPath<PacBio.Consensus.Vertex>;
+    using PartialOrderPath = PacBio.Consensus.PartialOrderPath<Vertex>;
 
     public static class GraphAlgos
     {

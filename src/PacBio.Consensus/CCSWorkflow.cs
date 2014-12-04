@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ConsensusCore;
 using PacBio.Align;
 using PacBio.IO;
 using PacBio.IO.Fasta;
@@ -30,7 +29,6 @@ namespace PacBio.Consensus
 
         private ReadPartition partitioner;
 
-        public ScorerConfig ScConfig;
 
 
         public CCSStream()

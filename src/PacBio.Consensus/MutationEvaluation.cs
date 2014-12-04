@@ -6,8 +6,7 @@ using PacBio.Utils;
 
 namespace PacBio.Consensus
 {
-    using MutationType = ConsensusCore.MutationType;
-
+    public enum MutationType {INSERTION, DELETION, SUBSTITUTION}
     /// <summary>
     /// Used to represent a potential modification to the consensus template.  Typically a Mutation always applies to
     /// the forward strand.  The Strand convert method converts the mutation to apply to the reverse strand this usage
@@ -162,14 +161,6 @@ namespace PacBio.Consensus
             }
         }
 
-        public ConsensusCore.Mutation ToConsensusCoreType()
-        {
-            // Convert the mutation type across
-            var typ = (ConsensusCore.MutationType) ((int) Type);
-
-            var mt = new ConsensusCore.Mutation(typ, TemplatePosition,  Base);
-            return mt;
-        }
     }
     
     /// <summary>

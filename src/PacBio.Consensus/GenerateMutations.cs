@@ -34,7 +34,6 @@ using PacBio.Utils;
 
 namespace PacBio.Consensus
 {
-    using MutationType = ConsensusCore.MutationType;
 
     /// <summary>
     /// Static methods for generating streams of candidate mutations

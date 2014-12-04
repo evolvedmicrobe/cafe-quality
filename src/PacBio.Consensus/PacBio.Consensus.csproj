@@ -78,14 +78,11 @@
   <ItemGroup>
     <Compile Include="CCSWorkflow.cs" />
     <Compile Include="CoarseClustering.cs" />
-    <Compile Include="ConsensusCoreWrap.cs" />
     <Compile Include="FindConsensus.cs" />
     <Compile Include="FineClustering.cs" />
     <Compile Include="GenerateBarcodes.cs" />
     <Compile Include="GenerateMutations.cs" />
     <Compile Include="VariantDetection.cs" />
-    <Compile Include="Models.cs" />
-    <Compile Include="MultiTemplateConsensus.cs" />
     <Compile Include="MutationEvaluation.cs" />
     <Compile Include="MutationSelector.cs" />
     <Compile Include="PartialOrderAlignment.cs" />
@@ -93,10 +90,6 @@
     <Compile Include="ReadPartition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
-      <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
-      <Name>ConsensusCore</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PacBio.HDF\PacBio.HDF.csproj">
       <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
       <Name>PacBio.HDF</Name>
