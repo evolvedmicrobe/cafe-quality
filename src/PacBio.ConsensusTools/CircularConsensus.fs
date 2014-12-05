@@ -54,6 +54,7 @@ type CircularConsensus() as this =
             let pulseFeatures = Set.empty // FIXME: okay for now, but should use PacBio.Data APIs in the future
             let chemistries = Set.singleton basReader.SequencingChemistry
             use scorerConfig = this.LoadQuiverConfig paramsFile pulseFeatures chemistries
+            scorerConfig.Algorithm <- RecursionAlgo.Prob
 
             let config = new ConsensusConfig(MinPredictedAccuracy = !minPredictedAccuracy / 100.0f,
                                              MinFullPasses = !minFullPasses,
