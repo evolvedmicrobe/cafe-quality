@@ -6,22 +6,38 @@ import os
 import subprocess
 import sys
 
+def VerifyLinux():
+    """ Silly method to remind me what to do in case of errors """
+    loaded = os.environ['LOADEDMODULES']
+    if loaded.count("swig") == 0:
+        raise " You must load swig first"
+    if loaded.count("mono") ==0:
+        print "*"*20
+        print "Mono not loaded by module, you know what you're at right?"
+        print "*"*20
+    if loaded.count("hdf5-tools/1.8.14") ==0:
+        raise "You need to Load HDF5 1.8.14"
+
+
 plat = sys.platform
 # Hard coded paths
 if plat=="darwin":
     print "Running on Mac"
     test_top_dir = "/Users/nigel/CCS_P6_C4/TestRun/"
     fofn = "/Users/nigel/CCS_P6_C4/input.fofn"
+    mono_opts = ""
 elif plat=="linux2":
+    VerifyLinux()
     print "Running on Unix"
     fofn = "/home/UNIXHOME/ndelaney/ccswork/CCS_P6_C4/input.fofn"
     test_top_dir = "/home/UNIXHOME/ndelaney/ccswork/CCS_P6_C4/TestRun/"
-
+    mono_opts = " --gc=boehm "
 
 # should be /Users/nigel/git/cafe-quality/src/python
 start_dir = os.getcwd()
 os.chdir("../")
 src_dir = os.getcwd()
+
 
 
 def GetGitInfo():
@@ -79,7 +95,7 @@ def MoveChemistry(test_dir):
 
    
 def RunTest(dir_to_run, fofn):
-    cmd_base = "mono PacBio.ConsensusTools.exe"
+    cmd_base = "mono " + mono_opts + "PacBio.ConsensusTools.exe"
     cmd_base += " " + fofn
     os.chdir(dir_to_run)
     res = os.system(cmd_base)
