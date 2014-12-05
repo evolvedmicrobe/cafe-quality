@@ -69,10 +69,7 @@
     <Reference Include="PacBio.Utils">
       <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChunkUtils.cs" />
     <Compile Include="CRuntime.cs" />
@@ -90,11 +87,7 @@
     <Compile Include="Test\ArrayRecordStore.cs" />
     <Compile Include="Test\HDFTest.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="keyfile.snk" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
+    <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -143,8 +136,5 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">
-    xcopy /D /Y "$(ProjectDir)..\..\..\third-party\dotnet\HDF5\Windows_$(PlatformTarget)\*.dll" "$(TargetDir)"
-    </PreBuildEvent>
-  </PropertyGroup>
+   </PropertyGroup>
 </Project>
