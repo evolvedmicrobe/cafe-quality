@@ -110,7 +110,7 @@ def MoveCore(test_dir):
         raise "Failed to move ConsensusCore  file"
     
 def RunTest(dir_to_run, fofn):
-    cmd_base = "mono " + mono_opts +  " PacBio.ConsensusTools.exe CircularConsensus -n 8"
+    cmd_base = "mono " + mono_opts +  " PacBio.ConsensusTools.exe CircularConsensus -n 8 -directional -csv"
     outName = dir_to_run.split("/")[-1]
     cmd_base += " -o " + outName
     cmd_base += " -fofn=" + fofn
