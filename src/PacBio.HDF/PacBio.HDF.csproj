@@ -69,7 +69,10 @@
     <Reference Include="PacBio.Utils">
       <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
     </Reference>
-   </ItemGroup>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\lib\nunit.framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="ChunkUtils.cs" />
     <Compile Include="CRuntime.cs" />
@@ -87,7 +90,7 @@
     <Compile Include="Test\ArrayRecordStore.cs" />
     <Compile Include="Test\HDFTest.cs" />
   </ItemGroup>
-    <ItemGroup>
+  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
@@ -136,5 +139,5 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-   </PropertyGroup>
+  </PropertyGroup>
 </Project>
