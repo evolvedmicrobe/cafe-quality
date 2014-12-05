@@ -1,9 +1,7 @@
-﻿open System;
+﻿open System
 open System.IO
 open System.Collections.Generic
 open VariantCaller
-open PacBio.HDF
-open PacBio.Utils
 open Bio.Util
 open Bio
 open LoadZMWs
@@ -50,8 +48,7 @@ type VariantWriter (fname:string) =
                     | VariantType.SNP -> "SNP"
                     | VariantType.INDEL -> "Indel"
                     | VariantType.Complex -> "Complex"
-                    | _ -> failwith "not gonna happen"
-        
+                    | _ -> failwith "not gonna happen"        
         
         let homopolymerLength = match variant.AtEndOfAlignment with
                                   | true -> "-999"
@@ -68,8 +65,6 @@ type VariantWriter (fname:string) =
                             (variant :?> IndelVariant).InsertedOrDeletedBases.Length.ToString() else
                             "NA"
 
-              
-
         let homoChar = match variant with
                         | :? IndelVariant as indel -> indel.HomopolymerBase.ToString()
                         | :? SNPVariant as snp -> "N"
@@ -81,13 +76,12 @@ type VariantWriter (fname:string) =
         sw.WriteLine(toOut)
     member this.Close = sw.Close()
 
-let vwriter = new VariantWriter("/Users/nigel/git/cafe-quality/data/variants_ratioRef.csv")
-let cwriter = new CCSWriter("/Users/nigel/git/cafe-quality/data/ccs_ratioRef.csv")
+
 let mutable totWithVariants = 0;
 
 let vempty = new List<Variant>()
 
-let outputRead (read:CCSRead) =
+let outputRead (vwriter:VariantWriter) (cwriter:CCSWriter) (read:CCSRead) =
     if read.AssignedReference <> null then
         let alns = read.AssignedReference.AlignSequence (read.Seq) |> Seq.toArray
         if alns.Length  = 0 then
@@ -98,19 +92,20 @@ let outputRead (read:CCSRead) =
             variants |> Seq.iter (fun v -> vwriter.Write read v)
 
 
-
-
-
 [<EntryPoint>]
 let main args =
     let sw = System.Diagnostics.Stopwatch.StartNew()
-    LoadZMWs.ccs_data.CCSReads  |>Seq.iter outputRead
+    let direc = args.[0]
+    let prefix = args.[1]
+    let fname_prefix = Path.Combine(direc,prefix)
+    let vwriter = new VariantWriter( fname_prefix + "_all_variants.csv")
+    let cwriter = new CCSWriter(fname_prefix + "_read_report.csv")
+    let data = LoadZMWs.ccs_data direc
+    let outputter = outputRead vwriter cwriter
+    data.CCSReads  |> Seq.iter outputter
     sw.Stop()
     printfn "%f" sw.Elapsed.TotalMilliseconds
     cwriter.Close
     vwriter.Close
-
-    // Now to ouptu
-
     Console.WriteLine("Success");
     0
