@@ -246,7 +246,7 @@ Global
 		{F28305DF-92B6-4820-A5AF-957075A4BF52}.Release|Win32.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = PacBio.ConsensusTools\PacBio.ConsensusTools.fsproj
+		StartupItem = ErrorReporter\ErrorReporter.fsproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

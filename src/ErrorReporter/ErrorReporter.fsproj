@@ -29,8 +29,9 @@
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>
     </PlatformTarget>
-    <Externalconsole>true</Externalconsole>
     <Tailcalls>true</Tailcalls>
+    <ConsolePause>false</ConsolePause>
+    <Commandlineparameters>/Users/nigel/temp/tmp/tmp/tmp test</Commandlineparameters>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
