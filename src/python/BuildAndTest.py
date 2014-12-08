@@ -45,11 +45,19 @@ def GetGitInfo():
     output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[:3]
     op = output[0].split("\n")
     hash = op[0].split(" ")[1][:7]
-    print hash
+    branch = GetGitBranchName()
+    hash = branch + "_" + 
     message = op[4].strip()
     print "Building for " + hash
     print message
     return (hash, message)
+
+def GetGitBranchName():
+    cmd = ["git","branch"]
+    output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[:3]
+    op = [x for x in output[0].split("\n") if x.count("*") == 1]
+    branch = op.split(" ")[1]
+
 
 def CreateTestDirectory():
     info = GetGitInfo()
