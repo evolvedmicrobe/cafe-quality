@@ -187,7 +187,7 @@ start_branch = GetGitBranchName()
 for b in branches:
     SwitchGitBranch(b)
     dirName = CreateTestDirectoryName()
-    if BranchNeedsAnalysis(b):        
+    if REDO_ALL_BRANCHES or  BranchNeedsAnalysis(b):        
         CreateTestDirectory(dirName)
         RemoveDependencies()
         BuildUnmanaged()
