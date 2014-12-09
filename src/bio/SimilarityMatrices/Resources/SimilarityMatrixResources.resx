@@ -119,36 +119,36 @@
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="AmbiguousDna" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>similaritymatrices\ambiguousdna.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>SimilarityMatrices\AmbiguousDNA.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="AmbiguousRna" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>similaritymatrices\ambiguousrna.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\AmbiguousRNA.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="Blosum45" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>similaritymatrices\blosum45.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\BLOSUM45.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="Blosum50" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>similaritymatrices\blosum50.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\BLOSUM50.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="Blosum62" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>similaritymatrices\blosum62.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\blosum62.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="Blosum80" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>similaritymatrices\blosum80.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\blosum80.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="Blosum90" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>similaritymatrices\blosum90.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\blosum90.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="EDNAFull" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>SimilarityMatrices\EDNAFull.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="Pam250" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>similaritymatrices\pam250.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\PAM250.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="Pam30" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>similaritymatrices\pam30.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\PAM30.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="Pam70" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>similaritymatrices\pam70.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\PAM70.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
 </root>
