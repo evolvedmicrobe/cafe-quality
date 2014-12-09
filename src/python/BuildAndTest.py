@@ -26,19 +26,32 @@ if plat=="darwin":
     test_top_dir = "/Users/nigel/CCS_P6_C4/TestRun/"
     fofn = "/Users/nigel/CCS_P6_C4/input.fofn"
     mono_opts = ""
+    src_top_dir = "/Users/nigel/git/cafe-quality/src/"
 elif plat=="linux2":
     VerifyLinux()
     print "Running on Unix"
     fofn = "/home/UNIXHOME/ndelaney/ccswork/CCS_P6_C4/input.fofn"
     test_top_dir = "/home/UNIXHOME/ndelaney/ccswork/CCS_P6_C4/TestRun/"
     mono_opts = " --gc=boehm "
+    src_top_dir = "/home/UNIXHOME/ndelaney/git/cafe-quality/src/"
 
 # should be /Users/nigel/git/cafe-quality/src/python
 start_dir = os.getcwd()
 os.chdir("../")
 src_dir = os.getcwd()
 
-
+def RemoveDependencies():
+    print "Removing Dependencies"
+    cmd_top = "find " + src_top_dir + " | grep '\.exe'  "
+    os.system(cmd_top)
+    cmd = cmd_top + " | xargs rm"
+    res = os.system(cmd)
+    if res != 0:
+        raise "Failed to remove old executables!"
+    cmd_top = "find " + src_top_dir + " | grep '\.dll' | xargs rm  "
+    res = os.system(cmd_top)
+    if res != 0:
+        raise "Could not remove old dlls!"
 
 def GetGitInfo():
     cmd = ["git","log"]
@@ -46,18 +59,19 @@ def GetGitInfo():
     op = output[0].split("\n")
     hash = op[0].split(" ")[1][:7]
     branch = GetGitBranchName()
-    hash = branch + "_" + 
+    hash = branch + "_" + hash
     message = op[4].strip()
     print "Building for " + hash
     print message
     return (hash, message)
 
 def GetGitBranchName():
-    cmd = ["git","branch"]
+    cmd = ["git", "branch"]
     output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[:3]
     op = [x for x in output[0].split("\n") if x.count("*") == 1]
-    branch = op.split(" ")[1]
-
+    print op
+    branch = op[0].split(" ")[1]
+    return branch
 
 def CreateTestDirectory():
     info = GetGitInfo()
@@ -84,6 +98,9 @@ def BuildManaged(outputDir):
 def BuildUnmanaged():
     cc_dir = os.path.join(src_dir, "ConsensusCore")
     os.chdir(cc_dir)
+    res = os.system("./configure")
+    if res !=0:
+        raise "Failed to run unmanaged configure"
     res = os.system("make")
     if res != 0:
         raise "Failed to build unmanaged code"
@@ -128,7 +145,9 @@ def RunTest(dir_to_run, fofn):
         raise "CCS Failed"
 
 
-test_dir = CreateTestDirectory() 
+test_dir = CreateTestDirectory()
+
+RemoveDependencies()
 BuildUnmanaged()
 BuildManaged(test_dir)
 MoveChemistry(test_dir)
