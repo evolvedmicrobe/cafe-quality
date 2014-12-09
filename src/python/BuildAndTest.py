@@ -6,6 +6,10 @@ import os
 import subprocess
 import sys
 
+#Global Variables
+excludedBranches = ['example_problem','sgen','check_muts_work']
+REDO_ALL_BRANCHES = False
+
 def VerifyLinux():
     """ Silly method to remind me what to do in case of errors """
     loaded = os.environ['LOADEDMODULES']
@@ -38,9 +42,10 @@ elif plat=="linux2":
 # should be /Users/nigel/git/cafe-quality/src/python
 start_dir = os.getcwd()
 os.chdir("../")
-src_dir = os.getcwd()
 
 def RemoveDependencies():
+    """ Since we copy everything out of the bin/Release,Debug directories, I want
+    to make sure we delete any old copies, so they must be rebuilt or copied from lib/ """
     print "Removing Dependencies"
     cmd_top = "find " + src_top_dir + " | grep '\.exe'  "
     os.system(cmd_top)
@@ -67,36 +72,38 @@ def GetGitInfo():
 
 def GetGitBranchName():
     cmd = ["git", "branch"]
-    output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[:3]
+    output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()
     op = [x for x in output[0].split("\n") if x.count("*") == 1]
     print op
     branch = op[0].split(" ")[1]
     return branch
 
-def CreateTestDirectory():
+def CreateTestDirectoryName():
     info = GetGitInfo()
     dirName = info[0]
     dirName = os.path.join(test_top_dir,dirName)
+    return dirName
+
+def CreateTestDirectory(dirName):
     if os.path.exists(dirName):
         os.system("rm -r "+dirName)
     os.mkdir(dirName)
     chemdir = os.path.join(dirName,"Chemistry")
-    os.mkdir(chemdir)
-    return dirName   
+    os.mkdir(chemdir)  
 
 def BuildManaged(outputDir):
     cmd = "xbuild /p:Configuration=Release CafeQuality.sln"
-    os.chdir(src_dir)
+    os.chdir(src_top_dir)
     res = os.system(cmd)
     if res !=0:
         raise "Failed to build managed code"
-    releaseDirs = [x[0] for x in os.walk(src_dir) if x[0].count("/bin/Release")==1]
+    releaseDirs = [x[0] for x in os.walk(src_top_dir) if x[0].count("/bin/Release")==1]
     print releaseDirs
     for j in releaseDirs:
         os.system("cp -r " + j + "/* " + test_dir + "/")
         
 def BuildUnmanaged():
-    cc_dir = os.path.join(src_dir, "ConsensusCore")
+    cc_dir = os.path.join(src_top_dir, "ConsensusCore")
     os.chdir(cc_dir)
     res = os.system("./configure")
     if res !=0:
@@ -106,7 +113,7 @@ def BuildUnmanaged():
         raise "Failed to build unmanaged code"
 
 def MoveChemistry(test_dir):
-    os.chdir(src_dir)
+    os.chdir(src_top_dir)
     mp_name = "mapping.xml"
     np = os.path.join(test_dir,"Chemistry",mp_name)
     op = "../lib/Chemistry/" + mp_name
@@ -125,7 +132,7 @@ def MoveChemistry(test_dir):
         raise "Failed to move parameter file"
 
 def MoveCore(test_dir):
-    os.chdir(src_dir)
+    os.chdir(src_top_dir)
     mp_name = "libConsensusCore.so"
     np = os.path.join(test_dir,mp_name)
     op = "../lib/" + mp_name
@@ -145,12 +152,42 @@ def RunTest(dir_to_run, fofn):
         raise "CCS Failed"
 
 
-test_dir = CreateTestDirectory()
+def GetGitBranchLists():
+    cmd = ["git", "branch"]
+    output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()
+    branches = [x.split(" ")[-1] for x in output[0].split("\n")[:-1]]
+    branches = [x for x in branches if x not in excludedBranches]
+    print excludedBranches
+    print branches
+    return branches
 
-RemoveDependencies()
-BuildUnmanaged()
-BuildManaged(test_dir)
-MoveChemistry(test_dir)
-MoveCore(test_dir)
-RunTest(test_dir, fofn)
+def BranchNeedsAnalysis(test_dir):
+    """ Checks if the ccs output files already exists, indicating a successful run """
+    outFileName = "m141008_060349_42194_c100704972550000001823137703241586_s1_p0.1.ccs.h5"
+    outName = test_dir.split("/")[-1]
+    f_name = os.path.join(test_dir, outName, outFileName)
+    return not os.path.exists(f_name)
 
+def SwitchGitBranch(branch):
+    os.chdir(src_top_dir)
+    res = os.system("git checkout " + branch)
+    if res !=0:
+        raise "Could not switch to branch: " + branch
+
+
+
+branches = GetGitBranchLists()
+start_branch = GetGitBranchName()
+for b in branches:
+    SwitchGitBranch(b)
+    dirName = CreateTestDirectoryName()
+    if BranchNeedsAnalysis(b):        
+        CreateTestDirectory(dirName)
+        RemoveDependencies()
+        BuildUnmanaged()
+        BuildManaged(dirName)
+        MoveChemistry(dirName)
+        MoveCore(dirName)
+        RunTest(dirName, fofn)
+SwitchGitBranch(start_branch)
+os.chdir(start_dir)
