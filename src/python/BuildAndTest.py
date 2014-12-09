@@ -150,7 +150,8 @@ def RunTest(dir_to_run, fofn):
     res = os.system(cmd_base)
     if res != 0:
         raise "CCS Failed"
-
+    outDir = os.path.join(dir_to_run, outName)
+    CountErrors(outDir, outName)
 
 def GetGitBranchLists():
     cmd = ["git", "branch"]
@@ -174,6 +175,11 @@ def SwitchGitBranch(branch):
     if res !=0:
         raise "Could not switch to branch: " + branch
 
+def CountErrors(dirName,prefix):
+    cmd = "mono " + mono_opts + " ErrorReporter.exe " + dirName +" "+ prefix
+    res = os.system(cmd)
+    if res !=0:
+        raise "Failed to call variants for this sample"
 
 
 branches = GetGitBranchLists()
