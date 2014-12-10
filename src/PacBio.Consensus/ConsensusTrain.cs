@@ -363,7 +363,7 @@ namespace PacBio.Consensus
                 var rStart = data.ParSelect(
                     e =>
                     {
-                        var newConsensus = ccsAlgo.Map(e.Trace.ZmwBases);
+                        var newConsensus = ccsAlgo.Map(e.Trace.ZmwBases).Item2;
 
                         var al = CCSExample.LocalAlign(
                                      e.Reference,
