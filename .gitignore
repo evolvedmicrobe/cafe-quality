@@ -1,5 +1,5 @@
 # Nigel's list
-BuildAndTest.py
+BuildAndRun.py
 *.dll
 *.exe
 *.pdb
