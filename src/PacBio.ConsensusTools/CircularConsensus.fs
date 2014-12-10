@@ -47,6 +47,7 @@ type CircularConsensus() as this =
     let paramsFile = "CCSParameters.ini"
 
     override this.Run(args) =
+        let zmwResultReport = new CcsResultsReport(true)
         this.PrepareOutputDirectory !outputPath
 
         let processMoviePart basFile ccsH5 fasta fastq csv =
@@ -79,10 +80,12 @@ type CircularConsensus() as this =
             else
                 h5Sink.AddChemistryInformation this.ChemistryModelOverride
 
-            let sinkFunc (rawBases, consensusBases) =
+            let sinkFunc (rawBases, consensusBasesResult) =
+                let consensusBases = snd consensusBasesResult
                 fastaSink.OnNext consensusBases
                 h5Sink.OnNext consensusBases
                 csvSink.OnNext (rawBases, consensusBases)
+                zmwResultReport.TallyResult((fst consensusBasesResult))
                 ()
 
             try
@@ -126,5 +129,6 @@ type CircularConsensus() as this =
             this.logf Info "Processing bas.h5 file: '%s'" basFile
 
             processMoviePart basFile ccsH5 fasta fastq csv
+            this.log Warn (zmwResultReport.MakeFinalReport())
 
         int ProcessExitCode.Success
