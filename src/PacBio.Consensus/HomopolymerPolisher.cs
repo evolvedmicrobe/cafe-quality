@@ -12,10 +12,10 @@ namespace PacBio.Consensus
     /// Temporary bandaid class to determine if we can improve homopolymers by proposing mutations in homopolymers >4 and 
     /// scoring them with the C2 chemistry. 
     /// </summary>
-    internal class HomopolymerPolisher
+    public static class HomopolymerPolisher
     {
-      
-        internal static Tuple<TrialTemplate, List<MutationScore>> PolishHomopolymers(TrialTemplate tpl,
+        public static int TotalMutationsAccepted = 0;
+        public static Tuple<TrialTemplate, List<MutationScore>> PolishHomopolymers(TrialTemplate tpl,
                                                             MultiReadMutationScorer oldScorer,
                                                             IZmwBases bases,
                                                             List<MutationScore> allScores)
@@ -46,8 +46,12 @@ namespace PacBio.Consensus
                     }
                 }
             }
+            for (int i=0; i< accepted.Count; i++)
+            {
+                System.Threading.Interlocked.Increment (ref TotalMutationsAccepted);
+            }
             scorer.ApplyMutations(accepted);
-            return new Tuple<TrialTemplate, List<MutationScore>>(tpl, allScores);
+            return new Tuple<TrialTemplate, List<MutationScore>>(scorer.Template, allScores);
         }
        static IEnumerable<Mutation> GenerateLongHomopolymerMutations(TrialTemplate tpl, int minLength = 4)
         {

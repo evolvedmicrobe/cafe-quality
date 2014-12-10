@@ -125,5 +125,5 @@ type CircularConsensus() as this =
             this.logf Info "Processing bas.h5 file: '%s'" basFile
 
             processMoviePart basFile ccsH5 fasta fastq csv
-
+        System.Console.WriteLine("HP Corrector Fixed: " + PacBio.Consensus.HomopolymerPolisher.TotalMutationsAccepted.ToString())
         int ProcessExitCode.Success
