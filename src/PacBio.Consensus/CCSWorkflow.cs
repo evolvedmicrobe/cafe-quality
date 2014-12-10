@@ -8,9 +8,156 @@ using PacBio.IO;
 using PacBio.IO.Fasta;
 using PacBio.Utils;
 using PacBio.HDF;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace PacBio.Consensus
 {
+    /// <summary>
+    /// This enumeration lists all the ways that a ZMW could be processed by the CCS workflow.
+    /// We return this value for each processed ZMW so that we can tally the different results an return them to the user.
+    /// Each enumeration option is described by a description attribute which is used to produce the descrbipion in the text. 
+    /// </summary>
+    public enum CCSResultType { 
+        [Description("Successful - Quiver consensus found")]
+        Success = 0,
+        [Description("Successful - But only 1 region, no true consensus")]
+        OneRegionResult,
+        [Description("Failed - Exception thrown")]
+        Exception,
+        [Description("Failed - ZMW was not productive")]
+        NotProductive,
+        [Description("Failed - Outside of SNR ranges")]
+        OutsideSNR,
+        [Description("Failed - No insert regions found")]
+        NoInsertRegions,
+        [Description("Failed - Not enough full passes")]
+        NotEnoughFullPasses,
+        [Description("Failed - Insert length too small")]
+        InsertSizeTooSmall,
+        [Description("Failed - Post POA requirements not met")]
+        PostPOAFail,
+        [Description("Failed - Post CCS requirements not met")]
+        PostCCSFail
+    }
+    /// <summary>
+    /// Keeps track of different CCS success and failures for all ZMWs.
+    /// </summary>
+    public class CcsResultsReport
+    {
+        /// <summary>
+        /// An array to count the type of each result observed, elements will be filled as determined
+        /// by the index in the CcsResult enum passed to the tally method.
+        /// </summary>
+        long[] resultsCount;
+
+        /// <summary>
+        /// Should a report be made? If not no information is stored or returned.
+        /// </summary>
+        bool makeReport;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PacBio.Consensus.CcsResultsReport"/> class.
+        /// </summary>
+        /// <param name="makeReport">If set to <c>true</c> make report.</param>
+        public CcsResultsReport(bool makeReport)
+        {
+            this.makeReport = makeReport;
+            if (makeReport)
+            {
+                int numOptions = Enum.GetNames(typeof(CCSResultType)).Length;
+                resultsCount = new long[numOptions];
+            }
+        }
+
+        /// <summary>
+        /// Tallies the result in a thread safe way.
+        /// </summary>
+        /// <param name="result">Result.</param>
+        public void TallyResult(CCSResultType result)
+        {
+            if (makeReport)
+            {
+                int index = (int)result;
+                System.Threading.Interlocked.Increment(ref resultsCount[index]);
+            }
+        }
+
+        /// <summary>
+        /// The string we use to format the percentage of ZMWs in each group.
+        /// </summary>
+        internal readonly static string PERCENTAGE_FORMAT = "P2";
+
+        /// <summary>
+        /// Makes a final report based on all the results tallied.  If initialized 
+        /// to not make a report, simply returns an empty string.
+        /// </summary>
+        /// <returns>The final report.</returns>
+        public string MakeFinalReport()
+        {
+            if (!makeReport)
+            {
+                return String.Empty;
+            }
+            double totalZMWs = (double)resultsCount.Sum();
+            // Make a line for each result
+            var results = new List<string[]>(resultsCount.Length + 1);
+            results.Add( new string[] {"Zmw Result" , "#-Zmws", "%-Zmws"});
+            for (int i = 0; i < resultsCount.Length; i++)
+            {
+                var description = getCcsResultDescription(i);
+                var cnt = resultsCount[i];//.ToString();
+                var perc = (cnt / totalZMWs).ToString(PERCENTAGE_FORMAT);
+                results.Add(new string[] { description, cnt.ToString(), perc });
+            }
+
+            // Format each line by adding white space
+            int bufferCharsPerCol = 5; // how many extra characters to add.
+            for (int i = 0; i < results.First().Length; i++)
+            {
+                var maxSize = results.Max(z => z[i].Length);
+                int newSize = maxSize + bufferCharsPerCol;
+                foreach(var p in results) {
+                    p[i] = p[i] + new string(' ', newSize - p[i].Length);
+                }
+            }
+
+            // Now combine into one big string
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine("Result Report for the " + ((long)totalZMWs) + " Zmws processed");  
+            foreach (var res in results)
+            {
+                sb.AppendLine(String.Join("", res));
+            }
+            return sb.ToString();
+        }
+
+
+        /// <summary>
+        /// Get the description for a CcsResult enum given a value.
+        /// </summary>
+        /// <returns>The ccs result description.</returns>
+        /// <param name="value">The integer cast version of the enum.</param>
+        private static string getCcsResultDescription(int value)
+        {
+            var converted = (CCSResultType)value;
+            FieldInfo fi = typeof(CCSResultType).GetField(converted.ToString());
+            DescriptionAttribute[] attributes =
+                (DescriptionAttribute[])fi.GetCustomAttributes(
+                    typeof(DescriptionAttribute),
+                    false);
+
+            if (attributes != null &&
+                attributes.Length > 0)
+                return attributes[0].Description;
+            else
+                throw new NotImplementedException("Could not acquire description of CCS result type. "
+                   + "This attribute likely needs to be added to the CcsResult enum.");
+        }
+
+    }
+
+
 
     public class CsvSink : BasicSinkStage<Tuple<IZmwBases, IZmwConsensusBases>>
     {
@@ -379,7 +526,7 @@ namespace PacBio.Consensus
     /// Pipeline stage implementing CircularConsensus Sequencing.  For each ZMW the inputs are IZmwPulses, and IZmwBases.
     /// The output is IZmwConsensusBases
     /// </summary>
-    public class CCSStream : PipelineMapper<ConsensusConfig, IZmwBases, IZmwConsensusBases>
+    public class CCSStream : PipelineMapper<ConsensusConfig, IZmwBases, Tuple<CCSResultType, IZmwConsensusBases>>
     {
         /// <summary>
         /// Instantiate the CCS algo with standard parameters
@@ -442,13 +589,14 @@ namespace PacBio.Consensus
 
 
 
-        public override IZmwConsensusBases Map(IZmwBases bases)
+        public override Tuple<CCSResultType, IZmwConsensusBases> Map(IZmwBases bases)
         {
             var zmw = bases.Zmw;
             Log(LogLevel.DEBUG, "CCS processing '{0}/{1}'", zmw.Movie.MovieName, zmw.HoleNumber);
+            Tuple<CCSResultType, IZmwConsensusBases> toReturn;
             try
             {
-                return InnerMap(bases);
+                toReturn = InnerMap(bases);
             }
             catch (Exception e)
             {
@@ -459,8 +607,10 @@ namespace PacBio.Consensus
                     e.Message);
                 Log(LogLevel.ERROR, "Stack Trace: {0}", e.StackTrace);
 
-                return ZmwConsensusBases.Null(zmw);
+                toReturn = new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.Exception, ZmwConsensusBases.Null(zmw));
             }
+            Log(LogLevel.DEBUG, "CCS Result: {0},  '{1}/{2}'", toReturn.Item1 , zmw.Movie.MovieName, zmw.HoleNumber);
+            return toReturn;
         }
 
         /// <summary>
@@ -542,16 +692,16 @@ namespace PacBio.Consensus
         /// <summary>
         /// Compute SMC for one trace.
         /// </summary>
-        public IZmwConsensusBases InnerMap(IZmwBases bases)
+        public Tuple<CCSResultType, IZmwConsensusBases> InnerMap(IZmwBases bases)
         {
             // Don't even bother if this is not a productive ZMW. 
             // This will filter out low SNR or otherwise crappy, which take a lot of time
             if (bases.Metrics.Productivity != ProductivityClass.Productive)
-                return ZmwConsensusBases.Null(bases.Zmw);
+                return new Tuple<CCSResultType, IZmwConsensusBases> (CCSResultType.NotProductive, ZmwConsensusBases.Null(bases.Zmw));
 
 
             if (!Config.SnrCut.Contains(bases.Metrics.HQRegionSNR))
-                return ZmwConsensusBases.Null(bases.Zmw);
+                return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.OutsideSNR, ZmwConsensusBases.Null(bases.Zmw));
 
             //perf.Time(zmw.HoleNumber, "CCSPartition");
 
@@ -560,7 +710,7 @@ namespace PacBio.Consensus
 
             // 0 inserts -- empty result
             if (readRegions.InsertRegions.Count == 0)
-                return ZmwConsensusBases.Null(bases.Zmw);
+                return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.NoInsertRegions, ZmwConsensusBases.Null(bases.Zmw));
 
             // In 2.0 we only emit >0-length sequences for true 'CCS' reads -- best estimate reads & CCS are moving to secondary
             // However, we supply the metrics for 'Read of Insert' reporting here, via the metrics attached to IZmwConsensusBases.
@@ -569,7 +719,7 @@ namespace PacBio.Consensus
 
             if (readRegions.InsertRegions.Count(r => r.AdapterHitAfter && r.AdapterHitBefore) < Config.MinFullPasses)
             {
-                return ZmwConsensusBases.Null(bases.Zmw);
+                return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.NotEnoughFullPasses, ZmwConsensusBases.Null(bases.Zmw));
             }
 
             // Compute insert length
@@ -578,7 +728,7 @@ namespace PacBio.Consensus
 
             // If this is an adapter dimer, or a very short insert then bail
             if (insertLength < 10)
-                return ZmwConsensusBases.Null(bases.Zmw);
+                return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.InsertSizeTooSmall, ZmwConsensusBases.Null(bases.Zmw));
 
 
             //perf.Time(zmw.HoleNumber, "ComputePOA");
@@ -612,7 +762,7 @@ namespace PacBio.Consensus
                 initialTpl.Sequence.Length < minTplLength ||
                 initialTpl.Sequence.Length > maxTplLength)
             {
-                return  ZmwConsensusBases.Null(bases.Zmw);
+                return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.PostPOAFail,  ZmwConsensusBases.Null(bases.Zmw));
             }
 
             IZmwConsensusBases result;
@@ -620,7 +770,7 @@ namespace PacBio.Consensus
             // Local POA may return no regions -- just return the longest original region
             if (regions.Count < 2)
             {
-                return PassBestRegion(bases, readRegions.InsertRegions);
+                return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.OneRegionResult, PassBestRegion(bases, readRegions.InsertRegions));
             }
             else
             {
@@ -650,12 +800,12 @@ namespace PacBio.Consensus
                 result.Sequence.Length <= Config.MaxLength)
             {
                 // Valid CCS read
-                return result;
+                return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.Success, result);
             }
             else
             {
                 // We hads a bad CCS result - just bail and return the metrics of the best subread.
-                return ZmwConsensusBases.Null(bases.Zmw);
+                return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.PostCCSFail, ZmwConsensusBases.Null(bases.Zmw));
             }
         }
 
