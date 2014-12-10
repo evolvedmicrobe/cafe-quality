@@ -9,6 +9,7 @@ import sys
 #Global Variables
 excludedBranches = ['example_problem','sgen','check_muts_work']
 REDO_ALL_BRANCHES = False
+ONLY_MASTER = True
 
 def VerifyLinux():
     """ Silly method to remind me what to do in case of errors """
@@ -22,8 +23,8 @@ def VerifyLinux():
     if loaded.count("hdf5-tools/1.8.14") ==0:
         raise "You need to Load HDF5 1.8.14"
 
-
 plat = sys.platform
+
 # Hard coded paths
 if plat=="darwin":
     print "Running on Mac"
@@ -48,8 +49,7 @@ def DeleteFilesInSrcMatchingSubString(substr):
     cmd_top = ["find", src_top_dir] 
     print cmd_top
     output = subprocess.Popen( cmd_top, stdout=subprocess.PIPE ).communicate()[0]
-    print output
-    op = [x for x in output[0].split("\n") if x.count(substr) >0]
+    op = [x for x in output.split("\n") if x.count(substr) > 0]
     for f in op:
         cmd = "rm " + f
         print cmd
@@ -99,6 +99,7 @@ def CreateTestDirectory(dirName):
     os.mkdir(chemdir)  
 
 def BuildManaged(outputDir):
+    
     cmd = "xbuild /p:Configuration=Release CafeQuality.sln"
     os.chdir(src_top_dir)
     res = os.system(cmd)
@@ -107,7 +108,7 @@ def BuildManaged(outputDir):
     releaseDirs = [x[0] for x in os.walk(src_top_dir) if x[0].count("/bin/Release")==1]
     print releaseDirs
     for j in releaseDirs:
-        os.system("cp -r " + j + "/* " + test_dir + "/")
+        os.system("cp -r " + j + "/* " + outputDir + "/")
         
 def BuildUnmanaged():
     cc_dir = os.path.join(src_top_dir, "ConsensusCore")
@@ -192,6 +193,8 @@ def CountErrors(dirName,prefix):
 
 branches = GetGitBranchLists()
 start_branch = GetGitBranchName()
+if ONLY_MASTER:
+    branches = ["master"]
 for b in branches:
     SwitchGitBranch(b)
     dirName = CreateTestDirectoryName()
