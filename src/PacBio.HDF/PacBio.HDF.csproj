@@ -70,7 +70,7 @@
       <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\..\lib\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -89,10 +89,6 @@
     <Compile Include="Table.cs" />
     <Compile Include="Test\ArrayRecordStore.cs" />
     <Compile Include="Test\HDFTest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="keyfile.snk" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -143,8 +139,5 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">
-    xcopy /D /Y "$(ProjectDir)..\..\..\third-party\dotnet\HDF5\Windows_$(PlatformTarget)\*.dll" "$(TargetDir)"
-    </PreBuildEvent>
   </PropertyGroup>
 </Project>
