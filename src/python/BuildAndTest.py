@@ -49,11 +49,11 @@ def RemoveDependencies():
     print "Removing Dependencies"
     cmd_top = "find " + src_top_dir + " | grep '\.exe'  "
     os.system(cmd_top)
-    cmd = cmd_top + " | xargs rm"
+    cmd = cmd_top + " | xargs -r rm"
     res = os.system(cmd)
     if res != 0:
         raise "Failed to remove old executables!"
-    cmd_top = "find " + src_top_dir + " | grep '\.dll' | xargs rm  "
+    cmd_top = "find " + src_top_dir + " | grep '\.dll' | xargs -r rm  "
     res = os.system(cmd_top)
     if res != 0:
         raise "Could not remove old dlls!"
