@@ -131,13 +131,13 @@
     <value>SimilarityMatrices\BLOSUM50.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="Blosum62" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>SimilarityMatrices\blosum62.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\BLOSUM62.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="Blosum80" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>SimilarityMatrices\blosum80.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\BLOSUM80.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="Blosum90" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>SimilarityMatrices\blosum90.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+    <value>SimilarityMatrices\BLOSUM90.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="EDNAFull" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>SimilarityMatrices\EDNAFull.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>

@@ -5,6 +5,7 @@
 import os
 import subprocess
 import sys
+import re
 
 #Global Variables
 excludedBranches = ['example_problem','sgen','check_muts_work']
@@ -43,20 +44,27 @@ elif plat=="linux2":
 start_dir = os.getcwd()
 os.chdir("../")
 
+def DeleteFilesInSrcMatchingSubString(substr):
+    os.chdir(src_top_dir)
+    cmd_top = ["find", src_top_dir] 
+    print cmd_top
+    output = subprocess.Popen( cmd_top, stdout=subprocess.PIPE ).communicate()[0]
+    print output
+    op = [x for x in output[0].split("\n") if x.count(substr) >0]
+    for f in op:
+        cmd = "rm " + f
+        print cmd
+        res = os.system(cmd)
+        if res != 0:
+            raise "Could not delete file: " + f
+
+    
 def RemoveDependencies():
     """ Since we copy everything out of the bin/Release,Debug directories, I want
     to make sure we delete any old copies, so they must be rebuilt or copied from lib/ """
     print "Removing Dependencies"
-    cmd_top = "find " + src_top_dir + " | grep '\.exe'  "
-    os.system(cmd_top)
-    cmd = cmd_top + " | xargs -r rm"
-    res = os.system(cmd)
-    if res != 0:
-        raise "Failed to remove old executables!"
-    cmd_top = "find " + src_top_dir + " | grep '\.dll' | xargs -r rm  "
-    res = os.system(cmd_top)
-    if res != 0:
-        raise "Could not remove old dlls!"
+    DeleteFilesInSrcMatchingSubString(".exe")
+    DeleteFilesInSrcMatchingSubString(".dll")
 
 def GetGitInfo():
     cmd = ["git","log"]
