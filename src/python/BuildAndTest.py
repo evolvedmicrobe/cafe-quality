@@ -146,6 +146,7 @@ def RunTest(dir_to_run, fofn):
     outName = dir_to_run.split("/")[-1]
     cmd_base += " -o " + outName
     cmd_base += " -fofn=" + fofn
+    cmd_base += " > analysis.log"
     os.chdir(dir_to_run)
     res = os.system(cmd_base)
     if res != 0:
