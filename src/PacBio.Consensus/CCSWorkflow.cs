@@ -824,7 +824,7 @@ namespace PacBio.Consensus
         public CCSResultType QualityFilter(IZmwConsensusBases consensusBases, IZmwBases bases)
         {
             // Don't emit very short CCS reads
-            CCSResultType result =  !(consensusBases.NumBases < 5) ? CCSResultType.PostCCSShort : CCSResultType.Success ;
+            CCSResultType result =  consesusBases.NumBases < 5 ? CCSResultType.PostCCSShort : CCSResultType.Success ;
 
             var ccsAccPred = consensusBases.PredictedAccuracy;
 
