@@ -38,7 +38,15 @@ namespace PacBio.Consensus
         [Description("Failed - Post POA requirements not met")]
         PostPOAFail,
         [Description("Failed - Post CCS requirements not met")]
-        PostCCSFail
+        PostCCSFail,
+        [Description("Failed - CCS Read below predicted accuracy")]
+        PostCCSAccuracy,
+        [Description("Failed - CCS Read was palindrome")]
+        PostCCSPalindrome,
+        [Description("Failed - CCS Read below SNR Threshold")]
+        PostCCSSNR,
+        [Description("Failed - CCS Read too short")]
+        PostCCSShort
     }
     /// <summary>
     /// Keeps track of different CCS success and failures for all ZMWs.
@@ -795,7 +803,7 @@ namespace PacBio.Consensus
             // Check that the read appears to be reasonably accurate based on the CCS QVs
             var passFilter = QualityFilter(result, bases);
 
-            if (passFilter &&
+            if (passFilter == CCSResultType.Success &&
                 result.Sequence.Length >= Config.MinLength &&
                 result.Sequence.Length <= Config.MaxLength)
             {
@@ -805,7 +813,7 @@ namespace PacBio.Consensus
             else
             {
                 // We hads a bad CCS result - just bail and return the metrics of the best subread.
-                return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.PostCCSFail, ZmwConsensusBases.Null(bases.Zmw));
+                return new Tuple<CCSResultType, IZmwConsensusBases>(passFilter, ZmwConsensusBases.Null(bases.Zmw));
             }
         }
 
@@ -813,19 +821,19 @@ namespace PacBio.Consensus
         /// A filter to clean up low-quality CCS reads
         /// </summary>
         /// <returns></returns>
-        public bool QualityFilter(IZmwConsensusBases consensusBases, IZmwBases bases)
+        public CCSResultType QualityFilter(IZmwConsensusBases consensusBases, IZmwBases bases)
         {
             // Don't emit very short CCS reads
-            bool ok = !(consensusBases.NumBases < 5);
+            CCSResultType result =  !(consensusBases.NumBases < 5) ? CCSResultType.PostCCSShort : CCSResultType.Success ;
 
             var ccsAccPred = consensusBases.PredictedAccuracy;
 
             if (ccsAccPred < Config.MinPredictedAccuracy)
-                ok = false;
+                result = CCSResultType.PostCCSAccuracy;
 
             // Don't emit low SNR reads
-            if (bases.Metrics.HQRegionSNR.Min() < 3f)
-                ok = false;
+            if (bases.Metrics.HQRegionSNR.Min () < 3f)
+                result = CCSResultType.OutsideSNR;
             
             // Don't emit palindromic CCS sequences
             var ccsSeq = consensusBases.Sequence;
@@ -836,12 +844,14 @@ namespace PacBio.Consensus
                 // Use lo-mem global alignment -- this can cause OO
                 var palindromeAl = LinearMemAlign.Align(ccsSeq, DNA.ReverseComplement(ccsSeq), GlobalSettings.FullGlobal);
 
-                if (palindromeAl.Accuracy > 0.85)
-                    ok = false;
+                if (palindromeAl.Accuracy > 0.85) {
+                    result = CCSResultType.PostCCSPalindrome;
+                    Console.WriteLine ("Palindrome at hole: " + bases.Zmw.HoleNumber);
+                }
             }
 
             // You made it!
-            return ok;
+            return result;
         }
 
         /// <summary>
