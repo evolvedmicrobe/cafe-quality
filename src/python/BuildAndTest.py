@@ -31,7 +31,7 @@ elif plat=="linux2":
     print "Running on Unix"
     fofn = "/home/UNIXHOME/ndelaney/ccswork/CCS_P6_C4/input.fofn"
     test_top_dir = "/home/UNIXHOME/ndelaney/ccswork/CCS_P6_C4/TestRun/"
-    mono_opts = " --gc=boehm "
+    mono_opts = " "
 
 # should be /Users/nigel/git/cafe-quality/src/python
 start_dir = os.getcwd()
