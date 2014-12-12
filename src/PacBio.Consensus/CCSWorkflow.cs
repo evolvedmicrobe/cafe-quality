@@ -37,8 +37,6 @@ namespace PacBio.Consensus
         InsertSizeTooSmall,
         [Description("Failed - Post POA requirements not met")]
         PostPOAFail,
-        [Description("Failed - Post CCS requirements not met")]
-        PostCCSFail,
         [Description("Failed - CCS Read below predicted accuracy")]
         PostCCSAccuracy,
         [Description("Failed - CCS Read was palindrome")]
@@ -803,7 +801,7 @@ namespace PacBio.Consensus
             // Check that the read appears to be reasonably accurate based on the CCS QVs
             var passFilter = QualityFilter(result, bases);
 
-            if (passFilter == CCSResultType.Success &&
+            if ( (passFilter == CCSResultType.Success || passFilter == CCSResultType.PostCCSAccuracy) &&
                 result.Sequence.Length >= Config.MinLength &&
                 result.Sequence.Length <= Config.MaxLength)
             {
@@ -824,7 +822,7 @@ namespace PacBio.Consensus
         public CCSResultType QualityFilter(IZmwConsensusBases consensusBases, IZmwBases bases)
         {
             // Don't emit very short CCS reads
-            CCSResultType result =  consesusBases.NumBases < 5 ? CCSResultType.PostCCSShort : CCSResultType.Success ;
+            CCSResultType result =  consensusBases.NumBases < 5 ? CCSResultType.PostCCSShort : CCSResultType.Success ;
 
             var ccsAccPred = consensusBases.PredictedAccuracy;
 
