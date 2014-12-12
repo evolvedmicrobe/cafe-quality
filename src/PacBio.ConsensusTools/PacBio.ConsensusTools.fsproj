@@ -87,10 +87,9 @@
     <Reference Include="PacBio.Utils">
       <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
     </Reference>
-    <ProjectReference Include="..\PacBio.HDF\PacBio.HDF.csproj">
-      <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
-      <Name>PacBio.HDF</Name>
-    </ProjectReference>
+    <Reference Include="PacBio.HDF">
+      <HintPath>..\..\lib\PacBio.HDF.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <PropertyGroup>
   </PropertyGroup>
