@@ -32,10 +32,9 @@ type CircularConsensus() =
            
             try
                 let mapFun = (fun x -> (x, stream.Map x))
-                let firstBit = toProcess |> Seq.truncate 2000
-                while true do
-                    let cnt =  firstBit |> Seq.parMap mapFun |> Seq.length
-                    System.Console.WriteLine(cnt)
+                let firstBit = toProcess |> Seq.truncate 500
+                let cnt =  firstBit |> Seq.parMap mapFun |> Seq.length
+                System.Console.WriteLine(cnt)
             with
                 | ex ->
                     reraise ()
