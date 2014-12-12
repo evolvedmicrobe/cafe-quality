@@ -54,7 +54,7 @@ def GetGitInfo():
 def CreateTestDirectory():
     info = GetGitInfo()
     dirName = info[0]
-    dirName = os.path.join(test_top_dir,dirName)
+    dirName = os.path.join(test_top_dir,"prob_"+dirName)
     if os.path.exists(dirName):
         os.system("rm -r "+dirName)
     os.mkdir(dirName)
