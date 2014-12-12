@@ -792,11 +792,13 @@ namespace PacBio.Consensus
                 }
             }
 
+
+            #if FALSE
             // Recalibrate the accuracy prediction.  The model based estimate is not quite right.
             // We should revisit this later when we fix the model.
             float recalibratedPredAcc = RecalibratedAccuracyPrediction(bases.Zmw.Movie.SequencingChemistry, result.PredictedAccuracy, result.NumPasses);
             ((ZmwMetricsBases)result.Metrics).ReadScore = recalibratedPredAcc;
-
+            #endif
 
             // Check that the read appears to be reasonably accurate based on the CCS QVs
             var passFilter = QualityFilter(result, bases);
