@@ -39,6 +39,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="BeforeBuild">
+    <Exec Command="./configure" Condition=" '$(OS)' != 'Windows_NT' " />
     <Exec Command="make before-xbuild" Condition=" '$(OS)' != 'Windows_NT' " />
   </Target>
   <Target Name="BeforeClean" BeforeTargets="Clean">
