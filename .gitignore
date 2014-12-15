@@ -89,6 +89,3 @@ data/tmp.fasta
 
 src/bio/obj/Release/Bio.Properties.Resource.resources
 
-src/packages/NUnit.2.6.3/NUnit.2.6.3.nupkg
-
-src/packages/NUnit.2.6.3/license.txt
