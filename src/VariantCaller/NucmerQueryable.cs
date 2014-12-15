@@ -27,8 +27,32 @@ namespace VariantCaller
             nucmer= new NUCmer(ReferenceSequence)
            {
                 LengthOfMUM = lengthOfMUM,
-				MinimumScore = (int)(touse.Count * .2),
+                MinimumScore = Math.Min((int)(touse.Count * .2), 60)
             };
+        }
+
+        public PairwiseAlignedSequence GetLongestAlignment(Sequence toAlign)
+        {
+            var delts = GetDeltaAlignments (toAlign)
+                .SelectMany (x => x).ToList();
+            if (delts.Count > 0) {
+                var score = new Func<DeltaAlignment, int> ((x) => (int)(x.FirstSequenceEnd - x.FirstSequenceStart + 1));
+           
+                int max = score (delts [0]);
+                var mx = delts [0];
+                for (int i = 1; i < delts.Count; i++) {
+                    var cur = delts [i];
+                    var cur_s = score (cur);
+                    if (cur_s > max) {
+                        mx = cur;
+                        max = cur_s;
+                    }
+                }
+                var aln = NucmerPairwiseAligner.ConvertDeltaToAlignment (mx);
+                aln.Score = CalculateScore ((Sequence)aln.FirstSequence, (Sequence)aln.SecondSequence);
+                return aln;
+            }
+            return null;
         }
 
 		public List<PairwiseAlignedSequence> GetAlignments(Sequence toAlign)
@@ -43,7 +67,7 @@ namespace VariantCaller
             }
 			var delts = GetDeltaAlignments (toAlign)
 				.SelectMany (x => x);
-			var alns = NucmerPairwiseAligner.ConvertDeltaToAlignment (delts).ToList();
+			var alns = NucmerPairwiseAligner.ConvertDeltasToAlignment (delts).ToList();
 			//Now to score them
 			alns.ForEach (z => {
                 z.Score = CalculateScore ( (Sequence)z.FirstSequence, (Sequence) z.SecondSequence);
