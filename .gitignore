@@ -1,5 +1,7 @@
 # Nigel's list
 BuildAndRun.py
+*.ccs.fasta
+tempLambdaVariant/
 *.dll
 *.exe
 *.pdb
@@ -89,3 +91,5 @@ data/tmp.fasta
 
 src/bio/obj/Release/Bio.Properties.Resource.resources
 
+
+data/lambdaNEB.fna
