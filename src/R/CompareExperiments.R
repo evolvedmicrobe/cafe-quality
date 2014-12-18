@@ -8,9 +8,22 @@ aggregate(ZMW~Algorithm,d,length)
 dv = read.csv("combined_variant_report.csv")
 aggregate(zmw~Algorithm,dv,length)
 
+#get all sets
+c4 = d$ZMW[d$Algorithm=="c4"]
+C2 = d$ZMW[d$Algorithm=="C2"]
+m = d$ZMW[d$Algorithm=="master"]
+valid = intersect(c4,C2)
+valid = intersect(valid, m)
 
-levels(d$Algorithm) <- c("Polish HP w/ C2", "P6-C4 SumProduct", "Current")
-
+levels(dv$Algorithm) <- c("Polish HP w/ C2", "P6-C4 SumProduct", "Current")
+vd = dv[dv$Ref=="HP.V1.02" & (dv$zmw%in%valid),]
+#vd$Pos = factor(vd$Pos)
+res = aggregate(length ~ Pos+Algorithm, vd, length)
+v = ggplot(res, aes(x=Pos, y = length, fill=Algorithm)) 
+v = v + geom_bar(stat="identity", position="dodge") + theme_bw()
+v = v + labs(x="Template Position", y = "Error Count", title = "Trade-offs in Algorithms for HP")
+v
+  
 
 #plot by depth
 mkPlot <- function(group) {
