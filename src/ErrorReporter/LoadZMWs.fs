@@ -14,9 +14,11 @@ let ccs_data d_direct =
                     Seq.toList
 
     let reference = Path.Combine(d_direct, "../../../References.fna")
+    //let reference = "/Users/nigel/git/cafe-quality/data/References.fna"
 
     // FIXME: This is temporarily hardcoded since I goofed the first runs
     let subReadDirectory = Path.Combine(d_direct, "../../../")
+    //let subReadDirectory = "/Users/nigel/CCS_P6_C4/Analysis_Results"
     let subReads = (new DirectoryInfo(subReadDirectory)).GetFiles() |> 
                     Seq.where (fun h -> h.Name.EndsWith(".subreads.fasta.gz")) |> 
                     Seq.map (fun u-> u.FullName) |>

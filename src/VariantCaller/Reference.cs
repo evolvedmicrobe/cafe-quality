@@ -20,7 +20,7 @@ namespace VariantCaller
         {
             RefSeq = new Sequence(NoGapDnaAlphabet.Instance, seq.ToArray(), true);
             RefSeq.ID = seq.ID;
-            nucmer= new NucmerQueryable(RefSeq, 8);
+            nucmer= new NucmerQueryable(RefSeq, 12);
         }
 
 		public List<PairwiseAlignedSequence> AlignSequence(Sequence toAlign)

@@ -442,7 +442,7 @@ namespace Bio.Algorithms.Alignment
                     IPairwiseSequenceAlignment sequenceAlignment = new PairwiseSequenceAlignment(concatReference, querySequence);
 
                     // Convert delta alignments to sequence alignments
-                    IList<PairwiseAlignedSequence> alignments = ConvertDeltaToAlignment(qDelta);
+                    IList<PairwiseAlignedSequence> alignments = ConvertDeltasToAlignment(qDelta);
 
                     if (alignments.Count > 0)
                     {
@@ -513,7 +513,7 @@ namespace Bio.Algorithms.Alignment
         /// </summary>
         /// <param name="alignments">List of delta alignments.</param>
         /// <returns>List of Sequence alignment.</returns>
-        public static IList<PairwiseAlignedSequence> ConvertDeltaToAlignment(
+        public static IList<PairwiseAlignedSequence> ConvertDeltasToAlignment(
                 IEnumerable<DeltaAlignment> alignments)
         {
             if (alignments == null)
@@ -524,32 +524,48 @@ namespace Bio.Algorithms.Alignment
             IList<PairwiseAlignedSequence> alignedSequences = new List<PairwiseAlignedSequence>();
             foreach (DeltaAlignment deltaAlignment in alignments)
             {
-                PairwiseAlignedSequence alignedSequence = deltaAlignment.ConvertDeltaToSequences();
-
-                // Find the offsets
-                long referenceStart = deltaAlignment.FirstSequenceStart;
-                alignedSequence.FirstSequenceStart = referenceStart;
-
-                long queryStart = deltaAlignment.SecondSequenceStart;
-                alignedSequence.SecondSequenceStart = queryStart;
-
-                long difference = referenceStart - queryStart;
-                if (0 < difference)
-                {
-                    alignedSequence.FirstOffset = 0;
-                    alignedSequence.SecondOffset = difference;
-                }
-                else
-                {
-                    alignedSequence.FirstOffset = -1 * difference;
-                    alignedSequence.SecondOffset = 0;
-                }
-
+                PairwiseAlignedSequence alignedSequence = ConvertDeltaToAlignment (deltaAlignment);
                 alignedSequences.Add(alignedSequence);
             }
 
             return alignedSequences;
         }
+
+        /// <summary>
+        /// Convert to delta alignments to sequence alignments.
+        /// </summary>
+        /// <param name="deltaAlignment">List of delta alignments.</param>
+        /// <returns>List of Sequence alignment.</returns>
+        public static PairwiseAlignedSequence ConvertDeltaToAlignment(
+            DeltaAlignment deltaAlignment)
+        {
+
+            PairwiseAlignedSequence alignedSequence = deltaAlignment.ConvertDeltaToSequences();
+
+            // Find the offsets
+            long referenceStart = deltaAlignment.FirstSequenceStart;
+            alignedSequence.FirstSequenceStart = referenceStart;
+
+            long queryStart = deltaAlignment.SecondSequenceStart;
+            alignedSequence.SecondSequenceStart = queryStart;
+
+            long difference = referenceStart - queryStart;
+            if (0 < difference)
+            {
+                alignedSequence.FirstOffset = 0;
+                alignedSequence.SecondOffset = difference;
+            }
+            else
+            {
+                alignedSequence.FirstOffset = -1 * difference;
+                alignedSequence.SecondOffset = 0;
+            }
+
+            return alignedSequence;
+        }
+
+
+
 
         /// <summary>
         /// Gets the sequence at specified index.

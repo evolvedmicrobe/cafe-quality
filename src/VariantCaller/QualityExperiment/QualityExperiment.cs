@@ -126,11 +126,18 @@ namespace VariantCaller
         /// </summary>
         private void assignCCSReadsToReference()
         {
+            var lambda = References.Find(r => r.RefSeq.ID.StartsWith("lambda_NEB3011", StringComparison.Ordinal));
             foreach (var v in CCSReads) {
-                foreach (var r in References) {
-                    if (Math.Abs (r.RefSeq.Count - v.Seq.Count) < 25) {
-                        v.AssignedReference = r;
-                        break;
+                if (v.Movie.StartsWith ("m141115", StringComparison.Ordinal)) {
+                    if (v.Seq.Count > 60) {
+                        v.AssignedReference = lambda;
+                    }
+                } else {
+                    foreach (var r in References) {
+                        if (Math.Abs (r.RefSeq.Count - v.Seq.Count) < 25) {
+                            v.AssignedReference = r;
+                            break;
+                        }
                     }
                 }
             }
