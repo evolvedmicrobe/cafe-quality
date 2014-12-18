@@ -9,7 +9,7 @@ open System.Linq
 
 type CCSWriter (fname:string) = 
     let sw = new StreamWriter(fname)
-    do sw.WriteLine("ZMW,Reference,NumSubReads,NumErrors,Length,NumIndelErrors,NumSNPErrors")
+    do sw.WriteLine("Movie,ZMW,Reference,NumSubReads,NumErrors,Length,NumIndelErrors,NumSNPErrors")
     member this.Output (read : CCSRead) ( vars: List<Variant>) = 
         if read.AssignedReference <> null && read.SubReads <> null then 
             let indel_cnt = vars |>  Seq.where (fun u  -> u.Type = VariantType.INDEL) |> Seq.length
@@ -19,7 +19,8 @@ type CCSWriter (fname:string) =
                       | null -> "None"
                       | _ -> read.AssignedReference.RefSeq.ID
             
-            let toOut = [| read.ZMWnumber.ToString();
+            let toOut = [| read.Movie;
+                           read.ZMWnumber.ToString();
                            read.AssignedReference.RefSeq.ID;
                            read.SubReads.Count.ToString();
                            vars.Count.ToString();
@@ -28,6 +29,7 @@ type CCSWriter (fname:string) =
                            snp_cnt.ToString() |]
             let line = String.concat "," toOut
             sw.WriteLine(line)
+            sw.Flush()
 
     member this.Close = sw.Close()
 
@@ -40,7 +42,7 @@ type VariantWriter (fname:string) =
 
     let sw = new StreamWriter(fname)        
 
-    do sw.WriteLine("Ref,Pos,zmw,type,length,num_subreads,homopolymerLength,homopolymerChar,indelSize,indeltype")
+    do sw.WriteLine("Ref,Pos,zmw,type,length,homopolymerLength,homopolymerChar,indelSize,indeltype")
         
     member this.Write (read : CCSRead) (variant : Variant )= 
 
@@ -70,19 +72,22 @@ type VariantWriter (fname:string) =
                         | :? SNPVariant as snp -> "N"
                         | _ -> failwith "type miss"
 
-        let toWrite : Object[] = [| variant.RefSeq.ID; variant.StartPosition; read.ZMWnumber; vtype; read.Seq.Count; read.SubReads.Count; homopolymerLength; homoChar; indelLength; indeltype|]
+        let toWrite : Object[] = [| variant.RefSeq.ID; variant.StartPosition; read.ZMWnumber; vtype; read.Seq.Count; homopolymerLength; homoChar; indelLength; indeltype|]
 
         let toOut = join toWrite
         sw.WriteLine(toOut)
+        sw.Flush()
     member this.Close = sw.Close()
 
 
 let mutable totWithVariants = 0;
 
 let vempty = new List<Variant>()
-
+let mutable outCnt = 0
 let outputRead (vwriter:VariantWriter) (cwriter:CCSWriter) (read:CCSRead) =
     if read.AssignedReference <> null then
+        outCnt <- outCnt + 1
+        if outCnt % 50 = 0 then Console.WriteLine ("Outputting read number: " + outCnt.ToString())
         let alns = read.AssignedReference.AlignSequence (read.Seq) |> Seq.toArray
         if alns.Length  = 0 then
             cwriter.Output read vempty else
