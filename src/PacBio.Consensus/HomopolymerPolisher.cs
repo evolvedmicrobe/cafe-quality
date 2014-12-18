@@ -82,7 +82,7 @@ namespace PacBio.Consensus
                         len++;
                         i++;
                     }
-                    if (len >= minLength)
+                    if (len >= minLength && (bp == 'G' || bp == 'C'))
                     {
                         yield return new Mutation() { Base = bp, TemplatePosition = start_hp, Type = MutationType.INSERTION };
                     }
