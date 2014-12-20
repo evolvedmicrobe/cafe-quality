@@ -49,11 +49,14 @@ namespace PacBio.Consensus
             for (int i=0; i< accepted.Count; i++)
             {
                 System.Threading.Interlocked.Increment (ref TotalMutationsAccepted);
+                if (i % 100 == 0) {
+                    Console.WriteLine ("Changed: " + TotalMutationsAccepted + " mutations");
+                }
             }
             scorer.ApplyMutations(accepted);
             return new Tuple<TrialTemplate, List<MutationScore>>(scorer.Template, allScores);
         }
-       static IEnumerable<Mutation> GenerateLongHomopolymerMutations(TrialTemplate tpl, int minLength = 4)
+       static IEnumerable<Mutation> GenerateLongHomopolymerMutations(TrialTemplate tpl, int minLength = 2)
         {
             // Attempt to insert or mismatch every base at every positions.
             // Don't mutate anything in the know template adapter region
