@@ -24,6 +24,9 @@ nd$homopolymerChar[nd$homopolymerChar=="G"]="C"
 res = aggregate(Pos~homopolymerLength+indeltype+homopolymerChar,nd,function(x) length(x)/nrow(nd))
 head(res)
 
+res2 = aggregate(Pos~homopolymerLength+homopolymerChar,nd,function(x) length(x)/nrow(nd))
+head(res)
+
 pdf("LambdaIndelErrors.pdf",width=6,height=4)
 v = ggplot(res,aes(x=homopolymerLength,y=Pos, colour=homopolymerChar))+facet_grid( .~indeltype)+geom_point()+theme_bw(base_size=8)
 v = v +labs(x="Homopolymer Length",y="Percentage of Total Errors", title="Indel errors divided by genomic context for reads with >9X Passes")

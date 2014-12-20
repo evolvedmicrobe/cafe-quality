@@ -14,9 +14,14 @@ head(lambda)
 d$ErrorRate = d$NumErrors/d$Length
 d$SNPErrorRate = d$NumSNPErrors / d$Length
 d$IndelErrorRate = d$NumIndelErrors / d$Length
+d$MeanGC = (d$SnrG + d$SnrC) / 2
 
+hpd = d[d$Reference=="HP.V1.02",]
+head(hpd)
+ggplot(hpd, aes(x=MeanGC,y=IndelErrorRate))+geom_point()+scale_y_log10()+geom_smooth()
 
-ggplot
+sum(hpd$MeanGC>5 & hpd$NumIndelErrors<2)/nrow(hpd)
+
 
 mkPlot<-function(errorType, ylab, title) {
   fm = formula(paste(errorType,"~NumPasses+Reference"))
@@ -68,7 +73,20 @@ ph = function(x) { -10*log10(x)}
 res$QV = sapply(res$ErrorRate,ph)
 
 d$JittedPos = d$NumPasses+.5 - runif(nrow(d))
+
 ld =d[d$Reference=="lambda_NEB3011",]
+head(ld)
+
+sld = ld[ld$NumPasses>10,]
+head(sld)
+ggplot(sld, aes(x=MeanGC,y=ErrorRate))+geom_point()+scale_y_log10()+geom_smooth()
+a=ggplot(sld, aes(x=SnrG,y=ErrorRate))+geom_point()+scale_y_log10()+geom_smooth()
+b=ggplot(sld, aes(x=SnrC,y=ErrorRate))+geom_point()+scale_y_log10()+geom_smooth()
+grid.arrange(a,b)
+
+
+plot(sld$SnrG,sld$SnrC)
+
 n = nrow(ld)
 sd = ld[sample(n, n*.05),]
 
