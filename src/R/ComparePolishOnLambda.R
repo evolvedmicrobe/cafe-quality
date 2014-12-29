@@ -2,7 +2,7 @@ library(ggplot2)
 library(gridExtra)
 library(grid)
 
-setwd("/Users/nigel/git/cafe-quality/master_full/")
+setwd("/Users/nigel/git/cafe-quality/NotTracked/master_full")
 
 getld <-function(fname) {
   d= read.csv(fname)
@@ -14,8 +14,8 @@ getld <-function(fname) {
   d$MeanGC = (d$SnrG + d$SnrC) / 2
   d[d$Reference=="lambda_NEB3011",]
 }
-d = getld("/Users/nigel/git/cafe-quality/master_full/local_read_combined_reads.csv")
-d2 = getld("/Users/nigel/git/cafe-quality/master_full/C2_polymer_combined_reads.csv")
+d = getld("master_5ba5286_combined_reads.csv")
+d2 = getld("C2_polymer_d067558_combined_reads.csv")
 
 head(d2)
 
@@ -25,7 +25,7 @@ d = d[d$ZMW%in%in1,]
 
 cd = rbind(d,d2)
 cd$Reference=  factor(c(rep("Original",nrow(d)),rep("Polished",nrow(d2))))
-
+cd$MeanGC = .5*(cd$SnrG + cd$SnrC)
 mkPlot<-function(errorType, ylab, title) {
   fm = formula(paste(errorType,"~NumPasses+Reference"))
   q = aggregate(fm,cd,mean)
@@ -71,7 +71,6 @@ v
 
 
 
-setwd("/Users/nigel/git/cafe-quality/master_full/")
 pdf("errors.pdf",width=11,height=8.5)
 grid.arrange(a,b,c,v, ncol = 2)
 dev.off()
@@ -85,9 +84,9 @@ median(lb$ErrorRate)
 
 
 ## Variant analysis
-dv = read.csv("/Users/nigel/git/cafe-quality/master_full/master_5ba5286_all_variants.csv")
+dv = read.csv("master_5ba5286_all_variants.csv")
 ldv = dv[dv$Ref=="lambda_NEB3011",]
-ldv2 = read.csv("/Users/nigel/git/cafe-quality/data/C2_polymer_fix_1934603_all_variants.csv" )
+ldv2 = read.csv("C2_polymer_fix_d067558_all_variants.csv" )
 ldv2 = ldv2[ldv2$Ref=="lambda_NEB3011",]
 
 cdv = rbind(ldv,ldv2)
@@ -141,14 +140,14 @@ errorContour <-function(minGC, minPasses) {
   head(gd)
   res = aggregate(Pos~Ref,gd,length)
   print(res)
-  res[2,2]/res[1,2]
+  1-res[2,2]/res[1,2]
 }
 k = Vectorize(errorContour)
 x = seq(0,14,.5) # Min GC
 y = seq(0,20) # Min Passes
 z = outer(x,y,k)
 
-pdf("ErrorsRemovedContour.pdf",width=6.5,height=5)
+pdf("ErrorsRemovedContourPolish2orMore.pdf",width=6.5,height=5)
 filled.contour(x,y,z, xlab="Mean G+C SNR",ylab="Minimum Number of Passes", main="% Errors Removed By SNR and Coverage")
 dev.off()
 
@@ -207,24 +206,32 @@ dev.off()
 
 
 
-
-ok = cd$ZMW[cd$MeanGC>=(minGC - 2) & cd$MeanGC>=(minGC + 2) & cd$NumPasses>=minPasses]
+minPasses=20
+ok = cd$ZMW[cd$NumPasses>=minPasses]
 gd = cdv[cdv$zmw%in%ok,] 
-head(gd)
-res = aggregate(Pos~Ref+type+homopolymerLength+homopolymerChar,cdv,length)
+res = aggregate(Pos~Ref+type+homopolymerLength+homopolymerChar+indeltype,gd,length)
 
 head(res)
+
 
 res2 = res[res$homopolymerChar=="C",]
 head(res2)
 pdf("LambdaIndelErrorsPolishedAllData.pdf",width=6,height=4)
-v = ggplot(res2,aes(x=homopolymerLength,y=Pos, colour=Ref))+facet_grid( .~indeltype)+geom_point(size=1.5)+theme_bw(base_size=9)
+v = ggplot(res2,aes(x=homopolymerLength,y=Pos, colour=Ref))+facet_grid( .~indeltype)+geom_point(size=3)+theme_bw(base_size=9)
 v = v +labs(x="Homopolymer Length",y="Count of Total Errors", 
             title=expression(paste(lambda, " G/C indel errors divided by genomic context for all Reads")))
-v = v + scale_colour_discrete(name="Method",labels = c("Original","Polished"))#+geom_vline(xintercept=3.5,colour="red")
+v = v + scale_colour_discrete(name="Method",labels = c("Original","Full Polish"))#+geom_vline(xintercept=3.5,colour="red")
 v
 dev.off()
 
+head(res)
+
+
+
+
+res3 = res2[res2$type=="Indel",]
+head(res3)
+aggregate(Pos~Ref,res3,sum)
 or = res2[res2$Ref=="Original",]
 e1d = sum(or$Pos[or$homopolymerLength>4 & or$indeltype=="Deletion"])
 e1i = sum(or$Pos[or$homopolymerLength>3 & or$indeltype=="Insertion"])
