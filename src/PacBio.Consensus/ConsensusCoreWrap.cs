@@ -37,8 +37,10 @@ namespace PacBio.Consensus
     {
         public static QvSequenceFeatures MakeQvSequenceFeatures(int startBase, int length, IZmwBases b)
         {
+            // Remove all of them.
+            var delTags = Enumerable.Repeat ('N', b.DeletionTag.Count).ToList ();
             using (FloatArray delQv = MakeFloatArray(b.DeletionQV, startBase, length),
-                              delTag = MakeFloatArray(b.DeletionTag, startBase, length),
+                              delTag = MakeFloatArray(delTags, startBase, length),
                               insQv = MakeFloatArray(b.InsertionQV, startBase, length),
                               subsQv = MakeFloatArray(b.SubstitutionQV, startBase, length),
                               mergeQv = MakeFloatArray(b.MergeQV, startBase, length)
