@@ -112,7 +112,7 @@ namespace PacBio.Consensus
         /// <summary>
         /// Subcommands must implement this method to carry out the subcommand.
         /// </summary>
-        public int Run(string cmpH5File, string fofn, string reference, string outFile, int maxTraces, 
+        public int Run(string cmpH5File, string fofn, string reference, string outFile, int totalTraces, 
             int maxIterations = 100, SnrCut snrCut = null)
         {
             if (maxIterations > 0)
@@ -130,22 +130,36 @@ namespace PacBio.Consensus
             var rFasta = new PacBio.IO.Fasta.SimpleFASTAReader(reference);
             var refDict = rFasta.ToDictionary(e => e.Header, e => e.GetSequence());
 
+
+            var totalReferences = refDict.Count;
+            Log (LogLevel.WARN, "Found " + totalReferences + " references in file");
+            var tracesPerReference = (int) Math.Ceiling (totalTraces / (double)totalReferences); 
+
+
             // Load trainSet
             var traceSet = new TraceSet(cmpH5File, fofn, snrCut);
 
             // FIXME shuffle
-            var ex = CCSExample.GetExamples(traceSet, maxTraces * 2, refDict);
-            var train = ex.Take(maxTraces).ToList();
-            var test = ex.Skip(maxTraces).Take(maxTraces).ToList();
+            List<CCSExample> train = new List<CCSExample> ();
+            List<CCSExample> test = new List<CCSExample> ();
+            foreach(var refname in refDict.Keys)
+            {
+                Log (LogLevel.WARN, "Started getting train/test data for " + refname);
+                var ex = CCSExample.GetExamples(traceSet, tracesPerReference * 2, refDict, refname);
+                train.AddRange(ex.Take(tracesPerReference));
+                test.AddRange(ex.Skip(tracesPerReference).Take(tracesPerReference));
+                Log (LogLevel.WARN, "Finished getting train/test data for " + refname);
+                Log (LogLevel.WARN, "Training set is now contains " + train.Count + " samples" );
 
+            }
             // Check that enough data is available
-            int warnThresh = maxTraces / 2;
-            int failThresh = maxTraces / 10;
+            int warnThresh = totalTraces / 2;
+            int failThresh = totalTraces / 10;
 
             if (train.Count < failThresh || test.Count < failThresh)
             {
                 Log(LogLevel.ERROR, "Insufficient data for training: maxTraces={0}, train.Count={1}, test.Count={2}",
-                    maxTraces, train.Count, test.Count);
+                    totalTraces, train.Count, test.Count);
 
                 return 1;
             }
@@ -153,7 +167,7 @@ namespace PacBio.Consensus
             if (train.Count < warnThresh || test.Count < warnThresh)
             {
                 Log(LogLevel.WARN, "Input data yields less than 2x requested: maxTraces={0}, train.Count={1}, test.Count={2}",
-                    maxTraces, train.Count, test.Count);
+                    totalTraces, train.Count, test.Count);
             }
 
             using (var scConfig = ParameterLoading.DefaultQuiver)
