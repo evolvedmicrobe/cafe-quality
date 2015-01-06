@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2323B197-528D-470E-A895-ECF055F1CBA0}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>CCSTrain</RootNamespace>
+    <AssemblyName>CCSTrain</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <Externalconsole>true</Externalconsole>
+    <Tailcalls>false</Tailcalls>
+    <PlatformTarget>
+    </PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>
+    </PlatformTarget>
+    <Externalconsole>true</Externalconsole>
+    <Tailcalls>true</Tailcalls>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="ManyConsole">
+      <HintPath>..\..\lib\ManyConsole.dll</HintPath>
+    </Reference>
+    <Reference Include="NDesk.Options">
+      <HintPath>..\..\lib\NDesk.Options.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>..\..\lib\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.FSharp.Utils">
+      <HintPath>..\..\lib\PacBio.FSharp.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.Data">
+      <HintPath>..\..\lib\PacBio.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.IO">
+      <HintPath>..\..\lib\PacBio.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph">
+      <HintPath>..\..\lib\QuickGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.Utils">
+      <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="ConsensusSubCommand.fs" />
+    <Compile Include="CCSTrain.fs" />
+    <Compile Include="Main.fs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
+      <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
+      <Name>ConsensusCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PacBio.Consensus\PacBio.Consensus.csproj">
+      <Project>{D3A49F4E-1139-4782-A72A-599CCE57D715}</Project>
+      <Name>PacBio.Consensus</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PacBio.HDF\PacBio.HDF.csproj">
+      <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
+      <Name>PacBio.HDF</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

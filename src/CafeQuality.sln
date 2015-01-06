@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PacBio.HDF", "PacBio.HDF\Pa
 EndProject
 Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "ErrorReporter", "ErrorReporter\ErrorReporter.fsproj", "{F28305DF-92B6-4820-A5AF-957075A4BF52}"
 EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "CCSTrain", "CCSTrain\CCSTrain.fsproj", "{2323B197-528D-470E-A895-ECF055F1CBA0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,26 @@ Global
 		DebugLinux|Any CPU = DebugLinux|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Debug|Win32.Build.0 = Debug|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.DebugLinux|Any CPU.ActiveCfg = Debug|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.DebugLinux|Any CPU.Build.0 = Debug|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Mono|Any CPU.ActiveCfg = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Mono|Any CPU.Build.0 = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Mono|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Mono|Mixed Platforms.Build.0 = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Mono|Win32.ActiveCfg = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Mono|Win32.Build.0 = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Release|Win32.ActiveCfg = Release|Any CPU
+		{2323B197-528D-470E-A895-ECF055F1CBA0}.Release|Win32.Build.0 = Release|Any CPU
 		{4DDC858E-1EA7-4A48-9348-51B7D932C684}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4DDC858E-1EA7-4A48-9348-51B7D932C684}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DDC858E-1EA7-4A48-9348-51B7D932C684}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -246,7 +268,7 @@ Global
 		{F28305DF-92B6-4820-A5AF-957075A4BF52}.Release|Win32.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = PacBio.ConsensusTools\PacBio.ConsensusTools.fsproj
+		StartupItem = CCSTrain\CCSTrain.fsproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
