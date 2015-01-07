@@ -196,9 +196,7 @@ The insertion score for the read base is used differently depending on whether o
 							 \end{cases}
 \]
 
-The deletion score also differs from what is typical.  A small subset of bases in HQ regions (\textasciitilde10\%) contain a DeletionTag base that is not equal to N.  This base reports the most likely base that was deleted immediately before that base.  If a position in the template is deleted, the score changes if it matches the next positions most likely deleted base.
-
-
+The deletion score also differs from what is typical.  A small subset of bases in HQ regions (\textasciitilde10\%) contain a DeletionTag base that is not equal to N.  This base reports the most likely base that was deleted immediately before that base.  If a position in the template is deleted, the score changes if it matches the next positions most likely deleted base.  Note that if no DeletionTag is present, the QV value for the deletion is hardcoded to be 17.\footnote{See \texttt{PulseToBaseStream.cs@478}}.  Since this was an arbitrary value, this value is reset during training.
 
 
 \subsection{\textbf{Merge Score}}
