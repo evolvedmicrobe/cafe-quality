@@ -209,8 +209,8 @@ namespace Bio.IO.FastA
             {
                 message = string.Format(
                         CultureInfo.InvariantCulture,
-                        Properties.Resource.INVALID_INPUT_FILE,
-                        Properties.Resource.FASTA_NAME);
+                        "INVALID_INPUT_FILE",
+                        "FASTA_NAME");
 
                 throw new FileFormatException(message);
             }
