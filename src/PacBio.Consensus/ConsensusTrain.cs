@@ -99,7 +99,7 @@ namespace PacBio.Consensus
 
         private static void Log(string msg, params object[] args)
         {
-            logger.Log(LogLevel.INFO, String.Format(msg, args));
+            logger.Log(LogLevel.WARN, String.Format(msg, args));
         }
 
         private int maxIterations = 35;
@@ -244,7 +244,7 @@ namespace PacBio.Consensus
                             var spec = ConsensusCoreWrap.QvModelParamsFromArray(pars.ToArray().Map(v => (float) v));
                             var err = LikelihoodObjective(spec, examples, algo);
 
-                            Log("Iteration {0}. Training set error: {1}", iterations, err);
+                            Log(LogLevel.WARN, "Iteration {0}. Training set error: {1}", iterations, err);
                             iterations++;
 
                             return err;
