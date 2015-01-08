@@ -62,6 +62,8 @@ using std::min;
 using std::max;
 #endif  // SWIG
 
+#define N_FLOAT (float)'N'
+
 #define NEG_INF -FLT_MAX
 
 namespace ConsensusCore
@@ -177,7 +179,7 @@ namespace ConsensusCore
             else
             {
                 float tplBase = tpl_[j];
-                return (i < ReadLength() && tplBase == Features().DelTag[i]) ?
+                return (i < ReadLength() && N_FLOAT != Features().DelTag[i]) ?
                         params_.DeletionWithTag + params_.DeletionWithTagS * Features().DelQv[i] :
                         params_.DeletionN;
             }
@@ -234,8 +236,8 @@ namespace ConsensusCore
                                          params_.DeletionWithTagS,
                                          &Features().DelQv[i]);
                 __m128 delNoTag = _mm_set_ps1(params_.DeletionN);
-                __m128 mask = _mm_cmpeq_ps(_mm_loadu_ps(&Features().DelTag[i]),
-                                           _mm_set_ps1(tplBase));
+                __m128 mask = _mm_cmpneq_ps(_mm_loadu_ps(&Features().DelTag[i]), // Loads the relevant deletion Tags
+                                           _mm_set_ps1(N_FLOAT)); //Sets all values equal to the scalar argument
                 return MUX4(mask, delWTag, delNoTag);
             }
             else
