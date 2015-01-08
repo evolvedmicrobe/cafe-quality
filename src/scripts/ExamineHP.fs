@@ -226,7 +226,7 @@ let ProcessRead (read:CCSRead) =
                outFile.write outData
 
 
-[<EntryPoint>]
+//[<EntryPoint>]
 let main args =
    let sw = System.Diagnostics.Stopwatch.StartNew()
    LoadZMWs.ccs_data.CCSReads  |> Seq.where (fun z -> z.AssignedReference <> null && z.AssignedReference.RefSeq.ID = "HP.V1.02" && z.SubReads.Count > 126) 

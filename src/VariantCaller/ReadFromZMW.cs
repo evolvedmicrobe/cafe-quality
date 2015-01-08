@@ -16,6 +16,20 @@ namespace VariantCaller
     /// </summary>
     public class ReadFromZMW
     {
+
+        [OutputAttribute]
+        public string AssignedReferenceName;
+
+        private Reference assignedReference;
+
+        public Reference AssignedReference
+        {
+            get{ return assignedReference; }
+            set { assignedReference = value;
+                AssignedReferenceName = value.RefSeq.ID;
+            }
+        }
+
         [OutputArrayAttribute]
         public readonly byte[] DeletionQV;
         [OutputArrayAttribute]
@@ -72,6 +86,22 @@ namespace VariantCaller
         public float RQ;
         [OutputAttribute]
         public int Zmw;
+        /// <summary>
+        /// IF we do an alignment, how long this is.
+        /// </summary>
+        [OutputAttribute]
+        public int AlignedLength;
+
+        /// <summary>
+        /// The total count of DelTags not equal to 'N'
+        /// </summary>
+        [OutputAttribute]
+        public int CountDelTags;
+        /// <summary>
+        /// The count of DelTags that could be considered correct
+        /// </summary>
+        [OutputAttribute]
+        public int CountCorrectDelTags;
         [OutputAttribute]
         public int SpikeMergeQVCount;
         [OutputAttribute]
@@ -163,6 +193,8 @@ namespace VariantCaller
         public ReadFromZMW GetReverseComplement()
         {
             var s = new Sequence (DnaAlphabet.Instance, BaseCalls, false);
+            var ds = new Sequence (AmbiguousDnaAlphabet.Instance, DeletionTag, false);
+            var ds_rc = ds.GetReverseComplementedSequence ().ConvertToString ().Select (z => (byte)z).ToArray ();
             return new ReadFromZMW (DeletionQV.Reverse ().ToArray (),
                 IpdInFrames.Reverse ().ToArray (),
                 s.GetReverseComplementedSequence ().ConvertToString (),
@@ -170,7 +202,7 @@ namespace VariantCaller
                 MergeQV.Reverse ().ToArray (),
                 SubstitutionQV.Reverse ().ToArray (),
                 PulseWidthInFrames.Reverse ().ToArray (),
-                DeletionTag.Reverse().ToArray());                         
+                ds_rc);                         
         }
          
     }

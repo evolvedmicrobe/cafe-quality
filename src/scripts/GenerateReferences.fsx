@@ -72,7 +72,7 @@ let printAln (read:CCSRead) =
     alns |> Seq.iter (fun z -> Console.WriteLine(z.ToString())) 
 
 
-[<EntryPoint>]
+//[<EntryPoint>]
 let main args =
 [seq1; seq2; seq3] |> List.map printAln |> ignore
     

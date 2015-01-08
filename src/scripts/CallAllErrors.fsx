@@ -109,7 +109,7 @@ let outputRead (read:CCSRead) =
 
 
 
-[<EntryPoint>]
+//[<EntryPoint>]
 let main args =
     let sw = System.Diagnostics.Stopwatch.StartNew()
     LoadZMWs.ccs_data.CCSReads  |>Seq.iter outputRead
