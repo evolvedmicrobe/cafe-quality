@@ -85,6 +85,7 @@ let getTagReport (parentRead : ReadFromZMW) (subRead : CCSSubRead) =
        let subSection = zmwSection.GetSubSection(start, len)
 
        let del_rpt = countCorrectDelTags top subSection
+       subSection.AssignedReference <- parentRead.AssignedReference
        subSection.ReverseComplementedOriginally <- revComp
        subSection.OriginalSubReadLength <- subRead.Seq.Length
        subSection.RQ <- subRead.RQ
