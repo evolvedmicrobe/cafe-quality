@@ -80,7 +80,7 @@ showstringspaces=false} % no special string spaces
 %	ABSTRACT
 %----------------------------------------------------------------------------------------
 
-\Abstract{ The PacBio consensus calling framework is greatly complicated by the presence of deletion tag values attached to certain basepairs.  These  that are emitted by the .}
+\Abstract{ The PacBio consensus calling framework is complicated by the presence of deletion tag values attached to certain basepairs.  This PBIP reviews how these values are generated and evaluates from a principled and empirical perspective why they are undesirable.  It concludes that the CCS algorithm could likely benefit from richer deletion QV values, but that the DelTag value is likely to only complicate matters at present. }
 
 %----------------------------------------------------------------------------------------
 
@@ -104,14 +104,14 @@ showstringspaces=false} % no special string spaces
 
 A desirable statistical model is no more complex than necessary, does not contain unnecessary parameters and has a likelihood function that is smooth and continuous to aid in optimization.  There should also be a well defined generative process that defines how the observed data should be interpreted.
 
-The use of Deletion Tags (DelTags), in secondary analysis takes the CCS and Quiver models further away from, rather than closer to, this ideal.  The proposal suggests that either DelTag values should be removed entirely, or the deleted base should be promoted to an actual base in the read sequence, so that it could be handled using the framework for insertions/deletions already present in the scoring models that does not require DelTag values. 
+The use of Deletion Tags (DelTags), in secondary analysis takes the CCS and Quiver models further away from, rather than closer to, this ideal.  The proposal suggests that either DelTag values should be ignored during CCS analysis or promoted to an actual base in the read sequence, so that it could be handled using the framework for insertions/deletions already present in the scoring models that does not require DelTag values. 
 
 Here, I review the origin and rational for deletions tags then present several arguments for their removal. 
 
 
 
 \subsection{What are DelTags?}
-Each base in a PacBio dataset may have an associated DelTag value which is one of the basepairs A, C, G, T.  It is defined in the PacBio documentation as the \textit{``Likely identity of a deleted base, if it exists"}.  In practice, typically approximately 10\% of bases in a dataset will have this value, the remainder will have a `N' value.  However the percentage of bases with a DelTag varies by overall read quality as shown in Figure \ref{fig:RateByRQ}\footnote{Generated using code in ExamineDelTags.fs and ExamineDelTags.R.}.  The DeletionTag value is created within the method that converts pulses into bases\footnote{Method: \texttt{ AnalyzeInsertClassify@PulseToBaseStream.cs:521}}.
+Each base in a PacBio dataset may have an associated DelTag value which is one of the basepairs A, C, G, T.  It is defined in the PacBio documentation as the \textit{``Likely identity of a deleted base, if it exists"}.  In practice, typically approximately 10\% of bases in a dataset will have this value, while the remainder will have an `N' value to indicate the DelTag was never set.  The exact percentage of bases with a DelTag varies by overall read quality as shown in Figure \ref{fig:RateByRQ}\footnote{Generated using code in ExamineDelTags.fs and ExamineDelTags.R.}.  The DeletionTag value is created within the method that converts pulses into bases\footnote{Method: \texttt{ AnalyzeInsertClassify@PulseToBaseStream.cs:521}}.
 
 \begin{figure}[ht]\centering 
 \includegraphics[width=\linewidth]{TagRateByRQ}
@@ -120,7 +120,7 @@ Each base in a PacBio dataset may have an associated DelTag value which is one o
 \end{figure}
 
 
-Before discussing when and how DelTags are added, it is worth mentioning that generally speaking, the Deletion QV values emitted from PacBio data processing are not very useful, and their calculation appears to be an unfinished project.  It appears Pat originally intended to create Deletion QV values using a GBM\footnote{Generalized Boosted Model, for more details see the R package GBM.} to predict the likelihood of error, as is currently done for insertion QVs.  However, at present the values for the deletion QV are all hardcoded to a QV of 17 with the following line of code:\footnote{\texttt{PulseToBaseStream.cs:478}}
+Before discussing when and how DelTags are added, it is worth mentioning that generally speaking, the Deletion QV values emitted from PacBio data processing are not very useful, and their calculation appears to be an unfinished project.  It appears Pat originally intended to create Deletion QV values using a GBM\footnote{Generalized Boosted Model, for more details see the R package GBM.} to predict the likelihood of error, as is currently done for insertion QVs.  However, at present the values for the deletion QV are all hardcoded to a QV of 17 (corresponding to a 2\% error rate) with the following line of code:\footnote{\texttt{PulseToBaseStream.cs:478}}
 
 \lstset{style=sharpc}
 \begin{lstlisting}[frame=single]
@@ -132,7 +132,7 @@ delPrediction = incPredictions.Map(v => 0.02f);
 
 Although all DeletionQV values are initially hard-coded to the seemingly arbitrary 17 value in PulseToBases, this value can later be modified if and only if when converting pulses to bases some pulses are not emitted, or are skipped.  If a pulse is skipped, then a new DeletionQV value, and a DelTag, is attached to the next pulse converted to a base.  This is the only time a DelTag will exist.
 
-To obtain both the base and the QV value, the skipped pulses are all evaluated.  The basepair of the skipped pulse with the highest probability of incorporation becomes the DelTag basepair.  A new DeletionQV value is then calculated as the sum of all the deletion probabilities for the skipped pulses (which are all a fixed constant), plus the probability of incorporation for the most likely base.  The specific code to do this is shown below.\footnote{\texttt{PulseToBaseStream.cs:636}}
+To calculate both the DelTag base and the QV value that will be attached to this base, all pulses skipped before the emitted pulse are evaluated.  The basepair of the skipped pulse with the highest probability of incorporation becomes the DelTag basepair.  A new DeletionQV value is then calculated as the sum of all the deletion probabilities for the skipped pulses (which are all a fixed constant), plus the probability of incorporation for the most likely base.  The specific code to do this is shown below.\footnote{\texttt{PulseToBaseStream.cs:636}}
 
 \lstset{style=sharpc}
 \begin{lstlisting}[frame=single]
@@ -175,7 +175,7 @@ The second issue is that only the pulse with the highest probability of being a 
 
 \subsection{They make scoring complex}
 
-The ``Deletion Move" in our template scoring routine is done in one of two distinct ways depending on if a Deletion Tag is present.  With positions denoted by Figure \ref{fig:del}, a Deletion move is currently scored according to the equation shown below.  
+The ``Deletion Move" in our template scoring routine is done in one of two distinct ways depending on if a DelTag is present.  With positions denoted by Figure \ref{fig:del}, a deletion move is currently scored according to the equation shown below.  
 
 \begin{figure}[ht]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
 \includegraphics[width=\linewidth]{Deletion}
@@ -190,7 +190,15 @@ The ``Deletion Move" in our template scoring routine is done in one of two disti
 							 \end{cases}
 \]
 
-By having two possible scoring methods, we not only need to estimate 3 parameters for the deletion move in training, but we also are scoring the same behavior (a deletion in the template), using two separate methods.
+By having two possible scoring methods, we not only need to estimate 3 parameters for the deletion move in training, but we also are scoring the same behavior (a deletion in the template), using two separate methods.  This additional step further exacerbates the complexity when deletions in homopolymer regions (the main error mode for CCS P6-C4 PacBio data) are considered.  For example, consider the alignment:
+
+\begin{center}
+\texttt{GGGG}
+
+\texttt{GG-G}
+\end{center}
+
+The deletion in this alignment can be explained by either a single merge move or a deletion move followed by a match.  Because deletions can be scored in one of two ways depending on the deletion tag values, this creates three separate possible scorings for the single deletion and makes the score affected by at least 5 parameters that need to be trained in order to compare these possibilities (1 for the baseline deletion penalty, 2 for the affine transform used if a DelTag exists and 2 more to transform the MergeQV).  Such complexity makes it difficult to analyze and optimize the scoring model.
 
 \subsection{Knowing the identity of the base most likely to have been deleted should not add value.}
 
@@ -201,17 +209,6 @@ As a consequence of this, with multiple reads being used to generate a consensus
 In other words, \textit{we don't need to encode the most likely deleted base in the DelTag because it is already encoded by the other reads used for consensus}. 
  
 
-
-\subsection{Subsection}
-
-\lipsum[6] % Dummy text
-
-\paragraph{Paragraph} \lipsum[7] % Dummy text
-\paragraph{Paragraph} \lipsum[8] % Dummy text
-
-\subsection{Subsection}
-
-\lipsum[9] % Dummy text
 
 
 
@@ -227,85 +224,49 @@ The overall rate at which a DelTag is correct is only $\sim3.6\%$ and this value
 
 \begin{figure}[ht]\centering
 \includegraphics[width=\linewidth]{TagCorrectRateByRQ.pdf}
-\caption{Percentage of DelTags Correct by RQ.  For each DelTag in an aligned set of subreads, I counted the DelTag as correct if it followed a deletion of the given base in the alignment (with some accounting for different alignments within homopolymers).  Each dot in this graph represents the average for a set of subreads binned by RQ. For more details, see the cafe-quality commit  }
+\caption{Percentage of DelTags Correct by RQ.  For each DelTag in an aligned set of subreads, DelTags were counted as correct if when aligned to a reference they came after a deletion of the given base in the alignment (with some accounting for different alignments within homopolymers, though this may be an underestimate of the true rate is it in contingent on a particular alignment).  Each dot in this graph represents the average for a set of subreads binned by RQ. For more details, see the cafe-quality commit \texttt{c0a4384}}.
 \label{fig:rateCorrect}
 \end{figure}
 
+\subsection{Ignoring them can improve accuracy}
+
+The presence of a DelTag value simultaneously does two things: it provides a condition under which a different Deletion QV value will be used, and it provides a QV value to use if that condition is met.  It can be that of these two things \textit{the alternate QV value is important, but the condition under which to use it is not}.
+
+A simple experiment helps to demonstrate this.  Figure \ref{fig:lambdaTest} shows how the empirically observed error rate (Phred Scaled) for data derived from the $\lambda$ genome using the current version 2.3 P6-C4 CCS analysis as well as two variants of it\footnote{Code to run comparison is in Cafe-Quality, branches \texttt{del\_tag\_all\_match:522aae7} and \texttt{no\_del\_tag:f6b0952}.  Figures from R script \texttt{CompareDelTagPolishOnLambda.R}}.  In the first alogrithmic variant (referred to as \textbf{Never use}) we remove all DelTag values from the dataset before analysis so that only the constant term is used to score deletions.  As the figure evinces, this lowers the accuracy at all coverage levels in the data, indicating using the alternate QV value is important.
+
+In the second variation of the algorithm shown (referred to as \textbf{Always Use}) the QV value associated with the DelTag is always used, with no requirement that the base in the template being considered matches the base specified by the DelTag.  The figure shows that although initially not considering the DelTag increases the error rate.  At around 15X coverage (corresponding to a Phred Scaled error rate of $\sim27$ for the original algorithm), the error rate obtained by always using the DelTag QV score is lower than that obtained by using it, and it continues to drop until it has about $\sim30\%$ fewer errors at high coverage levels. 
+
+This demonstrates that under some conditions ignoring the DelTag value is beneficial.  Not ignoring it appears most beneficial for the areas used for training, namely at coverage levels between 3X and 9X.  Current work is exploring how this ``Always Use" algorithmic variant would performs if the CCS parameters are retrained with it.
+
+\begin{figure*}[ht]\centering
+\includegraphics[width=\linewidth]{LambdaComparison.pdf}
+\caption{Evaluating how accuracy changes for two variations of the CCS scoring algorithm.   }
+\label{fig:lambdaTest}
+\end{figure*}
+
+
+
 
 %------------------------------------------------
 
-\section{Results and Discussion}
 
-\lipsum[10] % Dummy text
+\section{Conclusions and Possibilities}
+PacBio Deletion QV values are effectively hard coded to a constant for $\sim90\%$ of emitted bases.  This is despite the fact that deletion rates empirically are observed to vary across different SNR and template contexts.
 
-\subsection{Subsection}
+An exception to this hard-coded rule exists for $\sim10\%$ of emitted bases which have a DelTag emitted along with them, and in this case a different QV value can be used if a certain condition is met between the template and the read being considered.  The presence of this alternative QV value is clearly useful -- the accuracy drops if it is never considered and  frequent trainings designed to find optimum transformations of the QV values prior to scoring have made the penalty for a deletion with an appropriate DelTag less than the penalty for a standard deletion.
 
-\lipsum[11] % Dummy text
+However, although one can certainly see the intuition behind generating the DelTag value and reasons it may be useful, a simpler model could generate a single deletion QV value for all bases, and would use this value regardless of whether the DeletionTag matched.  We should expect that if we have enough data to make high accuracy calls, the information present in the DelTag could be provided by the other reads being used to generate the consensus, and that the information obtained from one pulse not deemed worthy enough to be turned into a base should not aid the algorithm much, and may hinder it if this information represents the wrong or incorrect base.  The DelTag gives value in that it indicates this base came from a noisy region, but in attempting to pick out the most likely base from that noise it likely adds more complexity than justified.
 
-\begin{table}[hbt]
-\caption{Table of Grades}
-\centering
-\begin{tabular}{llr}
-\toprule
-\multicolumn{2}{c}{Name} \\
-\cmidrule(r){1-2}
-First name & Last Name & Grade \\
-\midrule
-John & Doe & $7.5$ \\
-Richard & Miles & $2$ \\
-\bottomrule
-\end{tabular}
-\label{tab:label}
-\end{table}
-
-\subsubsection{Subsubsection}
-
-\lipsum[12] % Dummy text
-
-\begin{description}
-\item[Word] Definition
-\item[Concept] Explanation
-\item[Idea] Text
-\end{description}
-
-\subsubsection{Subsubsection}
-
-\lipsum[13] % Dummy text
+As such, the improvement proposal is to:
 
 \begin{itemize}[noitemsep] % [noitemsep] removes whitespace between the items for a compact look
-\item First item in a list
-\item Second item in a list
-\item Third item in a list
+\item Ignore the particular DelTag value in CCS analysis 
+\item Revisit the underling model for determining Deletion QVs, and attempt to obtain an informative value that will appear for all bases.  
 \end{itemize}
-
-\subsubsection{Subsubsection}
-
-\lipsum[14] % Dummy text
-
-\subsection{Subsection}
-
-\lipsum[15-23] % Dummy text
+ 
+This proposal does not suggest we stop emitting the DelTags, as they could still be useful for diagnostic purposes.  Similarly, when revising how deletion QVs are calculated, this covariate might be incorporated at that stage.  However, to aid analyzing, diagnosing and optimizing the CCS scoring model, it argues that it should be ignored. Model building always involves trade-offs, but DelTags introduce more complexity than they currently justify.
 
 
-\section{Conclusions}
-A statistical model with additional parameters and/or information can always beat a simpler model.  Simpler models provide alternate benefits in that they are easier to analyze, more tractable computationally, and 
-
-
-
-%------------------------------------------------
-\phantomsection
-\section*{Acknowledgments} % The \section*{} command stops section numbering
-
-\addcontentsline{toc}{section}{Acknowledgments} % Adds this section to the table of contents
-
-So long and thanks for all the fish \cite{Figueredo:2009dg}.
-
-%----------------------------------------------------------------------------------------
-%	REFERENCE LIST
-%----------------------------------------------------------------------------------------
-\phantomsection
-\bibliographystyle{unsrt}
-\bibliography{sample}
 
 %----------------------------------------------------------------------------------------
 
