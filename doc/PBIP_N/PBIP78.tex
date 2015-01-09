@@ -20,8 +20,6 @@
 
 \documentclass[fleqn,10pt]{SelfArx} % Document font size and equations flushed left
 
-\usepackage{lipsum} % Required to insert dummy text. To be removed otherwise
-
 
 %----------------------------------------------------------------------------------------
 %	Source Code Listings
@@ -66,10 +64,10 @@ showstringspaces=false} % no special string spaces
 %	ARTICLE INFORMATION
 %----------------------------------------------------------------------------------------
 
-\JournalInfo{PBIP \#78, 2015} % Journal information
+\JournalInfo{PBEP \#78, 2015} % Journal information
 \Archive{Additional note} % Additional notes (e.g. copyright, DOI, review/research article)
 
-\PaperTitle{PacBio Improvement Proposal \#((int)`N') \\{\large Removing the deletion tag value from secondary analysis}} % Article title
+\PaperTitle{PacBio Enhancement Proposal \#((int)`N') \\{\large Removing the deletion tag value from secondary analysis}} % Article title
 
 \Authors{Nigel Delaney} % Authors
 
@@ -80,7 +78,7 @@ showstringspaces=false} % no special string spaces
 %	ABSTRACT
 %----------------------------------------------------------------------------------------
 
-\Abstract{ The PacBio consensus calling framework is complicated by the presence of deletion tag values attached to certain basepairs.  This PBIP reviews how these values are generated and evaluates from a principled and empirical perspective why they are undesirable.  It concludes that the CCS algorithm could likely benefit from richer deletion QV values, but that the DelTag value is likely to only complicate matters at present. }
+\Abstract{ The PacBio consensus calling framework is complicated by the presence of deletion tag values attached to certain basepairs.  This PBEP reviews how these values are generated and evaluates from a principled and empirical perspective why they are undesirable.  It concludes that the CCS algorithm could likely benefit from richer deletion QV values, but that the DelTag value is expected to only complicate matters at present. }
 
 %----------------------------------------------------------------------------------------
 
@@ -257,8 +255,7 @@ An exception to this hard-coded rule exists for $\sim10\%$ of emitted bases whic
 
 However, although one can certainly see the intuition behind generating the DelTag value and reasons it may be useful, a simpler model could generate a single deletion QV value for all bases, and would use this value regardless of whether the DeletionTag matched.  We should expect that if we have enough data to make high accuracy calls, the information present in the DelTag could be provided by the other reads being used to generate the consensus, and that the information obtained from one pulse not deemed worthy enough to be turned into a base should not aid the algorithm much, and may hinder it if this information represents the wrong or incorrect base.  The DelTag gives value in that it indicates this base came from a noisy region, but in attempting to pick out the most likely base from that noise it likely adds more complexity than justified.
 
-As such, the improvement proposal is to:
-
+As such, this enchancement proposal is to:
 \begin{itemize}[noitemsep] % [noitemsep] removes whitespace between the items for a compact look
 \item Ignore the particular DelTag value in CCS analysis 
 \item Revisit the underling model for determining Deletion QVs, and attempt to obtain an informative value that will appear for all bases.  

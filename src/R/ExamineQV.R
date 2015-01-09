@@ -9,10 +9,7 @@ setwd("/Users/nigel/git/cafe-quality/data/")
 d = read.csv("QVvalues.csv")
 head(d)
 
-head(d)
 
-
-head(d)
 nrow(d)
 
 dns = sample(1:nrow(d),1e4)
@@ -67,7 +64,7 @@ if(useChemP6) {
   
   
   #Original ones below 
-  if(FALSE) {
+  if(TRUE) {
     #p6_c4 parameters
     v_lab = "- P6-C4 Chemistry"
     v_name = "qv_violin_p6c4.pdf"
@@ -128,7 +125,7 @@ for(bp in bases)
   cos = recal[,paste("Merge_",bp,sep="")]
   rd$MergeQV[ro] = cos[2]*rd$MergeQV[ro]+cos[1]
 }
-
+head(rd)
 name = "MergeQV"
 p=ggplot(nd,aes_string(x=name))+geom_histogram(aes(y=..density..),colour="black", fill="white",binwidth=1)
 p=p+geom_density()+theme_classic() +facet_grid(.~Base) + labs(title="Original")
@@ -153,7 +150,7 @@ for(bp in bases) {
   ro = vd$Base==bp
   vd[ro,nm]=rd$MergeQV[ro]
 }
-vd2 = vd[,c(3,5,7,8,9,10,11,12,13)]
+vd2 = vd[,c(3,5,7,8,9,10,11,12)]
 vd2$row = 1:nrow(vd2)
 vd3 = melt(vd2,id="row")
 n=1000
@@ -168,7 +165,7 @@ vd4=vd3[-rm,]
 low_y = min(min(vd4$value,na.rm=TRUE),delNVal)
 high_y = max(max(vd4$value,na.rm=TRUE),matchVal)
 pdf(paste("../doc/",v_name,sep=""),width=6,height=4.45)
-ggplot(vd4,aes(variable,value,fill=variable))+geom_violin(show_guide=FALSE)+theme_classic(base_size=10)+
+ggplot(vd4,aes(variable,value,fill=variable))+geom_violin(show_guide=FALSE)+theme_classic(base_size=16)+
   labs(y="Recalibrated Score",x="",title=paste("Distribution of Quality Scores at Bases",v_lab))+
   geom_hline(yintercept=matchVal,colour="red")+ scale_y_continuous(limits=c(low_y, high_y)) +
   geom_hline(yintercept=delNVal,colour="blue") +
