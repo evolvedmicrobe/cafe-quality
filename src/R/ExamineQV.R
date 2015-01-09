@@ -43,23 +43,49 @@ do.call(grid.arrange,g)
 sum(nd$DeletionTag==78)/nrow(nd)
 
 # Now to look at recalibration
-useChemP6=FALSE
+useChemP6=TRUE
 
 if(useChemP6) {
-  #p6_c4 parameters
+  
+  ### Retrained P6-C4 parameters
   v_lab = "- P6-C4 Chemistry"
   v_name = "qv_violin_p6c4.pdf"
-  matchVal = .494617
-  delNVal = -3.07623 
-  recal = data.frame( Mismatch =c (-3.45427,-0.0199875), 
-                      Branch = c(-0.28307, -0.121895),
-                     DeletionWithTag  = c(-0.0134004, -0.0844901),
-                     Nce = c(-0.0213797,-0.175615),
-                     Merge_A =c ( -1.95056, -0.0357092),
-                    Merge_C = c(-0.0101704, -0.0878416),
-                    Merge_G = c(-0.225816, -0.0759892),
-                    Merge_T = c(-0.344726,-0.0570072))
+  matchVal = ### Retrained P6-C4 parameters
+    v_lab = "- P6-C4 Chemistry"
+  v_name = "qv_violin_p6c4.pdf"
+  matchVal = 0.139078334
+    
+  delNVal = -1.45442641 
+  recal = data.frame( Mismatch =c (-1.85595274, -0.0312577896), 
+                      Branch = c(-0.426779211, -0.0509828515),
+                      DeletionWithTag  = c(0.0239052698, -0.0412806273),
+                      Nce = c(-0.165034905,-0.0826156288),
+                      Merge_A =c ( -0.656411886, -0.0198618043),
+                      Merge_C = c( 0.0718991458, -0.0777479857),
+                      Merge_G = c(0.281680286, -0.0718968958),
+                      Merge_T = c(-0.717717707, -0.149290472))
+  
+  
+  #Original ones below 
+  if(FALSE) {
+    #p6_c4 parameters
+    v_lab = "- P6-C4 Chemistry"
+    v_name = "qv_violin_p6c4.pdf"
+    matchVal = .494617
+    delNVal = -3.07623 
+    recal = data.frame( Mismatch =c (-3.45427,-0.0199875), 
+                        Branch = c(-0.28307, -0.121895),
+                       DeletionWithTag  = c(-0.0134004, -0.0844901),
+                       Nce = c(-0.0213797,-0.175615),
+                       Merge_A =c ( -1.95056, -0.0357092),
+                      Merge_C = c(-0.0101704, -0.0878416),
+                      Merge_G = c(-0.225816, -0.0759892),
+                      Merge_T = c(-0.344726,-0.0570072))
+  
+  }
 } else {
+  
+
 ## c2 Chemistry
   v_lab = "- C2 Chemistry"
   v_name = "qv_violin_c2.pdf"
@@ -79,10 +105,10 @@ rd = nd
 head(rd)
 rd$DeletionQV = nd$DeletionQV*recal$DeletionWithTag[2] + recal$DeletionWithTag[1]
 d=qplot(nd$DeletionQV,rd$DeletionQV,xlab="Original Score", ylab = "Recalibrated Score")+geom_jitter()+theme_classic()+labs(title="DeletionQV")+geom_abline(slope = -.1*log(10),colour="red")
-
+d
 rd$SubsQv = nd$SubsQv*recal$Mismatch[2] + recal$Mismatch[1]
 s=qplot(nd$SubsQv,rd$SubsQv,xlab="Original Score", ylab = "Recalibrated Score")+geom_jitter()+theme_classic()+labs(title="SubQV")+geom_abline(slope = -.1*log(10),colour="red")
-
+s
 rd$InsQvBranch = nd$InsQV*recal$Branch[2] + recal$Branch[1]
 i1=qplot(nd$InsQV,rd$InsQvBranch,xlab="Original Score", ylab = "Recalibrated Score")+geom_jitter()+theme_classic()+labs(title="InsQV - Branch Recalibration")+geom_abline(slope = -.1*log(10),colour="red")
 
@@ -127,7 +153,7 @@ for(bp in bases) {
   ro = vd$Base==bp
   vd[ro,nm]=rd$MergeQV[ro]
 }
-vd2 = vd[,c(3,5,7,8,9,10,11,12)]
+vd2 = vd[,c(3,5,7,8,9,10,11,12,13)]
 vd2$row = 1:nrow(vd2)
 vd3 = melt(vd2,id="row")
 n=1000
