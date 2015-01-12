@@ -335,8 +335,7 @@ namespace PacBio.Consensus
 
                                             // Trim to -13.8 against (Q60) and 4.5 (Q20) in favor (these are probably annotation errors so don't weight them too strongly)
                                             var score = scorer.ScoreMutation(m);
-                                            var scoreToAccept = Math.Max(-13.8, Math.Min(4.5, score));
-                                            return -Math.Log(1 + Math.Exp(scoreToAccept));
+                                            return ( 1 / (1 + Math.Exp(-score)));
                                         }).Sum();
 
                                 return new Tuple<float, float>((float) ll, overallScore);
@@ -360,7 +359,7 @@ namespace PacBio.Consensus
 
                 // Maximize the log-likelihood, and add a regularization term that keeps the
                 // overall alignment score close to 0 -- avoids numerical issues.
-                return -mean + (float) Math.Pow(overall.Average() / 100.0, 2);
+                return mean + (float) Math.Pow(overall.Average() / 100.0, 2);
             }   
         }
 
