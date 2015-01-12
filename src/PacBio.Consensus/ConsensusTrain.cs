@@ -352,14 +352,12 @@ namespace PacBio.Consensus
                 var minErr = r.Min();
                 var mean = r.Average();
 
-                Log(LogLevel.INFO, "Mean LL: {0:0.0000}, Max: {1:0.0000}, Min: {2:0.0000}, Mean Aln Score: {3:0.00}", mean, maxErr, minErr, overall.Sum());
+                Log(LogLevel.WARN, "Mean LL: {0:0.0000}, Max: {1:0.0000}, Min: {2:0.0000}, Mean Aln Score: {3:0.00}", mean, maxErr, minErr, overall.Sum());
                 
                 Log(LogLevel.INFO, "Parameters:\n{0}", 
                         Vector.OfEnumerable(ConsensusCoreWrap.QvModelParamsToArray(spec).Select(v => (double) v)).ToString());
 
-                // Maximize the log-likelihood, and add a regularization term that keeps the
-                // overall alignment score close to 0 -- avoids numerical issues.
-                return mean + (float) Math.Pow(overall.Average() / 100.0, 2);
+                return mean;
             }   
         }
 
