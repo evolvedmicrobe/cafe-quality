@@ -136,6 +136,40 @@ namespace PacBio.Consensus
             return fa;
         }
 
+        /// <summary>
+        /// When optimizing, we keep the match value equal to a fixed constant of 1.0
+        /// </summary>
+        /// <returns>The model parameters to optimization array.</returns>
+        /// <param name="p">P.</param>
+        public static float[] QvModelParamsToOptimizationArray(QvModelParams p)
+        {
+            var mergeArray = FloatArray.frompointer(p.Merge);
+            var mergeSArray = FloatArray.frompointer(p.MergeS);
+
+            var d = new[]
+            {
+                p.Mismatch,
+                p.MismatchS,
+                p.Branch,
+                p.BranchS,
+                p.DeletionN,
+                p.DeletionWithTag,
+                p.DeletionWithTagS,
+                p.Nce,
+                p.NceS,
+                mergeArray.getitem(0),
+                mergeArray.getitem(1),
+                mergeArray.getitem(2),
+                mergeArray.getitem(3),
+                mergeSArray.getitem(0),
+                mergeSArray.getitem(1),
+                mergeSArray.getitem(2),
+                mergeSArray.getitem(3)
+            };
+
+            return d;
+        }
+
 
         public static float[] QvModelParamsToArray(QvModelParams p)
         {
@@ -167,7 +201,31 @@ namespace PacBio.Consensus
             return d;
         }
 
+        public static QvModelParams QvModelParamsFromOptimizationArray(float matchScore, float[] arr)
+        {
+            var m = new QvModelParams(
+                matchScore,
+                arr[0],
+                arr[1],
+                arr[2],
+                arr[3],
+                arr[4],
+                arr[5],
+                arr[6],
+                arr[7],
+                arr[8],
+                arr[9],
+                arr[10],
+                arr[11],
+                arr[12],
+                arr[13],
+                arr[14],
+                arr[15],
+                arr[16]
+            );
 
+            return m;
+        }
         public static QvModelParams QvModelParamsFromArray(float[] arr)
         {
             var m = new QvModelParams(

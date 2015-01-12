@@ -80,6 +80,9 @@ namespace PacBio.Consensus
 
     public class ConsensusTrain
     {		
+
+        const float FIXED_MATCH_SCORE = 1.0F;
+
 		private static PacBioLogger logger = PacBioLogger.GetLogger("ConsensusTrain");
 		
         private static void Log(string msg)
@@ -241,7 +244,7 @@ namespace PacBio.Consensus
                     Func<Vector, double> f = pars =>
                         {
                             // Pipe the current spec in as the model to use in CCS.
-                            var spec = ConsensusCoreWrap.QvModelParamsFromArray(pars.ToArray().Map(v => (float) v));
+                            var spec = ConsensusCoreWrap.QvModelParamsFromOptimizationArray(FIXED_MATCH_SCORE, pars.ToArray().Map(v => (float) v));
                             var err = LikelihoodObjective(spec, examples, algo);
 
                             Log(LogLevel.WARN, "Iteration {0}. Training set error: {1}", iterations, err);
@@ -259,7 +262,7 @@ namespace PacBio.Consensus
             var preTrainExamples = trainSet.Take(numPreTrainExamples).ToList();
             var warmupFunction = makeObjectiveFunction(preTrainExamples);
 
-            var packedStart = Vector.OfEnumerable(ConsensusCoreWrap.QvModelParamsToArray(startParams).Select(v => (double)v));
+            var packedStart = Vector.OfEnumerable(ConsensusCoreWrap.QvModelParamsToOptimizationArray(startParams).Select(v => (double)v));
             
             var preTrainResult = optimizer.MinimizeFunction(packedStart, 0.05, maxIterations, warmupFunction);
             var fullOptimizationStartpoint = preTrainResult.X;
@@ -287,7 +290,7 @@ namespace PacBio.Consensus
 
             var modelValues = result.X;
             Console.WriteLine(modelValues);
-            var modelSpec = ConsensusCoreWrap.QvModelParamsFromArray(modelValues.ToArray().Map(v => (float) v));
+            var modelSpec = ConsensusCoreWrap.QvModelParamsFromOptimizationArray(FIXED_MATCH_SCORE, modelValues.ToArray().Map(v => (float) v));
 
             testError = 0;
             if (testSet != null)
