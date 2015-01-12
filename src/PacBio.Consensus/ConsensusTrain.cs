@@ -326,14 +326,6 @@ namespace PacBio.Consensus
                                 var ll = muts.Select(
                                     m =>
                                         {
-                                            // For each possible mutation use the score to define a 2-class distribution 
-                                            // over 'accept' & 'reject' mutation.  Sc(accept, D), Sc(reject, D)
-                                            // P(reject|D) = exp(Sc(reject, D)) / ( exp(Sc(accecpt, D)) + exp(Sc(reject, D)) )
-                                            // log P(reject|D) = -log(1 + exp(Sc(accept, D) - Sc(reject, D)))
-                                            // We then define the overall likelihood of the correct template as the likelihood
-                                            // of rejecting all possible 1-base mutations to the correct template.
-
-                                            // Trim to -13.8 against (Q60) and 4.5 (Q20) in favor (these are probably annotation errors so don't weight them too strongly)
                                             var score = scorer.ScoreMutation(m);
                                             return ( 1 / (1 + Math.Exp(-score)));
                                         }).Sum();
