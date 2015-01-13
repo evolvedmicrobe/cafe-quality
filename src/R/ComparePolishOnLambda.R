@@ -12,11 +12,41 @@ getld <-function(fname) {
   d$SNPErrorRate = d$NumSNPErrors / d$Length
   d$IndelErrorRate = d$NumIndelErrors / d$Length
   d$MeanGC = (d$SnrG + d$SnrC) / 2
-  d[d$Reference=="lambda_NEB3011",]
+  #d=d[d$Reference=="lambda_NEB3011",]
+  #d=d[d$Reference=="HP.V1.02",]
+  return(d)
 }
 d = getld("master_5ba5286_combined_reads.csv")
-d2 = getld("C2_polymer_d067558_combined_reads.csv")
 
+head(d)
+
+snr=d[,grep("Snr",colnames(d))]
+d$minSNR = apply(snr,1,min)
+d$meanSNR = apply(snr,1,mean)
+qplot(d$minSNR,d$MeanGC)
+ggplot(d,aes(x=minSNR,fill=Reference))+geom_density(alpha=.2)+geom_vline(xintercept=3.5, col="red")
+ggplot(d,aes(x=MeanGC,fill=Reference))+geom_density(alpha=.2)+geom_vline(xintercept=3.5, col="red")
+
+
+d$RoundGC = factor(round(4*floor(d$meanSNR/4)))
+
+dq2 = aggregate(IndelErrorRate~NumPasses+RoundGC, d, mean )
+ph = function(x) { -10*log10(x)}
+dq2$IndelErrorRate = ph(dq2$IndelErrorRate)
+pdf("ErrorBySNR.pdf")
+v = ggplot(dq2,aes(x=NumPasses, y = IndelErrorRate, colour=RoundGC)) + geom_line()+ theme_bw(base_size=8)
+v = v + labs(x= "Number of Passes", y ="Indel Error Rate (Phred Scaled)")
+v = v + scale_x_continuous(limits=c(0,100))
+v
+dev.off()
+names(q2)[3]<-"ErrorRate"
+t2 = rep("Indel",nrow(q2))
+
+
+
+d2 = getld("C2_polymer_d067558_combined_reads.csv")
+snr=d2[,grep("Snr",colnames(d2))]
+d2$minSNR = apply(snr,1,min)
 head(d2)
 
 in1 = intersect(d$ZMW,d2$ZMW)
@@ -126,75 +156,77 @@ s=seq(0,15)
 y2 = sapply(s,errorDrop2)
 b=data.frame(NumPasses = s, pr = y2)
 
-pdf(height=4,width=4,"ImprovementsByCoverage.pdf")
+pdf(height=4,width=4,"ImprovementsBySNR.pdf")
 ggplot(b,aes(x=NumPasses,y=pr))+geom_point()+labs(x="Minimum Number of Passes Required",
                                                   y = "Percentage of Errors Removed",
-                                                  title ="How Polishing Effect Varies by Coverage Cutoff")+theme_bw()
+                                                  title ="How Polishing Effect Varies by GC SNR Cutoff")+theme_bw()
 dev.off()
 
 
 ### CONTOUR PLOT
 errorContour <-function(minGC, minPasses) {
-  ok = cd$ZMW[cd$MeanGC>=(minGC - 2) & cd$MeanGC>=(minGC + 2) & cd$NumPasses>=minPasses]
-  gd = cdv[cdv$zmw%in%ok,] 
-  head(gd)
+  ok = cd$ZMW[cd$MeanGC>=(minGC - 1) & cd$MeanGC<=(minGC + 1) & cd$NumPasses>=(minPasses-1) & cd$NumPasses<=(minPasses+1)]
+  print(minGC)
+  print(minPasses)
+  print(sum(ok))  
+  gd = cdv[cdv$zmw%in%ok,]
   res = aggregate(Pos~Ref,gd,length)
   print(res)
   1-res[2,2]/res[1,2]
 }
 k = Vectorize(errorContour)
-x = seq(0,14,.5) # Min GC
-y = seq(0,20) # Min Passes
+x = seq(3,14,.5) # Min GC
+y = seq(2,20) # Min Passes
 z = outer(x,y,k)
 
 pdf("ErrorsRemovedContourPolish2orMore.pdf",width=6.5,height=5)
-filled.contour(x,y,z, xlab="Mean G+C SNR",ylab="Minimum Number of Passes", main="% Errors Removed By SNR and Coverage")
+filled.contour(x,y,z, color.palette=rainbow, xlab="Mean G+C SNR",ylab="Minimum Number of Passes", main="% Errors Removed By SNR and Coverage")
 dev.off()
 
 pdf("LogScaleErrors.pdf", width=10.5, height=7.5)
 par(mfrow=c(2,2))
 errorCount <-function(minGC, minPasses) {
-  ok = d[d$MeanGC>=(minGC - 2) & d$MeanGC>=(minGC + 2) & d$NumPasses>=minPasses,]
+  ok = d[d$MeanGC>=(minGC - 2) & d$MeanGC<=(minGC + 2) & d$NumPasses>(minPasses-2) & d$NumPasses<(minPasses+2),]
   sum(ok$NumIndelErrors)
 }
 k = Vectorize(errorCount)
-x = seq(0,14,.5) # Min GC
-y = seq(0,20) # Min Passes
+x = seq(1,14,.5) # Min GC
+y = seq(1,20) # Min Passes
 z = outer(x,y,k)
-filled.contour(x,y,z, xlab="Mean G+C SNR",
+filled.contour(x,y,z,color.palette=rainbow, xlab="Mean G+C SNR",
                ylab="Minimum Number of Passes", 
                main="Total Indel Errors by\nSNR and Coverage", 
                key.title=title(main="Count"))
 
-filled.contour(x,y,log10(z), xlab="Mean G+C SNR",
+filled.contour(x,y,log10(z),color.palette=rainbow, xlab="Mean G+C SNR",
                ylab="Minimum Number of Passes", 
                main="Log Total Indel Errors by\nSNR and Coverage", 
                key.title=title(main="Log10\nCount"))
 
 
 readCount <-function(minGC, minPasses) {
-  sum(d$Length[d$MeanGC>=(minGC - 2) & d$MeanGC>=(minGC + 2) & d$NumPasses>=minPasses & d$Length<2500])
+  sum(d$Length[d$MeanGC>=(minGC - 2) & d$MeanGC<=(minGC + 2) & d$NumPasses>=(minPasses-1) & d$NumPasses<=(minPasses+1) & d$Length<2500])
 }
 k = Vectorize(readCount)
-x = seq(0,14,.5) # Min GC
-y = seq(0,20) # Min Passes
+x = seq(1,14,.5) # Min GC
+y = seq(1,20) # Min Passes
 z = outer(x,y,k)
 
-filled.contour(x,y,z, xlab="Mean G+C SNR",
+filled.contour(x,y,z,color.palette=rainbow, xlab="Mean G+C SNR",
                ylab="Minimum Number of Passes", 
                main="Total CCS Basepairs", 
                key.title=title(main="BP\nCount"))
 
 errorRate <-function(minGC, minPasses) {
-  ok = d[d$MeanGC>=(minGC - 2) & d$MeanGC>=(minGC + 2) & d$NumPasses>=minPasses & d$Length<2500,]
+  ok = d[d$MeanGC>=(minGC - 2) & d$MeanGC<=(minGC + 2) & d$NumPasses>=(minPasses-1) & d$NumPasses<=(minPasses+1) & d$Length<2500,]
   mean(ok$IndelErrorRate)
 }
 k = Vectorize(errorRate)
-x = seq(0,14,.5) # Min GC
-y = seq(0,20) # Min Passes
+x = seq(3,14,.5) # Min GC
+y = seq(1,20) # Min Passes
 z = outer(x,y,k)
 
-filled.contour(x,y,log10(z), xlab="Mean G+C SNR",
+filled.contour(x,y,log10(z),color.palette=rainbow, xlab="Mean G+C SNR",
                ylab="Minimum Number of Passes", 
                main="CCS Log10 Indel Error Rate")
 
