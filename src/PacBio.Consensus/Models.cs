@@ -229,7 +229,7 @@ namespace PacBio.Consensus
         {
             Func<float, string> format = x => String.Format("{0:G9}", x / ModelFactor);
 
-            using (var sr = new System.IO.StreamWriter(filename))
+            using (var sr = new System.IO.StreamWriter(filename, true))
             {
                 var iniData = new IniData();
                 var sectionName = sequencingChemistry + "." + modelType;

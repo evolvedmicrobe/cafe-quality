@@ -83,7 +83,7 @@ namespace PacBio.Consensus
 
         const float FIXED_MATCH_SCORE = 1.0F;
 
-		private static PacBioLogger logger = PacBioLogger.GetLogger("ConsensusTrain");
+        private static PacBioLogger logger = PacBioLogger.GetLogger("ConsensusTrain");
 		
         private static void Log(string msg)
         {
@@ -108,31 +108,29 @@ namespace PacBio.Consensus
         private int maxIterations = 35;
         private IOptimizer optimizer;
 
+        private ReadConfigurationAssigner rca = new ReadConfigurationAssigner ();
+
 		public ConsensusTrain()
         {
+
         }
 
         /// <summary>
-        /// Subcommands must implement this method to carry out the subcommand.
+        /// Train a single snr/coverage group
         /// </summary>
-        public int Run(string cmpH5File, string fofn, string reference, string outFile, int totalTraces, 
-            int maxIterations = 100, SnrCut snrCut = null)
+        /// <returns>The run.</returns>
+        public int InnerRun(string cmpH5File, string fofn, string reference, int totalTraces, 
+            int snrGroup, int coverageGroup, string outFile, int maxIterations = 100 )
         {
             if (maxIterations > 0)
                 this.maxIterations = maxIterations;
 
-            if (String.IsNullOrEmpty(outFile))
-            {
-                Log(LogLevel.ERROR, "Specify an output file with '-o <filename>'");
-                return 1;
-            }
 
             optimizer = NelderMeadOptimizer.Instance;
-            
+
             // Load reference
             var rFasta = new PacBio.IO.Fasta.SimpleFASTAReader(reference);
             var refDict = rFasta.ToDictionary(e => e.Header, e => e.GetSequence());
-
 
             var totalReferences = refDict.Count;
             Log (LogLevel.WARN, "Found " + totalReferences + " references in file");
@@ -140,7 +138,7 @@ namespace PacBio.Consensus
 
 
             // Load trainSet
-            var traceSet = new TraceSet(cmpH5File, fofn, snrCut);
+            var traceSet = new TraceSet(cmpH5File, fofn);
 
             // FIXME shuffle
             List<CCSExample> train = new List<CCSExample> ();
@@ -148,7 +146,7 @@ namespace PacBio.Consensus
             foreach(var refname in refDict.Keys)
             {
                 Log (LogLevel.WARN, "Started getting train/test data for " + refname);
-                var ex = CCSExample.GetExamples(traceSet, tracesPerReference * 2, refDict, refname);
+                var ex = CCSExample.GetExamples(traceSet, tracesPerReference * 2, refDict, refname, snrGroup, coverageGroup, rca);
                 train.AddRange(ex.Take(tracesPerReference));
                 test.AddRange(ex.Skip(tracesPerReference).Take(tracesPerReference));
                 Log (LogLevel.WARN, "Finished getting train/test data for " + refname);
@@ -184,44 +182,50 @@ namespace PacBio.Consensus
                 float testError;
                 var trainedModel = OptimizeConsensus(train, test, start, algo, out trainError, out testError);
 
-
                 // Assess the accuracy on test set
                 Log("Measuring Accuracy:");
                 AccuracyObjective(trainedModel, test, algo);
-
 
                 // Save the model to a results file
                 Log("Writing CCS MoveSpec to: {0}", outFile);
 
                 // FIXME (lhepler) pass chemistry and model type appropriately
-                ParameterLoading.SaveModelToFile("P4-C2", "AllQVsMergingByChannelModel", trainedModel, outFile);
-                //MoveSpec.SaveModel(outFile, trainedModel, algo, true);
+                var name = ReadConfigurationAssigner.GetNameForConfiguration (snrGroup, coverageGroup);
+                ParameterLoading.SaveModelToFile(name, "AllQVsMergingByChannelModel", trainedModel, outFile);
             }
-            /*
-            // Write some stats to a csv for easy comparison
-            using (var w = new WCsvWriter(outFile + ".csv"))
+            return 0;
+        }
+
+
+
+        /// <summary>
+        /// Subcommands must implement this method to carry out the subcommand.
+        /// </summary>
+        public int Run(string cmpH5File, string fofn, string reference, string outFile, int totalTraces, 
+            int maxIterations = 100, SnrCut snrCut = null)
+        {
+           
+            if (String.IsNullOrEmpty(outFile))
             {
-                w["Model"] = args.Model;
-                w["Algo"] = algo;
-                w["TrainError"] = trainError;
-                w["TestError"] = testError;
-
-                var modelArr = ConsensusCoreWrap.QvModelParamsToArray(trainedModel);
-                for (int i = 0; i < MoveSpec.FieldNames.Length; i++)
-                    w[MoveSpec.FieldNames[i]] = modelArr[i];
-                w.Row();
+                Log(LogLevel.ERROR, "Specify an output file with '-o <filename>'");
+                return 1;
             }
-            */
+            if (System.IO.File.Exists (outFile)) {
+                System.IO.File.Delete (outFile);
+            }
 
-            /*
-            // Log some metadata about the training set.
-            var metadata = new TrainingMetadata();
-            metadata.SetTrainingSet(scans);
-            metadata["TrainError"] = trainError;
-            metadata["TestError"] = testError;
-            metadata.WriteMetadata(outFile, "Metadata");
-            */
+            Log (LogLevel.WARN, "Starting to optimize across partitions");
 
+            for (int i = 0; i < rca.NumberOfSNRGroups; i++) {
+                for (int j = 0; j < rca.NumberOfSNRGroups; j++) {
+                    Log (LogLevel.WARN, "Optimizing " + i +" - "+ j);
+                    // Run this data for this file and output it.
+                    var res = InnerRun (cmpH5File, fofn, reference, totalTraces, i, j,outFile, maxIterations);       
+                    if (res != 0) {
+                        return res;
+                    }
+                }
+            }
             return 0;
         }
 
@@ -308,7 +312,7 @@ namespace PacBio.Consensus
         public float LikelihoodObjective(QvModelParams spec, List<CCSExample> data, RecursionAlgo algo)
         {
             using (var scConfig = new ScorerConfig { Parameters = new QuiverConfigTable(), Algorithm = algo, HasChemistryOverride = true })
-            using (var qvConfig = new QuiverConfig(spec, (int) Move.ALL_MOVES, new BandingOptions(4, 5), -12.5f))
+            using (var qvConfig = new QuiverConfig(spec, (int) Move.ALL_MOVES, new BandingOptions(4, 18), -12.5f))
             {
                 scConfig.Parameters.Insert("*", qvConfig);
 
@@ -360,7 +364,7 @@ namespace PacBio.Consensus
         public float AccuracyObjective(QvModelParams spec, List<CCSExample> data, RecursionAlgo algo)
         {
             using (var scConfig = new ScorerConfig { Parameters = new QuiverConfigTable(), Algorithm = algo, HasChemistryOverride = true })
-            using (var qvConfig = new QuiverConfig(spec, (int) Move.ALL_MOVES, new BandingOptions(4, 5), -12.5f))
+            using (var qvConfig = new QuiverConfig(spec, (int) Move.ALL_MOVES, new BandingOptions(4, 18), -12.5f))
             {
                 scConfig.Parameters.Insert("*", qvConfig);
 

@@ -29,8 +29,12 @@
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>
     </PlatformTarget>
-    <Externalconsole>true</Externalconsole>
     <Tailcalls>true</Tailcalls>
+    <ConsolePause>false</ConsolePause>
+    <Commandlineparameters>CCSTrain -i 1000  --fofn /Users/nigel/CCS_P6_C4/input2.fofn -l /Users/nigel/CCS_P6_C4/allAligned.cmp.h5  --maxTraces=3
+        --ref /Users/nigel/CCS_P6_C4/References.fna
+ -o multiTrain
+</Commandlineparameters>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

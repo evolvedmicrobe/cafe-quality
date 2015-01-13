@@ -153,7 +153,8 @@ namespace PacBio.Consensus
         }
 
 
-        public static List<CCSExample> GetExamples(TraceSet traceSet, int n, Dictionary<string, string> referenceContigs, string referenceToGet, ExampleMode mode = ExampleMode.Sample)
+        public static List<CCSExample> GetExamples(TraceSet traceSet, int n, Dictionary<string, string> referenceContigs, string referenceToGet, 
+                                                    int snrGroup, int  coverageGroup, ReadConfigurationAssigner rca, ExampleMode mode = ExampleMode.Sample)
         {           
             //Console.WriteLine("Checking references");
 			//ScanSets.VerifyReferences(rawCmpH5);
@@ -164,17 +165,18 @@ namespace PacBio.Consensus
             //var ccsTraces = scans.SelectMany(s => s.LazyTraces).Where(CCSTraceFilter);
             var ccsTraces = traceSet.Traces.Where (z => z.SmithWatermanAlignment!= null && z.SmithWatermanAlignment.ReferenceName == referenceToGet);
 			var nTotal = traceSet.NumTraces;
-
+            var nTried = 0;
             int accepted = 0;
             var rejects = new Dictionary<string, int>
                               {
                                   {"UnAligned", 0}, {"Al70Acc80", 0}, {"ETControl", 0},
-                                  {"Passes<05", 0}, {"Passes>20", 0}, {"BadSnrChk", 0},
-                                  {"WeirdAlgn", 0},
+                                  {"Passes<03", 0}, {"Passes>80", 0}, {"BadSnrChk", 0},
+                {"WeirdAlgn", 0}, {"NotOkay",0}
                               };
 
             var l = SparseTargetSample(ccsTraces, n, nTotal, 
                         t => {
+                    nTried++;
                     if(t.MultiAlignment.Length < 2) {
                         ++rejects["UnAligned"];
                         return null;
@@ -185,7 +187,6 @@ namespace PacBio.Consensus
                         var accCap = Math.Min(al.Accuracy, 0.85);
                         return accCap * al.TemplateLength;
                     }).First();
-
 
                     if(bestAl.TemplateLength < 70 || bestAl.Accuracy < 0.80) {
                         ++rejects["Al70Acc80"];
@@ -200,20 +201,38 @@ namespace PacBio.Consensus
                         ++rejects["BadSnrChk"];
                         return null;
                     }
+                    var numSubReads = t.MultiAlignment.Length;
+                    var okay =  rca.ReadInGroup(t.ZmwBases, numSubReads, snrGroup, coverageGroup);
+                    if(!okay) {
+                        ++rejects["NotOkay"];
+                    }
 
                     var r = ccsAlgo.GetPoaAndRegions(t.ZmwBases);
                     var passes = r.Item3;
                     var tpl = r.Item1;
                     var poaScore = r.Item2;
 
-                    // Want to work on at least 4 passes
-                    if(passes.Count < 5) {
-                        ++rejects["Passes<05"];
+                    if(r.Item1 == null)
+                    {
                         return null;
                     }
-                    // Don't use more than 11 passes -- a waste of time because the error rate should be low
-                    if(passes.Count > 20) {
-                        ++rejects["Passes>20"];
+                    //FIXME: This can be a lot faster by moving this check up, and by assigning reads to groups
+                    //       at different times so we aren't doing a full pass for each combo.
+                    var isGroup = rca.ReadInGroup(t.ZmwBases, passes.Count, snrGroup, coverageGroup);
+
+                    if(!isGroup)
+                    {
+                        return null;
+                    }
+
+                    // Want to work on at least 4 passes
+                    if(passes.Count < 3) {
+                        ++rejects["Passes<03"];
+                        return null;
+                    }
+                    // Don't use more than 80 passes -- a waste of time because the error rate should be low
+                    if(passes.Count > 80) {
+                        ++rejects["Passes>80"];
                         return null;
                     }
 
