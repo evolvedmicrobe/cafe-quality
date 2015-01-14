@@ -163,7 +163,7 @@ namespace PacBio.Consensus
 			//varscans = ScanSets.FromCmpH5(rawCmpH5);
 
             var tds = new TrainingDataStore (rca, examplesPerReference);
-            int totalNeeded = 2 * referenceContigs.Count * rca.NumberOfSNRGroups * rca.NumberOfCoverageGroups * examplesPerReference;
+            int totalNeeded = 2 * referenceContigs.Count * 4 * examplesPerReference;
             HashSet<string> okayRefs = new HashSet<string>(referenceContigs.Keys);
 
             //var ccsTraces = scans.SelectMany(s => s.LazyTraces).Where(CCSTraceFilter);
