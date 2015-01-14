@@ -25,7 +25,7 @@ namespace PacBio.Consensus
         /// <summary>
         /// The breakpoints between SNR bins.
         /// </summary>
-        public readonly float[] MeanSNRBreakPoints = new float[] {5.0F, 8.0F};
+        public readonly float[] MeanSNRBreakPoints = new float[] {5.0F, 9.0F};
 
         /// <summary>
         /// Coverage breakpoints
@@ -40,6 +40,8 @@ namespace PacBio.Consensus
         /// The parameters for the assigned group, given by [SNR_GROUP,COVERAGE_GROUP]
         /// </summary>
         QvModelParams[,] parametersForGroups;
+
+
 
 
         public ReadConfigurationAssigner ()
@@ -63,8 +65,11 @@ namespace PacBio.Consensus
         public bool ReadInGroup(IZmwBases bases, int numberOfInserts, int snrGroupIndex, int coverageGroupIndex)
         {
             var meanSNR = bases.Metrics.HQRegionSNR.Average ();
+            Console.WriteLine ("Mean SNR: " + meanSNR);
+            Console.WriteLine ("Number: " + numberOfInserts);
             var i = assignToSNRGroup (meanSNR);
             var j = assignToCoverageGroup (numberOfInserts);
+
             return i == snrGroupIndex && j == coverageGroupIndex;
         }
 
@@ -74,6 +79,13 @@ namespace PacBio.Consensus
             var i = assignToSNRGroup (meanSNR);
             var j = assignToCoverageGroup (numberOfInserts);
             return parametersForGroups [i, j];
+        }
+
+        public PartitionAssignment GetGroupAssignment(float meanSNR, int numberOfInserts)
+        {
+            var i = assignToSNRGroup (meanSNR);
+            var j = assignToCoverageGroup (numberOfInserts);
+            return new PartitionAssignment(i, j);
         }
 
         private int assignToSNRGroup(float meanSNR)
@@ -100,6 +112,16 @@ namespace PacBio.Consensus
         public static string GetNameForConfiguration(int snrGroup, int covGroup)
         {
             return BASE_NAME + "_" + snrGroup + "_"+ covGroup;
+        }
+    }
+
+    public struct PartitionAssignment {
+        public readonly int SnrGroup;
+        public readonly int CoverageGroup;
+        public PartitionAssignment(int snrGroup, int coverageGroup)
+        {
+            SnrGroup = snrGroup;
+            CoverageGroup = coverageGroup;
         }
     }
 }

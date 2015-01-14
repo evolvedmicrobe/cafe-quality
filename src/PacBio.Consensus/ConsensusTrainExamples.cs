@@ -153,8 +153,8 @@ namespace PacBio.Consensus
         }
 
 
-        public static List<CCSExample> GetExamples(TraceSet traceSet, int n, Dictionary<string, string> referenceContigs, string referenceToGet, 
-                                                    int snrGroup, int  coverageGroup, ReadConfigurationAssigner rca, ExampleMode mode = ExampleMode.Sample)
+        public static TrainingDataStore GetExamples(TraceSet traceSet, Dictionary<string, string> referenceContigs, 
+                                                    int examplesPerReference, ReadConfigurationAssigner rca, ExampleMode mode = ExampleMode.Sample)
         {           
             //Console.WriteLine("Checking references");
 			//ScanSets.VerifyReferences(rawCmpH5);
@@ -162,8 +162,12 @@ namespace PacBio.Consensus
             //Console.WriteLine("Loading cmp.h5:");
 			//varscans = ScanSets.FromCmpH5(rawCmpH5);
 
+            var tds = new TrainingDataStore (rca, examplesPerReference);
+            int totalNeeded = 2 * referenceContigs.Count * rca.NumberOfSNRGroups * rca.NumberOfCoverageGroups * examplesPerReference;
+            HashSet<string> okayRefs = new HashSet<string>(referenceContigs.Keys);
+
             //var ccsTraces = scans.SelectMany(s => s.LazyTraces).Where(CCSTraceFilter);
-            var ccsTraces = traceSet.Traces.Where (z => z.SmithWatermanAlignment!= null && z.SmithWatermanAlignment.ReferenceName == referenceToGet);
+            var ccsTraces = traceSet.Traces.Where (z => z.SmithWatermanAlignment!= null && okayRefs.Contains(z.SmithWatermanAlignment.ReferenceName));
 			var nTotal = traceSet.NumTraces;
             var nTried = 0;
             int accepted = 0;
@@ -174,12 +178,17 @@ namespace PacBio.Consensus
                 {"WeirdAlgn", 0}, {"NotOkay",0}
                               };
 
-            var l = SparseTargetSample(ccsTraces, n, nTotal, 
-                        t => {
+            var acceptedAsExamples = 0;
+            foreach(var t in ccsTraces) 
+            {
                     nTried++;
+                var meanSNR = t.ZmwBases.Metrics.HQRegionSNR.Average ();
+                if (meanSNR < 5.0) {
+                    Console.WriteLine (meanSNR.ToString () + "Testing!");
+                }
                     if(t.MultiAlignment.Length < 2) {
                         ++rejects["UnAligned"];
-                        return null;
+                    continue;
                     }
                     // Cap the accuracy at 80% - so we will get the longest read among those above 80% accuracy.
                     var bestAl = t.MultiAlignment.OrderByDescending
@@ -190,23 +199,17 @@ namespace PacBio.Consensus
 
                     if(bestAl.TemplateLength < 70 || bestAl.Accuracy < 0.80) {
                         ++rejects["Al70Acc80"];
-                        return null;
+                    continue;
                     }
                     if(bestAl.ReferenceName.Contains("ET")) {
                         ++rejects["ETControl"];
-                        return null;
+                        continue;
                     }
 
                     if(!CheckSnr(t)) {
                         ++rejects["BadSnrChk"];
-                        return null;
+                        continue;
                     }
-                    var numSubReads = t.MultiAlignment.Length;
-                    var okay =  rca.ReadInGroup(t.ZmwBases, numSubReads, snrGroup, coverageGroup);
-                    if(!okay) {
-                        ++rejects["NotOkay"];
-                    }
-
                     var r = ccsAlgo.GetPoaAndRegions(t.ZmwBases);
                     var passes = r.Item3;
                     var tpl = r.Item1;
@@ -214,26 +217,17 @@ namespace PacBio.Consensus
 
                     if(r.Item1 == null)
                     {
-                        return null;
+                        continue;
                     }
-                    //FIXME: This can be a lot faster by moving this check up, and by assigning reads to groups
-                    //       at different times so we aren't doing a full pass for each combo.
-                    var isGroup = rca.ReadInGroup(t.ZmwBases, passes.Count, snrGroup, coverageGroup);
-
-                    if(!isGroup)
-                    {
-                        return null;
-                    }
-
-                    // Want to work on at least 4 passes
+                    // Want to work on at least 3 passes
                     if(passes.Count < 3) {
                         ++rejects["Passes<03"];
-                        return null;
+                        continue;
                     }
                     // Don't use more than 80 passes -- a waste of time because the error rate should be low
                     if(passes.Count > 80) {
                         ++rejects["Passes>80"];
-                        return null;
+                        continue;
                     }
 
                     var refStart = bestAl.TemplateStart;
@@ -256,7 +250,7 @@ namespace PacBio.Consensus
                         Console.WriteLine(@"Skipping trace. POA Acc: {0}. POAScore: {1}. Had weird alignments: {2}",
                             poaAl.Accuracy, poaScore, err ? msg : "False");
                         ++rejects["WeirdAlgn"];
-                        return null;
+                        continue;
                     }
 
                     // Construct the correct trial template!
@@ -276,14 +270,23 @@ namespace PacBio.Consensus
 
                     Console.WriteLine(@"Accepting trace. POA Acc: {0}. POA Score: {1}", poaAl.Accuracy, poaScore);
                     ++accepted;
-                    return new CCSExample {
+                    var example = new CCSExample {
                         Trace = t,
                         Reference = rref,
                         CorrectTrialTemplate = trialTemplate,
                         Regions = newRegions
                     };
-                }).ToList();
-
+                    var success = tds.AddExample(example);
+                if (success) {
+                    Console.WriteLine ("Accepted");
+                    acceptedAsExamples++;
+                } else {
+                    Console.WriteLine ("Not Accepted");
+                }
+                if (acceptedAsExamples >= totalNeeded) {
+                    break;
+                } 
+            }
 
             int nRejects = rejects.Sum(v => v.Value);
 
@@ -293,7 +296,8 @@ namespace PacBio.Consensus
             Console.WriteLine(@"Total: {0}", nTotal);
             Console.WriteLine(@"Viewed: Accepted[{0}] + Rejected[{1}] = {2}",
                               accepted, nRejects, accepted + nRejects);
-            return l;
+            Console.WriteLine ("Accepted as examples: " + acceptedAsExamples);
+            return tds;
         }
 
         public static AlignedSequenceReg MapRegionToRef(AlignedSequenceReg reg, IZmwBases bases, string refChunk, string rcRefChunk)
@@ -320,9 +324,9 @@ namespace PacBio.Consensus
         public static bool CheckSnr(Trace t)
         {
             // Fast path SNR check -- see if the HQRegionSNR Metric passes -- if so then we should be GTG
-			var minHqRegionSnr = t.ZmwBases.Metrics.HQRegionSNR.Min();
+			var meanHqRegionSnr = t.ZmwBases.Metrics.HQRegionSNR.Average();
 
-            if (minHqRegionSnr > 3.5)
+            if (meanHqRegionSnr > 3.5)
                 return true;
 
 			return false;

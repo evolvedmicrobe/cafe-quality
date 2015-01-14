@@ -119,48 +119,17 @@ namespace PacBio.Consensus
         /// Train a single snr/coverage group
         /// </summary>
         /// <returns>The run.</returns>
-        public int InnerRun(string cmpH5File, string fofn, string reference, int totalTraces, 
+        public int InnerRun(List<CCSExample> train, List<CCSExample> test, int hopedForTraces,
             int snrGroup, int coverageGroup, string outFile, int maxIterations = 100 )
-        {
-            if (maxIterations > 0)
-                this.maxIterations = maxIterations;
-
-
-            optimizer = NelderMeadOptimizer.Instance;
-
-            // Load reference
-            var rFasta = new PacBio.IO.Fasta.SimpleFASTAReader(reference);
-            var refDict = rFasta.ToDictionary(e => e.Header, e => e.GetSequence());
-
-            var totalReferences = refDict.Count;
-            Log (LogLevel.WARN, "Found " + totalReferences + " references in file");
-            var tracesPerReference = (int) Math.Ceiling (totalTraces / (double)totalReferences); 
-
-
-            // Load trainSet
-            var traceSet = new TraceSet(cmpH5File, fofn);
-
-            // FIXME shuffle
-            List<CCSExample> train = new List<CCSExample> ();
-            List<CCSExample> test = new List<CCSExample> ();
-            foreach(var refname in refDict.Keys)
-            {
-                Log (LogLevel.WARN, "Started getting train/test data for " + refname);
-                var ex = CCSExample.GetExamples(traceSet, tracesPerReference * 2, refDict, refname, snrGroup, coverageGroup, rca);
-                train.AddRange(ex.Take(tracesPerReference));
-                test.AddRange(ex.Skip(tracesPerReference).Take(tracesPerReference));
-                Log (LogLevel.WARN, "Finished getting train/test data for " + refname);
-                Log (LogLevel.WARN, "Training set is now contains " + train.Count + " samples" );
-
-            }
+        {           
             // Check that enough data is available
-            int warnThresh = totalTraces / 2;
-            int failThresh = totalTraces / 10;
+            int warnThresh = hopedForTraces / 2;
+            int failThresh = hopedForTraces / 10;
 
             if (train.Count < failThresh || test.Count < failThresh)
             {
                 Log(LogLevel.ERROR, "Insufficient data for training: maxTraces={0}, train.Count={1}, test.Count={2}",
-                    totalTraces, train.Count, test.Count);
+                    hopedForTraces, train.Count, test.Count);
 
                 return 1;
             }
@@ -168,11 +137,11 @@ namespace PacBio.Consensus
             if (train.Count < warnThresh || test.Count < warnThresh)
             {
                 Log(LogLevel.WARN, "Input data yields less than 2x requested: maxTraces={0}, train.Count={1}, test.Count={2}",
-                    totalTraces, train.Count, test.Count);
+                    hopedForTraces, train.Count, test.Count);
             }
 
-            using (var scConfig = ParameterLoading.DefaultQuiver)
-            using (var qvConfig = scConfig.Parameters.At("P4-C2"))
+            using (var scConfig = ParameterLoading.DefaultCCS)
+            using (var qvConfig = scConfig.Parameters.At("P6-C4"))
             using (var start = qvConfig.QvParams)
             {
                 var algo = RecursionAlgo.Viterbi;
@@ -216,13 +185,32 @@ namespace PacBio.Consensus
 
             Log (LogLevel.WARN, "Starting to optimize across partitions");
 
+
+            // Load reference
+            var rFasta = new PacBio.IO.Fasta.SimpleFASTAReader(reference);
+            var refDict = rFasta.ToDictionary(e => e.Header, e => e.GetSequence());
+
+            var totalReferences = refDict.Count;
+            Log (LogLevel.WARN, "Found " + totalReferences + " references in file");
+            var tracesPerReference = (int) Math.Ceiling (totalTraces / (double)totalReferences); 
+
+
+            // Load training data for each partition
+            // This code goes through the entire file and assigns examples to different partitions
+            var traceSet = new TraceSet(cmpH5File, fofn);
+            var tds = CCSExample.GetExamples (traceSet, refDict, tracesPerReference * 2, rca);
+
+            // Now assign all the training sets to different files
             for (int i = 0; i < rca.NumberOfSNRGroups; i++) {
-                for (int j = 0; j < rca.NumberOfSNRGroups; j++) {
+                for (int j = 0; j < rca.NumberOfCoverageGroups; j++) {
                     Log (LogLevel.WARN, "Optimizing " + i +" - "+ j);
                     // Run this data for this file and output it.
-                    var res = InnerRun (cmpH5File, fofn, reference, totalTraces, i, j,outFile, maxIterations);       
+                    var traintest = tds.GetExamples (i, j);
+                    var train = traintest.Item1;
+                    var test = traintest.Item2;
+                    var res = InnerRun (train,test, totalTraces, i, j,outFile, maxIterations);       
                     if (res != 0) {
-                        return res;
+                        Log (LogLevel.ERROR, "Failed for: " + i +" - "+ j);
                     }
                 }
             }
