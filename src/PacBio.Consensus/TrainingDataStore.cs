@@ -41,27 +41,25 @@ namespace PacBio.Consensus
         {
             var meanSNR = example.Trace.ZmwBases.Metrics.HQRegionSNR.Average ();
             var gr = rca.GetGroupAssignment ((float)meanSNR, example.Regions.Length);
-
-            if (gr.CoverageGroup == 1 && gr.SnrGroup == 1) {
             var result = false;
-            lock (exampleStore) {
-
-                var cur = exampleStore [gr.SnrGroup, gr.CoverageGroup];
-                List<CCSExample> examples;
-                bool alreadyPresent = cur.TryGetValue (example.Reference, out examples);
-                if (!alreadyPresent) {
-                    examples = new List<CCSExample> () { example };
-                    exampleStore [gr.SnrGroup, gr.CoverageGroup] [example.Reference] = examples;
-                    result = true;
-                }  else {
-                    if (examples.Count < MaxPerReference) {
-                        examples.Add (example);
-                        result =  true;
+            if (gr.CoverageGroup == 1 && gr.SnrGroup == 1) {
+                lock (exampleStore) {
+                    var cur = exampleStore [gr.SnrGroup, gr.CoverageGroup];
+                    List<CCSExample> examples;
+                    bool alreadyPresent = cur.TryGetValue (example.Reference, out examples);
+                    if (!alreadyPresent) {
+                        examples = new List<CCSExample> () { example };
+                        exampleStore [gr.SnrGroup, gr.CoverageGroup] [example.Reference] = examples;
+                        result = true;
+                    }  else if (examples.Count < MaxPerReference) {
+                            examples.Add (example);
+                            result =  true;
+                        }
                     }
-                }
             }
             return result;
         }
+
         /// <summary>
         /// Get a training and test set for the examples specified by the SNR and Coverage grouping.
         /// </summary>
