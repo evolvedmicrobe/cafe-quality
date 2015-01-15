@@ -296,7 +296,7 @@ namespace PacBio.Consensus
 			//varscans = ScanSets.FromCmpH5(rawCmpH5);
 
             var tds = new TrainingDataStore (rca, examplesPerReference);
-            int totalNeeded = 2 * referenceContigs.Count * rca.NumberOfSNRGroups * rca.NumberOfCoverageGroups * examplesPerReference;
+            int totalNeeded = 2 * referenceContigs.Count * examplesPerReference;
             HashSet<string> okayRefs = new HashSet<string>(referenceContigs.Keys);
 
             //var ccsTraces = scans.SelectMany(s => s.LazyTraces).Where(CCSTraceFilter);
@@ -315,10 +315,7 @@ namespace PacBio.Consensus
             foreach(var t in ccsTraces) 
             {
                     nTried++;
-                var meanSNR = t.ZmwBases.Metrics.HQRegionSNR.Average ();
-                if (meanSNR < 5.0) {
-                    Console.WriteLine (meanSNR.ToString () + "Testing!");
-                }
+
                     if(t.MultiAlignment.Length < 2) {
                         ++rejects["UnAligned"];
                     continue;
@@ -457,9 +454,9 @@ namespace PacBio.Consensus
         public static bool CheckSnr(Trace t)
         {
             // Fast path SNR check -- see if the HQRegionSNR Metric passes -- if so then we should be GTG
-			var meanHqRegionSnr = t.ZmwBases.Metrics.HQRegionSNR.Average();
+			var minHqRegionSnr = t.ZmwBases.Metrics.HQRegionSNR.Min();
 
-            if (meanHqRegionSnr > 3.5)
+            if (minHqRegionSnr > 3.5)
                 return true;
 
 			return false;

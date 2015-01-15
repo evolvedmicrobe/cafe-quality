@@ -201,19 +201,17 @@ namespace PacBio.Consensus
             var tds = CCSExample.GetExamples (traceSet, refDict, tracesPerReference * 2, rca);
 
             // Now assign all the training sets to different files
-            for (int i = 0; i < rca.NumberOfSNRGroups; i++) {
-                for (int j = 0; j < rca.NumberOfCoverageGroups; j++) {
-                    Log (LogLevel.WARN, "Optimizing " + i +" - "+ j);
+                   Log (LogLevel.WARN, "Optimizing 1-1");
                     // Run this data for this file and output it.
-                    var traintest = tds.GetExamples (i, j);
+                    var traintest = tds.GetExamples (1, 1);
                     var train = traintest.Item1;
                     var test = traintest.Item2;
-                    var res = InnerRun (train,test, totalTraces, i, j,outFile, maxIterations);       
+                    var res = InnerRun (train,test, totalTraces, 1, 1,outFile, maxIterations);       
                     if (res != 0) {
-                        Log (LogLevel.ERROR, "Failed for: " + i +" - "+ j);
+                        Log (LogLevel.ERROR, "Failed");
                     }
-                }
-            }
+                
+            
             return 0;
         }
 

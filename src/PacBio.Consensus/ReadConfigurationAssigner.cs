@@ -25,12 +25,12 @@ namespace PacBio.Consensus
         /// <summary>
         /// The breakpoints between SNR bins.
         /// </summary>
-        public readonly float[] MeanSNRBreakPoints = new float[] {5.0F, 9.0F};
+        public readonly float[] MeanSNRBreakPoints = new float[] {4.0F, 200.0F};
 
         /// <summary>
         /// Coverage breakpoints
         /// </summary>
-        public readonly float[] CoverageBreakPoints = new float[] {5.0F, 10.0F, 20.0F};
+        public readonly float[] CoverageBreakPoints = new float[] {3.0F, 20.0F};
 
 
         public int NumberOfCoverageGroups { get {return CoverageBreakPoints.Length + 1;}}
