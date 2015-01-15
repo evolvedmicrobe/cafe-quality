@@ -152,7 +152,140 @@ namespace PacBio.Consensus
             Fast
         }
 
+        /// <summary>
+        /// Gets a simple set of examples, used for comparing parameters.
+        /// </summary>
+        /// <returns>The simple examples.</returns>
+        /// <param name="traceSet">Trace set.</param>
+        /// <param name="referenceContigs">Reference contigs.</param>
+        /// <param name="examplesToGet">Examples to get.</param>
+        /// <param name="curReference">Current reference.</param>
+        public static List<CCSExample> GetSimpleExamples(TraceSet traceSet, Dictionary<string, string> referenceContigs, 
+            int examplesToGet, string curReference)
+        {           
+            int totalNeeded = examplesToGet;
+            var toReturn = new List<CCSExample> (totalNeeded);
+           
+            var ccsTraces = traceSet.Traces.Where (z => z.SmithWatermanAlignment!= null && z.SmithWatermanAlignment.ReferenceName == curReference );
+            var nTotal = traceSet.NumTraces;
+            var nTried = 0;
+            int accepted = 0;
+            var rejects = new Dictionary<string, int>
+            {
+                {"UnAligned", 0}, {"Al70Acc80", 0}, {"ETControl", 0},
+                {"Passes<03", 0}, {"Passes>80", 0}, {"BadSnrChk", 0},
+                {"WeirdAlgn", 0}, {"NotOkay",0}
+            };
 
+            foreach(var t in ccsTraces) 
+            {
+                nTried++;
+                if(t.MultiAlignment.Length < 2) {
+                    ++rejects["UnAligned"];
+                    continue;
+                }
+                // Cap the accuracy at 80% - so we will get the longest read among those above 80% accuracy.
+                var bestAl = t.MultiAlignment.OrderByDescending
+                    (al => {
+                        var accCap = Math.Min(al.Accuracy, 0.85);
+                        return accCap * al.TemplateLength;
+                    }).First();
+
+                if(bestAl.TemplateLength < 70 || bestAl.Accuracy < 0.80) {
+                    ++rejects["Al70Acc80"];
+                    continue;
+                }
+                if(bestAl.ReferenceName.Contains("ET")) {
+                    ++rejects["ETControl"];
+                    continue;
+                }
+
+                if(!CheckSnr(t)) {
+                    ++rejects["BadSnrChk"];
+                    continue;
+                }
+                var r = ccsAlgo.GetPoaAndRegions(t.ZmwBases);
+                var passes = r.Item3;
+                var tpl = r.Item1;
+                var poaScore = r.Item2;
+
+                if(r.Item1 == null)
+                {
+                    continue;
+                }
+                // Want to work on at least 3 passes
+                if(passes.Count < 3) {
+                    ++rejects["Passes<03"];
+                    continue;
+                }
+                // Don't use more than 80 passes -- a waste of time because the error rate should be low
+                if(passes.Count > 80) {
+                    ++rejects["Passes>80"];
+                    continue;
+                }
+
+                var refStart = bestAl.TemplateStart;
+                var refLength = bestAl.TemplateLength;
+
+                var refSeq = referenceContigs[bestAl.ReferenceName];
+
+                const int templateExtend = 100;
+                var start = Math.Max(refStart - templateExtend, 0);
+                var len = Math.Min(refSeq.Length - 1 - start, refLength + 2 * templateExtend);
+
+                var rref = refSeq.Substring(start, len);
+                var poaAl = CCSExample.SemiGlobalAlign(rref, tpl.Sequence);
+
+                var badAlign = MultiAlignCheck(t);
+
+                if(poaAl.Accuracy < 0.87) {
+                    var err = badAlign.Item1;
+                    var msg = badAlign.Item2;
+                    Console.WriteLine(@"Skipping trace. POA Acc: {0}. POAScore: {1}. Had weird alignments: {2}",
+                        poaAl.Accuracy, poaScore, err ? msg : "False");
+                    ++rejects["WeirdAlgn"];
+                    continue;
+                }
+
+                // Construct the correct trial template!
+                var rcRef = DNA.ReverseComplement(rref);
+                var refChunk = poaAl.Strand == Strand.Forward ? rref : rcRef;
+                var correctInsertSequence = refChunk.Substring(poaAl.TemplateStartBase, poaAl.TemplateLength);
+                var rcCorrectInsert = DNA.ReverseComplement(correctInsertSequence);
+
+                var trialTemplate = new TrialTemplate() {
+                    Sequence = correctInsertSequence,
+                    StartAdapterBases = 5,
+                    EndAdapterBases = 5
+                };
+
+                // Remap regions to this sequence
+                var newRegions = passes.Map(p => MapRegionToRef(p, t.ZmwBases, correctInsertSequence, rcCorrectInsert));
+
+                Console.WriteLine(@"Accepting trace. POA Acc: {0}. POA Score: {1}", poaAl.Accuracy, poaScore);
+                ++accepted;
+                var example = new CCSExample {
+                    Trace = t,
+                    Reference = rref,
+                    CorrectTrialTemplate = trialTemplate,
+                    Regions = newRegions
+                };
+                toReturn.Add (example);
+                if (accepted >= totalNeeded) {
+                    break;
+                } 
+            }
+
+            int nRejects = rejects.Sum(v => v.Value);
+
+            Console.WriteLine(@"Reject Counts:");
+            rejects.ForEach(r => Console.WriteLine(@"{0} = {1}", r.Key, r.Value));
+
+            Console.WriteLine(@"Total: {0}", nTotal);
+            Console.WriteLine(@"Viewed: Accepted[{0}] + Rejected[{1}] = {2}",
+                accepted, nRejects, accepted + nRejects);
+           return toReturn;
+        }
         public static TrainingDataStore GetExamples(TraceSet traceSet, Dictionary<string, string> referenceContigs, 
                                                     int examplesPerReference, ReadConfigurationAssigner rca, ExampleMode mode = ExampleMode.Sample)
         {           

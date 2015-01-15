@@ -30,11 +30,10 @@
     <PlatformTarget>
     </PlatformTarget>
     <Tailcalls>true</Tailcalls>
+    <Commandlineparameters>CCSTrainCompare --fofn /Users/nigel/CCS_P6_C4/input2.fofn -l /Users/nigel/CCS_P6_C4/allAligned.cmp.h5  --maxTraces=400
+ --ref /Users/nigel/CCS_P6_C4/References.fna --param1=P6-C4
+--param2=P6-C4_fix_match_logit</Commandlineparameters>
     <ConsolePause>false</ConsolePause>
-    <Commandlineparameters>CCSTrain -i 1000  --fofn /Users/nigel/CCS_P6_C4/input2.fofn -l /Users/nigel/CCS_P6_C4/allAligned.cmp.h5  --maxTraces=3
-        --ref /Users/nigel/CCS_P6_C4/References.fna
- -o multiTrain
-</Commandlineparameters>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -71,6 +70,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ConsensusSubCommand.fs" />
     <Compile Include="CCSTrain.fs" />
+    <Compile Include="CCSTrainCompare.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
