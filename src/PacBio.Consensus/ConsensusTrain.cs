@@ -248,19 +248,10 @@ namespace PacBio.Consensus
                     return f;
                 };
 
-            // Do a 'pre-training' with a small number of examples to get into the ballpark.
-            var numPreTrainExamples = 25;
-            Log("Doing pre-training on {0} examples", numPreTrainExamples);
-            var preTrainExamples = trainSet.Take(numPreTrainExamples).ToList();
-            var warmupFunction = makeObjectiveFunction(preTrainExamples);
-
-            var packedStart = Vector.OfEnumerable(ConsensusCoreWrap.QvModelParamsToOptimizationArray(startParams).Select(v => (double)v));
-            
-            var preTrainResult = optimizer.MinimizeFunction(packedStart, 0.05, maxIterations, warmupFunction);
-            var fullOptimizationStartpoint = preTrainResult.X;
 
 
             // Do the full training
+            var fullOptimizationStartpoint = Vector.OfEnumerable(ConsensusCoreWrap.QvModelParamsToOptimizationArray(startParams).Select(v => (double)v));
             Log("Doing full training on {0} examples", trainSet.Count);
             var fullObjectiveFunction = makeObjectiveFunction(trainSet);
 
