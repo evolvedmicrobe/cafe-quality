@@ -314,6 +314,7 @@ namespace PacBio.Consensus
             var acceptedAsExamples = 0;
             Parallel.ForEach(ccsTraces, t =>  
             {
+                try {
                     if (acceptedAsExamples >= totalNeeded) {
                         return;
                     } 
@@ -323,10 +324,10 @@ namespace PacBio.Consensus
                         ++rejects["UnAligned"];
                     return;
                     }
-                if (t.MultiAlignment.Length > 40) {
-                    ++rejects ["TooManyRegions"];
-                    return;
-                }
+                    if (t.MultiAlignment.Length > 40) {
+                        ++rejects ["TooManyRegions"];
+                        return;
+                    }
 
                     // Cap the accuracy at 80% - so we will get the longest read among those above 80% accuracy.
                     var bestAl = t.MultiAlignment.OrderByDescending
@@ -406,7 +407,7 @@ namespace PacBio.Consensus
                     // Remap regions to this sequence
                     var newRegions = passes.Map(p => MapRegionToRef(p, t.ZmwBases, correctInsertSequence, rcCorrectInsert));
 
-                    Console.WriteLine(@"Accepting trace. POA Acc: {0}. POA Score: {1}", poaAl.Accuracy, poaScore);
+                    Console.WriteLine(@"Accepting trace. POA Acc: {0}. POA Score: {1}. Ref: {2}", poaAl.Accuracy, poaScore, t.SmithWatermanAlignment.ReferenceName);
                     ++accepted;
                     var example = new CCSExample {
                         Trace = t,
@@ -421,6 +422,10 @@ namespace PacBio.Consensus
                 } else {
                     Console.WriteLine ("Not Accepted");
                 }
+                    }
+                    catch(Exception thrown) {
+                        Console.WriteLine("ERROR\n\n\n"+thrown.Message+"\n\n\nStack Trace\n\n" + thrown.StackTrace);
+                    }
                
                 });
 
