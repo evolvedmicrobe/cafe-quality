@@ -324,7 +324,7 @@ namespace PacBio.Consensus
                         ++rejects["UnAligned"];
                     return;
                     }
-                    if (t.MultiAlignment.Length > 40) {
+                    if (t.MultiAlignment.Length > 25) {
                         ++rejects ["TooManyRegions"];
                         return;
                     }
