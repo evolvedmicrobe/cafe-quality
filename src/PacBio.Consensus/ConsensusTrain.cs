@@ -105,7 +105,6 @@ namespace PacBio.Consensus
             logger.Log(LogLevel.WARN, String.Format(msg, args));
         }
 
-        private int maxIterations = 35;
         private IOptimizer optimizer;
 
         private ReadConfigurationAssigner rca = new ReadConfigurationAssigner ();
@@ -149,7 +148,7 @@ namespace PacBio.Consensus
                 // Train the model
                 float trainError;
                 float testError;
-                var trainedModel = OptimizeConsensus(train, test, start, algo, out trainError, out testError);
+                var trainedModel = OptimizeConsensus(train, test, start, algo, maxIterations, out trainError, out testError);
 
                 // Assess the accuracy on test set
                 Log("Measuring Accuracy:");
@@ -228,7 +227,7 @@ namespace PacBio.Consensus
         /// <param name="startParams">Start point of optimization</param>
         /// <param name="testError"></param>
         /// <returns>Trained model</returns>
-        public QvModelParams OptimizeConsensus(List<CCSExample> trainSet, List<CCSExample> testSet, QvModelParams startParams, RecursionAlgo algo, out float trainError, out float testError)
+        public QvModelParams OptimizeConsensus(List<CCSExample> trainSet, List<CCSExample> testSet, QvModelParams startParams, RecursionAlgo algo, int maxIterations, out float trainError, out float testError)
         {
             int iterations = 0;
             optimizer = NelderMeadOptimizer.Instance;
