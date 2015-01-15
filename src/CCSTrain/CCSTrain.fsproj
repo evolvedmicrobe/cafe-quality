@@ -30,9 +30,8 @@
     <PlatformTarget>
     </PlatformTarget>
     <Tailcalls>true</Tailcalls>
-    <Commandlineparameters>CCSTrainCompare --fofn /Users/nigel/CCS_P6_C4/input2.fofn -l /Users/nigel/CCS_P6_C4/allAligned.cmp.h5  --maxTraces=400
- --ref /Users/nigel/CCS_P6_C4/References.fna --param1=P6-C4
---param2=P6-C4_fix_match_logit</Commandlineparameters>
+    <Commandlineparameters>CCSTrain --fofn /Users/nigel/CCS_P6_C4/input2.fofn -l /Users/nigel/CCS_P6_C4/allAligned.cmp.h5  --maxTraces=400
+ --ref /Users/nigel/CCS_P6_C4/References.fna -o whoCares</Commandlineparameters>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
