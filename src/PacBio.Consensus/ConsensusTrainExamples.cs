@@ -308,7 +308,7 @@ namespace PacBio.Consensus
                               {
                                   {"UnAligned", 0}, {"Al70Acc80", 0}, {"ETControl", 0},
                                   {"Passes<03", 0}, {"Passes>80", 0}, {"BadSnrChk", 0},
-                {"WeirdAlgn", 0}, {"NotOkay",0}
+                {"WeirdAlgn", 0}, {"NotOkay",0}, {"TooManyRegions",0}
                               };
 
             var acceptedAsExamples = 0;
@@ -320,6 +320,11 @@ namespace PacBio.Consensus
                         ++rejects["UnAligned"];
                     continue;
                     }
+                if (t.MultiAlignment.Length > 25) {
+                    ++rejects ["TooManyRegions"];
+                    continue;
+                }
+
                     // Cap the accuracy at 80% - so we will get the longest read among those above 80% accuracy.
                     var bestAl = t.MultiAlignment.OrderByDescending
                             (al => {
