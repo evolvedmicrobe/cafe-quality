@@ -110,3 +110,5 @@ src/ConsensusCore/src/C++/ConsensusCoreXCode/ConsensusCoreXCode.xcodeproj/projec
 src/CCSTrain/bin/Release/Chemistry/CCSParameters.ini
 
 src/CCSTrain/bin/Release/Chemistry/QuiverParameters.ini
+
+src/ConsensusCore/src/C++/ConsensusCoreXCode/ConsensusCoreXCode.xcodeproj/project.xcworkspace/xcuserdata/nigel.xcuserdatad/UserInterfaceState.xcuserstate
