@@ -312,17 +312,20 @@ namespace PacBio.Consensus
                               };
 
             var acceptedAsExamples = 0;
-            foreach(var t in ccsTraces) 
+            Parallel.ForEach(ccsTraces, t =>  
             {
+                    if (acceptedAsExamples >= totalNeeded) {
+                        return;
+                    } 
                     nTried++;
 
                     if(t.MultiAlignment.Length < 2) {
                         ++rejects["UnAligned"];
-                    continue;
+                    return;
                     }
-                if (t.MultiAlignment.Length > 25) {
+                if (t.MultiAlignment.Length > 40) {
                     ++rejects ["TooManyRegions"];
-                    continue;
+                    return;
                 }
 
                     // Cap the accuracy at 80% - so we will get the longest read among those above 80% accuracy.
@@ -334,16 +337,16 @@ namespace PacBio.Consensus
 
                     if(bestAl.TemplateLength < 70 || bestAl.Accuracy < 0.80) {
                         ++rejects["Al70Acc80"];
-                    continue;
+                    return;
                     }
                     if(bestAl.ReferenceName.Contains("ET")) {
                         ++rejects["ETControl"];
-                        continue;
+                        return;
                     }
 
                     if(!CheckSnr(t)) {
                         ++rejects["BadSnrChk"];
-                        continue;
+                        return;
                     }
                     var r = ccsAlgo.GetPoaAndRegions(t.ZmwBases);
                     var passes = r.Item3;
@@ -352,17 +355,17 @@ namespace PacBio.Consensus
 
                     if(r.Item1 == null)
                     {
-                        continue;
+                        return;
                     }
                     // Want to work on at least 3 passes
                     if(passes.Count < 3) {
                         ++rejects["Passes<03"];
-                        continue;
+                        return;
                     }
                     // Don't use more than 80 passes -- a waste of time because the error rate should be low
                     if(passes.Count > 80) {
                         ++rejects["Passes>80"];
-                        continue;
+                        return;
                     }
 
                     var refStart = bestAl.TemplateStart;
@@ -385,7 +388,7 @@ namespace PacBio.Consensus
                         Console.WriteLine(@"Skipping trace. POA Acc: {0}. POAScore: {1}. Had weird alignments: {2}",
                             poaAl.Accuracy, poaScore, err ? msg : "False");
                         ++rejects["WeirdAlgn"];
-                        continue;
+                        return;
                     }
 
                     // Construct the correct trial template!
@@ -414,14 +417,12 @@ namespace PacBio.Consensus
                     var success = tds.AddExample(example);
                 if (success) {
                     Console.WriteLine ("Accepted");
-                    acceptedAsExamples++;
+                        Interlocked.Increment(ref acceptedAsExamples);
                 } else {
                     Console.WriteLine ("Not Accepted");
                 }
-                if (acceptedAsExamples >= totalNeeded) {
-                    break;
-                } 
-            }
+               
+                });
 
             int nRejects = rejects.Sum(v => v.Value);
 
