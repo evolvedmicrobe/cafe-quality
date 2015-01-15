@@ -199,6 +199,8 @@ namespace PacBio.Consensus
             var traceSet = new TraceSet(cmpH5File, fofn);
             var tds = CCSExample.GetExamples (traceSet, refDict, tracesPerReference * 2, rca);
 
+            tds.PrintCounts ();
+
             // Now assign all the training sets to different files
             for (int i = 0; i < rca.NumberOfSNRGroups; i++) {
                 for (int j = 0; j < rca.NumberOfCoverageGroups; j++) {

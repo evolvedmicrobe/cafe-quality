@@ -32,6 +32,30 @@ namespace PacBio.Consensus
                 }
             }
         }
+
+        public void PrintCounts()
+        {
+            Console.WriteLine("\t".Join("Group","SNR","Cov","Count"));
+            for (int i = 0; i < rca.NumberOfSNRGroups; i++) {
+                for (int j = 0; j < rca.NumberOfCoverageGroups; j++) {
+                    var gr = i + "-" + j;
+                    var top_snr = i > rca.MeanSNRBreakPoints.Length ? "" : " < " + rca.MeanSNRBreakPoints [i];
+                    var bottom_snr = i > 0 ? rca.MeanSNRBreakPoints [i - 1] + " < " : "";
+                    var snr = bottom_snr + "snr" + top_snr;
+
+                    var top_cov = i > rca.CoverageBreakPoints.Length ? "" : " < " + rca.CoverageBreakPoints [i];
+                    var bottom_cov = i > 0 ? rca.CoverageBreakPoints [i - 1] + " < " : "";
+                    var cov = bottom_cov + "cov" + top_cov;
+
+                    var cnts = GetExamples (i, j);
+                    var cnts_s = cnts.Item1.Count + cnts.Item2.Count.ToString ();
+
+                    Console.WriteLine("\t".Join(gr, snr, cov, cnts_s));
+                }
+            }
+        }
+
+
         /// <summary>
         /// Add an example to the collection.
         /// </summary>
