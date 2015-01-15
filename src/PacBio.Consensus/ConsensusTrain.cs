@@ -229,6 +229,7 @@ namespace PacBio.Consensus
         public QvModelParams OptimizeConsensus(List<CCSExample> trainSet, List<CCSExample> testSet, QvModelParams startParams, RecursionAlgo algo, out float trainError, out float testError)
         {
             int iterations = 0;
+            optimizer = NelderMeadOptimizer.Instance;
             Func<List<CCSExample>, Func<Vector, double>> makeObjectiveFunction = examples =>
                 {
                     Func<Vector, double> f = pars =>
