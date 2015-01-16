@@ -35,7 +35,7 @@ namespace PacBio.Consensus
 
         public void PrintCounts()
         {
-            Console.WriteLine("\t".Join("Group","SNR","Cov","Count"));
+            Console.WriteLine(string.Join("\t", "Group","SNR","Cov","Count"));
             for (int i = 0; i < rca.NumberOfSNRGroups; i++) {
                 for (int j = 0; j < rca.NumberOfCoverageGroups; j++) {
                     var gr = i + "-" + j;
@@ -50,7 +50,7 @@ namespace PacBio.Consensus
                     var cnts = GetExamples (i, j);
                     var cnts_s = cnts.Item1.Count + cnts.Item2.Count.ToString ();
 
-                    Console.WriteLine("\t".Join(gr, snr, cov, cnts_s));
+                    Console.WriteLine(string.Join("\t", gr, snr, cov, cnts_s));
                 }
             }
         }
