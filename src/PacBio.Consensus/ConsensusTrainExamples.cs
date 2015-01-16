@@ -272,6 +272,7 @@ namespace PacBio.Consensus
                 };
                 toReturn.Add (example);
                 if (accepted >= totalNeeded) {
+                    Console.WriteLine ("Found all I need!");
                     break;
                 } 
             }
@@ -287,7 +288,7 @@ namespace PacBio.Consensus
            return toReturn;
         }
         public static TrainingDataStore GetExamples(TraceSet traceSet, Dictionary<string, string> referenceContigs, 
-                                                    int examplesPerReference, ReadConfigurationAssigner rca, ExampleMode mode = ExampleMode.Sample)
+                                                    int examplesPerReference, ReadConfigurationAssigner rca)
         {           
             //Console.WriteLine("Checking references");
 			//ScanSets.VerifyReferences(rawCmpH5);
@@ -296,6 +297,7 @@ namespace PacBio.Consensus
 			//varscans = ScanSets.FromCmpH5(rawCmpH5);
 
             var tds = new TrainingDataStore (rca, examplesPerReference);
+            // Get this many for each group time 2 to get training and test data
             int totalNeeded = 2 * referenceContigs.Count * rca.NumberOfSNRGroups * rca.NumberOfCoverageGroups * examplesPerReference;
             HashSet<string> okayRefs = new HashSet<string>(referenceContigs.Keys);
 
@@ -308,17 +310,22 @@ namespace PacBio.Consensus
                               {
                                   {"UnAligned", 0}, {"Al70Acc80", 0}, {"ETControl", 0},
                                   {"Passes<03", 0}, {"Passes>80", 0}, {"BadSnrChk", 0},
-                {"WeirdAlgn", 0}, {"NotOkay",0}, {"TooManyRegions",0}
+                                  {"WeirdAlgn", 0}, {"NotOkay",0}, {"TooManyRegions",0}
                               };
 
             var acceptedAsExamples = 0;
+            bool endMet = false;
             Parallel.ForEach(ccsTraces, t =>  
             {
                 try {
                     if (acceptedAsExamples >= totalNeeded) {
+                            if(!endMet) {
+                                Console.WriteLine("Found all I needed!");
+                                endMet = true;
+                            }
                         return;
                     } 
-                    nTried++;
+                        Interlocked.Increment(ref  nTried);
 
                     if(t.MultiAlignment.Length < 2) {
                         ++rejects["UnAligned"];
@@ -388,7 +395,7 @@ namespace PacBio.Consensus
                         var msg = badAlign.Item2;
                         Console.WriteLine(@"Skipping trace. POA Acc: {0}. POAScore: {1}. Had weird alignments: {2}",
                             poaAl.Accuracy, poaScore, err ? msg : "False");
-                        ++rejects["WeirdAlgn"];
+                            ++ rejects["WeirdAlgn"];
                         return;
                     }
 
@@ -435,6 +442,8 @@ namespace PacBio.Consensus
             rejects.ForEach(r => Console.WriteLine(@"{0} = {1}", r.Key, r.Value));
 
             Console.WriteLine(@"Total: {0}", nTotal);
+            Console.WriteLine(@"Tried: {0}", nTried);
+
             Console.WriteLine(@"Viewed: Accepted[{0}] + Rejected[{1}] = {2}",
                               accepted, nRejects, accepted + nRejects);
             Console.WriteLine ("Accepted as examples: " + acceptedAsExamples);
