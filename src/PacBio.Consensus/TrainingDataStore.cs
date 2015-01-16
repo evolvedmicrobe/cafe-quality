@@ -43,12 +43,12 @@ namespace PacBio.Consensus
                     var bottom_snr = i > 0 ? rca.MeanSNRBreakPoints [i - 1] + " < " : "";
                     var snr = bottom_snr + "snr" + top_snr;
 
-                    var top_cov = i > rca.CoverageBreakPoints.Length ? "" : " < " + rca.CoverageBreakPoints [i];
-                    var bottom_cov = i > 0 ? rca.CoverageBreakPoints [i - 1] + " < " : "";
+                    var top_cov = j > rca.CoverageBreakPoints.Length ? "" : " < " + rca.CoverageBreakPoints [j];
+                    var bottom_cov = j > 0 ? rca.CoverageBreakPoints [j - 1] + " < " : "";
                     var cov = bottom_cov + "cov" + top_cov;
 
                     var cnts = GetExamples (i, j);
-                    var cnts_s = cnts.Item1.Count + cnts.Item2.Count.ToString ();
+                    var cnts_s = (cnts.Item1.Count + cnts.Item2.Count).ToString ();
 
                     Console.WriteLine(string.Join("\t", gr, snr, cov, cnts_s));
                 }
