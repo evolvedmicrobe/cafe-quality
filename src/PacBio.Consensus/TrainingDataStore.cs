@@ -35,23 +35,28 @@ namespace PacBio.Consensus
 
         public void PrintCounts()
         {
-            Console.WriteLine(string.Join("\t", "Group","SNR","Cov","Count"));
-            for (int i = 0; i < rca.NumberOfSNRGroups; i++) {
-                for (int j = 0; j < rca.NumberOfCoverageGroups; j++) {
-                    var gr = i + "-" + j;
-                    var top_snr = i > rca.MeanSNRBreakPoints.Length ? "" : " < " + rca.MeanSNRBreakPoints [i];
-                    var bottom_snr = i > 0 ? rca.MeanSNRBreakPoints [i - 1] + " < " : "";
-                    var snr = bottom_snr + "snr" + top_snr;
+            try {
+                Console.WriteLine(string.Join("\t", "Group","SNR","Cov","Count"));
+                for (int i = 0; i < rca.MeanSNRBreakPoints.Length; i++) {
+                    for (int j = 0; j < rca.CoverageBreakPoints.Length; j++) {
+                        var gr = i + "-" + j;
+                        var top_snr = i > rca.MeanSNRBreakPoints.Length ? "" : " < " + rca.MeanSNRBreakPoints [i];
+                        var bottom_snr = i > 0 ? rca.MeanSNRBreakPoints [i - 1] + " < " : "";
+                        var snr = bottom_snr + "snr" + top_snr;
 
-                    var top_cov = j > rca.CoverageBreakPoints.Length ? "" : " < " + rca.CoverageBreakPoints [j];
-                    var bottom_cov = j > 0 ? rca.CoverageBreakPoints [j - 1] + " < " : "";
-                    var cov = bottom_cov + "cov" + top_cov;
+                        var top_cov = j > rca.CoverageBreakPoints.Length ? "" : " < " + rca.CoverageBreakPoints [j];
+                        var bottom_cov = j > 0 ? rca.CoverageBreakPoints [j - 1] + " < " : "";
+                        var cov = bottom_cov + "cov" + top_cov;
 
-                    var cnts = GetExamples (i, j);
-                    var cnts_s = (cnts.Item1.Count + cnts.Item2.Count).ToString ();
-
-                    Console.WriteLine(string.Join("\t", gr, snr, cov, cnts_s));
+                        var cnts = GetExamples (i, j);
+                        var cnts_s = (cnts.Item1.Count + cnts.Item2.Count).ToString ();
+                        Console.WriteLine(string.Join("\t", gr, snr, cov, cnts_s));
+                    }
                 }
+            }
+            catch(Exception thrown) {
+                Console.WriteLine ("Print statement Failed! " + thrown.Message);
+                Console.WriteLine (thrown.StackTrace);
             }
         }
 
