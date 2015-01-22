@@ -15,14 +15,22 @@ namespace PacBio.Consensus
     public static class HomopolymerPolisher
     {
         public static int TotalMutationsAccepted = 0;
+        //Early work showed these changes work the best on data with an SNR below 9
+        public const double MeanSNRCutoff = 9.0;
         public static Tuple<TrialTemplate, List<MutationScore>> PolishHomopolymers(TrialTemplate tpl,
                                                             MultiReadMutationScorer oldScorer,
                                                             IZmwBases bases,
                                                             List<MutationScore> allScores)
         {
+            var meanSNR = bases.Metrics.HQRegionSNR.Average ();
+            // Don't try to fix with SNR > 9, you introduce more errors.
+            if (meanSNR > MeanSNRCutoff) {
+                return new Tuple<TrialTemplate, List<MutationScore>>(tpl, allScores);
+            }
             var scConfig = ParameterLoading.C2Parameters;
             scConfig.Algorithm = RecursionAlgo.Prob;
             var scorer = new MultiReadMutationScorer(oldScorer.OriginalRegions, bases, tpl, scConfig);
+
             Func<Mutation, MutationScore> scoreMutation =
                 m => new MutationScore { Score = scorer.ScoreMutation(m), Mutation = m, Exists = true };
             double score;
