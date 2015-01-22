@@ -11,6 +11,14 @@ d = read.csv("homopolymerDeepDive5bpLong.csv")
 head(d)
 nrow(d)
 
+
+#Merge in SNR Data?
+snrD = read.csv("/Users/nigel/git/cafe-quality/NotTracked/master_full/master_5ba5286_combined_reads.csv")
+snrD = snrD[snrD$Reference=="HP.V1.02",]
+head(snrD)
+colnames(snrD)[colnames(snrD)=="ZMW"]<-"Zmw"
+
+
 ## Now to count how many subreads have null bases, this occurs if any of the following occurs
 # 1 - The subread could not align to the reference
 # 2 - The subread aligned, but the alignment did not overlap with the homopolymer13/59
@@ -19,6 +27,8 @@ bad = d$BaseCalls=="NULL"
 percMissing = sum(bad)/nrow(d) # less than 5%
 percMissing
 cb = function (x) sum(x == "NULL")/ length(x)
+
+
 
 
 # Create a set of only good data
@@ -54,10 +64,39 @@ for (i in 1:nrow(gd)) {
   res[i]= (nchar(s) - nchar(s2))
 }
 gd$NumC = res
-aggregate(NumC~Correct,gd,mean)
+aggregate(NumC~Correct, gd, mean)
 # FINISH DATA LOAD
 
+#Get mean C count for SNR
+cntD = aggregate(NumC~Correct+Zmw+ReverseComplementedOriginally, gd, mean)
+
+md = merge(cntD, snrD, by ="Zmw")
+nrow(cntD)
+nrow(md)
+
+head(md)
+md$MeanGC = .5 * (md$SnrG + md$SnrC)
+pdf("DeletionRatebySNRGC.pdf", width=7, height = 7)
+ggplot(md[md$NumSubReads>120,],aes(x=MeanGC,y=NumC,colour=ReverseComplementedOriginally))  + geom_point(alpha=.5) + geom_smooth(size=2) +theme_bw(base_size=14) +
+  labs(x="Mean G+C SNR", y = "Average number of C's from a 5 bp C homopolymer", title = "Deletion rate at different SNR levels" ) +
+  scale_colour_manual(values=c("red","black"), labels=c("G","C"),name=c("Read Direction"))
+dev.off()
+
+
+cntD2 = aggregate(Mean_MergeQV~Correct+Zmw, gd, mean)
+cntD3 = aggregate(NumC~Correct+Zmw, gd, mean)
+cntD2=merge(cntD2,cntD3)
+md2 = merge(cntD2, snrD, by ="Zmw")
+md2$MeanGC = .5 * (md2$SnrG + md2$SnrC)
+nrow(cntD2)
+nrow(md2)
+ggplot(md2[md2$NumSubReads>120,],aes(x=NumC,y=Mean_MergeQV))  + geom_point(alpha=.5) + geom_smooth(size=2) +theme_bw(base_size=14) +
+  labs(y="Mean MergeQV", x = "Average number of C's from a 5 bp C homopolymer", title = "Deletion rate at different SNR levels" ) 
 b=summary(gd$HPSizeGroup)
+
+y =lm(NumC~Mean_MergeQV + I(Mean_MergeQV^2), md2)
+summary(y)
+plot(y)
 b= data.frame(HPSize=factor(names(b), levels= c("Below -2","-2","-1","0","1","2","Above 2","SNP")) ,Count=b)
 ggplot(b,aes(x=HPSize,y=Count))+geom_bar(stat="identity")+theme_classic(base_size=16)
 

@@ -1,8 +1,9 @@
 library(ggplot2)
 setwd("/Users/nigel/git/cafe-quality/data")
-
+setwd("/Users/nigel/git/cafe-quality/NotTracked/master_full")
 #Section to plot the variant data.
-d = read.csv("variants_corrected.csv")
+d = read.csv("variants_nochange.csv")
+d = read.csv("master_5ba5286_all_variants.csv")
 head(d)
 #how many errors are G indels?
 ng = sum(d$type=="Indel" & d$homopolymerChar=="G" & d$indeltype == "Deletion" & d$homopolymerLength > 1)
@@ -13,16 +14,21 @@ ng = sum(d$type=="Indel")
 ng/nrow(d)
 
 cnts = aggregate(zmw~Ref+type,data=d,FUN=length)
-ggplot(data = cnts,aes(x=type,y=zmw)) + geom_bar(stat="identity") + facet_grid( . ~ Ref) +
-   labs(x="Error Type", y = "Count", title = "Errors by Reference") + theme_bw()
+#pdf()
+head(cnts)
+cnts = cnts[!(as.character(cnts$Ref)%in%c("lambda_NEB3011","SmrtBellSequence")),]
 
+pdf("ErrorsByReference.pdf",width=10,height=7)
+ggplot(data = cnts,aes(x=type,y=zmw, fill=type)) + geom_bar(stat="identity") + facet_grid( . ~ Ref) +
+   labs(x="Error Type", y = "Count", title = "Errors by Reference") + theme_bw(base_size=14)+scale_fill_manual(name="", guide=FALSE, values=c("blue","black"))
+dev.off()
 
 hp = d[d$Ref=="HP.V1.02",]
 cnts = aggregate(zmw~Pos+type, data=hp, FUN=length)
 cnts = cnts[order(-cnts$zmw),]
 head(cnts)
 ggplot(data = cnts, aes(x=Pos,y=zmw)) + geom_bar(stat="identity") +
-  labs(x="Position of Error on Refernce", y = "Count", title = "Error Count by Reference Location") + theme_bw()
+  labs(x="Position of Error on HP.V1.02 Reference", y = "Count", title = "Error Count by Reference Location") + theme_bw()
 
 ## Make plot of insertion/deletion frequeincy
 cntType = aggregate(zmw~indeltype+Pos, data=hp, FUN=length)
