@@ -47,7 +47,7 @@ if(useChemP6) {
   ### Retrained P6-C4 parameters
   v_lab = "- P6-C4 Chemistry"
   v_name = "qv_violin_p6c4.pdf"
-  matchVal = ### Retrained P6-C4 parameters
+  matchVal = ### Retrained P6-C4 parameters with mixed data set
     v_lab = "- P6-C4 Chemistry"
   v_name = "qv_violin_p6c4.pdf"
   matchVal = 0.139078334
@@ -62,9 +62,28 @@ if(useChemP6) {
                       Merge_G = c(0.281680286, -0.0718968958),
                       Merge_T = c(-0.717717707, -0.149290472))
   
+  if(TRUE) {
+    #Parameters using the fix_match_logit branch
+    v_lab = "- P6-C4 Chemistry"
+    v_name = "qv_violin_p6c4_fix_match_logit.pdf"
+    matchVal = 1
+    
+    delNVal = -2.70041752
+    recal = data.frame( Mismatch =c (-1.60920334, -0.0436339602), 
+                        Branch = c(-0.214696303, -0.030388),
+                        DeletionWithTag  = c(0.033560317, -0.065511629),
+                        Nce = c(-0.0559878,-0.0321),
+                        Merge_A =c ( 0.841557, -0.02275502),
+                        Merge_C = c( 0.0464521199, -0.0727610067),
+                        Merge_G = c(0.3760493, -0.0735563412),
+                        Merge_T = c(-0.641991913, -0.141830266))
+    
+    
+  }
+  
   
   #Original ones below 
-  if(TRUE) {
+  if(FALSE) {
     #p6_c4 parameters
     v_lab = "- P6-C4 Chemistry"
     v_name = "qv_violin_p6c4.pdf"
