@@ -1,0 +1,189 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Stylish Article
+% LaTeX Template
+% Version 2.0 (13/4/14)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Mathias Legrand (legrand.mathias@gmail.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[fleqn,10pt]{SelfArx} % Document font size and equations flushed left
+
+
+%----------------------------------------------------------------------------------------
+%	Source Code Listings
+%----------------------------------------------------------------------------------------
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{darkgreen}{rgb}{0.0, 0.2, 0.13}
+\definecolor{ao}{rgb}{0.0, 0.5, 0.0}
+\lstdefinestyle{sharpc}{language=[Sharp]C, frame=single}
+\lstset{% general command to set parameter(s)
+basicstyle=\small, % print whole listing small
+keywordstyle=\color{blue}\bfseries,
+% underlined bold black keywords
+commentstyle=\small\color{ao}, % white comments
+stringstyle=\ttfamily, % typewriter type for strings
+columns=fullflexible, % keeps the comments from exploding
+showstringspaces=false} % no special string spaces
+
+
+%----------------------------------------------------------------------------------------
+%	COLUMNS
+%----------------------------------------------------------------------------------------
+
+\setlength{\columnsep}{0.55cm} % Distance between the two columns of text
+\setlength{\fboxrule}{0.75pt} % Width of the border around the abstract
+
+%----------------------------------------------------------------------------------------
+%	COLORS
+%----------------------------------------------------------------------------------------
+
+\definecolor{color1}{RGB}{0,0,90} % Color of the article title and sections
+\definecolor{color2}{RGB}{0,20,20} % Color of the boxes behind the abstract and headings
+
+%----------------------------------------------------------------------------------------
+%	HYPERLINKS
+%----------------------------------------------------------------------------------------
+
+\usepackage{hyperref} % Required for hyperlinks
+\hypersetup{hidelinks,colorlinks,breaklinks=true,urlcolor=color2,citecolor=color1,linkcolor=color1,bookmarksopen=false,pdftitle={Title},pdfauthor={Author}}
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\JournalInfo{PBEP \#2, 2015} % Journal information
+\Archive{PBEP Series} % Additional notes (e.g. copyright, DOI, review/research article)
+
+\PaperTitle{PacBio Enhancement Proposal \#2 \\{\large Changing how merge QVs are used in secondary analysis}} % Article title
+
+\Authors{Nigel Delaney} % Authors
+
+\Keywords{} % Keywords - if you don't want any simply remove all the text between the curly brackets
+\newcommand{\keywordname}{Keywords} % Defines the keywords heading name
+
+%----------------------------------------------------------------------------------------
+%	ABSTRACT
+%----------------------------------------------------------------------------------------
+
+\Abstract{ Merge QVs need work. }
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\flushbottom % Makes all text pages the same height
+
+\maketitle % Print the title and abstract box
+
+\tableofcontents % Print the contents section
+
+\thispagestyle{empty} % Removes page numbering from the first page
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE CONTENTS
+%----------------------------------------------------------------------------------------
+
+\section*{Introduction} % The \section*{} command stops section numbering
+
+\addcontentsline{toc}{section}{Introduction} % Adds this section to the table of contents
+
+
+\subsection{What are Merge QVs?}
+The MergeQV value is created within the method that converts pulses into bases\footnote{Method: \texttt{ AnalyzeInsertClassify@PulseToBaseStream.cs:671}}.
+
+\lstset{style=sharpc}
+\begin{lstlisting}[frame=single]
+// The mergeQV is provided by the pulse caller
+mergeQV.Add(pulseMergeQV[i]);
+\end{lstlisting}
+
+Tracing further up it appears this value is set in \texttt{TraceToPulse:454} by this code:
+
+\lstset{style=sharpc}
+\begin{lstlisting}[frame=single]
+// The mergeQV is provided by the pulse caller
+// Pulse-call quality values
+mergeQvList.Add((byte) Math.Round(
+	Math.Min(Math.Max(pulse.MergeQV, 0.0f), 255f)) );
+
+\end{lstlisting}
+
+This seems to be mainly set in the FrameCrfClassiier\footnote{\texttt{FrameCrfClassifier.cs:600}}
+
+\lstset{style=sharpc}
+\begin{lstlisting}[frame=single, float=*]
+/// Estimate the quality score for a given segment's classification
+private float ComputeQualityValue(int label, int rhsLabel, int startFrame, int endFrame, out float mergeQv)
+{
+  // Probability of a miscall. If label=0, P(deletion).  
+  // Otherwise, includes P(insertion), based on comparison to the P(label=0) case.
+  var miscallProb = MiscallProb(label, rhsLabel, startFrame, endFrame);  
+
+  // Probability that the called pulse includes a merge error (label != 0 case);
+  // or, Probability that a No-Pulse region missed a short (single-frame) pulse.
+  var mergeOrMissProb = MergeOrMissProb(label, rhsLabel, startFrame, endFrame);  
+
+  if (label == 0)
+  {
+      mergeQv = LogPeToPhredQv(new LFloat(float.Epsilon)); 
+      return LogPeToPhredQv(miscallProb + mergeOrMissProb);
+  }  
+
+  // Otherwise, for a pulse label, return separate label and merge results
+  mergeQv = LogPeToPhredQv(mergeOrMissProb);
+  return LogPeToPhredQv(miscallProb);
+}       
+\end{lstlisting}
+
+%------------------------------------------------
+
+\section{Principled Arguments For MergeQV Improvements}
+
+
+
+\subsection{They make scoring complex}
+
+The ``Merge Move" in our template scoring routine is done in one of two distinct ways depending on if a DelTag is present.  With positions denoted by Figure \ref{fig:del}, a deletion move is currently scored according to the equation shown below.  
+
+\begin{figure}[ht]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
+\includegraphics[width=\linewidth]{Merge}
+\caption{Merge Scoring}
+\label{fig:del}
+\end{figure}
+
+\[
+ \alpha_{i-1,j-2}  +  \begin{cases}
+			\text{Merge score from } R_{i}  & \text{if }  R_{i} = T_{j} \text{ \& } R_{i} = T_{j-1} \\
+			\text{A constant (typically }-\infty\text{)} & \text{otherwise}
+			\end{cases}
+\]
+
+
+%------------------------------------------------
+
+\section{Empirical Arguments Against DelTags}
+
+
+%------------------------------------------------
+
+
+\section{Conclusions and Possibilities}
+
+
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

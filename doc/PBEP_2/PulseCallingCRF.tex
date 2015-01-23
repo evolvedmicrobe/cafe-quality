@@ -1,0 +1,969 @@
+% Theory of Operations for the trace CRF (pulse segmentation and classification)
+% Jim Labrenz
+% 2011-03-28
+
+\documentclass[10pt]{article}
+\usepackage{amssymb,amsmath}
+\usepackage{fancyhdr}
+\usepackage{textcomp}
+%\usepackage{showlabels}
+
+\pagestyle{fancy}
+\textheight 8.0in
+
+\rhead{\thepage}
+\cfoot{\small \textit{Pacific Biosciences Confidential \copyright~2011}}
+
+\newcommand{\half}{\frac{1}{2}}
+\newcommand{\ie}{\emph{i.e.}}
+\newcommand{\eg}{\emph{e.g.}}
+\newcommand{\etc}{\emph{etc}}
+\newcommand{\pkmid}{\emph{pkmid}}
+\newcommand{\pvecT}{\vec{p}_k^{\;T}}
+\newcommand{\erf}{\mbox{erf}}
+\newcommand{\cv}{{\small CV}}
+\newcommand{\dws}{{\small DWS}}
+\newcommand{\crf}{{\small CRF}}
+\newcommand{\tcrf}{Trace {\small CRF}}
+\newcommand{\hmm}{{\small HMM}}
+\newcommand{\zmw}{{\small ZMW}}
+\newcommand{\cmos}{{\small CMOS}}
+
+% Of interest to marketing
+\newcommand{\smrt}{{\small SMRT\texttrademark}}
+\newcommand{\theRS}{the PacBio\hspace{2 pt}\textit{RS}}
+\newcommand{\TheRS}{The PacBio\hspace{2 pt}\textit{RS}}
+
+\newcommand{\poissdist}[1]{\ensuremath{\text{Poisson}(#1)}}
+\newcommand{\normdist}[2]{\ensuremath{N(#1, #2)}}
+
+\DeclareMathOperator{\A}{A}
+\DeclareMathOperator{\C}{C}
+\DeclareMathOperator{\G}{G}
+\DeclareMathOperator{\T}{T}
+
+\newcommand{\fA}{\ensuremath{\text{\small{A}}}}
+\newcommand{\fC}{\ensuremath{\text{\small{C}}}}
+\newcommand{\fG}{\ensuremath{\text{\small{G}}}}
+\newcommand{\fT}{\ensuremath{\text{\small{T}}}}
+
+\newcommand{\pA}{\ensuremath{\text{a}}}
+\newcommand{\pC}{\ensuremath{\text{c}}}
+\newcommand{\pG}{\ensuremath{\text{g}}}
+\newcommand{\pT}{\ensuremath{\text{t}}}
+
+\title{Conditional Random Field Models for Pulse Segmentation and Classification in SMRT\texttrademark\ Sequencing Traces}
+\author{James Labrenz, Patrick Marks, and Phillip McClurg\\\\
+Primary Analysis Group\\
+Pacific Biosciences}
+
+\begin{document}
+\maketitle
+
+%======================================================================================================================
+\section{Introduction}
+%In this document we describe the conditional random field (\crf{}) model that is used pulse-calling performance of the \emph{TraceToPulse} classification algorithm.  We use the term ``\tcrf{}'' for the models that are used to segment and classify pulse regions in \smrt{} traces.
+
+The trace-to-pulse stage of the primary analysis pipeline for \theRS{} uses a conditional random field (\crf{}) algorithm to segment each trace from the single-molecule, real-time (\smrt{}) sequencing experiment into a corresponding list of classified pulses.
+We will refer to this process as \emph{pulse-calling}, because it is similar in nature to the usual notion of \emph{base-calling}, with the exception that correct identification of pulse events in the data that do not correspond to actual base incorporation (as well as those that do) is explicitly desired.  Refinement of the pulse list into a sequence of basecalls is deferred to a subsequent stage of analysis.
+
+\crf{}s offer a general framework for assigning label sequences to a set of observation sequences using a conditional probability model $p(\mathbf{Y}|\mathbf{x})$, where $\mathbf{x}$ is a particular observation sequence and $\mathbf{Y}$ is a set of random variables ranging over a corresponding label sequence.\footnote{Because we require real-time performance for inference, we limit the scope of our development to linear-chain CRFs.}  Once the model is established, inference is performed by assinging a label sequence $\mathbf{y^*}$ to a new observation sequence $\mathbf{x^*}$ by maximizing the conditional probability $p(\mathbf{y^*}|\mathbf{x^*})$~\cite{Lafferty,Wallach2004,Gupta}.
+
+In our case, the sequence of observations $\mathbf{x^*}$ is the sequence of frame observations that comprise the trace data from a single zero-mode wave-guide (\zmw), and the classifier functions by assigning a model state label to each frame of the trace.  
+Pulse boundaries (the segmentation) and analog identity (the classification) are inferred from this labeling.  We will refer to this particular application of the \crf{} formalism as the \emph{\tcrf};
+details of the training and inference algorithms that support the implementation can be found in~\cite{McClurg2009}.
+
+In this paper, we focus specifically on model design, with the practical goal of optimizing classifier performance.
+In Section~\ref{sec:model_design}, we briefly review the \crf{} formalism and introduce some essential features of the pulse-calling problem that
+(i) motivate our model-building strategy and
+(ii) inform on more optimal ways to define the hidden states that correspond to the output labels.
+Section~\ref{sec:signal_processing} provides an overview of prerequisite trace signal processing and parameter estimation steps. 
+(A complete description of the algorithms that are used for these purposes in the implementation is beyond our current scope, however.)
+These preliminary sections are intended to provide background for the core material on \tcrf{} design that follow.
+
+The ``state-dependent'' feature functions of the \crf, based on models of photo-emission and detection, are derived in Sections \ref{sec:photonics} and \ref{sec:photonics_dws}.
+The first of these develops the key elements of the physical system model and identifies the probability density function (pdf) for a trace observation conditional on a \crf{} model label; a set of feature functions computed on the camera trace observation is thereby obtained.
+The second develops the same model structure for the special case where the functions
+must be defined on a transformed trace representation---the dye-weighted sum (\dws)---when the original observations cannot be recovered.
+%
+%Then, there are two core sections that describe in detail the design of our \tcrf{} models.
+%Section \ref{sec:photonics} covers the development of ``state-dependent'' feature functions, based on the photonic detection model; and
+Section \ref{sec:kinetics} covers the structure of ``transition'' feature functions, based on a first-order model of enzyme-analog binding kinetics.
+In Section \ref{sec:discussion}, we discuss a number of open issues and potential avenues for further improvements.
+Detailed specifications of the \crf{} models used in particular software releases for \theRS{} are provided as appendices and are intended to complement internal design documentation.   
+
+\subsection{Notation}
+\label{sec:notation}
+\emph{Notation conventions described here.}
+
+%======================================================================================================================
+\section{CRF Model Design}
+\label{sec:model_design}
+
+The models we consider describe the optical detection of sequential pulse events, as obtained when the waveguide is loaded with a single template-poly\-merase complex that is performing the sequencing reaction.
+Although not strictly required by the formalism, the restriction to isolated (non-overlapping) pulse events will enable us to focus on efficient solutions that should deliver near-optimal performance for normal sequencing conditions, and allow us to use quality metrics after-the-fact to determine when this assumption is violated.
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{Standard formalism}
+The standard linear-chain \crf{} is written in a log-linear form,
+\begin{equation}
+\label{eq:crf_cond_prob}
+p(\mathbf{y}|\mathbf{x},\mathbf{\lambda}) = \frac{1}{Z(\mathbf{x})} \exp(\sum_j \lambda_j F_j(\mathbf{y},\mathbf{x})),
+\end{equation}  
+where
+\begin{equation}
+\label{eq:feat_func_form}
+F_j(\mathbf{y},\mathbf{x}) = \sum_{i=1}^n f_j(y_{i-1},y_i,\mathbf{x}).
+\end{equation}
+The classifier functions by assigning a model state label to each frame $i$ of the trace, where the labeling $\mathbf{y_*}$ minimizes the conditional probability of the model given the trace data $\mathbf{x_*}$, \ie,
+\begin{equation}
+\label{eq:arg_max}
+\mathbf{y_*} = \arg \max_\mathbf{y} p(\mathbf{y}|\mathbf{x_*}).
+\end{equation}
+This is the usual inference problem and is solved by the Viterbi algorithm.
+Pulse segmentation is determined using some established relationthip between the model state labels and the output (base) labels. Each pulse is characterized by a start frame, $t_S$ (the first frame of activity for the pulse), an end frame, $t_E$ (the first exluded frame \emph{after} the pulse), a base classification, and various signal or quality metrics.
+In the normal sequencing case, the classification is one of the four labels $\{\fA, \fC, \fG, \fT\}$, but the class of models we describe would in principle support an arbitrary number of output labels.
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{Approach to model building}
+\label{sec:principles}
+The standard log-linear form \eqref{eq:crf_cond_prob} of the \crf{} provides a great deal of latitude to the model builder.
+Although constrained by the Markov property \eqref{eq:feat_func_form}, a model can be otherwise arbitrarily complex in terms of functional form---including choice of categorical vs. ordinal features, degree of feature overlap, incorporation of neighboring observables, \etc.
+How do we identify appropriate feature functions and then select an optimal set for our application?
+
+Here, we leverage the fact that the linear-chain \crf{} and a Hidden Markov Model (\hmm) constitute a \emph{discriminative-generative pair} of graphical probability models~\cite{sutton_mccallum}.
+We start by constructing a generative model of the joint distribution $p(\mathbf{x},\mathbf{y})$, using physical models
+of the key subsystem components---namely, the enzyme kinetics, dye photophysics and photon detection.
+Our first-order physical model naturally factors as an \hmm, and thus the associated conditional distribution $p(\mathbf{y}|\mathbf{x})$ is a linear-chain \crf.  
+From this construction, we identify the feature functions of the generative model.\footnote{
+		We also determine their associated weights.  The CRF constructed this way would correspond to a fully-specified HMM (\ie, the \emph{trace HMM}), and require no training.
+}
+Through factoring, Taylor expansion, or other \emph{ad hoc} transformations, these functions then serve to generate a larger set of candidate feature functions, which are a basis for building a \tcrf{} with more degrees of freedom, 
+%These functions may then serve as generators of a ``basis set'' for feature functions, to construct a more complex \tcrf{},
+where feature weights will be optimized by the training algorithm, and no corresponding generative probability model is defined.
+
+To illustrate this concept, we review its basic elements in the pulse-calling context.  Let us consider a model with the label alphabet $\mathcal{Y} \in \{\epsilon, \fA, \fC, \fG, \fT\}$, which we now identify with hidden system states corresponding to the dye-labeled analog (or no analog) held captive by the polymerase complex in the illumination region of the waveguide, for the full duration of a frame aquisition period, $T$.
+For small $T$, we can model the physical state sequence of enzyme-analog activity as a Markov chain,
+\begin{equation}
+\label{eq:markov_chain_1}
+ p(\mathbf{y}) = \prod_i{p(y_{i-1}, y_i)},
+\end{equation}
+where
+\begin{equation}
+\sum_{y_i} p(y_{i-1}, y_i) = 1.
+\end{equation}
+The ``memoryless'' nature of the Markov chain model leads to the exponential distribution for the time duration of each state and provides a reasonable approximation to an enzymatic reaction with a single rate-limiting step. We return to this model and derive a specific form of the transition matrix in Section \ref{sec:kinetics}.
+
+Next, we make the following general observation about the emission-detection system:
+the measured photon count $x_i$ at each frame $i$, as dependent on the hidden waveguide state $y_i$, is expected to be i.i.d.
+That is to say, in general,
+\begin{equation}
+\label{eq:iid_photonics}
+p(\mathbf{x}|\mathbf{y}) = \prod_i p(x_i|y_i).
+\end{equation}
+The component models $p(x|y)$ are satisfied by distributions that follow from the fundamental physics of photon emission and the detection device.  We return to the design of photonics models in Section~\ref{sec:photonics}.
+
+These additional constraints on the system model---namely, component densities of the form \eqref{eq:markov_chain_1} and \eqref{eq:iid_photonics}---are the same independence assumptions made by the \hmm.
+The corresponding \tcrf{} follows from Bayes' rule,
+\begin{equation}
+\label{eq:bayes}
+p(\mathbf{y}|\mathbf{x}) p(\mathbf{x}) = p(\mathbf{x}|\mathbf{y}) p(\mathbf{y}) = \prod_i p(x_i|y_i) p(y_{i-1}, y_i),
+\end{equation}
+with the partition function of Equation \eqref{eq:crf_cond_prob} given by 
+\begin{equation}
+Z(\mathbf{x}) = p(\mathbf{x}) = \sum_{\mathbf{y}} p(\mathbf{x}|\mathbf{y}) p(\mathbf{y}).
+\end{equation}
+The feature functions and corresponding weights will be identified analytically by casting the model in its log-linear form,
+\begin{equation}
+p(\mathbf{y}|\mathbf{x}) = \frac{1}{Z(\mathbf{x})} \exp(\sum_{i=1}^n (\log p(x_i|y_i) + \log p(y_{i-1}, y_i))).
+\end{equation}
+So, we answer the first part of our original question (how do we identify appropriate feature functions?) by following the generative $\rightarrow$ discriminative prescription outlined above.  We comment further on the second part (how do we select an optimal set?) in Section \ref{sec:discussion}. 
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{Structure of the hidden state space}
+\label{sec:state_space}
+In the previous section, we introduced the simplest structure for the hidden states,
+$\mathcal{Y} \in \{\epsilon, \fA, \fC, \fG, \fT\}$. 
+We call this a \emph{full-frame} \tcrf{} model, because it inherently makes a \emph{synchronized pulse} approximation: each frame in the trace is either ``fully occupied'' (an  analog is captive in the illumination region and contributes light for the duration of the frame acquisition), or ``unoccupied'' (the frame observation came from background light). 
+The classifier, which can only identify transitions at frame boundaries, in general will produce a pulse stream satisfying, for pulse number $k$,
+\begin{equation}
+t_E^{(k)} \le t_S^{(k+1)}. \label{eq:pulse_bounds}
+\end{equation}
+
+But, this is true only if we include ``unoccupied'' segments in the output stream.
+More conventionally, we include just the analog-labeled segments as pulses; then \eqref{eq:pulse_bounds} holds strictly only for label-changing transitions.  In homopolymer regions, the full-frame model implies
+\begin{equation}
+t_E^{(k)} < t_S^{(k+1)},
+\end{equation}
+because to start a new pulse of a given label, the model must transition in and out of the $\epsilon$ state for at least one frame.
+The reduction in resolving power for homopolymer vs. non-homopolymer regions is a limitation of the full-frame \crf{} state model,
+particularly when reation rates approach the instrument sampling rate.
+%is one indication of a fundamental problem with the full-frame state model.
+%Any \crf{} of this type will inherently be prone to certain types of systematic error, because
+%the model is fundamentally at odds with the constraint of a finite sampling rate.
+
+%----------------------------------------------------------------------------------------------------------------------
+%\subsection{Subframe state-space models}
+%\label{sec:subframe_models}
+
+To address the pulse synchronization error, we will extend the state model to include states of partial occupation,
+where the unkown occupation fraction is ``integrated out.''  This \emph{subframe} state model will therefore contain nine states:  $\mathcal{Y} \in \{\epsilon, \pA, \fA, \pC, \fC,...\}$, where lower-case labels identify a partial-occupation condition by the analog of the full-frame (upper case) label.  In the sections that follow, the density and feature functions for the subframe \crf{} are developed together with those for the full-frame model.
+
+%In any ZMW, we assume that the mean flux at the detector of photons emitted from a captive dye-labeled analog is a stationary value.  For dye species $k$, we introduce a model parameter $\hat{a}_k$, representing the full-frame (or mid-pulse) amplitude observed in the dye-weighted-sum (\dws) trace channel $k$.
+%A ``partially occupied'' frame is observed when an analog is held captive for for some fraction $0 < \xi < 1$ of the acquisition period $T$.
+%This state would generate an amplitude model that is the corresponding fraction of the full-frame model, \ie, $\xi a_k$.\footnote{Here we are making the additional assumption that only one base state is involved in the partial occupation.}  
+%A partially occupied frame cam be viewed as a state whose amplitude model would be some fraction $0 < \xi < 1$ of the full-frame model, \ie, $\xi a_k$.\footnote{Here we are making the additional assumption that only one base state is involved in the partial occupation.}
+
+%To obtain the subframe \crf{}, we effectively ``integrate out'' the unknown occupation fraction, and define additional fractional-frame states $\{\pA, \pC, \pG, \pT\}$, to represent a frame of partial occupation at \emph{any} fractional value, corresponding to the original full-frame states.
+%The subframe state model therefore contains nine states:  $\mathcal{Y} \in \{\epsilon, \pA, \fA, \pC, \fC,...\}$.  In the sections that follow, feature functions for the subframe \crf{} will be developed in tandem with those for the full-frame model, since they follow as a natural extension.
+
+%======================================================================================================================
+\section{Preliminary Signal Processing}
+\label{sec:signal_processing}
+Feature functions derived in the following sections follow from a model of the emittor-detector system.  Generally, the physical model leads to parameterized functions.  The full-occupation amplitudes $\hat{a}_k$ are examples of such parameters; others include channel mean background levels and covariances.  These feature function parameters are distinct from the trained weights $\mathbf{\lambda}$ of the \crf{}.  They must be provided to the model on a per-waveguide basis, because they can vary significantly over a sequencing chip and from one experiment to the next.
+
+Details of the signal processing algorithms that deliver parameter estimates to the \crf{} are outside our current scope.
+However, we find it useful to introduce the basic concepts of trace processing, in order to clearly frame the problem of deriving the feature functions. 
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{Spectral response matrix}
+\label{sec:spectral_response}
+
+The system achieves base discrimination by correlating the spectral signature of trace measurements with known signatures from each of the fluorescent dye labels.  In principle, a detector can achieve spectral separation in a number of ways, but the specific mechanism will not impact our analysis.  Without loss of generality then, we refer to the detector channels that isolate distinct spectral bands as \emph{cameras}.
+
+The spectral response matrix $p_{kj}$ quantifies the relative intensity (above mean background) that is measured in camera $j$ when dye-label $k$ is the sole emittor in the waveguide.  We also introduce the notation
+\begin{equation}
+p_{kj} \equiv (\vec{p}_k)_j, 
+\end{equation}
+where $\vec{p}_k$ is the response of dye $k$ written as a column-vector, and we adopt the normalization convention
+\begin{equation}
+\label{eq:spectra_norm}
+\sum_j (\vec{p}_k)_j = 1, \forall k.
+\end{equation}
+Defining $n_D$ to be the number of dyes (for our purposes, usually four) and $n_C$ to be the number of cameras, we require a detection system with
+\begin{equation}
+n_C \geq n_D.
+\end{equation} 
+
+In \theRS, $n_C = 4$, and the spectral response $p_{kj}$ is generated as a function of waveguide number (position on the chip) as part of the instrument calibration procedure.  In general, the best approach for estimating these values will depend on details of the system specification.  If necessary, for example, they could be estimated or optimized on-the-fly for each waveguide analysis.
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{Baseline estimation and subtraction}
+\label{sec:baselining}
+Let $\vec{x}_i$ denote the camera trace observation at frame $i$.
+(To simplify the notation in Section \ref{sec:model_design}, we used $x_i$ to identify this sequence.)
+Each observation is a vector quantity in an $n_C$-dimensional space. 
+Equivalently, let $x_{ij}$ denote the estimated photon count from the $j$\textsuperscript{th} camera at the $i$\textsuperscript{th} frame. 
+ 
+We now stipulate that the mean background intensity (or, \emph{baseline bias}) is estimated and subtracted from the $\vec{x}_i$ as a trace pre-conditioning step.
+There is no loss of generality, and the transformation helps clarify the model construction and simplify its implementation in code.
+In \theRS, our baseline algorithm computes a non-stationary bias $b_j(t)$ and produces a uniform variance estimate for each channel.\footnote{
+	This should be a reasonable approximation when variation in the bias is expected to be small.
+	If necessary, a non-stationary variance estimate could parameterize the \crf as a function of frame number.}
+With baseline subtraction,
+\begin{equation}
+\label{eq:baseline_subtraction}
+x_{ij} \leftarrow x_{ij} - b_j(iT),
+\end{equation}   
+and our data model for a waveguide with no pulse activity is given by
+\begin{equation}
+x_{ij} \sim \normdist{0}{\sigma_j^2}.
+\end{equation}
+The choice of a normal distribution to model the random error in trace observations is justified in practice for \theRS{} in Section~\ref{sec:photonics}.  In general, our approach to \crf{} model design can accommodate other noise models.
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{Pulse amplitude estimation}
+\label{sec:amplitude_model}
+The \emph{signal} is light emitted by one or more dye-labeled analogs trapped in the illumination region. 
+For any waveguide, we assume that the mean photon flux comprising signal from a single molecule of species $k$, incident at the detector (\ie, all cameras), is a stationary value.
+We introduce the model parameter $\hat{a}_k$, which represents the integrated flux, spatially over camera pixels, over all cameras, and for the full duration $T$ of a frame acquisition; it has units of photo-electron count.
+
+For a pulse in channel $k$ which persists for three or more frames, $\hat{a}_k$ models the amplitude above baseline of the interior frames in the corresponding \dws{} trace; we refer to it as the \emph{pkmid} (pronounced \emph{p-kay-mid}) of the channel.  
+Similarly, a ``partially occupied'' frame is observed when an analog emits signal for some fraction $0 < \xi < 1$ of the acquisition period $T$.
+From the stationarity assumption, this state generates an amplitude model that is the corresponding fraction of the full-frame model,\footnote{
+	Here we are making the additional assumption that only one base state is involved in the partial occupation of the frame.}
+\begin{equation}
+\label{eq:partial_amplitude_model}
+a_k = \xi \hat{a}_k.
+\end{equation}
+In the subframe \crf{}, we integrate out the unknown occupation fraction.
+Therefore, the only parameter that must be supplied to the model is the flux, or alternatively $\hat{a}_k$. 
+
+For each waveguide, the $\hat{a}_k$ must be estimated by some \emph{ad hoc} means.  Our algorithm relies on an initial detection of pulse activity.  Frames in each region of activity are selected based on spectral purity of the region, position in the pulse, and signal/noise characteristics.  An estimate of $\hat{a}_k$ is computed as the mean \dws{} trace value in channel $k$ over frames that pass the filters.
+
+%======================================================================================================================
+\section{Photonic Detection Models}
+\label{sec:photonics}
+In this section we derive the pdf for the detection of photons from a Poisson emittor, for both the full-frame and subframe \crf{} models.  Our  discussion pertains to the \cmos{} sensor, but the approach is general and could be applied to sensor types with other noise models. The detection pdf leads to candidate feature functions for the corresponding \crf{} classifier.
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{The CMOS sensor}
+\TheRS{} employs a \cmos{} sensor for photon detection.  For any instrument of this type, the read-out in camera $j$, given an incident mean light level $Z_j$ from one or more Poisson emittors, will consist of a photo-electron contribution, $C_1$, and a read-noise contribution, $C_2$.  The trace observation can be modeled as
+\begin{equation}
+\label{eq:trace_obs_model}
+x_j = C_1(Z_j) + C_2(r_j),
+\end{equation}
+where $r_j$ denotes the read-noise from camera $j$, and $C_1$ and $C_2$ are sampled from Poisson and Normal distributions respectively:
+\begin{subequations}
+\begin{align}
+C_1(Z_j) &\sim \poissdist{Z_j} \label{eq:cmos_photon}\\
+C_2(r_j) &\sim \normdist{0}{r_j^2}. \label{eq:cmos_read}
+\end{align}
+\end{subequations}
+
+The trace datum $x_j$ modeled by \eqref{eq:trace_obs_model} is produced from real-time image processing, and each observation is computed as a weighted sum over multiple pixels~\cite{Gehman2010}.  With an effective integration area $\approx 10$ pixels and a mean background level $\gtrsim 1$ photo-electron/pixel, the minimum photo-electron count contributing to any observation is
+$
+Z_j^{\min} \gtrsim 10.
+$
+Even at this relatively low count, the Poisson distribution is well approximated as Gaussian.
+Therefore, we will replace the signal model \eqref{eq:cmos_photon} with
+\begin{equation}
+C_1(Z_j) \sim \normdist{Z_j}{Z_j}.
+\end{equation} 
+After background subtraction (see Section \ref{sec:baselining}), the model for a camera trace observation is
+\begin{equation}
+\label{eq:trace_data_model}
+x_j \sim \normdist{\mu_j}{\sigma_j^2},
+\end{equation}
+where
+\begin{subequations}
+\label{eq:sensor_model}
+\begin{align}
+\sigma_j^2 &= r_j^2 + Z_j \label{eq:sensor_error}\\
+Z_j &= B_j + \mu_j. \label{eq:sensor_signal}
+\end{align}
+\end{subequations}
+The mean background $B_j$ is removed from the camera trace datum $x_j$ in the baseline subtraction operation \eqref{eq:baseline_subtraction}.  The factor $\mu_j$ represents the mean signal in camera $j$ for the system state sampled by the measurement.
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{Density function for single-molecule detection}
+%Let $\vec{x}$ be the observed intensities at a single frame in the camera trace.
+%In the following discussion, we make the assumption that $\vec{x}$ and related quantities are background-subtracted---\ie{}, the mean background bias in each channel has already been removed.
+
+In the single-molecule assumption, fluorescence signal from the waveguide is either absent, or it is emitted from a single captive analog.
+We label these conditions as $k \in \{0,1,...,n_D\}$, where non-zero integers index the signal states.
+A single Poisson emittor contributing light to each camera at a constant mean flux can be modeled as $n_C$ independent emittors.
+Therefore, from \eqref{eq:trace_data_model}, the pdf for observing the camera trace value $\vec{x}$ is a multivariate normal distribution, with a diagonal covariance matrix $V$:
+%For the \cmos{} sensor model \eqref{eq:trace_data_model}, we write the pdf for observing the camera trace value $\vec{x}$ as
+\begin{equation}
+\label{eq:detect_pdf}
+f(\vec{x}|k,\vec{\mu}_k) \sim e^{-\half(\vec{x}-\vec{\mu}_k)^T V^{-1} (\vec{x}-\vec{\mu}_k)}.
+\end{equation}
+%where $V$ is the covariance matrix for sensor measurement error \eqref{eq:sensor_error} in the cameras.
+
+Following the discussion in Sections \ref{sec:spectral_response} and \ref{sec:amplitude_model}, we write the model coefficients $\vec{\mu}_k$ as
+\begin{equation}
+\vec{\mu}_k = a_k \vec{p}_k.
+\end{equation}
+For $k\neq0$, $\vec{p}_k$ and $a_k$ are the dye spectral response and signal intensities respectively.
+Otherwise, $a_0 \equiv 0$, and we may assign $\vec{p}_0 \equiv \text{diag}(\boldsymbol{1})$ to complete the notation.
+%Consistent with the normalization convention \eqref{eq:spectra_norm}, from the sensor model we have the identity
+%$$
+%\mu_j = a_k p_{kj}.
+%$$
+
+From the amplitude model (Section \ref{sec:amplitude_model}), frame ``occupation'' by one of the four analogs leads to the model parameter $a_k = \xi \hat{a}_k$, where $\xi$ is the fraction of the frame collection period during which the dye molecule persists in the illumination region.  
+%For example, under the assumption that pulses in dye channel $k$ are of uniform amplitude, we write $a_k = \hat{a}_k$, where $\hat{a}_k$ are the best estimate of the pulse \emph{pkmid} values.
+%Typically, we assume that the dye spectra are known by some prior calibration but that \emph{pkmid} values will vary substantially by ZMW and may also vary slowly over time (i.e., from frame to frame).
+%Hence, estimates of the $\hat{a}_k$ are typically made as part of the trace analysis prior to pulse classification.
+%In addition, individual trace measurements may capture a pulse event that occupies only a fraction of a frame.
+%As we discuss below, this will motivate an extension to the basic ``minimal state-space'' \crf{}.
+To focus attention on the amplitude model, we re-write \eqref{eq:detect_pdf} as
+\begin{equation}
+\label{eq:detect_pdf_2}
+f(\vec{x}|k,a_k) \sim e^{-\half(\vec{x}-a_k\vec{p}_k)^T V^{-1} (\vec{x}-a_k\vec{p}_k)}.
+\end{equation}
+The occupation fraction $\xi$ implies a continuum of possible states for each analog, with amplitude in $[0,\hat{a}_k]$.
+In general though, for any distribution of amplitude values $f(a)$, we can integrate out this degree of freedom to define a single pdf associated with the analog occupation state:
+\begin{equation}
+f_k(\vec{x}) \equiv f(\vec{x}|k) = \int{da_k f(\vec{x}|k,a_k) f(a_k)}. \label{eq:detect_pdf_3}
+\end{equation}
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{The dye-weighted sum trace representation}
+\label{sec:dws}
+%In \smrt{} trace analysis, we frequently make use of the \emph{dye-weighted sum} (\dws{}) trace representation.  The quantity $s_k$ %denotes the \dws{} for dye channel $k$ on the measurement $\vec{x}$ made at some frame. In a typical sequencing trace, there are four %channels, $k \in \{1,2,3,4\}$, and each $s_k$ is the optimal estimate of the number of photons emitted by dye $k$, under the %assumption that dye $k$ is the sole emittor during the measurement.
+The \dws{} value $s_k$ is the maximum-likelihood estimate of the unknown emission intensity $a_k$, for $k \in \{1,...,n_D\}$.
+In other words, it is the best estimator of integrated signal flux, under the assumption that species $k$ is the sole emittor during the measurement.
+The \dws{} trace representation consists of the four separate estimates  packaged in a multi-channel trace observation $\vec{s}$, where~\cite{Gehman2010}
+\begin{equation}
+\vec{s} \equiv A^T \vec{x}, \label{eq:dws_def}
+\end{equation}
+and
+\begin{equation}
+A^T_{ki} \equiv \frac{(\vec{p}_k)_i / \sigma^2_i}{\sum_j{(\vec{p}_k)_j^2/\sigma_j^2}}. \label{eq:dws_weight_def}
+\end{equation}
+In equation \eqref{eq:dws_weight_def}, the $\sigma_i^2$ are the elements of the (diagonal) covariance matrix $V$ in the camera representation:
+\begin{equation}
+V_{ij} = \sigma_i^2 \delta_{ij}. \label{eq:cam_covar}
+\end{equation}
+Note that the $k^{\mbox{\tiny th}}$ column of $A$ is the weight vector, which when dotted with the camera trace measurement $\vec{x}$ produces the $k^{\mbox{\tiny th}}$ \dws{} channel $s_k$.
+
+For use in the following sections, we define the covariance matrix in the \dws{} representation,
+\begin{equation}
+V_s = A^T V A, \label{eq:dws_covar}
+\end{equation}
+and the related quantity
+\begin{equation}
+\Sigma_k^2 = (\pvecT V^{-1} \vec{p}_k)^{-1}. \label{eq:dws_var}
+\end{equation}
+Using equations (\ref{eq:dws_weight_def}--\ref{eq:dws_var}), it is straightforward to show that 
+\begin{equation}
+\label{eq:dws_var_identity}
+(V_s)_{ki} = \Sigma^2_k \Sigma^2_i \left( \pvecT V^{-1} \vec{p}_i \right),
+\end{equation}
+and therefore,
+\begin{equation}
+\Sigma_k^2 = (V_s)_{kk},
+\end{equation}
+\emph{i.e.}, the quantities $\Sigma_k^2$ defined by equation \eqref{eq:dws_var} are the diagonal entries of the \dws{} covariance matrix.  (Note that in the \dws{} representation, the covariance matrix $V_s$ is \emph{not} diagonal.)
+Finally, using the notation $p_{ki} \equiv (\vec{p}_k)_i$ and equations \eqref{eq:cam_covar} and \eqref{eq:dws_var}, note that
+\begin{equation}
+\Sigma_k^2 \left[\pvecT V^{-1}\right]_i = \frac{p_{ki} / \sigma^2_i}{\sum_j{p_{kj}^2/\sigma_j^2}} = A^T_{ki}. \label{eq:dws_weight_id}
+\end{equation}
+Therefore, we have the identity
+\begin{equation}
+s_k = \Sigma_k^2 \pvecT  V^{-1} \vec{x}. \label{eq:dws_identity}
+\end{equation}
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{The full-frame density function}
+\label{sec:full_frame_density}
+Our standard \crf{} model uses the state labeling $\{\epsilon,\fA,\fC,\fG,\fT\}$, corresponding to state indices $k\in\{0,1,...,4\}$.
+(The assignment of indices to analogs is, of course, arbitrary.)
+%Our standard \crf{} models assumes that we will label each frame as one of the four dye labels or as \emph{not-a-pulse}, corresponding to those frames when no analog is held by the enzyme. We label this set of states as $\{\epsilon,\fA,\fC,\fG,\fT\}$.
+%Segmentation of a pulse region is accomplished by analyzing a consecutive section of frames labeled by the \crf{}; transitions between labels delineate the pulse boundaries.
+The model builds in the assumption that a single frame observation is either ``fully occupied'' by one and only one of the four analogs, or otherwise ``unoccupied.''
+Therefore, for each state,
+\begin{equation}
+\label{eq:full_amp_density}
+f(a) = \delta(a - \hat{a}),
+\end{equation}
+where $\hat{a}_0 \equiv 0$, and for $k\neq 0$, the $\hat{a}_k$ are the amplitude \emph{pkmid} values introduced in Section \ref{sec:amplitude_model}.
+%\footnote{
+%	In practice, the model parameters are satisfied by \emph{a priori} estimates made for each wave\-guide.
+%	To lighten the notation, we do not distinguish here between the the model parameters and their estimators.}
+Using equations \eqref{eq:detect_pdf_2} and \eqref{eq:detect_pdf_3}, and restoring the normalization factor, we have the density function
+\begin{equation}
+f_k(\vec{x}) = \frac{1}{|2\pi V|^\half} \; e^{-\half(\vec{x}-\hat{a}_k\vec{p}_k)^T V^{-1} (\vec{x}-\hat{a}_k\vec{p}_k)}, 	\label{eq:full_density}
+\end{equation}
+where $|M| \equiv \det M$.
+
+In practice, it is often useful to work in terms of ``sigma-normalized'' quantities.
+We therefore define the normalized \dws{} value and corresponding model parameter
+\begin{subequations}
+\label{eq:sigma_normalization}
+\begin{align}
+		\varsigma &= s/\Sigma,\\
+		\alpha &= a/\Sigma.
+\end{align}
+\end{subequations}
+To obtain a convenient form for identifying feature functions, 
+we use \eqref{eq:dws_var} and \eqref{eq:dws_identity} to re-factor the exponent.
+After completing the square, the full-frame density can be written as
+\begin{equation}
+\label{eq:full_density_cam}
+f_k(\vec{x}) = \frac{1}{|2\pi V|^\half} \; e^{-\half(\vec{x}^{\;T} V^{-1} \vec{x} - \varsigma_k^2) -\half(\hat{\alpha}_k - \varsigma_k)^2}.
+\end{equation}
+
+Finally, since the dye-weighted trace values $\vec{s}$ are a function of the camera trace values $\vec{x}$, it is useful to re-write the photonics density function in terms of the \dws{}, in the event that the camera trace values are unavailable. In the transformation of variables $\vec{s} = A^T\vec{x}$, the corresponding function $f_k(\vec{s}|k,a_k)$ must be multiplied by the jacobian, $|d\vec{x}/d\vec{s}| = |(A^T)^{-1}|$. Therefore, using equation \eqref{eq:dws_covar}, we have the corresponding density function over the \dws{} variables,
+\begin{equation}
+f_k(\vec{s}) = \frac{1}{|2\pi V_s|^\half} \; e^{-\half(\vec{s}^{\;T} V_s^{-1} \vec{s} - \varsigma_k^2) -\half(\hat{\alpha}_k - \varsigma_k)^2}. 	\label{eq:full_density_dws}
+\end{equation}
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{Feature function factorization}
+In Section \ref{sec:principles}, we outlined the strategy for \crf{} model building:
+define a generative model of the system and then cast it into the form of the \crf.
+The feature functions defined by the \hmm{} construction can be factored or modified to meet specific design goals;
+weights for the new or expanded feature set are determined in the training process.
+%The resulting feature functions provide a basis to form, perhaps, a more generalized model, and the weights of this model are determined in the training process. 
+
+Feature functions for earlier \tcrf{} models were developed based on heuristics~\cite{McClurg2009}.
+For example, it makes sense to construct a feature function using chi-squared of the spectral fit,
+to identify which of $n_D$ possible dyes match the observation.
+And it makes sense to leverage the amplitude model, to distinguish signal from background and possibly to further discriminate analog states based on differences in their \emph{pkmid} values.
+This is a valid approach in the \crf{} context, but it can lead to non-trivial questions.  For example, for the state $k=0$, what function should balance the chi-squared computed for $k\neq 0$?
+
+In this section, we make a connection between heuristic metrics used in the earlier full-frame models and a particular factorization of the feature function derived from the photonics pdf \eqref{eq:full_density}.
+Consider the feature function defined as
+\begin{equation}
+g_k(\vec{x}) \equiv \log f_k(\vec{x}) - \mbox{const} = -\half (\vec{x}-\hat{a}_k\vec{p}_k)^T V^{-1} (\vec{x}-\hat{a}_k\vec{p}_k). \label{eq:full_feature}
+\end{equation} 
+For the model term $\hat{a}_k$, we are free to write
+\begin{equation}
+\hat{a}_k = s_k + (\hat{a}_k - s_k), \label{eq:pkmid_iden}
+\end{equation}
+where $s_k$ is defined by \eqref{eq:dws_def}.  Substituting \eqref{eq:pkmid_iden} into \eqref{eq:full_feature}, we have
+\begin{subequations}
+\label{eq:eq:ff_factored}
+\begin{align}
+2g_k(\vec{x}) = &-(\vec{x}-s_k\vec{p}_k)^T V^{-1} (\vec{x}-s_k\vec{p}_k) \label{eq:ff_chisquared}\\
+						    &-(\hat{a}_k - s_k)^2/\Sigma_k^2 \label{eq:ff_amplitude}\\ % \vec{p}_k^{\;T} V^{-1} \vec{p}_k (\hat{a}_k - s_k) 
+						    &+ 2(\hat{a}_k - s_k) \vec{p}_k^{\;T} V^{-1} (\vec{x}-s_k\vec{p}_k). \label{eq:ff_remainder}
+\end{align}
+\end{subequations}
+
+Comparing this expression with feature functions used in the full-frame model in~\cite{McClurg2009},
+the term \eqref{eq:ff_chisquared} is the $\chi^2$ metric on which chi-squared features ($k\neq 0$) are based,
+and the term \eqref{eq:ff_amplitude} is a corresponding metric for pulse amplitude features.
+%to construct feature functions in earlier \tcrf{} models,  
+%and the term \eqref{eq:ff_amplitude} is the metric used in a full-frame amplitude model. 
+%in various forms in trace-to-pulse \emph{chi-squared} feature functions.  And, the term \eqref{eq:ff_amplitude} corresponds to a full-frame pulse \emph{amplitude model}, variations of which have been tried in \crf{} models to help discriminate between the dyes excited by a single laser (\emph{e.g.}, for the Fab-4.12 dye set, where $a_0 \simeq 2a_1$ and $a_2 \simeq 2a_3$).
+But, the cross term \eqref{eq:ff_remainder} indicates that we exclude in this case a factor from the generative photonics density function.
+Again, we are free to pursue the heuristic approach, because the \crf{} training will normalize the conditional density globally; but we make this comparison to illustrate that the functional form may be sub-optimal and the model may not generalize as well under a change of parameters.
+
+%However, the additional term \eqref{eq:ff_remainder} indicates that a \crf{} that includes just the chi-squared and amplitude feature functions will incorrectly exclude a cross term that is contributed by the photonics pdf of equation \eqref{eq:full_density}.
+%There are two fundamental issues, then, that we seek to address in a modified \crf{} model:
+%\begin{itemize}
+%\item
+%Avoid \emph{ad hoc} elimination of terms from the photonics pdf.  For the full-frame case, for example, we derive feature functions directly from the density function as expressed by equation \eqref{eq:full_density_cam}.
+%\item
+%Address the problem that arises due to ``fractional frame'' observations. We discuss the fractional frame problem in the next section.
+%\end{itemize}    
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{The subframe density function}
+\label{sec:subframe_photonics}
+
+%The possibility of acquiring a frame that represents a partial ``on'' state (\ie, light is emitted by an analog for less than 100\% of the frame collection period) presents a problem for the standard \crf{} described in Section \ref{sec:full_frame_density}.
+%Two base incorporation events from a homopolymer region may be separated by an \emph{off} time that is less than the duration of a single frame.
+%In this case, frame observations inside the pulse region will be separated by one or two of these ``fractional frame'' observations.  %The photonics model of equation \eqref{eq:full_density} does not correctly model these states, since the observed amplitude $a_k$ will be somewhere between zero and the \emph{pkmid} of the appropriate dye model: $0 < a_k < \hat{a}_k$.
+
+In Section \ref{sec:state_space} we identified a systemic problem with the full-frame state model, which we now re-phrase in light of the model's detection features:
+%This presents a problem for the \crf{}:
+In order to correctly call two consecutive $\fA$ pulses that are separated by a partial-frame ``off'' transition, we must coerce the \crf{} (perhaps by some \emph{ad hoc} means) to label the partially-occupied frame as $\epsilon$.
+However,
+%with respect to the photonics contribution to the \crf{},
+this requirement is generally at odds with labeling an isolated sub-frame event as $\fA$, somewhere else in the trace, when it has the same photonic signature.
+
+%In order to solve the fractional frame problem,
+In the subframe extension,
+we add the four additional states $\{\pA, \pC, \pG, \pT\}$ to represent partial frame occupation by an analog of the corresponding full-frame (upper-case) state.
+%These states, which we label $\{sA, sC, sG, sT\}$, represent a frame observation where the analog was held in the excitation region for some fraction of the frame collection period.
+Based on the amplitude model \eqref{eq:partial_amplitude_model}, and because pulse synchronization error is random,
+the amplitude density is uniform:
+%we assume a uniform density $f(a_k)$,
+\begin{equation}
+\label{eq:amplitude_pdf}
+f(a_k) = \left\{
+		\begin{array}{ll}
+		1/\hat{a}_k & 0 \leq a_k \leq \hat{a}_k \\
+		0 & \mbox{otherwise.}
+		\end{array} \right. 
+\end{equation}
+Using \eqref{eq:amplitude_pdf} in equation \eqref{eq:detect_pdf_3}, we arrive at the sub-frame density function
+\begin{equation}
+\label{eq:sub_density}
+f_k(\vec{x}) \sim \int_0^{\hat{a_k}}{da_k e^{-\half(\vec{x}-a_k\vec{p}_k)^T V^{-1} (\vec{x}-a_k\vec{p}_k)}}. 
+\end{equation}
+%
+%We define the quantities
+%\begin{equation}
+%\Sigma_k^{-2} = \pvecT V^{-1} \vec{p}_k, \label{dwsVariance}
+%\end{equation}
+%and
+%\begin{equation}
+%s_k(\vec{x}) = \Sigma_k^2 \pvecT  V^{-1} \vec{x}. \label{eq:dws_identity}
+%\end{equation} 
+%Since we are working in camera space, the covariance matrix $V$ is diagonal:
+%\begin{equation}
+%V_{ij} = \sigma_i^2 \delta_{ij}.
+%\end{equation}
+%Therefore, using the notation $p_{ki} \equiv (\vec{p}_k)_i$,
+%\begin{equation}
+%\Sigma_k^2 \left[\pvecT V^{-1}\right]_i = \frac{p_{ki} / \sigma^2_i}{\sum_j{p_{kj}^2/\sigma_j^2}} = A^T_{ki}. \label{eq:dws_weight_id}
+%\end{equation}
+%By comparing equations \eqref{eq:dws_identity} and \eqref{eq:dws_weight_id}, note that the quantity $s_k(\vec{x})$ defined by equation \eqref{eq:dws_identity} is the dye-weighted sum for dye $k$.  Similarly, the covariance matrix in the dye-weighted representation, $V_s = A^TVA$, can be written as
+%\begin{equation}
+%(V_s)_{ki} = \Sigma^2_k \Sigma^2_i \left( \pvecT V^{-1} \vec{p}_i \right).
+%\end{equation}
+%Therefore, using \eqref{dwsVariance},
+%\begin{equation}
+%\Sigma_k^2 = (V_s)_{kk}
+%\end{equation}
+%(\emph{i.e.}, the quantity $\Sigma_k$ defined by equation \eqref{dwsVariance} corresponds to the diagonal entry of the \dws{} covariance matrix).  We now define the ``sigma-normalized'' quantities (temporarily dropping the $k$ subscript)
+%\begin{align*}
+%		\varsigma &= s/\Sigma,\\
+%		\alpha &= a/\Sigma.
+%\end{align*}
+%
+Using the same substitution of terms that led from equation \eqref{eq:full_density} to equation \eqref{eq:full_density_cam}, and making the change of variables $z = (a-s)/\Sigma$,  the sub-frame density function becomes
+\begin{equation}
+\label{eq:sub_density_2}
+f_k(\vec{x}) \sim \Sigma_k \; e^{-\half (\vec{x}^{\:T} V^{-1}\vec{x} \:-\: \varsigma_k^2)} \int_{-\varsigma_k}^{\hat{\alpha}_k-\varsigma_k}{dz\: e^{-\half z^2}}. 
+\end{equation}
+Restoring the normalization factors, we find
+\begin{equation}
+\label{eq:sub_density_cam}
+\begin{split}
+f_k(\vec{x})& = \frac{1}{\left| 2\pi V \right|^\half} \: e^{-\half (\vec{x}^{\:T} V^{-1}\vec{x} \:-\: \varsigma_k^2)} \\
+						& \hspace{.7in}\times \sqrt{\frac{\pi}{2\hat{\alpha}_k^2}} \left[ \erf \left( \frac{\varsigma_k}{\sqrt{2}}\right) - \erf \left( \frac{\varsigma_k - \hat{\alpha}_k}{\sqrt{2}} \right)\right].
+\end{split}
+\end{equation}
+Finally, with the same change of variables that led from equation \eqref{eq:full_density_cam} to equation \eqref{eq:full_density_dws}, the sub-frame density function in the \dws{} representation, $f_k(\vec{s})$ is given by equation \eqref{eq:sub_density_cam} with substitutions $\vec{x} \rightarrow \vec{s}$ and $V \rightarrow V_s$.
+
+\subsection{Subframe CRF feature functions}
+\label{sec:feature_functions}
+
+We construct ``state'' feature functions for the \crf{} from the log of the detection model density function:
+$$
+g(x_i,y_i) \sim \log( f(x_i|y_i)).
+$$
+We will use the notation $\mathbf{1}_{y=y'}$ to denote the indicator function of label $y$, which takes on the value $1$ when $y=y'$ and $0$ otherwise.
+
+The subframe model extends the full-frame one with the addition of the subframe states.
+To simplify the notation, we identify the full-frame analog states with indices denoted $k_f$ and the corresponding subframe states with indices $k_s$.
+For both sets of indices, there is necessarily a one-to-one mapping $k(k_f)$ and $k(k_s)$ with $k\in\{1,...,n_D\}$,
+representing one of the analogs.  We choose $k(\epsilon)=0$ to index the background state.
+Henceforth, use of $k$ as a subscript will denote the appropriate mapping, which should be clear from the context.
+
+From the full-frame density \eqref{eq:full_density_cam}, we define the feature functions:
+\begin{subequations}
+\begin{align}
+g_{F0}(x,y) &= -\mathbf{1}_{y=k_f} \log |V|^\half; \\
+g_{F1}(x,y) &= -\mathbf{1}_{y=k_f}(\hat{\alpha}_k - \varsigma_k)^2; \\
+g_{F2}(x,y) &= -\mathbf{1}_{y=k_f}(\vec{x}^{\;T} V^{-1} \vec{x} - \varsigma_k^2).
+\end{align}
+\end{subequations}
+We choose this factoring because $g_{F1}$ is a feature that isolates the amplitude model; $g_{F2}$ then (presumably) captures the residual density, including a chi-squared portion for spectral profile correlation.   
+
+The background or ``no-pulse'' state $\epsilon$ is a special case of the full-frame model,
+with $\hat{\alpha}_0 = 0$, in which case the factors of $\varsigma_0$ cancel in \eqref{eq:full_density_cam}.     
+Features responding to the background state include
+\begin{subequations}
+\begin{align}
+g_{B0}(x,y) &= -\mathbf{1}_{y=\epsilon} \log |V|^\half; \\
+g_{B1}(x,y) &= -\mathbf{1}_{y=\epsilon} (\vec{x}^{\;T} V^{-1} \vec{x}).
+\end{align}
+\end{subequations}
+Features responding to the subframe states follow in the same manner from the density function \eqref{eq:sub_density_cam}:
+\begin{subequations}
+\begin{align}
+g_{S0}(x,y) &= -\mathbf{1}_{y=k_s} \log |V|^\half; \\
+g_{S1}(x,y) &= \phantom{-}\mathbf{1}_{y=k_s} \log \left[ \erf \left( \frac{\varsigma_k}{\sqrt{2}}\right)
+                                             - \erf \left( \frac{\varsigma_k - \hat{\alpha}_k}{\sqrt{2}} \right)\right];\\
+g_{S2}(x,y) &= -\mathbf{1}_{y=k_s}(\vec{x}^{\:T} V^{-1}\vec{x} \:-\: \varsigma_k^2); \\
+g_{S3}(x,y) &= -\mathbf{1}_{y=k_s} \log \hat{\alpha}_k.
+\end{align}
+\end{subequations}
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{Variance estimates}
+\label{sec:variance}
+
+%The feature functions are derived from \eqref{eq:full_density_cam} and \eqref{eq:sub_density_cam}, where the factorization followed from the model pdfs, \eqref{eq:full_density} and \eqref{eq:sub_density} respectively, using the matrix algebra derived in Section \ref{sec:dws}.  
+%Throughout, we encounter the covariance matrix $V$ [$V_s$], given by equation \ref{eq:cam_covar} [\ref{eq:dws_covar}], in the camera [\dws{}] representation, with the corresponding channel standard deviations, or ``sigma'' values, $\sigma$ [$\Sigma$].
+%In particular, we have introduced the scaling \eqref{eq:sigma_normalization} and express the feature functions in terms of ``sigma-normalized'' quantities.
+
+In the above feature functions, we encounter variance terms in the form of the camera covariance matrix $V$ and through the ``sigma-normalized'' quantities $\varsigma$ (the \dws{} observation) and $\alpha$ (the dye channel \emph{pkmid}).
+According to the sensor model \eqref{eq:sensor_model}, the variance in each camera depends on the mean signal captured from a Poisson emittor.
+However, note that to arrive at \eqref{eq:sub_density_2}, we have treated variance parameters as constant with respect to the signal level, $a$, of the model.
+For a complete treatment, incorporating the variance adjustment, we must return to the original density expression \eqref{eq:sub_density}.
+The subframe integral has the form
+$$
+f(\vec{x}) \sim \int_0^{\hat{a}} \frac{da}{|V(a)|^{\half}}\exp \left[ -\half \sum_{j=1}^{n_C} \frac{(x_j - ap_j)^2}{\sigma_j^2 + ap_j} \right].
+$$
+It is non-Gaussian and introduces some modified covariance structure in the marginal density.
+% Therefore, the optimal variance estimates $V$ will differ depending on the model hypothesis that is being evaluated.
+
+To keep the subframe case tractable, we use the simplified model, derived from the constant-variance assumption.
+This captures a feature that modulates the amplitude response via the error function term (in place of the Gaussian in the full-frame feature function).
+However, we stipulate that in \emph{all} features, variance terms should be adjusted according to the appropriate signal estimate.
+The function $\log |V|^\half$---which superficially appears to be a constant with respect to the state label and observations---is therefore included because it is computed differently depending on the type of hypothesis.
+Note that as $V$ is adjusted for signal, the values $s$, $\Sigma$, and sigma-normalized model parameters must be computed with the corresponding variances in equations \eqref{eq:dws_weight_def} and \eqref{eq:dws_var}.
+This is because the factorization of the densities that led to the defined feature functions followed from
+\eqref{eq:dws_identity}, which otherwise would be invalid.
+
+To summarize, the feature functions for each type of state hypothesis---background, subframe and full-frame---contain additional functional dependence on the observations $x_j$ or the model parameters $a_k$, which enters through the variance estimates.  One prescription for supplying variance estimates is as follows:
+\begin{enumerate}
+\item
+Background state:  The model hypothesis is no signal; variance estimates are from the baseline model.
+\item
+Subframe states:  The model hypothesis $k_s$ is some (unknown) signal between zero and the channel \emph{pkmid}, $\hat{a}_k$.  Variance estimates are made using \eqref{eq:sensor_error}, with the additional signal contribution $\mu_j$ estimated as $\max(x_j,0)$.
+\item
+Full-frame states:  The model hypothesis $k_f$ is the full \emph{pkmid} signal, $\hat{a}_k$. Variance estimates are made using \eqref{eq:sensor_error}, with additional signal contributions $\mu_j$ estimated as $\hat{a}_k p_{kj}$ (the model prediction). 
+\end{enumerate}
+
+%----------------------------------------------------------------------------------------------------------------------
+\subsection{Incorporation of dye photophysics}
+\label{sec:photophysics}
+The photophysics of fluorescent-dye emission will introduce a new source of covariance in the pulse amplitude model.
+Effectively, the mean flux per unit time is no longer constant; it will vary from frame to frame according to some underlying stochastic process of dye ``blinking.''
+The effect will require some adjustment to the amplitude model and the prescription for updating feature-function covariance estimates, as described in the previous section.
+
+For an initial treatment, we assume that the new noise source is dye-channel specific, i.i.d.~in time,\footnote{
+	In principle a photopysical noise source would lead to some auto-correlation in the intra-pulse signal when the process time scales are large relative to the frame collection time.
+}
+and results in an effective amplitude distribution that is approximately Gaussian.
+For the full-frame model, $a_k \sim N(\hat{a}_k,\nu_k)$,
+and we replace the amplitude density \eqref{eq:full_amp_density} with
+\begin{equation}
+f(a) \sim e^{-\half(a-\hat{a})^2/\nu^2}.
+\end{equation}
+In principle, we obtain the marginal distribution of the camera observations by computing a new Gaussian integral (again without adjusting the variance of the Poisson emittor at each amplitude $a$).
+Still, this integral introduces covariance among the observations and must be reduced to a closed form involving the \emph{inverse} of the new covariance matrix.
+We arrive at the desired result more easily by modeling the new multivariate distribution directly:
+\begin{equation}
+\vec{x} \sim \normdist{\vec{0}}{V} + \normdist{\hat{a}\vec{p}}{\Lambda},
+\end{equation}
+where, for dye hypothesis $k$,
+\begin{equation}
+\label{eq:var_adjust_signal}
+V_{ij} = \delta_{ij}\sigma_j^2 \;\xrightarrow{\;\text{Poisson emittor}\;}\; \delta_{ij}(\sigma_j^2 + \hat{a}_k p_{kj}).
+\end{equation}
+The covariance $\Lambda$ from the photophysical blinking contribution is obtained by viewing the observations $\vec{x}$ as arising from an affine transformation on a system without mixing across cameras, $\vec{y} \sim \normdist{\hat{a}\vec{e}}{\Sigma}$; \ie,
+$$
+\vec{x} = B\vec{y},
+$$
+where for dye $k$,
+$$
+B^{(k)} = (\vec{0},...,\vec{p}_k,...,\vec{0}),
+$$
+and
+$$
+\Sigma^{(k)} = \text{diag}(0,...,\nu_k^2,...,0).
+$$
+The covariance of the transformed variables $\vec{x}$ (our camera observations) is given by $\Lambda = B \Sigma B^T.$
+Thus, for the complete model, in dye hypothesis $k$, we have
+\begin{equation}
+\label{eq:var_adjust_photophys}
+V_{ij}^{(k)} = \delta_{ij}(\sigma_j^2 + \hat{a}_k p_{kj}) + p_{ki} p_{kj} \nu_k^2.
+\end{equation}
+Photophysical blinking modifies the model to one with a non-diagonal covariance matrix in the camera representation.
+
+\subsubsection{Variance updates to feature functions}
+\label{sec:var_update_photophys}
+Following the discussion in Section \ref{sec:variance}, we update variance estimates in the \crf{} feature functions for signal, but use \eqref{eq:var_adjust_photophys} in place of the standard correction, \eg{} as in \eqref{eq:var_adjust_signal}. 
+For this, the new model parameters $\nu_k$ are needed as input to the \crf.  In the Gaussian approximation, we expect a constant \cv{} from photophysical blinking. So at dye signal amplitude $a$,
+\begin{equation}
+\label{eq:blink_std_model}
+\nu_k(a) = a c_k.
+\end{equation}
+An estimate of the \cv{}, $c_k$, can be made from the observed intra-pulse variance in the \dws{} channels by backing out the  contribution of the sensor model:
+$$
+c_k^2 \sim ((V_s)_{kk}^{\text{obs}} - (\bar{\Sigma}_k^2 + \hat{a}_k))/\hat{a}_k^2.
+$$
+Here we use the notation $\bar{\Sigma}_k^2$ to denote the baseline variance estimate in \dws{} channel $k$. 
+The parameters $c_k$ would be computed concurrently with the \emph{pkmid} values $\hat{a}_k$; see Section \ref{sec:amplitude_model}.
+
+\subsection{Density factorization in the general case}
+\label{sec:density_general}
+Photophysics introduces off-diagonal elements to the covariance matrix in the camera representation.
+When computing the \dws{} trace \emph{de novo}---\ie, for trace analysis---it is convenient to use a stationary estimate of $V$.
+Typically, this will be the baseline estimate given by \eqref{eq:cam_covar}.
+Subsequently, in computing feature functions for the \crf{}, we modify the values of $V$ (and the corresponding \dws{} trace estimates) to include the extra signal contribution.
+As long as $V$-dependent terms are updated consistently, the density function factors as in \eqref{eq:full_density_cam}.
+
+However, in Section \ref{sec:dws}, we used a diagonal camera covariance matrix $V$, whereas the photophysics model \eqref{eq:var_adjust_photophys} introduces off-diagonal terms.
+We now re-trace some earlier steps to treat the general case.
+
+As we have noted, the \dws{} trace representation is a convenient packaging of $n_D$ separate model solutions.
+Channel $k$ holds the least-squares estimate for the model whose hypothesis is that the observations arose from background plus signal emitted exclusively from dye $k$.
+Each is a single-parameter model, with the general solution to the least-squares problem given by~\cite{Lupton1993}
+\begin{equation}
+\label{eq:dws_general}
+s_k = (\vec{p}_k^{\,T} V_k^{-1} \vec{p}_k)^{-1} \vec{p}_k^{\,T} V_k^{-1} \vec{x}.
+\end{equation}
+Here we use the notation $V_k$ for the camera covariance matrix adjusted for the dye-$k$ hypothesis, \eg{} as estimated by \eqref{eq:var_adjust_photophys}.
+
+To treat the \dws{} trace as a linear transformation on the camera trace as before, we define the weight matrix $A^T$, whose rows are comprised of the model solution vectors:
+$$
+A_{ki}^T \equiv (\vec{p}_k^{\,T} V_k^{-1} \vec{p}_k)^{-1} (\vec{p}_k^{\,T} V_k^{-1})_i.
+$$
+However, in the context of the \crf{}, we always consider each hypothesis $k$ separately.
+The relevant representation is \eqref{eq:dws_general}, and the uncertainty in the model parameter $s_k$ is given by~\cite{Lupton1993}
+\begin{equation}
+\label{eq:dws_var_general}
+\Sigma_k^2 = (\vec{p}_k^{\,T} V_k^{-1} \vec{p}_k)^{-1}.
+\end{equation}
+This is just the result \eqref{eq:dws_var}, but $V_k$ need not be diagonal.  Equations \eqref{eq:dws_general} and \eqref{eq:dws_var_general} are sufficient to show that the density function will factor as in \eqref{eq:full_density_cam}, with $V \rightarrow V_k$. 
+
+\subsubsection{Variance updates to feature functions, redux}
+\label{sec:var_updates_redux}
+Based on \eqref{eq:var_adjust_photophys}, and using the constant-\cv{} model \eqref{eq:blink_std_model},
+the covariance matrix at \emph{any} signal amplitude $a$ is estimated as
+\begin{equation}
+\label{eq:var_update_final}
+V_{ij}^{(k)}(a) = \delta_{ij}(\sigma_j^2 + ap_{kj}) + a^2 c_k^2 p_{ki}p_{kj}.
+\end{equation}
+At the end of Section \ref{sec:variance}, we give a prescription for computing variance updates for the three model cases.
+To use \eqref{eq:var_update_final}, algorithms for the background model ($a=0$) and the full-frame model ($a=\hat{a}_k$) are unchanged.  For consistency, we modify the subframe algorithm to use $a = \bar{s}_k$, where $\bar{s}_k$ denotes the \dws{} estimate for channel $k$, computed using the baseline variance model $V$.  Then, through \eqref{eq:dws_general}, there is effectively one pass in an iterative algorithm for re-estimating $s_k$ in the subframe case.
+
+In general, this solution will require computation of the covariance matrix inverse, for arbitrary amplitudes $a$, at each frame.  As a practical matter, in the implementation, we pre-compute the inverse and associated weights required for the calculation at some number of discrete amplitude intervals in $[0,\hat{a}_k]$.  In the subframe case, we then select the set of values computed at the amplitude that is closest to an observation $\bar{s}_k$.
+
+%======================================================================================================================
+\section{Detection Models in the DWS Representation}
+\label{sec:photonics_dws}
+
+\emph{This section is still under construction.}
+This section will describe the model construction when trace values are limited to the \dws{} values, \eg{} as for \textit{Astro}.
+
+%======================================================================================================================
+\section{Kinetics}
+\label{sec:kinetics}
+
+\emph{This section is still under construction.}
+
+%%----------------------------------------------------------------------------------------------------------------------
+%\subsection{Labeling sequences with fractional-frame states}
+%We propose a segmentation strategy that is illustrated by the following examples of frame sequence labelings:
+%
+%\begin{enumerate}
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{c|cc}
+%\hline
+%A&a&A\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{cc|cc}
+%\hline
+%A&a&a&A\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{c|cc|cc}
+%\hline
+%A&a&a&a&A\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{cc|cc|cc}
+%\hline
+%A&a&a&a&a&A\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{c|cc|cc|cc}
+%\hline
+%A&a&a&a&a&a&A\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{cc|cc|cc|cc}
+%\hline
+%A&a&a&a&a&a&a&A\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{cc|c}
+%\hline
+%A&a&$\epsilon$\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{c|c|c}
+%\hline
+%$\epsilon$&a&$\epsilon$\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{c|cc|c}
+%\hline
+%A&a&a&$\epsilon$\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{c|c|cc}
+%\hline
+%$\epsilon$&a&a&A\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\item
+%\renewcommand{\arraystretch}{1.2}
+%\begin{tabular}{cc|c}
+%\hline
+%A&a&C\\
+%\hline
+%\end{tabular}
+%\medskip
+%
+%\end{enumerate}
+%
+%\medskip
+%To accommodate fractional frame states, we assign transition scores as follows, where the original (full-frame) kinetics scores are denoted as $F$ (off transition), $N$ (on transition) and $S$ (stay).
+%
+%\begin{itemize}
+%\item All fractional frame states $y_i\in$\{a,c,g,t\} are assigned a score of $\half(N+F)$, independent of the preceeding state $y_{i-1}$.
+%\item Additional transition scores are assigned as illustrated in the table below, to be read in matrix form as $t(y_{i-1},y_i)$.
+%\item Where a specific kinetics model is label-specific for any of these scores, the correct value to use should be evident from the context.
+%\end{itemize}
+%
+%\bigskip
+%\renewcommand{\arraystretch}{1.5}
+%\begin{tabular*}{0.85\textwidth}{@{\extracolsep{\fill}}|c| c c c c c|}
+%\hline
+%						& 		$\epsilon$ 	& 		a 					& 		A 						& 		c 						& 	C							\\ \hline
+%$\epsilon$	& 		$S$					&			$\half N$		&			$N$						&			$\half N$			&		$N$						\\
+%a						&			$\half F$		&			$\half S$ 	& 	$\half (S+N)$		& 		$\half(F+N)$	& 	$\half F+N$ 	\\
+%A						&			$F$					&		$\half(S+F)$	&			$S$						&			$F+\half N$		&		$F+N$					\\
+%c						&			$\half F$		&		$\half(F+N)$	&		$\half F+N$			&			$\half S$			&		$\half S+N$		\\
+%C						&			$F$					&		$F+\half N$		&			$F+N$					&			$\half(S+F)$	&		$S$						\\
+%\hline
+%\end{tabular*}
+%\bigskip
+%\bigskip
+%
+%With these transition scores, the reader can verify that the pulse segmentations illustrated in the enumerated cases are scored consistently.  Note that long runs of consecutive fractional frame labelings are expected to be rare.  Nevertheless, our segmentation algorithm must accommodate the possibility, since the first-order \crf{} cannot restrict transitions to or from fractional frame states and remain consistent with the physical model that produces them.  We make the following additional observations regarding the strategy:
+%\begin{itemize}
+%\item
+%For a labeled sequence of frames that include one or more fractional frame labels, there are multiple segmentations that are consistent with the underlying physical model.  (There is no way to know \emph{which} fraction of a frame was ``on.'')
+%\item
+%With respect to consecutive (same-base) fractional frame labelings, we choose a segmentation that produces the minimum number of pulses, consistent with the underlying physical model.  We disallow more than two fractional frames in a single pulse, since such a configuration would necessarily pass through an additional off and on transition, which is inconsistent with the original hypothesis.
+%\item
+%We choose a segmentation strategy that can be implemented as a finite state machine, eliminating the need for complex rules in the algorithm.  In practice, the segmentation is performed moving from right to left.
+%\item
+%With respect to pulse segmentation boundaries, the strategy violates ``time reversal symmetry.''  For example, compare cases 9 and 10 above.  However, the symmetry violation occurs only at the frame level, not the pulse level.  In assigning metrics to the pulse(s) consisting of fractional frames, we should obtain a correct average, which is the best we can expect given our state of incomplete information for these labelings.     
+%\end{itemize}	 	
+
+\section{Discussion}
+\label{sec:discussion}
+
+\emph{This section is still under construction.}
+
+\begin{thebibliography}{99}
+	\bibitem{Lafferty} John Lafferty, Andrew McCallum and Fernando Pereira.  \textit{Conditional Random Fields: Probabilistic Models for Segmenting and Labeling Sequence Data}.
+	\bibitem{Wallach2004} Hanna M. Wallach, 2004.  \textit{Conditional Random Fields: An Introduction}, University of Pennsylvania CIS Technical Report MS-CIS-04-21.
+	\bibitem{sutton_mccallum} Charles Sutton and Andrew McCallum.  \textit{An Introduction to Conditional Random Fields for Relational Learning}.
+	\bibitem{Gupta} Rahul Gupta, \textit{Conditional Random Fields}.
+	\bibitem{Lupton1993} Robert Lupton, \textit{Statistics in Theory and Practice}, Princeton Univeristy Press, 1993.
+	\bibitem{McClurg2009} Phillip McClurg, internal CRF report.
+	\bibitem{Gehman2010} Curtis Gehman, \textit{Springfield Image Analysis and Optimal Estimation of Photon Flux}.
+	\bibitem{Horne1986} Keith Horne, 1986. \textit{PASP}, 98:609, \textit{An Optimal Extraction Algorithm for CCD Spectroscopy}.
+  \bibitem{Johnson2008} \textit{Data Reduction -- Springfield}, by Stuart Johnson, 2008, Pacific Biosciences.
+  \bibitem{TomaneyMarks2009} \textit{Investigation: Springfield Objective Design Merit Function}, ''Appendix: Optimally Weighted Extraction and SNR'', by Austin Tomaney and Patrick Marks, 2009, Pacific Biosciences.
+\end{thebibliography}
+
+\end{document}
