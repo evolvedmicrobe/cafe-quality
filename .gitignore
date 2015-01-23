@@ -2,6 +2,7 @@
 BuildAndRun.py
 *.ccs.fasta
 tempLambdaVariant/
+NotTracked/
 *.dll
 *.exe
 *.pdb
