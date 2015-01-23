@@ -73,7 +73,7 @@ namespace VariantCaller
             // Start loading CCS reads
             var ccs_reads_maker = Task<List<CCSRead>>.Factory.StartNew( () =>
                 {
-                   return ccsReads.SelectMany(p => (new FastAZippedParser(p))
+                   return ccsReads.SelectMany(p => (new FastAParser(p))
                                                 .Parse()
                                                 .Select(x => new CCSRead((Sequence)x)))
                             .ToList();
