@@ -143,7 +143,7 @@ namespace PacBio.Consensus
             using (var qvConfig = scConfig.Parameters.At("P6-C4"))
             using (var start = qvConfig.QvParams)
             {
-                var algo = RecursionAlgo.Viterbi;
+                var algo = RecursionAlgo.Prob;
 
                 // Train the model
                 float trainError;
