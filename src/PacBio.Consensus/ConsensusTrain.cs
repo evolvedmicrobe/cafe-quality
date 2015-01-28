@@ -309,7 +309,7 @@ namespace PacBio.Consensus
                         {
                                 var overallScore = scorer.GetBaselineScores().Sum();
 
-                                var muts = GenerateMutations.GenerateUniqueMutations(trueTpl);
+                                var muts = GenerateMutations.GenerateMutationsForTraining(trueTpl);
 
                                 var ll = muts.Select(
                                     m =>

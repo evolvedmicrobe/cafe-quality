@@ -148,5 +148,48 @@ namespace PacBio.Consensus
                 }
             }
         }
+
+        /// <summary>
+        /// Enumerate all possible single indel or substitution mutations to the TrialTemplate tpl. The template is 
+        /// flanked by presumed correct adapter bases that are not mutated. 
+        /// 
+        /// This method generates all templates derived from all possible mutations, and so does not filter out
+        /// mutations that lead to identical templates the way the other does.
+        /// </summary>
+        /// <param name="tpl">The template to generate mutations of</param>
+        /// <returns>An enumerable of Mutation objects</returns>
+        public static IEnumerable<Mutation> GenerateMutationsForTraining(TrialTemplate tpl)
+        {
+            // Attempt to insert or mismatch every base at every positions.
+            // Don't mutate anything in the know template adapter region
+            var seq = tpl.GetSequence(Strand.Forward);
+
+            // Start is the first base past the adapter
+            var start = Math.Max(1, tpl.StartAdapterBases);
+
+            // End is the fist base of the end adapter
+            var end = seq.Length - Math.Max(1, tpl.EndAdapterBases);
+
+            for (int i = start; i <= end; i++)
+            {
+                foreach (var b in DNA.Bases)
+                {
+                    // You are allowed to make an insertion before the first base of the adapter region
+                    yield return new Mutation {Base = b, TemplatePosition = i, Type = MutationType.INSERTION};
+
+                    // Don't generate substitutions if not requested
+                    // Don't mutate adapter
+                    if (b != seq[i] && i < end)
+                        yield return new Mutation { Base = b, TemplatePosition = i, Type = MutationType.SUBSTITUTION };
+                }
+
+                // Attempt to delete only the first base of a homopolymer run
+                // Don't delete adapter
+                if (i < end)
+                {
+                    yield return new Mutation {TemplatePosition = i, Type = MutationType.DELETION, Base = 'A'};
+                }
+            }
+        }
     }
 }
