@@ -21,6 +21,11 @@ namespace PacBio.Consensus
         Dictionary<string, List<CCSExample>>[,] exampleStore;
         ReadConfigurationAssigner rca;
         int MaxPerReference;
+        /// <summary>
+        /// Indicates that we have finished adding data, and that we have shuffled all the data
+        /// </summary>
+        bool beenShuffledAndFullyLoaded = false;
+
         public TrainingDataStore (ReadConfigurationAssigner rca, int maxExamplesPerReference)
         {
             this.rca = rca;
@@ -68,6 +73,9 @@ namespace PacBio.Consensus
         /// <param name="example">Example.</param>
         public bool AddExample(CCSExample example)
         {
+            if (beenShuffledAndFullyLoaded) {
+                throw new ApplicationException ("Trying to add data after we already began taking data!");
+            }
             var meanSNR = example.Trace.ZmwBases.Metrics.HQRegionSNR.Average ();
             var gr = rca.GetGroupAssignment ((float)meanSNR, example.Regions.Length);
             var result = false;
@@ -88,24 +96,68 @@ namespace PacBio.Consensus
             }
             return result;
         }
+
         /// <summary>
         /// Get a training and test set for the examples specified by the SNR and Coverage grouping.
         /// </summary>
         /// <returns>The examples.</returns>
         /// <param name="snrGroup">Snr group.</param>
         /// <param name="coverageGroup">Coverage group.</param>
-        public Tuple<List<CCSExample>, List<CCSExample>> GetExamples(int snrGroup, int coverageGroup)
+        public Tuple<List<CCSExample>, List<CCSExample>> GetExamples(int snrGroup, int coverageGroup, int desiredTrainingCount)
         {
+            var set = GetExamples (snrGroup, coverageGroup); // Tuple<Train, Test>
+            var obtainedOriginal = set.Item1.Count; 
+            var obtainedBySampling = 0;
+            int desiredCoverage = (int) Math.Round(set.Item1.Average (x => x.Regions.Length));
+            var needed = desiredTrainingCount - obtainedOriginal;
+            // If we didn't get enough data, try to get "fake" data by sampling down from a higher coverage 
+            // to the average of the current sample.
+            // TODO: Avoid this code path
+            while (set.Item1.Count < desiredTrainingCount && coverageGroup < (exampleStore.GetLength(2)- 1)) {
+                coverageGroup++;
+                var newData = GetExamples (snrGroup, coverageGroup);
+                var train_n = newData.Item1.Shuffle().TakeAtMost(needed).Select(x => x.CloneWithSubSample(desiredCoverage)).ToList();
+                obtainedBySampling += train_n.Count;
+                var test_n = newData.Item2.Shuffle().TakeAtMost(needed).Select(x => x.CloneWithSubSample(desiredCoverage));
+                set.Item1.AddRange (train_n);
+                set.Item2.AddRange (test_n);
+                needed = desiredTrainingCount - set.Item1.Count;
+            }
+            Console.WriteLine ("For " + snrGroup + " - " + coverageGroup + " From Bin: " + obtainedOriginal + " From Higher Bin: " + obtainedBySampling);
+            return set;           
+        }
+
+        public Tuple<List<CCSExample>, List<CCSExample>> GetExamples(int snrGroup, int coverageGroup) {
+            if (!beenShuffledAndFullyLoaded) {
+                _shuffle ();
+            }
+
             var cur = exampleStore [snrGroup, coverageGroup];
             var train = new List<CCSExample> ();
             var test = new List<CCSExample> ();
             foreach (var kv in cur) {
                 var examples = kv.Value;
                 var n = examples.Count / 2;
-                test.AddRange (examples.Take (n));
-                train.AddRange (examples.Skip (n).Take (n));
+                int n_train = n + (examples.Count % 2);
+                test.AddRange (examples.Take ( n_train));
+                train.AddRange (examples.Skip (n_train).Take (n));
             }
             return new Tuple<List<CCSExample>, List<CCSExample>> (train, test);
+        }
+        private void _shuffle()
+        {
+            beenShuffledAndFullyLoaded = true;
+            for (int i = 0; i < rca.NumberOfSNRGroups; i++) {
+                for (int j = 0; j < rca.NumberOfCoverageGroups; j++) {
+                    var dict = exampleStore [i, j];
+                    var newDict = new Dictionary<string, List<CCSExample>> (dict.Count);
+                    foreach (var kv in dict) {
+                        var newL = kv.Value.Shuffle ().ToList ();
+                        newDict [kv.Key] = newL;
+                    }
+                    exampleStore [i, j] = newDict;
+                }
+            }
         }
     }
 }

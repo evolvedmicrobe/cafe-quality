@@ -89,10 +89,30 @@ namespace PacBio.Consensus
 
     public class CCSExample
     {
-        public Trace Trace;
-        public string Reference;
-        public TrialTemplate CorrectTrialTemplate;
-        public AlignedSequenceReg[] Regions;
+        public readonly Trace Trace;
+        public readonly string Reference;
+        public readonly TrialTemplate CorrectTrialTemplate;
+        public readonly AlignedSequenceReg[] Regions;
+
+        public CCSExample(Trace t, string reference, TrialTemplate tt, AlignedSequenceReg[] regs)
+        {
+            this.Trace = t;
+            this.Reference = reference;
+            this.CorrectTrialTemplate = tt;
+            this.Regions = regs;
+        }
+        public CCSExample CloneWithSubSample (int toSample)
+        {
+            if (toSample > Regions.Length) {
+                throw new ArgumentException ("Not enough regions to sample!");
+            } else {
+                var regions = Regions.Sample(toSample, false);
+                var toR = new CCSExample (Trace, Reference, CorrectTrialTemplate, regions);
+                return toR;
+            }
+        }
+
+        #region STATICS
 
         public static CCSStream ccsAlgo = CCSStream.DefaultConfig;
 
@@ -264,14 +284,10 @@ namespace PacBio.Consensus
 
                 Console.WriteLine(@"Accepting trace. POA Acc: {0}. POA Score: {1}", poaAl.Accuracy, poaScore);
                 ++accepted;
-                var example = new CCSExample {
-                    Trace = t,
-                    Reference = rref,
-                    CorrectTrialTemplate = trialTemplate,
-                    Regions = newRegions
-                };
+                var example = new CCSExample (t, rref, trialTemplate, newRegions);
                 toReturn.Add (example);
-                if (accepted >= totalNeeded) {
+                // No longer quite true with sampling added
+                if (accepted >= (totalNeeded * 2)) {
                     Console.WriteLine ("Found all I need!");
                     break;
                 } 
@@ -371,11 +387,12 @@ namespace PacBio.Consensus
                         return;
                     }
                     // Don't use more than 80 passes -- a waste of time because the error rate should be low
-                    if(passes.Count > 80) {
-                        ++rejects["Passes>80"];
+                    /*
+                      if(passes.Count > 80) {
+                       ++rejects["Passes>80"];
                         return;
                     }
-
+                    */
                     var refStart = bestAl.TemplateStart;
                     var refLength = bestAl.TemplateLength;
 
@@ -416,12 +433,7 @@ namespace PacBio.Consensus
 
                     Console.WriteLine(@"Accepting trace. POA Acc: {0}. POA Score: {1}. Ref: {2}", poaAl.Accuracy, poaScore, t.SmithWatermanAlignment.ReferenceName);
                     ++accepted;
-                    var example = new CCSExample {
-                        Trace = t,
-                        Reference = rref,
-                        CorrectTrialTemplate = trialTemplate,
-                        Regions = newRegions
-                    };
+                    var example = new CCSExample (t, rref, trialTemplate, newRegions);
                     var success = tds.AddExample(example);
                 if (success) {
                     Console.WriteLine ("Accepted");
@@ -571,6 +583,6 @@ namespace PacBio.Consensus
 			}
             */
 		}
-
+        #endregion
 	}
 }
