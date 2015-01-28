@@ -193,7 +193,7 @@ After the matrix is initialized, each element in the matrix is recursively popul
 %\[
 \begin{dmath}
 \text{Match Probability} = \\
-	 \alpha_{i-1,j-1}  \times  (1-p_{id}+p_{is}+p_{dd}+p_{ds})  \times 
+	 \alpha_{i-1,j-1}  \times 
 	 \begin{cases}
 							 \ (1-p_{s}) & \text{if }  R_{j} = T_{i} \\
 							 \frac{1}{3} \times p_{s}  & \text{if }  R_{j}  \neq T_{i} 
@@ -270,9 +270,19 @@ Although this equation is the fundamentally correct model for primary to optimiz
 
 Finally, it is worth commenting on how to calculate the QV models in this new framework.  This will be the subject of another write-up, but at present I think it suffices to say that while QV scores are traditionally calculated marginally (that is without any knowledge of the other QVs or there relationship to the true template), one hundred years of statistical literature says that with a unified model it is best to jointly estimate parameters.  In this regard, given any framework we can directly maximize $P(T|R)$, and green pastures likely await there.
 
+\section{Nigel's Notes}
 
-    
-  
+Re-reading this in the morning after writing it, this was totally confusing, and doesn't really work at all.  Here is the problem, the "transition" parameters are kind of bogus, i.e. the   $ (1-p_{id}+p_{is}+p_{dd}+p_{ds}) $ stuff, the main problem is that I don't think I can really model the QV values as transitions between states. 
+
+I think an easier way to think of the method is in terms of alignments, that is consider this alignment with the given latent states: 
+
+ \begin{center}
+ \texttt{MMDMIM}\\
+\texttt{ATGC-T}\\
+\texttt{AT-CCT}
+\end{center}
+
+We can now score this alignment by taking each position and applying the QV values given by the equations above, the probability for the entire alignment is then just the integral over all of these.  This is contrived, but can be workable if we think of the QV values as giving priors for particular alignments, then the probability is just the integral over all possible alignments.
 
 %----------------------------------------------------------------------------------------
 
