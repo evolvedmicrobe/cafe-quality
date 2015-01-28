@@ -1,4 +1,6 @@
 * text eol=lf
+*.key binary
+*.pptx binary
 *.dll binary
 *.exe binary
 *.so binary
