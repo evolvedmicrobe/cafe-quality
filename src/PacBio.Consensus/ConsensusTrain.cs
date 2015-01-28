@@ -120,7 +120,8 @@ namespace PacBio.Consensus
         /// <returns>The run.</returns>
         public int InnerRun(List<CCSExample> train, List<CCSExample> test, int hopedForTraces,
             int snrGroup, int coverageGroup, string outFile, int maxIterations = 100 )
-        {           
+        {          
+            try {
             // Check that enough data is available
             int warnThresh = hopedForTraces / 2;
             int failThresh = hopedForTraces / 10;
@@ -162,6 +163,12 @@ namespace PacBio.Consensus
                 ParameterLoading.SaveModelToFile(name, "AllQVsMergingByChannelModel", trainedModel, outFile);
             }
             return 0;
+            }
+            catch(Exception thrown) {
+                Console.WriteLine ("Failed!!!\n\n" + thrown.Message + "\n\n" + thrown.StackTrace);
+               
+            }
+            return 1;
         }
 
 

@@ -108,12 +108,12 @@ namespace PacBio.Consensus
             var set = GetExamples (snrGroup, coverageGroup); // Tuple<Train, Test>
             var obtainedOriginal = set.Item1.Count; 
             var obtainedBySampling = 0;
-            int desiredCoverage = (int) Math.Round(set.Item1.Average (x => x.Regions.Length));
+            int desiredCoverage = obtainedOriginal > 0 ? (int) Math.Round(set.Item1.Average (x => x.Regions.Length)) : -1;
             var needed = desiredTrainingCount - obtainedOriginal;
             // If we didn't get enough data, try to get "fake" data by sampling down from a higher coverage 
             // to the average of the current sample.
             // TODO: Avoid this code path
-            while (set.Item1.Count < desiredTrainingCount && coverageGroup < (exampleStore.GetLength(2)- 1)) {
+            while (set.Item1.Count < desiredTrainingCount && coverageGroup < (rca.NumberOfCoverageGroups - 2) && obtainedOriginal > 0) {
                 coverageGroup++;
                 var newData = GetExamples (snrGroup, coverageGroup);
                 var train_n = newData.Item1.Shuffle().TakeAtMost(needed).Select(x => x.CloneWithSubSample(desiredCoverage)).ToList();
