@@ -110,6 +110,7 @@ namespace PacBio.Consensus
             var obtainedBySampling = 0;
             int desiredCoverage = obtainedOriginal > 0 ? (int) Math.Round(set.Item1.Average (x => x.Regions.Length)) : -1;
             var needed = desiredTrainingCount - obtainedOriginal;
+            var orgCoverageGroup = coverageGroup;
             // If we didn't get enough data, try to get "fake" data by sampling down from a higher coverage 
             // to the average of the current sample.
             // TODO: Avoid this code path
@@ -123,7 +124,13 @@ namespace PacBio.Consensus
                 set.Item2.AddRange (test_n);
                 needed = desiredTrainingCount - set.Item1.Count;
             }
-            Console.WriteLine ("For " + snrGroup + " - " + coverageGroup + " From Bin: " + obtainedOriginal + " From Higher Bin: " + obtainedBySampling);
+            if (Math.Abs (set.Item1.Count - set.Item2.Count) > 2) {
+                Console.WriteLine ("Inside main");
+                Console.WriteLine ("Train: " + set.Item1.Count);
+                Console.WriteLine ("Test: " + set.Item2.Count);
+                throw new ApplicationException ("This mismatch should not happen!");
+            }
+            Console.WriteLine ("For " + snrGroup + " - " + orgCoverageGroup + " From Bin: " + obtainedOriginal + " From Higher Bin: " + obtainedBySampling);
             return set;           
         }
 
@@ -141,6 +148,14 @@ namespace PacBio.Consensus
                 int n_train = n + (examples.Count % 2);
                 test.AddRange (examples.Take ( n_train));
                 train.AddRange (examples.Skip (n_train).Take (n));
+                Console.WriteLine ("Train: " + train.Count);
+                Console.WriteLine ("Test: " + test.Count);
+            }
+            if (Math.Abs (train.Count - test.Count) > 2) {
+                Console.WriteLine ("Inside sub");
+                Console.WriteLine ("Train: " + train.Count);
+                Console.WriteLine ("Test: " + test.Count);
+                throw new ApplicationException ("This mismatch should not happen!");
             }
             return new Tuple<List<CCSExample>, List<CCSExample>> (train, test);
         }
