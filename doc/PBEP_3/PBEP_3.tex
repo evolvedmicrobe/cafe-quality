@@ -193,10 +193,10 @@ After the matrix is initialized, each element in the matrix is recursively popul
 %\[
 \begin{dmath}
 \text{Match Probability} = \\
-	 \alpha_{i-1,j-1}  \times  (1-p_{id}+p_{is}+p_{dd}+p_{ds})  \times
+	 \alpha_{i-1,j-1}  \times  (1-p_{id}+p_{is}+p_{dd}+p_{ds})  \times 
 	 \begin{cases}
-							 \ (1-p_{s}) & \text{if }  R_{i} = T_{j} \\
-							 p_{s}  & \text{if }  R_{i}  \neq T_{j} 
+							 \ (1-p_{s}) & \text{if }  R_{j} = T_{i} \\
+							 \frac{1}{3} \times p_{s}  & \text{if }  R_{j}  \neq T_{i} 
 							 \end{cases}
 \end{dmath}
 %\]
@@ -206,7 +206,7 @@ After the matrix is initialized, each element in the matrix is recursively popul
 		\caption{The calculation of the match score.  The upper element is added to an amount determined by the comparison of the bases shown.}
 \end{figure}
 
-This is simply the probability that a match event occurred (rather than an insertion or deletion), plus the appropriate emmission probability for the base.
+This is simply the probability that a match event occurred (rather than an insertion or deletion), plus the appropriate emmission probability for the base (with a uniform probability,  $\frac{1}{3}$, for each possible incorrect base).
 
 \subsubsection{\textbf{Insertion}}
 
@@ -215,8 +215,8 @@ This is simply the probability that a match event occurred (rather than an inser
 \text{Insertion Probability} = \\
 	\alpha_{i-1,j}  \times 
 	\begin{cases}
-		p_{is_{i+1}}  & \text{if }  T_{i} = R_{j+1} \\
-		p_{id_{i+1}} & \text{if }  T_{i}  \neq R_{j+1} 
+		p_{is_{j+1}}  & \text{if }  T_{i} = R_{j+1} \\
+		p_{id_{j+1}} & \text{if }  T_{i}  \neq R_{j+1} 
 	\end{cases}
 \end{dmath}
 
@@ -238,14 +238,14 @@ This insertion score differs from what is typical.  It is designed to account fo
 \begin{dmath}
 	\text{Deletion Probability} = \alpha_{i,j-1}  \\
 	\times  \begin{cases}
-				p_{ds_{i+1}}  & \text{if }  \text{T}_{i} = R_{j+1} \\
-				p_{dd_{i+1}} & \text{if }  \text{T}_{i} \neq R_{j+1} 
+				p_{ds_{j+1}}  & \text{if }  \text{R}_{j} = R_{j+1} \\
+				p_{dd_{j+1}} & \text{if }  \text{R}_{j} \neq R_{j+1} 
 				\end{cases}
 \end{dmath}
 
 
 
-The deletion probability, like the insertion probability, has two different values, and as before this is motivated by the underlying process determining how PacBio data is generated.  For PacBio data, there is a ``branching" process that occurs during nucleotide incorporation in which the polymerase may begin to incorporate a base and hold it long enough for the base to be detected in the sequencer before eventually releasing it after failing to complete the incorporation reaction.  In the event of a true branch, the inserted base should thus match the next template base.  Also as before, the observation could also have been caused by a non-branch event, namely a stick where the base happens to match, and so the QV value used is intended to encompass both a branch and non-branch event leading to this base being emitted.
+The deletion probability, like the insertion probability, has two different values, and as before this is motivated by the underlying process determining how PacBio data is generated.  For PacBio data, there is a ``branching" process that occurs during nucleotide incorporation in which the polymerase may begin to incorporate a base and hold it long enough for the base to be detected in the sequencer before eventually releasing it after failing to complete the incorporation reaction.  In the event of a true branch, the inserted (or in our framework deleted) base should thus match the next template base.  Also as before, the observation could also have been caused by a non-branch event, namely a stick where the base happens to match, and so the QV value used is intended to encompass both a branch and non-branch event leading to this base being emitted.
 
 
 %------------------------------------------------
@@ -256,7 +256,7 @@ The deletion probability, like the insertion probability, has two different valu
 
 Statistical models should be motivated by the underlying processes that generate the data, but inevitably must make concessions to bias versus variance trade-offs that will govern if in practice the model can perform adequately for the purpose it is designed for.
 
-Our current CCS consensus model is poor largely because it examined this trade-off and decided it would suck at both bias and variance.  Variance in parameter estimates, such as the QV recalibration, is introduced because the same observed error, such as a deletion in a homopolymer, could be explained by multiple different events but by using Viterbi scoring only one of these could be considered, leading to multiple modes in the optimization.  Similarly, bias is introduced because the model does not adequately capture the generative process in which multiple events can lead to the same outcome, forcing it to make artificial trade-offs required when one possibility must represent all possibilities.
+Our current CCS consensus model is poor largely because it examined this trade-off and sort of lost at both bias and variance.  Variance in parameter estimates, such as the QV recalibration, is introduced because the same observed error, such as a deletion in a homopolymer, could be explained by multiple different events but by using Viterbi scoring only one of these could be considered, leading to multiple modes in the optimization.  Similarly, bias is introduced because in addition to the hard-coded values everywhere, the model does not adequately capture the generative process in which multiple events can lead to the same outcome, forcing it to make artificial trade-offs required when one possibility must represent all possibilities.
 
 This new model is simpler and more unified.  Although considering $P(T|R)$ seems unusual, taking this plunge immediately allows us to maximize the probability of the template sequence given the reads, and provides a statistical framework with which to compare possible consensus sequences.  It can also be seen as an approximation of the Bayes corollarly, which we need to use if we maintained the model for $P(R|T)$ such that we would need to calculate:
 
@@ -264,7 +264,7 @@ This new model is simpler and more unified.  Although considering $P(T|R)$ seems
 P(R|T) = \frac{P(T|R) \cdot P(R)}{P(T)}
 \end{dmath}
 
-Although this equation is the fundamentally correct model for primary to optimize the raw read accuracy, the denominator, $P(T)$ is irrelevant if we use a uniform prior over templates, and the probability of the read and it's associated QV values, $P(R)$, is neither defined and almost certainly would be challenging to calculate even if we could define it.  The calculation of $P(R)$ is a fundamental problem that makes modeling difficult.  In contrast, this framework effectively sets $P(R) = 1$ and can be seen as a very strong prior on the observed data (and after all, that read did happen, so such a prior is justified).  
+Although this equation is the fundamentally correct model for primary to optimize the raw read accuracy, the denominator, $P(T)$ is irrelevant if we use a uniform prior over templates, and the probability of the read and it's associated QV values, $P(R)$, is neither defined and almost certainly would be challenging to calculate even if we could define it.  The calculation of $P(R)$ is a fundamental problem that makes modeling difficult.  In contrast, this framework effectively sets $P(R) = 1$ and can be seen as a very strong prior on the observed data (and after all, that read already has been observed to have occurred).  
 
   Additionally, though the generative model itself has quite changed, the intuition governing the model has been carried over, with every type of move in the generative Edna model having a corresponding QV value and scoring mechanism in the algorithm.  However, nuisances edge cases, such as Deletion Tags and how the separate  `Knight's move' to represent a deletion in a homopolymer context have been excised.   In the later case, the underlying intuition has still been preserved in scoring that captures the branch or merge moves respectively, we have simply replace multiple ways to score these observations with a single one.
 

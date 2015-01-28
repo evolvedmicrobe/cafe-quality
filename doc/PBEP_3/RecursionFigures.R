@@ -153,9 +153,9 @@ fillRect(oi,oj,"blue")
 fillRect(oi,oj-1,"red")
 addText(oi,oj-1,expression(alpha["i,j-1"]))
 drawArrow(oi,oj-1,oi,oj)
-colorLetter(oi-1,"read")
+colorLetter(oj-1,"tpl","red")
 colorLetter(oj,"tpl","red")
-drawTextArrow("read_4","tpl_5")
+drawTextArrow("tpl_4","tpl_5")
 dev.off()
 
 #Now the Match plot
