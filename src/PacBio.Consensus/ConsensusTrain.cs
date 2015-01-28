@@ -206,7 +206,7 @@ namespace PacBio.Consensus
                 for (int j = 0; j < rca.NumberOfCoverageGroups; j++) {
                     Log (LogLevel.WARN, "Optimizing " + i +" - "+ j);
                     // Run this data for this file and output it.
-                    var traintest = tds.GetExamples (i, j);
+                    var traintest = tds.GetExamples (i, j, tracesPerReference);
                     var train = traintest.Item1;
                     var test = traintest.Item2;
                     var res = InnerRun (train,test, totalTraces, i, j,outFile, maxIterations);       

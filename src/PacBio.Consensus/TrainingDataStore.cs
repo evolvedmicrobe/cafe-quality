@@ -127,7 +127,7 @@ namespace PacBio.Consensus
             return set;           
         }
 
-        public Tuple<List<CCSExample>, List<CCSExample>> GetExamples(int snrGroup, int coverageGroup) {
+        private Tuple<List<CCSExample>, List<CCSExample>> GetExamples(int snrGroup, int coverageGroup) {
             if (!beenShuffledAndFullyLoaded) {
                 _shuffle ();
             }
