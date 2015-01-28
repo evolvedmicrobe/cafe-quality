@@ -387,13 +387,12 @@ namespace PacBio.Consensus
                         return;
                     }
                     // Don't use more than 80 passes -- a waste of time because the error rate should be low
-                    /*
-                      if(passes.Count > 80) {
+                    if(passes.Count > 80) {
                        ++rejects["Passes>80"];
                         return;
                     }
-                    */
-                    var refStart = bestAl.TemplateStart;
+                    
+                        var refStart = bestAl.TemplateStart;
                     var refLength = bestAl.TemplateLength;
 
                     var refSeq = referenceContigs[bestAl.ReferenceName];
@@ -434,6 +433,7 @@ namespace PacBio.Consensus
                     Console.WriteLine(@"Accepting trace. POA Acc: {0}. POA Score: {1}. Ref: {2}", poaAl.Accuracy, poaScore, t.SmithWatermanAlignment.ReferenceName);
                     ++accepted;
                     var example = new CCSExample (t, rref, trialTemplate, newRegions);
+                    
                     var success = tds.AddExample(example);
                 if (success) {
                     Console.WriteLine ("Accepted");
