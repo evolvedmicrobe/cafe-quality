@@ -1,0 +1,206 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Stylish Article
+% LaTeX Template
+% Version 2.0 (13/4/14)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Mathias Legrand (legrand.mathias@gmail.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[fleqn,10pt]{SelfArx} % Document font size and equations flushed left
+
+
+%----------------------------------------------------------------------------------------
+%	Source Code Listings
+%----------------------------------------------------------------------------------------
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{darkgreen}{rgb}{0.0, 0.2, 0.13}
+\definecolor{ao}{rgb}{0.0, 0.5, 0.0}
+\lstdefinestyle{sharpc}{language=[Sharp]C, frame=single}
+\lstset{% general command to set parameter(s)
+basicstyle=\small, % print whole listing small
+keywordstyle=\color{blue}\bfseries,
+% underlined bold black keywords
+commentstyle=\small\color{ao}, % white comments
+stringstyle=\ttfamily, % typewriter type for strings
+columns=fullflexible, % keeps the comments from exploding
+showstringspaces=false} % no special string spaces
+
+
+%----------------------------------------------------------------------------------------
+%	COLUMNS
+%----------------------------------------------------------------------------------------
+
+\setlength{\columnsep}{0.55cm} % Distance between the two columns of text
+\setlength{\fboxrule}{0.75pt} % Width of the border around the abstract
+
+%----------------------------------------------------------------------------------------
+%	COLORS
+%----------------------------------------------------------------------------------------
+
+\definecolor{color1}{RGB}{0,0,90} % Color of the article title and sections
+\definecolor{color2}{RGB}{0,20,20} % Color of the boxes behind the abstract and headings
+
+%----------------------------------------------------------------------------------------
+%	HYPERLINKS
+%----------------------------------------------------------------------------------------
+
+\usepackage{hyperref} % Required for hyperlinks
+\hypersetup{hidelinks,colorlinks,breaklinks=true,urlcolor=color2,citecolor=color1,linkcolor=color1,bookmarksopen=false,pdftitle={Title},pdfauthor={Author}}
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE INFORMATION
+%----------------------------------------------------------------------------------------
+
+\JournalInfo{PBEP \#3, 2015} % Journal information
+\Archive{PBEP Series} % Additional notes (e.g. copyright, DOI, review/research article)
+
+\PaperTitle{PacBio Enhancement Proposal \#3 \\{\large Implementing a probability based scoring model for CCS}} % Article title
+
+\Authors{Nigel Delaney and David Alexander} % Authors
+
+\Keywords{} % Keywords - if you don't want any simply remove all the text between the curly brackets
+\newcommand{\keywordname}{Keywords} % Defines the keywords heading name
+
+%----------------------------------------------------------------------------------------
+%	ABSTRACT
+%----------------------------------------------------------------------------------------
+
+\Abstract{ The current PacBio CCS scoring model does not work in probability space, resulting in several oddities and inefficiencies.  This proposal presents a new scoring scheme that, conditioned on QV scores associated with a read, calculates an approximate probability that the template could have generated the read by integrating over all possible paths of insertions, deletions, mismatches and matches between the read and the template. }
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\flushbottom % Makes all text pages the same height
+
+\maketitle % Print the title and abstract box
+
+\tableofcontents % Print the contents section
+
+\thispagestyle{empty} % Removes page numbering from the first page
+
+%----------------------------------------------------------------------------------------
+%	ARTICLE CONTENTS
+%----------------------------------------------------------------------------------------
+
+\section*{Introduction} % The \section*{} command stops section numbering
+
+\addcontentsline{toc}{section}{Introduction} % Adds this section to the table of contents
+
+There is a long standing tradition in bioinformatics of generating alignments between sequences according to a dynamic programming method that scores alignments according to a fixed set of parameters for insertions, deletions, mismatches and matches.  More sophisticated frameworks treat the alignment problem using a probabilistic modeling framework, such as a Paired HMM model, in which there is a defined generative model with transition probabilities between insertion, deletion and match states.  It has been shown that when considering the optimal alignment, there is a direct correspondence between the probabilistic framework and the standard affine scoring dynamic programming method.\footnote{See the section \textit{The most probable path is the optimal FSA alignment} on page 82 in the book \textit{Biological Sequence Analysis} by Durbin et. al}
+
+Using a probabilistic framework has numerous advantages compared to using a fixed scoring scheme.  Questions such as how much evidence is there for one alignment as compared to another are directly answered by comparing probabilities.  Additionally all the tools and historical research concerning probabilistic modeling become available, guiding the choices of optimization methods and offering asymptotic guarantees about their accuracy.  Finally, in the context of DNA sequencing probabilistic frameworks allow us to naturally integrate over all the ways a particular read could be generated from a particular template.
+
+The PacBio analysis which generates consensus sequences does not currently use a probabilistic framework, a possibly glaring omission since there is a left-right HMM generative model believed to govern how PacBio reads are generated.\footnote{See the EDNA documentation for a discussion of this model.}  The central reason for this is that most probabilistic models use fixed parameters for transitions between states, while in practice there are often covariates associated with the bases of an emitted read that indicate how much certainty we have that they are a true representation of the template.
+
+These covariates, typically condensed into QV values, are not easily incorporated into the PacBio probabilistic framework for how reads are generated, and so the statistical method of estimating models and parameters is abandoned in favor of scoring scheme that rhymes with, though does not actually represent, a probability model.  Trouble quickly follows.  As examples of the difficulties presented by QV scores, consider how an insertion of size 2 is assessed from a probability perspective in the context of QV values, or how the probability of a deletion event, which is in many ways an attribute of the template, is instead assigned to read bases.
+
+This proposal intends to create restore the PacBio framework back into a true probability model.  It will do this by making one central conceit, which is to invert the relationship between the read and the template.  Although we normally think of the read as being a noisy signal of the template and conceive of a generative model for $P(R|T)$, we will instead consider the generative model as the read giving rise to templates, in other words we will consider $P(T|R)$.  In doing so we will treat the read and it's associate QV values as fixed parameters, and given several such reads will find the template with the highest probability of occurring across a set of reads.  Although counterintuitive, once framed this way, we are easily able to incorporate the probabilities given by QV values and work in a probabilistic way.  This framework also allows us to cleanly separate the domains of primary and secondary analysis, with the transistion between the two governed by the generation of the respective QV values as probabilities of certain events. 
+
+
+
+\subsection{Place holder}
+The MergeQV value is created within the method that converts pulses into bases\footnote{Method: \texttt{ AnalyzeInsertClassify@PulseToBaseStream.cs:671}}.
+
+\lstset{style=sharpc}
+\begin{lstlisting}[frame=single]
+// The mergeQV is provided by the pulse caller
+mergeQV.Add(pulseMergeQV[i]);
+\end{lstlisting}
+
+Tracing further up it appears this value is set in \texttt{TraceToPulse:454} by this code:
+
+The CCS algorithm is responsible for 
+
+
+
+
+\lstset{style=sharpc}
+\begin{lstlisting}[frame=single]
+// The mergeQV is provided by the pulse caller
+// Pulse-call quality values
+mergeQvList.Add((byte) Math.Round(
+	Math.Min(Math.Max(pulse.MergeQV, 0.0f), 255f)) );
+
+\end{lstlisting}
+
+This seems to be mainly set in the FrameCrfClassiier\footnote{\texttt{FrameCrfClassifier.cs:600}}
+
+\lstset{style=sharpc}
+\begin{lstlisting}[frame=single, float=*]
+/// Estimate the quality score for a given segment's classification
+private float ComputeQualityValue(int label, int rhsLabel, int startFrame, int endFrame, out float mergeQv)
+{
+  // Probability of a miscall. If label=0, P(deletion).  
+  // Otherwise, includes P(insertion), based on comparison to the P(label=0) case.
+  var miscallProb = MiscallProb(label, rhsLabel, startFrame, endFrame);  
+
+  // Probability that the called pulse includes a merge error (label != 0 case);
+  // or, Probability that a No-Pulse region missed a short (single-frame) pulse.
+  var mergeOrMissProb = MergeOrMissProb(label, rhsLabel, startFrame, endFrame);  
+
+  if (label == 0)
+  {
+      mergeQv = LogPeToPhredQv(new LFloat(float.Epsilon)); 
+      return LogPeToPhredQv(miscallProb + mergeOrMissProb);
+  }  
+
+  // Otherwise, for a pulse label, return separate label and merge results
+  mergeQv = LogPeToPhredQv(mergeOrMissProb);
+  return LogPeToPhredQv(miscallProb);
+}       
+\end{lstlisting}
+
+%------------------------------------------------
+
+\section*{The new scoring model and associated QVs}
+
+\addcontentsline{toc}{section}{The new scoring model and associated QVs} % Adds this section to the table of contents
+
+
+\subsection{They make scoring complex}
+
+The ``Merge Move" in our template scoring routine is done in one of two distinct ways depending on if a DelTag is present.  With positions denoted by Figure \ref{fig:del}, a deletion move is currently scored according to the equation shown below.  
+
+%\begin{figure}[ht]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
+% \includegraphics[width=\linewidth]{Merge}
+%\caption{Merge Scoring}
+%\label{fig:del}
+%\end{figure}
+
+\[
+ \alpha_{i-1,j-2}  +  \begin{cases}
+			\text{Merge score from } R_{i}  & \text{if }  R_{i} = T_{j} \text{ \& } R_{i} = T_{j-1} \\
+			\text{A constant (typically }-\infty\text{)} & \text{otherwise}
+			\end{cases}
+\]
+
+
+%------------------------------------------------
+
+\section{Empirical Arguments Against DelTags}
+
+
+%------------------------------------------------
+
+
+\section{Conclusions and Possibilities}
+
+
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
