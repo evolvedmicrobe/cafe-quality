@@ -123,13 +123,7 @@ namespace PacBio.Consensus
                 set.Item1.AddRange (train_n);
                 set.Item2.AddRange (test_n);
                 needed = desiredTrainingCount - set.Item1.Count;
-            }
-            if (Math.Abs (set.Item1.Count - set.Item2.Count) > 2) {
-                Console.WriteLine ("Inside main");
-                Console.WriteLine ("Train: " + set.Item1.Count);
-                Console.WriteLine ("Test: " + set.Item2.Count);
-                throw new ApplicationException ("This mismatch should not happen!");
-            }
+            }           
             Console.WriteLine ("For " + snrGroup + " - " + orgCoverageGroup + " From Bin: " + obtainedOriginal + " From Higher Bin: " + obtainedBySampling);
             return set;           
         }
@@ -146,13 +140,15 @@ namespace PacBio.Consensus
                 var examples = kv.Value;
                 var n = examples.Count / 2;
                 int n_train = n + (examples.Count % 2);
-                test.AddRange (examples.Take ( n_train));
-                train.AddRange (examples.Skip (n_train).Take (n));
+                train.AddRange (examples.Take ( n_train));
+                test.AddRange (examples.Skip (n_train).Take (n));
+                Console.WriteLine ("n_train:\t" + n_train);
+                Console.WriteLine ("n:\t" + n);
                 Console.WriteLine ("Train: " + train.Count);
                 Console.WriteLine ("Test: " + test.Count);
             }
-            if (Math.Abs (train.Count - test.Count) > 2) {
-                Console.WriteLine ("Inside sub");
+            if (Math.Abs (train.Count - test.Count) > cur.Count) {
+                Console.WriteLine ("Inside sub method");
                 Console.WriteLine ("Train: " + train.Count);
                 Console.WriteLine ("Test: " + test.Count);
                 throw new ApplicationException ("This mismatch should not happen!");
