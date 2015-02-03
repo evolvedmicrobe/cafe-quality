@@ -71,9 +71,10 @@ namespace VariantCaller
             References = (new FastAParser(referenceFile)).Parse().Select(x => new Reference((Sequence)x)).ToList();
 
             // Start loading CCS reads
+
             var ccs_reads_maker = Task<List<CCSRead>>.Factory.StartNew( () =>
                 {
-                   return ccsReads.SelectMany(p => (new FastAParser(p))
+                    return ccsReads.SelectMany(p => (p.EndsWith(".gz") ? (new FastAZippedParser(p)) : (new FastAParser(p)))
                                                 .Parse()
                                                 .Select(x => new CCSRead((Sequence)x)))
                             .ToList();
@@ -126,6 +127,7 @@ namespace VariantCaller
         /// </summary>
         private void assignCCSReadsToReference()
         {
+            //TODO: CHANGE ME TO WORK WITH ARBITRARY INPUT
             var lambda = References.Find(r => r.RefSeq.ID.StartsWith("lambda_NEB3011", StringComparison.Ordinal));
             foreach (var v in CCSReads) {
                 if (v.Movie.StartsWith ("m141115", StringComparison.Ordinal)) {
