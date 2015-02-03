@@ -12,7 +12,7 @@ colors =  wes_palette(name = "Moonrise2", type="discrete")
 # Layout Branches
 cvp = viewport(width=0.95, height=0.95, name="base")
 pushViewport(cvp)
-grid.rect()
+#grid.rect()
 
 getPoses <- function(j) {
   w = 1 / (2*j)
@@ -198,6 +198,8 @@ drawTransitions <- function(start_col) {
              grobX(grid.get(e_c), 210), grobY(grid.get(e_c), 210),
              angle=90, shape= 1, square=FALSE,  curvature=0, open=TRUE, ncp=1,
              arrow=arr, gp=gpar(col=colors2[4], lwd=lwd * min_weight))
+  
+    
 }
 
 drawTransitions(2)
