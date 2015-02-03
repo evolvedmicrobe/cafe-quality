@@ -139,10 +139,31 @@ The model proposed for $P(T|R)$ is a left-right generative HMM that is designed 
 
 PacBio emits reads when sequencing a given template and our probabilistic model for this is motivated by our biological understanding of the sequencing process.  This section attempts to explain both the model and the reality it is designed to approximate.
 
-\begin{figure}[ht] %% The [h] means place the figure about here.
-	\includegraphics[width=\linewidth]{Deletion}
+In PacBio sequencing, the enzyme traverses along the template and as it incorporates nucleotides connected to fluorescent molecules, this creates 'pulses' detected by our optical equipment which are converted into basecalls.\footnote{https://www.youtube.com/watch?v=NHCJ8PtYCFc}  Our current model envisions 5 separate processes that can occur as a basepair is being incorporated by a template:
+
+
+\begin{enumerate}
+  \item \textbf{A Correct Emission (Match)} - The basepair is acquired by the enzyme, and a single fluorescent pulse is detected.  Typically, this pulse is identifed as coming from the corresponding fluorophore of the incorporated basepair, but occasionally may be miscalled due to an instrumentation error, which creates a substitution when viewed by later alignments.
+  \item \textbf{A Missed Emission (Deletion)} - Sometimes the fluorescent signal emitted during nucleotide incorporation is not enough to meet the criteria to be emitted as a space, leading to a base which was actually incorporated not causing a basepair to be emitted.
+  
+    \item \textbf{A Merge (Deletion) } - Occasionally, the enzyme will incorporate two basepairs that are only detected as one pulse.  This can occur if either the distance between acquiring separate molecules is too short to be detected, or if the   
+   
+  
+  \item \textbf{A Failed Incorporation (Insertion) } - Occasionally, the enzyme will begin to incorporate a base, but release the bound nucleotide before finishing the incorporation reaction.  This is often referred to as a branch and results in the emission of the same basepair as the true basepair which is next incorporated.
+  
+  \item \textbf{A Stick (Insertion) } - Sometimes, either the instrument `hiccups' and emits pure noise as a pulse equivalent to a basepair or a fluorescent molecule will randomly float into the detection level of the ZMW and will appear as a signal despite not being connected to an incorporation reaction (this behavior of `sticking' to the bottom of the ZMW leads to the given name).  Although one might think of this event leading to any basepair with equal probability, fluorphores may be quite biased to emit certain basepairs.
+     
+\end{enumerate}
+
+
+Although additional complexity may be at play, and if believed to be important should be accounted for, at present these are the dominant processes that occur as the PacBio technology converts basepairs into reads and so for the basis of the approximating HMM model described next.
+
+This HMM 
+
+\begin{figure*}[ht] %% The [h] means place the figure about here.
+	\includegraphics[width=\linewidth]{Hmm}
 		\caption{The calculation of the deletion score.  The left matrix element is added to an amount determined by the comparison of the bases shown.}				
-\end{figure}
+\end{figure*}
 
  
 
