@@ -80,8 +80,15 @@ namespace PacBio.Consensus
 
     public class ConsensusTrain
     {		
-
-        const float FIXED_MATCH_SCORE = 1.0F;
+        /// <summary>
+        /// Ideally this is a log probability, set to 0.98 to better behave in exponent.
+        /// This is a total hack.
+        /// 
+        /// Log(.98) = -0.02020271
+        /// 
+        /// With MCE scoring, everything should be forced to stay below this (hopefully)
+        /// </summary>
+        const float FIXED_MATCH_SCORE = -0.02020271f;
 
         private static PacBioLogger logger = PacBioLogger.GetLogger("ConsensusTrain");
 		
