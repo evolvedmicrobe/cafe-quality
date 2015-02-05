@@ -135,9 +135,9 @@ Although this may initially seem like a strange path, we'll show that there is a
 
 This proposal attempts to create a framework for PacBio consensus scoring that represents a true probability model according to the $P(T|R)$ framework.  It will do this by making the central conceit already mentioned, which is to invert the relationship between the read and the template so that we maximize the likelihood of templates being emitted by reads.
 
-The model proposed for $P(T|R)$ is a left-right generative HMM that is designed to mirror the original generative model for PacBio data, thus approximating its mechanics.  For example, while the original generative model has a `merge` transition which represents the probability that two bases are emitted as one (a homopolymer deletion), the new generative model has a `spit` probability that represents the transition where a base is emitted twice (a homopolymer insertion).  In this way there is a direct correspondence between the `Edna` model and this new probability model.  Given this framework, we can then assess the total probability for $P(T|R)$ by integrating over all paths through the left-right HMM given by the read that would emit the specified template sequence.  The key feature that this model is able to exploit is that the transition between the read bases in the underlying left-right HMM are governed by the QV values that accompany each read base, allowing for them to naturally be accommodated in a generative and probablistic framework.  
+The model proposed for $P(T|R)$ is a left-right generative HMM that is designed to mirror the original generative model for PacBio data, thus approximating its mechanics.  For example, while the original generative model has a `merge` transition which represents the probability that two bases are emitted as one (a homopolymer deletion), in the new generative model we could simply envision a `stutter` probability that represents the transition where a base is emitted twice (a homopolymer insertion).  In this way there is a direct correspondence between the `Edna` model and this new probability model.  Given this framework, we can then assess the total probability for $P(T|R)$ by integrating over all paths through the left-right HMM given by the read that would emit the specified template sequence.  The key feature that this model is able to exploit is that the transition between the read bases in the underlying left-right HMM are governed by the QV values that accompany each read base, allowing for them to naturally be accommodated in a generative and probabilistic framework.  
 
-I now review the original generative mode (Edna), and then explain the scoring model.
+Next we review the original generative mode (Edna), and then explain the new scoring model it implies.
 
 
 \section{The Model for $P(R|T)$}
@@ -149,9 +149,10 @@ In PacBio sequencing, the enzyme traverses along the template and as it incorpor
 
 \begin{enumerate}
   \item \textbf{A Correct Emission (Match)} - The basepair is acquired by the enzyme, and a single fluorescent pulse is detected.  Typically, this pulse is identifed as coming from the corresponding fluorophore of the incorporated basepair, but occasionally may be miscalled due to an instrumentation error, which creates a substitution when viewed by later alignments.
+  
   \item \textbf{A Missed Emission (Deletion)} - Sometimes the fluorescent signal emitted during nucleotide incorporation is not enough to meet the criteria to be emitted as a space, leading to a base which was actually incorporated not causing a basepair to be emitted.
   
-    \item \textbf{A Merge (Deletion) } - Occasionally, the enzyme will incorporate two basepairs that are only detected as one pulse.  This can occur if either the distance between acquiring separate molecules is too short to be detected, or if the   
+    \item \textbf{A Merge (Deletion) } - Occasionally, the enzyme will incorporate two basepairs that are only detected as one pulse.  This can occur if either the time between acquiring separate molecules is too short to be detected, or if the the same molecule donates two nucleotides sequentially to the incorporation reaction, such that the 
    
   
   \item \textbf{A Failed Incorporation (Insertion) } - Occasionally, the enzyme will begin to incorporate a base, but release the bound nucleotide before finishing the incorporation reaction.  This is often referred to as a branch and results in the emission of the same basepair as the true basepair which is next incorporated.
@@ -161,11 +162,11 @@ In PacBio sequencing, the enzyme traverses along the template and as it incorpor
 \end{enumerate}
 
 
-Although additional complexity may be at play, and if believed to be important should be accounted for, at present these are the dominant processes believed to occur as the PacBio technology converts basepairs into reads and so for the basis of the approximating HMM model described next.
+Although additional complexity may be at play, and if believed to be important should be accounted for, at present these are the dominant processes believed to occur as the PacBio technology converts basepairs into reads and so form the basis of the approximating HMM model described next.
 
 \begin{figure*}[ht] %% The [h] means place the figure about here.
 	\frame{\includegraphics[width=\linewidth]{Hmm}}
-		\caption{The left-right HMM that defines the paths by which an example template (AGG) can produce reads.  Each circle represents a latent state that can produce basepairs (or no observation for nodes colored as deletions) if visited by a stochastic path through the HMM.  Possible transitions into and out of each read are indicated by arrows.  Thick arrows represent paths presumed to be the most frequently used, while thin arrows represent less common occurrences. }				
+		\caption{The left-right HMM that defines the paths by which an example template (AGG) can produce reads.  Each circle represents a latent state that can produce basepairs (or no observation for nodes colored as deletions) if visited by a stochastic path through the HMM.  Possible transitions into and out of each state are indicated by arrows.  Thick arrows represent paths presumed to be the most frequently used, while thin arrows represent less common occurrences. }				
 \end{figure*}
 
 \subsection{The Left to Right HMM}
@@ -174,7 +175,7 @@ An HMM model is defined by a structure which defines what symbols are emitted an
 
 Figure 1 shows the structure of the HMM that determines how a template would emit reads when sequenced by the RS.  Not shown are the emission probabilities, but these follow directly from the mechanisms enumerated above.  For example, in a deletion event no basepair is emitted, while in a stick a random basepair is emitted, and in a branch the basepair matching the next template position is emitted (with some probability of miscalls for all emissions).   
 
-Importantly, this HMM structure is identical to a conditional random field, or CRF model, and so we can use all the standard tricks that apply to such models.  For example, in order to calculate the likelihood of a given read being emitted from a template, we can use the standard dynamic programming methods.  In this framework, each class of latent variable is represented by a position in an $ M \times N$ matrix which stores the probability that for the emission $i$ we were at template position $j$ and at the type of node stored by the matrix (as shown in Figure 2).  We then recursively populate each of these matrices using the standard algorithm described below.
+Importantly, this HMM structure is identical to a conditional random field, or CRF model, and so we can use all the standard tricks that apply to such models.  For example, in order to calculate the likelihood of a given read being emitted from a template, we can use the standard dynamic programming methods.  In this framework, each class of latent variable is represented by a position in an $ I \times J$ matrix which stores the probability that for the emission $i$ we were at template position $j$ and at the type of node stored by the matrix (as shown in Figure 2).  We then recursively populate each of these matrices using the standard algorithm described below.
 
 \begin{algorithm}
 \caption*{\textbf{Standard Recursion Algorithm to Calculate Probability }}
@@ -186,7 +187,7 @@ Importantly, this HMM structure is identical to a conditional random field, or C
 \STATE $A[i,j] \leftarrow 0$
 \ELSE
 \STATE \[
-	A[i,j]  \leftarrow \sum\nolimits_{\text{ All Connecting Nodes} } p_{\text{At Node}} \cdot p_{\text{Transistion}} \cdot p_{\text{Emission}}
+	A[i,j]  \leftarrow \sum\nolimits_{\text{ All Connecting Nodes} } p_{\text{At Node}} \cdot p_{\text{Transition}} \cdot p_{\text{Emission}}
 	\]
 \ENDIF	
 \ENDFOR
@@ -217,9 +218,9 @@ This CRF is a complete specification of the PacBio generative model, and the inf
 
 Given reads, if we want to estimate the probability for a template, we simply invert their relationship.  Seen from the perspective of the recursion matrices, this is exactly equivalent to "flipping" the placement along the axis so that the read bases now run along the top of the matrix and the template base run down the side.  As such, the same model as shown in figure 1 can be used, with the only change being that the labels and respective emission probabilities for insertion and deletion events are switched.  Fortunately, there is a direct correspondence between the types of deletions and insertions, with a Branch being equivalent to a Merge, and a Stick being equivalent to a Dark.  Therefore, while in our inverted framework what was previously seen as a deletion becomes an insertion, there is no need to write a separate scoring or optimization method.  The same CRF model and code base can be used for both, and the parameter estimates obtained from Edna can directly be used for the inverted inference process of $P(T|R)$.
 
-The one critical difference though is that with read bases, we have features attached to them, covariates such as SNR, IPD, etc. that we may wish to incorporate into our scoring scheme.  A straightforward way to do this is to model the transition probabilities as functions of these variables, and to do this we can simply co-opt the tools of nominal logistic regression.
+The one critical difference though is that with read bases, we have features attached to them, covariates such as SNR, IPD, Pk-mid, BaselineBias, Baseline$\sigma$  etc. that we may wish to incorporate into our scoring scheme.  A straightforward way to do this is to model the transition probabilities as functions of these variables, and to do this we can simply co-opt the tools of nominal logistic regression.
 
-The central insight here is that in the CRF model shown in figure 1, picking a random path out of any node in the CRF is equivalent of making a draw of size 1 from a multinomial distribution.  Nominal logistic regression is the standard and well established way to model how certain covariates affect such outcomes, and we can therefore consider the problem of fitting transition probabilities as exactly equivalent to fitting the probabilities in a multinomial distributions as a function of these covariates.  As a quick review, in nominal logistic regression, the transition probability for one category, $\pi_{1}$, is arbitrarily set as the reference and the relative probabilities of the other transiitons are fit as linear functions of the covariates. \footnote{See \textit{An Introduction to Generalized Linear Models} by Dobson and Barnett or any other text on GLMs for a more complete explanation.}
+The central insight is that in the CRF model shown in figure 1, picking a random path out of any node in the CRF is equivalent of making a draw of size 1 from a multinomial distribution.  Nominal logistic regression is the standard and well established way to model how certain covariates affect such outcomes, and we can therefore consider the problem of fitting transition probabilities as exactly equivalent to fitting the probabilities in a multinomial distribution as a function of these covariates.  As a quick review, in nominal logistic regression, the transition probability for one category, $\pi_{1}$, is arbitrarily set as the reference and the relative probabilities of the other transiitons are fit as linear functions of the covariates, $X$. \footnote{See \textit{An Introduction to Generalized Linear Models} by Dobson and Barnett or any other text on GLMs for a more complete explanation.}
 
 \begin{dmath}
 \text{logit} (\pi_{J}) = \text{log} ( \frac{\pi_{J}}{\pi_{1}}) = X \beta
@@ -227,7 +228,7 @@ The central insight here is that in the CRF model shown in figure 1, picking a r
 
 In the machine learning field this is often referred to as a `softmax' function.  We can now consider the calibration of QV scores as equivalent to finding the parameters $\beta$ which are best fit for this model.  Once this model is fit, we then have a choice.  We can either directly emit the covariates, or features, that are used in the model from primary, or use the model to calculate the respective probabilities in primary and emit them as QV scores which directly represent different transition probabilities.  An example of how such QVs would be interpreted is shown in Table 1.  
 
-\begin{table*}[bt]
+\begin{table*}[]
 \caption{Table of QV Meanings}
 \centering
     \begin{tabular}{| l | p{7cm} | c |  }
@@ -243,11 +244,11 @@ In the machine learning field this is often referred to as a `softmax' function.
     \end{tabular}
 \end{table*}
 
-Note that as before, now that we have a unified statistical model, we can use all the statistical tools that come along with it.  For example, to examine which covariates affect the different error rates, and which features are necessary, we can simply compared models using standard tools such as AIC, deviance values or the Wald test to assess the importance of individual parameters.  The unified statistical model enables all of this.
+Note that as before, now that we have a unified statistical model, we can use all the statistical tools that come along with it.  For example, to examine which covariates affect the different error rates, and which features are necessary, we can simply compare models using standard tools such as AIC, deviance values or the Wald test to assess the importance of individual parameters.  We can also simulate data and compare to observed data to assess model adequacy.  The unified statistical model enables all of this.
 
-\section{Model Training}
+\subsection{Model Training}
 
-As the model specified here meets the criteria for the Cramer-Rao lower bound, maximum likelihood is the best choice for parameter estimation.  Although the model is more complicated, there is an immediate analogy to Baum-Welch which I believe makes EM a clear choice for fitting the model parameters, $\beta$.
+As the model specified here meets the criteria for the Cramer-Rao lower bound, maximum likelihood is the best choice for parameter estimation as it is guaranteed to beat any other method if given enough data.  Although the model is more complicated, there is an immediate analogy to Baum-Welch which I believe makes EM a clear choice for finding the MLE for the model parameters, $\beta$.
 
 The central intuition behind Baum-Welch is that given a set of observations from a multinomial distribution, estimating the parameters for a constant value probability model is trivial as the MLE for each emission parameter is:
 
@@ -255,139 +256,30 @@ The central intuition behind Baum-Welch is that given a set of observations from
 p = \frac{\text{ Times happened}}{\text{ Times could have happened}}
 \end{dmath}
 
-However, in the CRF model we never actually observe draws from the multinomial distribution, as the underlying path taken through the model is hidden.  As a result, one cannot apply this simple formula.  The EM algorithm allows a solution to this dilemma. 
+However, in the CRF model we never actually observe draws from the multinomial distribution, as the underlying path taken through the model is hidden.  As a result, one cannot apply this simple formula.  The EM algorithm provides a solution to this dilemma. In Baum-Welch, which is an EM algorithm, in the E step one uses a current parameter guess to generate `pseudo-counts`, and then in the M step uses a slight modification of the simple formula above to maximize the parameters, iterating until convergence.
 
-which is an EM algorithm, in the E step one uses a current parameter guess to generate `pseudo-counts`, and then in the M step uses a slight modification of the above simple formula above to maximize the parameters, iterating until convergence.
-
-A simple extension of this principle allows us to fit our model for $P(T|R)$ in the presence of covariates.  In nominal logistic regression the multinomial parameters are not fixed and so to find the MLE one cannot use the analytical solution as in the constant value case but must instead solve a non-linear optimization.  However, Fisher Scoring provides an efficient means to do this, and can often converge quite quickly.  Therefore, just as in Baum-Welch we use the current parameters of the model to generate pseudo-counts in the E step, in the M step we can simply use the standard nominal regression Fisher Scoring algorithm to maximize the parameters, again iterating until convergence. 
-
-
-In doing so we will treat the read and it's associate QV values as fixed parameters, and given several such reads will find the template with the highest probability of occurring across a set of reads.  Although counterintuitive, once framed this way, we are easily able to incorporate the probabilities given by QV values and work in a probabilistic way.  This framework also allows us to cleanly separate the domains of primary and secondary analysis, with the transition between the two demarcated by the paradigm shift  $P(R|T) \rightarrow P(T|R) $ and the concurrent generation of the respective QV values as probabilities of certain events (which can be framed as maximizing the fixed parameters given the observed template). 
+A simple extension of this principle allows us to fit our model for $P(T|R)$ in the presence of covariates.  In nominal logistic regression the multinomial parameters are not fixed, but vary according to the covariates and so to find the MLE one cannot use the simple analytical solution.  Instead, one must solve a non-linear optimization.  However, Fisher Scoring provides an efficient means to do this, and can often converge quite quickly.  By analogy, just as in Baum-Welch we use the current parameters of the model to generate pseudo-counts in the E step, and by a simple extension to the M step we use the standard nominal regression Fisher Scoring algorithm to maximize the parameters, iterating until convergence. 
 
 
 
-
-\begin{figure*}[h] %% The [h] means place the figure about here.
+\begin{figure*} %% The [h] means place the figure about here.
 	\frame{\includegraphics[width=\linewidth]{OldvNewFigure}}
-		\caption{A comparison of the set of inter-related components required for the older as compared to the newer framework.  Boxes represent separately maintained models and code bases, and arrows indicated dependencies between modules. }				
+		\caption{A comparison of the set of inter-related components required for the older as compared to the newer framework.  Boxes represent separately maintained models and code bases, and arrows indicate dependencies between modules. }				
 \end{figure*}
 
 
-\subsection{ Calculating $\mathbf{P(T|R)}$} 
-
-The inputs are a read of length, J, and a template of length I.  Each base in the read also has an associated QV values given by Table 1.   The algorithm proceeds by recursively populating a matrix and returning the bottom right value as described next.  In describing the algorithm and to account for offsetting, in what follows read and template positions are 1-based indexed, while positions in the matrix that are filled are referred to by 0-based indexes. 
 
 
+\section{Discussion}
 
+Figure 3 shows all the components that the variant calling group is currently responsible for and that affect CCS accuracy.  In many ways it is a disparate collection of inter-related items with obfuscated relationships between them.  It is exceptionally difficult to assess how changes in one affect another, or to quantify how several \textit{ad-hoc} decisions affect overall accuracy.
 
+In contrast, this PBEP specifies a unified statistical model that provides a single mechanism with which to assess accuracy and which to jointly estimate parameters.  This new model is simpler and more unified.  Although considering $P(T|R)$ seems unusual, taking this plunge immediately allows us to maximize the probability of the template sequence given the reads, and provides a statistical framework with which to compare possible consensus sequences.  Additionally, though the generative model itself has quite changed, the intuition governing the model has been carried over, with every type of move in the generative model (Edna) having a corresponding QV value and scoring mechanism in the algorithm.  The leap is also not as large as it seems, as the current CCS Viterbi scoring algorithm can be seen as a specific set of parameters for the general model specified here (Excepting the nuisance edge cases of the Deletion Tags, though these could readily be incorporated as a covariate in the function for transition parameters).  In working in probability space, we also benefit from all the associated tools.  We can assess different model structures by considering them as sub-cases of the general model and naturally obtain a way to fit or compare them.
 
+Although at present a nominal-regression inspired model is suggested for determining the parameters in the CRF, clearly other options are possible, including GBMs and Gaussian Process models.  The essential feature that we want to preserve however is that all parameters are estimated in the context in which they will be used and jointly, rather than fitting parameters marginally as sub-cases.
 
-\subsection{Recursion steps}
-After the matrix is initialized, each element in the matrix is recursively populated with the logarithm of the probability of an alignments ending at $i,j$ by examining the available moves, either an insertion, deletion or match.  If a particular step cannot be calculated because it is too close to the edge, it is skipped.  Each possible move is described next.  Top row and first column are initialized as deletions or insertions of the relevant length.  Note that in practice, the elements are stored as log probabilities, but are described as actual probabilities here to simplify the description.
+If a generative parametric model is believed to apply to the data, as we think it does, then such a parametric model is the absolute best way to analyze it.  This model achieves that goal.
 
-
-
-
-
-
-\subsubsection{\textbf{Match}}
-
-\begin{dmath}
-\text{Match Probability} = \\
-	 \alpha_{i-1,j-1}  \times  (1-p_{id}+p_{is}+p_{dd}+p_{ds})  \times 
-	 \begin{cases}
-							 \ (1-p_{s}) & \text{if }  R_{j} = T_{i} \\
-							 \frac{1}{3} \times p_{s}  & \text{if }  R_{j}  \neq T_{i} 
-							 \end{cases}
-\end{dmath}
-
-
-\begin{figure}[ht] %% The [h] means place the figure about here.
-	\includegraphics[width=\linewidth]{Match}
-		\caption{The calculation of the match score.  The upper element is added to an amount determined by the comparison of the bases shown.}
-\end{figure}
-
-This is simply the probability that a match event occurred (rather than an insertion or deletion), plus the appropriate emmission probability for the base (with a uniform probability,  $\frac{1}{3}$, for each possible incorrect base).
-
-\subsubsection{\textbf{Insertion}}
-
-
-\begin{dmath}
-\text{Insertion Probability} = \\
-	\alpha_{i-1,j}  \times 
-	\begin{cases}
-		p_{is_{j+1}}  & \text{if }  T_{i} = R_{j+1} \\
-		p_{id_{j+1}} & \text{if }  T_{i}  \neq R_{j+1} 
-	\end{cases}
-\end{dmath}
-
-\begin{figure}[ht] %% The [h] means place the figure here.
-	\includegraphics[width=\linewidth]{Insertion}
-		\caption{The calculation of the insertion value.  The upper diagonal element is added to an amount determined by the comparison of the bases shown.}
-\end{figure}
-
-
-This insertion score differs from what is typical.  It is designed to account for two separate events.  First, is designed to account for the possibility that two bases were read simultaneously as one base (presumably because the enzyme acquired the next base before a break in the signal intensity was observed, and if this was the same base, this could be interpreted as one merged pulse).
- 
-\subsubsection{\textbf{Deletion}}
-
-\begin{figure}[ht] %% The [h] means place the figure about here.
-	\includegraphics[width=\linewidth]{Deletion}
-		\caption{The calculation of the deletion score.  The left matrix element is added to an amount determined by the comparison of the bases shown.}				
-\end{figure}
-
-\begin{dmath}
-	\text{Deletion Probability} = \alpha_{i,j-1}  \\
-	\times  \begin{cases}
-				p_{ds_{j+1}}  & \text{if }  \text{R}_{j} = R_{j+1} \\
-				p_{dd_{j+1}} & \text{if }  \text{R}_{j} \neq R_{j+1} 
-				\end{cases}
-\end{dmath}
-
-
-
-The deletion probability, like the insertion probability, has two different values, and as before this is motivated by the underlying process determining how PacBio data is generated.  For PacBio data, there is a ``branching" process that occurs during nucleotide incorporation in which the polymerase may begin to incorporate a base and hold it long enough for the base to be detected in the sequencer before eventually releasing it after failing to complete the incorporation reaction.  In the event of a true branch, the inserted (or in our framework deleted) base should thus match the next template base.  Also as before, the observation could also have been caused by a non-branch event, namely a stick where the base happens to match, and so the QV value used is intended to encompass both a branch and non-branch event leading to this base being emitted.
-
-%---------------  OPTIMIZATION
-
-\subsection{Parameter Estimation}
-
-Before describing the fitting, it is easiest if you have the simple   
-
-\subsection{Intuitive bits}
-
-
-%------------------------------------------------
-
-
-
-\section{Conclusion}
-
-Statistical models should be motivated by the underlying processes that generate the data, but inevitably must make concessions to bias versus variance trade-offs that will govern if in practice the model can perform adequately for the purpose it is designed for.
-
-Our current CCS consensus model is poor largely because it examined this trade-off and sort of lost at both bias and variance.  Variance in parameter estimates, such as the QV recalibration, is introduced because the same observed error, such as a deletion in a homopolymer, could be explained by multiple different events but by using Viterbi scoring only one of these could be considered, leading to multiple modes in the optimization.  Similarly, bias is introduced because in addition to the hard-coded values everywhere, the model does not adequately capture the generative process in which multiple events can lead to the same outcome, forcing it to make artificial trade-offs required when one possibility must represent all possibilities.
-
-This new model is simpler and more unified.  Although considering $P(T|R)$ seems unusual, taking this plunge immediately allows us to maximize the probability of the template sequence given the reads, and provides a statistical framework with which to compare possible consensus sequences.  It can also be seen as an approximation of the Bayes corollarly, which we need to use if we maintained the model for $P(R|T)$ such that we would need to calculate:
-
-\begin{dmath}
-P(R|T) = \frac{P(T|R) \cdot P(R)}{P(T)}
-\end{dmath}
-
-Although this equation is the fundamentally correct model for primary to optimize the raw read accuracy, the denominator, $P(T)$ is irrelevant if we use a uniform prior over templates, and the probability of the read and it's associated QV values, $P(R)$, is neither defined and almost certainly would be challenging to calculate even if we could define it.  The calculation of $P(R)$ is a fundamental problem that makes modeling difficult.  In contrast, this framework effectively sets $P(R) = 1$ and can be seen as a very strong prior on the observed data (and after all, that read already has been observed to have occurred).  
-
-  Additionally, though the generative model itself has quite changed, the intuition governing the model has been carried over, with every type of move in the generative Edna model having a corresponding QV value and scoring mechanism in the algorithm.  However, nuisances edge cases, such as Deletion Tags and how the separate  `Knight's move' to represent a deletion in a homopolymer context have been excised.   In the later case, the underlying intuition has still been preserved in scoring that captures the branch or merge moves respectively, we have simply replace multiple ways to score these observations with a single one.
-
-Finally, it is worth commenting on how to calculate the QV models in this new framework.  This will be the subject of another write-up, but at present I think it suffices to say that while QV scores are traditionally calculated marginally (that is without any knowledge of the other QVs or there relationship to the true template), one hundred years of statistical literature says that with a unified model it is best to jointly estimate parameters.  In this regard, given any framework we can directly maximize $P(T|R)$, and green pastures likely await there.
-
-\section{Model Training}
-
-As the model specified here meets the criteria for the Cramer-Rao lower bound, maximum likelihood is the best choice for parameter estimation.  Since we are looking to find the ML parameters of a HMM, the Baum-Welch algorithm is a natural choice for optimization.
-
-The central insight in this is that once the alignment is known, the models transition and emission probabilities are easy to estimate by simple counting.  Similarly, once the probabilities of transmission and emission are known, it is easy to find the most likely path by 
-
-\begin{dmath}
-\mathcal{L}  (R|T) = P(T|R) = \sum\nolimits_{A} P(T|A,R)P(A|R)
-\end{dmath}
 
 %----------------------------------------------------------------------------------------
 
