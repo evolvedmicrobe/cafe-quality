@@ -51,6 +51,14 @@
     <Compile Include="DataSetup.cs" />
     <Compile Include="TraceSet.cs" />
     <Compile Include="Trace.cs" />
+    <Compile Include="ParameterSet.cs" />
+    <Compile Include="ReadTemplatePair.cs" />
+    <Compile Include="DynamicProgrammingMatrixPair.cs" />
+    <Compile Include="Evaluate.cs" />
+    <Compile Include="MathUtils.cs" />
+    <Compile Include="QualityUtils.cs" />
+    <Compile Include="RectangularArrays.cs" />
+    <Compile Include="LoggedHMM.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
