@@ -13,10 +13,13 @@ nrow(d)
 
 
 #Merge in SNR Data?
-snrD = read.csv("/Users/nigel/git/cafe-quality/NotTracked/master_full/master_5ba5286_combined_reads.csv")
+snrD = read.csv("/Users/nigel/git/cafe-quality/NotTracked/master_5ba5286_combined_reads.csv")
 snrD = snrD[snrD$Reference=="HP.V1.02",]
 head(snrD)
 colnames(snrD)[colnames(snrD)=="ZMW"]<-"Zmw"
+
+
+
 
 
 ## Now to count how many subreads have null bases, this occurs if any of the following occurs
@@ -76,11 +79,44 @@ nrow(md)
 
 head(md)
 md$MeanGC = .5 * (md$SnrG + md$SnrC)
-pdf("DeletionRatebySNRGC.pdf", width=7, height = 7)
-ggplot(md[md$NumSubReads>120,],aes(x=MeanGC,y=NumC,colour=ReverseComplementedOriginally))  + geom_point(alpha=.5) + geom_smooth(size=2) +theme_bw(base_size=14) +
+
+
+pdf("DeletionRatebySNRGC.pdf")
+ggplot(md[md$NumSubReads>120,],aes(x=MeanGC,y=NumC,colour=ReverseComplementedOriginally))  + geom_point(alpha=.5) + geom_smooth(size=1.5) +theme_bw(base_size=14) +
   labs(x="Mean G+C SNR", y = "Average number of C's from a 5 bp C homopolymer", title = "Deletion rate at different SNR levels" ) +
   scale_colour_manual(values=c("red","black"), labels=c("G","C"),name=c("Read Direction"))
 dev.off()
+
+
+cs = md[md$NumSubReads>120 & md$ReverseComplementedOriginally == "True",]
+head(cs)
+
+ggplot(cs,aes(x=SnrC,y=NumC,colour=ReverseComplementedOriginally))  + geom_point(alpha=.5) + geom_smooth(size=1.5) +theme_bw(base_size=14) +
+  labs(x="SNR C", y = "Average number of C's from a 5 bp C homopolymer", title = "Deletion rate at different SNR levels" ) +
+  scale_colour_manual(values=c("red","black"), labels=c("G","C"),name=c("Read Direction"), guide=FALSE)
+
+gs = md[md$NumSubReads>120 & md$ReverseComplementedOriginally == "False",]
+ggplot(gs,aes(x=SnrC,y=NumC,colour=ReverseComplementedOriginally))  + geom_point(alpha=.5) + geom_smooth(size=1.5) +theme_bw(base_size=14) +
+  labs(x="SNR C", y = "Average number of C's from a 5 bp C homopolymer", title = "Deletion rate at different SNR levels" ) +
+  scale_colour_manual(values=c("black"), labels=c("G","C"),name=c("Read Direction"), guide=FALSE)
+
+
+
+
+predicts = colnames(md)[grep("Snr",colnames(md))]
+cntD2 = aggregate(NumC~Correct+Zmw gd, mean)
+md2 = merge(cntD2, snrD, by ="Zmw")
+pdf("SNRBiPlot.pdf")
+plot(md2[,predicts], alpha = .2)
+dev.off()
+
+
+ggplot(md2[md2$NumSubReads>120,],aes(x=MeanGC,y=NumC,colour=ReverseComplementedOriginally))  + geom_point(alpha=.5) + geom_smooth(size=1.5) +theme_bw(base_size=14) +
+  labs(x="Mean G+C SNR", y = "Average number of C's from a 5 bp C homopolymer", title = "Deletion rate at different SNR levels" ) +
+  scale_colour_manual(values=c("red","black"), labels=c("G","C"),name=c("Read Direction"))
+
+y = lm(NumC~SnrG+SnrC + SnrG:SnrC + I(SnrC^2)+ I(SnrG^2), data=md2)
+summary(y)
 
 
 cntD2 = aggregate(Mean_MergeQV~Correct+Zmw, gd, mean)
