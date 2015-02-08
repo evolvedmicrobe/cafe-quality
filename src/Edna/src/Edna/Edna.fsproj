@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AAF18B3B-EE2B-4ACB-924B-B84E54C6BE43}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Sweetness</RootNamespace>
+    <AssemblyName>Edna</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Name>Edna</Name>
+    <SccProjectName>
+    </SccProjectName>
+    <SccProvider>
+    </SccProvider>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccLocalPath>
+    </SccLocalPath>
+    <StartArguments>-b "Q:\Data\edna\pjm_test\edna_SMRTPipeJob152441_0.job"</StartArguments>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>3</WarningLevel>
+    <StartArguments>--cmp "\\usmp-data3\vol52\Smrtanalysis\userdata\jobs\069\069756\data\aligned_reads.cmp.h5" -o c:\users\pmarks\ed2.csv --fofn "\\usmp-data3\vol52\Smrtanalysis\userdata\jobs\069\069756\input.fofn"</StartArguments>
+    <PlatformTarget>x86</PlatformTarget>
+    <Commandlineparameters>--cmp /home/UNIXHOME/dalexander/Projects/Bugs/25281-EDNA/data/aligned_reads.cmp.h5 -fofn /home/UNIXHOME/dalexander/Projects/Bugs/25281-EDNA/input.fofn -h5out /tmp/foo.h5 -o /tmp/foo.csv</Commandlineparameters>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <StartArguments>--cmp 43381 -o c:\users\pmarks\edna-test.csv</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '11.0' Or '$(OS)' != 'Windows_NT' ">
+    <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+  </PropertyGroup>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
+  <PropertyGroup>
+    <PostBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">echo COPYING HDF5 DLLS...
+xcopy /D /E /I /Y "$(ProjectDir)..\..\..\..\tools\ConsensusTools\lib\HDF5\Windows_x86\*.dll" $(TargetDir)
+xcopy /D /E /I /Y "$(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\libConsensusCore.*" "$(TargetDir)"
+</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(OS)' != 'Windows_NT' ">
+ rsync -l $(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\libConsensusCore.* $(TargetDir)
+ </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="csvbuilder.fs" />
+    <Compile Include="analytical_dark.fs" />
+    <Compile Include="TraceSet.fs" />
+    <Compile Include="datasets.fs" />
+    <Compile Include="results_writing.fs" />
+    <Compile Include="workflows.fs" />
+    <Compile Include="main.fs" />
+    <Content Include="LogConfig.xml" />
+    <None Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="FSharp.Core">
+      <HintPath>\Library\Frameworks\Mono.framework\Libraries\mono\4.5\FSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\..\..\third-party\dotnet\FSPowerPack.Core.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.dll</HintPath>
+    </Reference>
+    <Reference Include="NDesk.Options">
+      <HintPath>..\..\..\..\third-party\dotnet\NDesk.Options.0.2.1\lib\NDesk.Options.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\..\PacBio.HDF\PacBio.HDF.csproj">
+      <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
+      <Name>PacBio.HDF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ConsensusCore\ConsensusCore.csproj">
+      <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
+      <Name>ConsensusCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
