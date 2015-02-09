@@ -3,10 +3,7 @@ using System;
 namespace ConstantModelOptimizer
 {
 
-	/// <summary>
-	/// @author Mauricio Carneiro
-	/// @since 8/16/12
-	/// </summary>
+
 	public class MathUtils
 	{
 
@@ -15,6 +12,7 @@ namespace ConstantModelOptimizer
 		private const double MAX_JACOBIAN_TOLERANCE = 8.0;
 		private const double JACOBIAN_LOG_TABLE_INV_STEP = 1.0 / 0.001;
 		private static readonly int JACOBIAN_LOG_TABLE_SIZE = (int)(MAX_JACOBIAN_TOLERANCE / JACOBIAN_LOG_TABLE_STEP) + 1;
+        public const double ONE_THIRD_LOGGED = -1.098612289;
 
 		static MathUtils()
 		{
@@ -86,6 +84,23 @@ namespace ConstantModelOptimizer
 			return array[maxElementIndex(array, endIndex)];
 		}
 
+
+        public static double logsumlog(double v1, double v2, double v3, double v4, double v5)
+        {
+            var max = Math.Max(Math.Max(Math.Max(Math.Max(v1, v2), v3),v4),v5);
+            if (maxValue == double.NegativeInfinity)
+            {
+                return maxValue;
+            }
+
+            for (int i = start; i < finish; i++)
+            {
+                sum += Math.Exp( log10p[i] - maxValue);
+            }
+
+            return System.Math.Log10(sum) + maxValue;
+        }
+
 		public static double log10sumLog10(double[] log10p, int start, int finish)
 		{
 			double sum = 0.0;
@@ -111,9 +126,6 @@ namespace ConstantModelOptimizer
 
 		public static double approximateLog10SumLog10(double[] vals, int endIndex)
 		{
-
-//JAVA TO C# CONVERTER WARNING: The original Java variable was marked 'final':
-//ORIGINAL LINE: final int maxElementIndex = MathUtils.maxElementIndex(vals, endIndex);
 			int maxElementIndex = MathUtils.maxElementIndex(vals, endIndex);
 			double approxSum = vals[maxElementIndex];
 
@@ -124,8 +136,7 @@ namespace ConstantModelOptimizer
 					continue;
 				}
 
-//JAVA TO C# CONVERTER WARNING: The original Java variable was marked 'final':
-//ORIGINAL LINE: final double diff = approxSum - vals[i];
+
 				double diff = approxSum - vals[i];
 				if (diff < MathUtils.MAX_JACOBIAN_TOLERANCE)
 				{
@@ -155,8 +166,6 @@ namespace ConstantModelOptimizer
 			// make sure small is really the smaller value
 			if (small > big)
 			{
-//JAVA TO C# CONVERTER WARNING: The original Java variable was marked 'final':
-//ORIGINAL LINE: final double t = big;
 				double t = big;
 				big = small;
 				small = t;
@@ -167,8 +176,6 @@ namespace ConstantModelOptimizer
 				return big;
 			}
 
-//JAVA TO C# CONVERTER WARNING: The original Java variable was marked 'final':
-//ORIGINAL LINE: final double diff = big - small;
 			double diff = big - small;
 			if (diff >= MAX_JACOBIAN_TOLERANCE)
 			{
@@ -181,8 +188,6 @@ namespace ConstantModelOptimizer
 			// max(x,y) + log10(1+10^-abs(x-y))
 			// we compute the second term as a table lookup with integer quantization
 			// we have pre-stored correction for 0,0.1,0.2,... 10.0
-//JAVA TO C# CONVERTER WARNING: The original Java variable was marked 'final':
-//ORIGINAL LINE: final int ind = fastRound(diff * JACOBIAN_LOG_TABLE_INV_STEP);
 			int ind = fastRound(diff * JACOBIAN_LOG_TABLE_INV_STEP); // hard rounding
 			return big + jacobianLogTable[ind];
 		}

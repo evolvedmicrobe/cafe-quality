@@ -5,29 +5,79 @@ using System.Collections.Generic;
 namespace ConstantModelOptimizer
 {
 
-    public class TransitionParametersNoHomopolymer
-    {
-        public double Match;
-        public double Branch;
-        public double Stick;
-        public double Dark;
 
-        public void Normalize()
-        {
-            var sum = Match+Branch+Stick+Dark;
-            Match /= sum;
-            Branch /= sum;
-            Stick /= sum;
-            Dark /= sum;
-        }
-    }
-    public class TransitionParametersHomopolymer
+    public class TransitionParameters
     {
-        public double Match;
-        public double Branch;
-        public double Stick;
-        public double Dark;
-        public double Merge;
+        public double Match {
+            get { return match; }
+            set {
+                match = value;
+                log_match = Math.Log (value);
+            }
+        }
+        public double Branch {
+            get { return branch; }
+            set {
+                branch = value;
+                log_branch = Math.Log (value);
+            }
+        }
+        public double Stick
+        {
+            get { return stick; }
+            set {
+                stick = value;
+                log_stick = Math.Log (value);
+            }
+        }
+        public double Dark
+        {
+            get { return dark; }
+            set {
+                dark = value;
+                log_dark = Math.Log (value);
+            }
+        }
+        /// <summary>
+        /// Zero if not in a homopolymer context
+        /// </summary>
+        public double Merge {
+            get { return merge; }
+            set {
+                merge = value;
+                log_merge = Math.Log (value);
+            }
+        }
+
+
+        public double log_Match {
+            get { return log_match; }
+        }
+        public double log_Branch {
+            get { return log_branch; }
+
+        }
+        public double log_Stick
+        {
+            get { return log_stick; }
+
+        }
+        public double log_Dark
+        {
+            get { return log_dark; }
+
+        }
+        /// <summary>
+        /// Zero if not in a homopolymer context
+        /// </summary>
+        public double log_Merge {
+            get { return log_merge; }
+
+        }
+
+
+        private double log_match, log_branch, log_stick, log_dark, log_merge;
+        private double match, branch, stick, dark, merge;
 
         public void Normalize()
         {
@@ -73,15 +123,33 @@ namespace ConstantModelOptimizer
         /// <summary>
         /// The probability that a match is emitted incorrectly
         /// </summary>
-        public double epsilon;
+        public double Epsilon
+        {
+            get { return epsilon; }
+            set {
+                log_one_minus_epsilon = Math.Log (1-value);
+                log_epsilon_times_one_third = Math.Log (value) + MathUtils.ONE_THIRD_LOGGED;
+                epsilon = value;
+            }
+        }
+
+        public double log_Epsilon_Times_One_Third {
+            get { return log_epsilon_times_one_third;}
+        }
+
+        public double log_One_Minus_Epsilon {
+            get{ return log_One_Minus_Epsilon; }
+        }
+
+        private double epsilon;
+        private double log_one_minus_epsilon;
+        private double log_epsilon_times_one_third;
+
 
         /// <summary>
         /// A dictionary which gives the probabilities of different emmissions for 
         /// </summary>
-        public Dictionary<string, TransitionParametersHomopolymer> HPparameters;
-
-        public Dictionary<string, TransitionParametersNoHomopolymer> NoHPparameters;
-
+        public Dictionary<string, TransitionParameters> TransitionProbabilities;
 
         public ParameterSet ()
         {
@@ -94,10 +162,10 @@ namespace ConstantModelOptimizer
         /// </summary>
         public void SetDefaults()
         {
-            NoHPparameters = new Dictionary<string, TransitionParametersNoHomopolymer> ();
-            HPparameters = new Dictionary<string, TransitionParametersHomopolymer> ();
+
+            TransitionProbabilities = new Dictionary<string, TransitionParameters> ();
             // Random guesses that are roughly in line with what I think
-            epsilon = 0.02;
+            Epsilon = 0.02;
             // I think merges happen roughly ~10% of the time based on Edna
             foreach (char c in "ACGT") {
                 var s = "N" + c.ToString ();

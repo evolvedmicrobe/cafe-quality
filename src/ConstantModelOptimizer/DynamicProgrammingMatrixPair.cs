@@ -7,15 +7,26 @@ namespace ConstantModelOptimizer
         /// <summary>
         /// Read position row, columns template
         /// </summary>
-        public double[][] forward;
+        public LatentStates[][] Forward;
         /// <summary>
         /// Read position row, columns template
         /// </summary>
-        public double[][] reverse;
+        public LatentStates[][] Reverse;
 
         public DynamicProgrammingMatrixPair (string read, string template)
         {
-            forward = RectangularArrays.ReturnRectangularDoubleArray (read.Length + 1, template.Length + 1);
+            Forward = RectangularArrays.ReturnRectangularLatentStateArray (read.Length + 1, template.Length + 1);
+            Reverse = RectangularArrays.ReturnRectangularLatentStateArray (read.Length + 1, template.Length + 1);
+
+        }
+        /// <summary>
+        /// Empty the arrays and fill with negative infinity
+        /// </summary>
+        public void Clear()
+        {
+            RectangularArrays.ClearLatentArray (Forward);
+            RectangularArrays.ClearLatentArray (Reverse);
+
         }
  
     }

@@ -59,6 +59,7 @@
     <Compile Include="QualityUtils.cs" />
     <Compile Include="RectangularArrays.cs" />
     <Compile Include="LoggedHMM.cs" />
+    <Compile Include="LatentStates.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
