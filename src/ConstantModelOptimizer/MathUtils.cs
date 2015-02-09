@@ -88,17 +88,17 @@ namespace ConstantModelOptimizer
         public static double logsumlog(double v1, double v2, double v3, double v4, double v5)
         {
             var max = Math.Max(Math.Max(Math.Max(Math.Max(v1, v2), v3),v4),v5);
-            if (maxValue == double.NegativeInfinity)
+            if (max == double.NegativeInfinity)
             {
-                return maxValue;
+                return max;
             }
-
-            for (int i = start; i < finish; i++)
-            {
-                sum += Math.Exp( log10p[i] - maxValue);
-            }
-
-            return System.Math.Log10(sum) + maxValue;
+            v1 -= max;
+            v2 -= max;
+            v3 -= max;
+            v4 -= max;
+            v5 -= max;
+            var sum = Math.Exp (v1) + Math.Exp (v2) + Math.Exp (v3) + Math.Exp (v4) + Math.Exp (v5);
+            return Math.Log (sum) + max;
         }
 
 		public static double log10sumLog10(double[] log10p, int start, int finish)
@@ -141,8 +141,6 @@ namespace ConstantModelOptimizer
 				if (diff < MathUtils.MAX_JACOBIAN_TOLERANCE)
 				{
 					// See notes from the 2-inout implementation below
-//JAVA TO C# CONVERTER WARNING: The original Java variable was marked 'final':
-//ORIGINAL LINE: final int ind = fastRound(diff * MathUtils.JACOBIAN_LOG_TABLE_INV_STEP);
 					int ind = fastRound(diff * MathUtils.JACOBIAN_LOG_TABLE_INV_STEP); // hard rounding
 					approxSum += MathUtils.jacobianLogTable[ind];
 				}

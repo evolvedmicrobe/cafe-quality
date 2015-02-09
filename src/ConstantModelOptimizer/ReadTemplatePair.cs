@@ -5,19 +5,10 @@ using System.Linq;
 
 namespace ConstantModelOptimizer
 {
-    public struct TransitionParameters {
-        public TransitionParametersNoHomopolymer NoHPparams;
-        public TransitionParametersHomopolymer HPparams;
-    }
 
     public class ReadTemplatePair
     {
-        DynamicProgrammingMatrixPair Stick;
-        DynamicProgrammingMatrixPair Branch;
-        DynamicProgrammingMatrixPair Merge;
-        DynamicProgrammingMatrixPair Dark;
-        DynamicProgrammingMatrixPair Match;
-
+        DynamicProgrammingMatrixPair StateProbabilities;
         /// <summary>
         /// A dictionary that holds where the positions are of every dinucleotide context
         /// </summary>
@@ -38,11 +29,9 @@ namespace ConstantModelOptimizer
         /// </summary>
         TransitionParameters[] CurrentTransitionParameters;
 
-        List<DynamicProgrammingMatrixPair> Matrices = new List<DynamicProgrammingMatrixPair>();
 
         string Read, Template;
 
-        public void 
 
 
         public ReadTemplatePair (string read, string template)
@@ -54,14 +43,8 @@ namespace ConstantModelOptimizer
                 throw new InvalidProgramException ("Read is expected to start in new ");
             }
             // Initialize Arrays
-            Merge = new DynamicProgrammingMatrixPair(read,template);
-            Branch = new DynamicProgrammingMatrixPair(read, template);
-            Stick = new DynamicProgrammingMatrixPair(read, template);
-            Dark = new DynamicProgrammingMatrixPair(read, template);
-            Match = new DynamicProgrammingMatrixPair(read, template);
-
-            Matrices = new List<DynamicProgrammingMatrixPair> () { Merge, Branch, Stick, Dark, Match };
-
+            StateProbabilities = new DynamicProgrammingMatrixPair(read,template);
+           
             // Now establish which parameters apply to which template positions
             TemplatePositionTypes = new Dictionary<string, List<int>>(ParameterSet.DiNucleotideContexts.Length);
             for (int i = 0; i < ParameterSet.DiNucleotideContexts.Length; i++) {
@@ -88,26 +71,63 @@ namespace ConstantModelOptimizer
             //Fill matrix
             fillTransitionParameters (pars);
             // clean house 
-            foreach (var mat in Matrices) {
-                mat.Clear ();
-            }
+            StateProbabilities.Clear();
 
             //We force ourselves to start and end in a math here
-            Match.forward [0] [0] = 0.0;
+            StateProbabilities.Forward[0][0].Match = 0.0;
+            StateProbabilities.Forward[0][0].Total = 0.0;
 
             // Now let's fill the forward matrices
-            for (int i = 1; i < Read.Length; i++) {
-                for (int j = 1; j < Template.Length; j++) {
-                            
+            for (int i = 1; i < (Read.Length-1); i++) {
+                for (int j = 1; j < (Template.Length-1); j++) {
+                    fillMatrixPosition(i,j, pars);    
                 }
             }
 
+            // Now for the final transition, where we condition on ending in a match state.
+            var newState = new LatentStates ();
+            var transProbs = CurrentTransitionParameters [Template.Length - 1];
+            var forward = StateProbabilities.Forward;
+            var previous = forward [Read.Length - 2] [Template.Length - 2].Total;
+            newState.Match = previous + pars.log_One_Minus_Epsilon + transProbs.log_Match;
+            newState.Total = newState.Match; // Only one possible state at end
+            forward [Read.Length - 1] [Template.Length - 1] = newState;
         }
 
-        private void fillMatrix(int i, int j)
+        private void fillMatrixPosition(int i, int j, ParameterSet pars)
         {
-            // Match score first!
-            if 
+            // To store this new element
+            var newState = new LatentStates ();
+            var transProbs = CurrentTransitionParameters [j];
+
+            // Match score first
+            var forward = StateProbabilities.Forward;
+            var previous = forward [i - 1] [j - 1].Total;
+            var toMatchTransitionProb = transProbs.log_Match;
+            var emissionProb = Read [i] == Template [j] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
+            newState.Match = previous + toMatchTransitionProb + emissionProb;
+
+            // Now the insertion, which is either a stick or a branch
+            var probAbove = forward [i - 1] [j].Total;
+            var isBranch = Template [j + 1] = Read [i];
+            if (isBranch) {
+                newState.Branch = probAbove + transProbs.log_Branch; // Emission probability is 1 for the same base
+            } else {
+                newState.Stick = probAbove + MathUtils.ONE_THIRD_LOGGED + transProbs.log_Stick;
+            }
+
+            // Now the deletion, which could be a merge or dark, in both cases the emission probability is 1
+            var probLeft = forward [i] [j - 1].Total;
+            // Dark first
+            newState.Dark = probLeft + transProbs.log_Dark;
+            if (MergePossible [j]) {
+                newState.Merge = probLeft + transProbs.log_Merge; 
+            }
+
+            // Now to sum it all up
+            newState.SetTotal ();
+            // And copy in
+            forward [i] [j] = newState;
 
         }
 
@@ -122,17 +142,11 @@ namespace ConstantModelOptimizer
         {
             foreach (var kv in TemplatePositionTypes) {
                 var noMerge = kv.Key[0]=='N';
-                var cp = noMerge ? pars.NoHPparameters [kv.Key] : null;
-                var cp2 = noMerge ? null : pars.HPparameters [kv.Key];
+                var cp =  pars.TransitionProbabilities[kv.Key];
                 foreach (int ind in kv.Value) {
-                    if (noMerge) {
-                        CurrentTransitionParameters [ind].NoHPparams = cp;
-                    } else {
-                        CurrentTransitionParameters [ind].HPparams = cp2;
-                    }
+                        CurrentTransitionParameters [ind] = cp;
                 }
-            }
-           
+            }           
         }
     }
 

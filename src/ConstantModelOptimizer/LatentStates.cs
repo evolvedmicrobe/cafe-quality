@@ -11,7 +11,6 @@ namespace ConstantModelOptimizer
         public LatentStates()
         {
             Clear ();
-
         }
         public void Clear() {
             Match = Double.NegativeInfinity;
@@ -20,6 +19,10 @@ namespace ConstantModelOptimizer
             Dark = Double.NegativeInfinity;
             Merge = Double.NegativeInfinity;
             Total = Double.NegativeInfinity;
+        }
+        public void SetTotal()
+        {
+            Total = MathUtils.logsumlog (Match, Stick, Branch, Dark, Merge);
         }
     }
 }
