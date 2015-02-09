@@ -88,4 +88,11 @@
       <Name>PacBio.HDF</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="CCSParameters.ini" />
+    <None Include="Chemistry\mapping.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Chemistry\" />
+  </ItemGroup>
 </Project>
