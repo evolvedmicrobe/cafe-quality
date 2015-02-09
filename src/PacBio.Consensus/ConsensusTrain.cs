@@ -207,7 +207,7 @@ namespace PacBio.Consensus
 
             var train = shuff_examples.Take (n_train).ToList();
             var test = shuff_examples.Skip (n_train).Take (n_test).ToList();
-            var res = InnerRun (train,test, totalTraces, i, j,outFile, maxIterations);       
+            var res = InnerRun (train,test, totalTraces, outFile, maxIterations);       
             return 0;
         }
 

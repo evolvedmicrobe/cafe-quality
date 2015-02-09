@@ -468,7 +468,7 @@ namespace PacBio.Consensus
             Console.WriteLine(@"Tried: {0}", nTried);
 
             Console.WriteLine(@"Viewed: Accepted[{0}] + Rejected[{1}] = {2}",
-                              accepted, nRejects, accepted + nRejects);
+                              acceptedAsExamples, nRejects, acceptedAsExamples + nRejects);
             Console.WriteLine ("Accepted as examples: " + acceptedAsExamples);
             return goodExamples;
         }

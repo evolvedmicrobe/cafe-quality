@@ -89,8 +89,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="CCSParameters.ini" />
-    <None Include="Chemistry\mapping.xml" />
+    <None Include="CCSParameters.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Chemistry\mapping.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Chemistry\" />
