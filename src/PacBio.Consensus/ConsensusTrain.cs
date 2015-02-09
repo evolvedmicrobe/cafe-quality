@@ -126,56 +126,46 @@ namespace PacBio.Consensus
         /// </summary>
         /// <returns>The run.</returns>
         public int InnerRun(List<CCSExample> train, List<CCSExample> test, int hopedForTraces,
-            int snrGroup, int coverageGroup, string outFile, int maxIterations = 100 )
+            string outFile, int maxIterations = 100 )
         {          
-            try {
+   
             // Check that enough data is available
             int warnThresh = hopedForTraces / 2;
             int failThresh = hopedForTraces / 10;
 
-            if (train.Count < failThresh || test.Count < failThresh)
-            {
-                Log(LogLevel.ERROR, "Insufficient data for training: maxTraces={0}, train.Count={1}, test.Count={2}",
+            if (train.Count < failThresh || test.Count < failThresh) {
+                Log (LogLevel.ERROR, "Insufficient data for training: maxTraces={0}, train.Count={1}, test.Count={2}",
                     hopedForTraces, train.Count, test.Count);
 
                 return 1;
             }
 
-            if (train.Count < warnThresh || test.Count < warnThresh)
-            {
-                Log(LogLevel.WARN, "Input data yields less than 2x requested: maxTraces={0}, train.Count={1}, test.Count={2}",
+            if (train.Count < warnThresh || test.Count < warnThresh) {
+                Log (LogLevel.WARN, "Input data yields less than 2x requested: maxTraces={0}, train.Count={1}, test.Count={2}",
                     hopedForTraces, train.Count, test.Count);
             }
 
             using (var scConfig = ParameterLoading.DefaultCCS)
-            using (var qvConfig = scConfig.Parameters.At("P6-C4"))
-            using (var start = qvConfig.QvParams)
-            {
+            using (var qvConfig = scConfig.Parameters.At ("P6-C4"))
+            using (var start = qvConfig.QvParams) {
                 var algo = RecursionAlgo.Prob;
 
                 // Train the model
                 float trainError;
                 float testError;
-                var trainedModel = OptimizeConsensus(train, test, start, algo, maxIterations, out trainError, out testError);
+                var trainedModel = OptimizeConsensus (train, test, start, algo, maxIterations, out trainError, out testError);
 
                 // Assess the accuracy on test set
-                Log("Measuring Accuracy:");
-                AccuracyObjective(trainedModel, test, algo);
+                Log ("Measuring Accuracy:");
+                AccuracyObjective (trainedModel, test, algo);
 
                 // Save the model to a results file
-                Log("Writing CCS MoveSpec to: {0}", outFile);
+                Log ("Writing CCS MoveSpec to: {0}", outFile);
 
                 // FIXME (lhepler) pass chemistry and model type appropriately
-                var name = ReadConfigurationAssigner.GetNameForConfiguration (snrGroup, coverageGroup);
-                ParameterLoading.SaveModelToFile(name, "AllQVsMergingByChannelModel", trainedModel, outFile);
+                ParameterLoading.SaveModelToFile ("HighCovHighSNR16S", "AllQVsMergingByChannelModel", trainedModel, outFile);
             }
             return 0;
-            }
-            catch(Exception thrown) {
-                Console.WriteLine ("Failed!!!\n\n" + thrown.Message + "\n\n" + thrown.StackTrace);
-               
-            }
-            return 1;
         }
 
 
@@ -196,7 +186,6 @@ namespace PacBio.Consensus
                 System.IO.File.Delete (outFile);
             }
 
-            Log (LogLevel.WARN, "Starting to optimize across partitions");
 
 
             // Load reference
@@ -211,24 +200,14 @@ namespace PacBio.Consensus
             // Load training data for each partition
             // This code goes through the entire file and assigns examples to different partitions
             var traceSet = new TraceSet(cmpH5File, fofn);
-            var tds = CCSExample.GetExamples (traceSet, refDict, tracesPerReference * 2, rca);
+            var examples = CCSExample.GetExamples (traceSet, refDict, tracesPerReference * 2, rca);
+            var n_train = examples.Count / 2 + examples.Count % 2;
+            var n_test = examples.Count / 2;
+            var shuff_examples = examples.Shuffle ();
 
-            tds.PrintCounts ();
-
-            // Now assign all the training sets to different files
-            for (int i = 0; i < rca.NumberOfSNRGroups; i++) {
-                for (int j = 0; j < rca.NumberOfCoverageGroups; j++) {
-                    Log (LogLevel.WARN, "Optimizing " + i +" - "+ j);
-                    // Run this data for this file and output it.
-                    var traintest = tds.GetExamples (i, j, tracesPerReference);
-                    var train = traintest.Item1;
-                    var test = traintest.Item2;
-                    var res = InnerRun (train,test, totalTraces, i, j,outFile, maxIterations);       
-                    if (res != 0) {
-                        Log (LogLevel.ERROR, "Failed for: " + i +" - "+ j);
-                    }
-                }
-            }
+            var train = shuff_examples.Take (n_train).ToList();
+            var test = shuff_examples.Skip (n_train).Take (n_test).ToList();
+            var res = InnerRun (train,test, totalTraces, i, j,outFile, maxIterations);       
             return 0;
         }
 

@@ -309,7 +309,7 @@ namespace PacBio.Consensus
         const int MINIMUM_PASSES = 10;
         const int MAX_PASSES  = 20;
 
-        public static TrainingDataStore GetExamples(TraceSet traceSet, Dictionary<string, string> referenceContigs, 
+        public static List<CCSExample> GetExamples(TraceSet traceSet, Dictionary<string, string> referenceContigs, 
                                                     int examplesPerReference, ReadConfigurationAssigner rca)
         {           
             //Console.WriteLine("Checking references");
@@ -318,7 +318,7 @@ namespace PacBio.Consensus
             //Console.WriteLine("Loading cmp.h5:");
 			//varscans = ScanSets.FromCmpH5(rawCmpH5);
 
-            var tds = new TrainingDataStore (rca, examplesPerReference);
+            List<CCSExample> goodExamples = new List<CCSExample> ();
             // Get this many for each group time 2 to get training and test data
             int totalNeeded = 2 * referenceContigs.Count * rca.NumberOfSNRGroups * rca.NumberOfCoverageGroups * examplesPerReference;
             HashSet<string> okayRefs = new HashSet<string>(referenceContigs.Keys);
@@ -327,7 +327,6 @@ namespace PacBio.Consensus
             var ccsTraces = traceSet.Traces.Where (z => z.SmithWatermanAlignment!= null && okayRefs.Contains(z.SmithWatermanAlignment.ReferenceName));
 			var nTotal = traceSet.NumTraces;
             var nTried = 0;
-            int accepted = 0;
             var rejects = new Dictionary<string, int>
                               {
                                 {"UnAligned", 0}, {"Al70Acc80", 0}, {"ETControl", 0},
@@ -447,16 +446,12 @@ namespace PacBio.Consensus
                         var newRegions = passes.Map(p => MapRegionToRef(p, t.ZmwBases, correctInsertSequence, rcCorrectInsert));
 
                         Console.WriteLine(@"Accepting trace. POA Acc: {0}. POA Score: {1}. Ref: {2}", poaAl.Accuracy, poaScore, t.SmithWatermanAlignment.ReferenceName);
-                        ++accepted;
                         var example = new CCSExample (t, rref, trialTemplate, newRegions);
-                        
-                        var success = tds.AddExample(example);
-                        if (success) {
-                            Console.WriteLine ("Accepted");
-                                Interlocked.Increment(ref acceptedAsExamples);
-                        } else {
-                            Console.WriteLine ("Not Accepted");
+                        lock(goodExamples) {
+                            goodExamples.Add(example);
                         }
+                        Interlocked.Increment(ref acceptedAsExamples);
+
                     }
                     catch(Exception thrown) {
                         Console.WriteLine("ERROR\n\n\n"+thrown.Message+"\n\n\nStack Trace\n\n" + thrown.StackTrace);
@@ -475,7 +470,7 @@ namespace PacBio.Consensus
             Console.WriteLine(@"Viewed: Accepted[{0}] + Rejected[{1}] = {2}",
                               accepted, nRejects, accepted + nRejects);
             Console.WriteLine ("Accepted as examples: " + acceptedAsExamples);
-            return tds;
+            return goodExamples;
         }
 
         public static AlignedSequenceReg MapRegionToRef(AlignedSequenceReg reg, IZmwBases bases, string refChunk, string rcRefChunk)
