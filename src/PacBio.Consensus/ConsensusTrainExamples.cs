@@ -194,12 +194,14 @@ namespace PacBio.Consensus
             {
                 {"UnAligned", 0}, {"Al70Acc80", 0}, {"ETControl", 0},
                 {"Passes<03", 0}, {"Passes>80", 0}, {"BadSnrChk", 0},
-                {"WeirdAlgn", 0}, {"NotOkay",0}
+                {"WeirdAlgn", 0}, {"NotOkay",0}, {"BlackList", 0}
             };
 
             foreach(var t in ccsTraces) 
             {
                 nTried++;
+
+
                 if(t.MultiAlignment.Length < 2) {
                     ++rejects["UnAligned"];
                     continue;
@@ -303,6 +305,10 @@ namespace PacBio.Consensus
                 accepted, nRejects, accepted + nRejects);
            return toReturn;
         }
+
+        const int MINIMUM_PASSES = 10;
+        const int MAX_PASSES  = 20;
+
         public static TrainingDataStore GetExamples(TraceSet traceSet, Dictionary<string, string> referenceContigs, 
                                                     int examplesPerReference, ReadConfigurationAssigner rca)
         {           
@@ -324,9 +330,9 @@ namespace PacBio.Consensus
             int accepted = 0;
             var rejects = new Dictionary<string, int>
                               {
-                                  {"UnAligned", 0}, {"Al70Acc80", 0}, {"ETControl", 0},
-                                  {"Passes<03", 0}, {"Passes>80", 0}, {"BadSnrChk", 0},
-                                  {"WeirdAlgn", 0}, {"NotOkay",0}, {"TooManyRegions",0}
+                                {"UnAligned", 0}, {"Al70Acc80", 0}, {"ETControl", 0},
+                                {"Passes<" + MINIMUM_PASSES, 0}, {"Passes>"+MAX_PASSES, 0}, {"BadSnrChk", 0},
+                                {"WeirdAlgn", 0}, {"NotOkay",0}, {"TooManyRegions",0}, {"BlackList", 0}
                               };
 
             var acceptedAsExamples = 0;
@@ -334,113 +340,123 @@ namespace PacBio.Consensus
             Parallel.ForEach(ccsTraces, t =>  
             {
                 try {
-                    if (acceptedAsExamples >= totalNeeded) {
-                            if(!endMet) {
-                                Console.WriteLine("Found all I needed!");
-                                endMet = true;
-                            }
-                        return;
-                    } 
+
+                       
+                        if (acceptedAsExamples >= totalNeeded) {
+                                if(!endMet) {
+                                    Console.WriteLine("Found all I needed!");
+                                    endMet = true;
+                                }
+                            return;
+                        }
                         Interlocked.Increment(ref  nTried);
+                        var name = t.Metadata.MovieName + "/" + t.HoleNumber;
+                        var black_listed = !WhiteList.ZMWisOkay (name);
+                        if(black_listed)
+                        {
+                            ++rejects["BlackList"];
+                            return;
+                        }
+                       
+                        if(t.MultiAlignment.Length < 2) {
+                            ++rejects["UnAligned"];
+                            return;
+                        }
+                        if (t.MultiAlignment.Length > MAX_PASSES) {
+                            ++rejects ["TooManyRegions"];
+                            return;
+                        }
+                        if(!CheckSnr(t)) {
+                            ++rejects["BadSnrChk"];
+                            return;
+                        }
 
-                    if(t.MultiAlignment.Length < 2) {
-                        ++rejects["UnAligned"];
-                    return;
-                    }
-                    if (t.MultiAlignment.Length > 40) {
-                        ++rejects ["TooManyRegions"];
+                        // Cap the accuracy at 80% - so we will get the longest read among those above 80% accuracy.
+                        var bestAl = t.MultiAlignment.OrderByDescending
+                                (al => {
+                            var accCap = Math.Min(al.Accuracy, 0.85);
+                            return accCap * al.TemplateLength;
+                        }).First();
+
+                        if(bestAl.TemplateLength < 70 || bestAl.Accuracy < 0.80) {
+                            ++rejects["Al70Acc80"];
                         return;
-                    }
+                        }
+                        if(bestAl.ReferenceName.Contains("ET")) {
+                            ++rejects["ETControl"];
+                            return;
+                        }
 
-                    // Cap the accuracy at 80% - so we will get the longest read among those above 80% accuracy.
-                    var bestAl = t.MultiAlignment.OrderByDescending
-                            (al => {
-                        var accCap = Math.Min(al.Accuracy, 0.85);
-                        return accCap * al.TemplateLength;
-                    }).First();
+                       
+                        var r = ccsAlgo.GetPoaAndRegions(t.ZmwBases);
+                        var passes = r.Item3;
+                        var tpl = r.Item1;
+                        var poaScore = r.Item2;
 
-                    if(bestAl.TemplateLength < 70 || bestAl.Accuracy < 0.80) {
-                        ++rejects["Al70Acc80"];
-                    return;
-                    }
-                    if(bestAl.ReferenceName.Contains("ET")) {
-                        ++rejects["ETControl"];
-                        return;
-                    }
+                        if(r.Item1 == null)
+                        {
+                            return;
+                        }
+                        // Want to work on at least MINIMUM_PASSES passes
+                        if(passes.Count < MINIMUM_PASSES) {
+                            ++rejects["Passes<"+MINIMUM_PASSES];
+                            return;
+                        }
+                        // Don't use more than MAX_PASSES passes -- a waste of time because the error rate should be low
+                        if(passes.Count > (MAX_PASSES*1.5)) {
+                           ++rejects["Passes>"+MAX_PASSES];
+                            return;
+                        }
+                        
+                            var refStart = bestAl.TemplateStart;
+                        var refLength = bestAl.TemplateLength;
 
-                    if(!CheckSnr(t)) {
-                        ++rejects["BadSnrChk"];
-                        return;
-                    }
-                    var r = ccsAlgo.GetPoaAndRegions(t.ZmwBases);
-                    var passes = r.Item3;
-                    var tpl = r.Item1;
-                    var poaScore = r.Item2;
+                        var refSeq = referenceContigs[bestAl.ReferenceName];
 
-                    if(r.Item1 == null)
-                    {
-                        return;
-                    }
-                    // Want to work on at least 3 passes
-                    if(passes.Count < 3) {
-                        ++rejects["Passes<03"];
-                        return;
-                    }
-                    // Don't use more than 80 passes -- a waste of time because the error rate should be low
-                    if(passes.Count > 80) {
-                       ++rejects["Passes>80"];
-                        return;
-                    }
-                    
-                        var refStart = bestAl.TemplateStart;
-                    var refLength = bestAl.TemplateLength;
+                        const int templateExtend = 100;
+                        var start = Math.Max(refStart - templateExtend, 0);
+                        var len = Math.Min(refSeq.Length - 1 - start, refLength + 2 * templateExtend);
 
-                    var refSeq = referenceContigs[bestAl.ReferenceName];
+                        var rref = refSeq.Substring(start, len);
+                        var poaAl = CCSExample.SemiGlobalAlign(rref, tpl.Sequence);
 
-                    const int templateExtend = 100;
-                    var start = Math.Max(refStart - templateExtend, 0);
-                    var len = Math.Min(refSeq.Length - 1 - start, refLength + 2 * templateExtend);
+                        var badAlign = MultiAlignCheck(t);
 
-                    var rref = refSeq.Substring(start, len);
-                    var poaAl = CCSExample.SemiGlobalAlign(rref, tpl.Sequence);
+                        if(poaAl.Accuracy < 0.87) {
+                            var err = badAlign.Item1;
+                            var msg = badAlign.Item2;
+                            Console.WriteLine(@"Skipping trace. POA Acc: {0}. POAScore: {1}. Had weird alignments: {2}",
+                                poaAl.Accuracy, poaScore, err ? msg : "False");
+                                ++ rejects["WeirdAlgn"];
+                            return;
+                        }
 
-                    var badAlign = MultiAlignCheck(t);
+                        // Construct the correct trial template!
+                        var rcRef = DNA.ReverseComplement(rref);
+                        var refChunk = poaAl.Strand == Strand.Forward ? rref : rcRef;
+                        var correctInsertSequence = refChunk.Substring(poaAl.TemplateStartBase, poaAl.TemplateLength);
+                        var rcCorrectInsert = DNA.ReverseComplement(correctInsertSequence);
 
-                    if(poaAl.Accuracy < 0.87) {
-                        var err = badAlign.Item1;
-                        var msg = badAlign.Item2;
-                        Console.WriteLine(@"Skipping trace. POA Acc: {0}. POAScore: {1}. Had weird alignments: {2}",
-                            poaAl.Accuracy, poaScore, err ? msg : "False");
-                            ++ rejects["WeirdAlgn"];
-                        return;
-                    }
+                        var trialTemplate = new TrialTemplate() {
+                            Sequence = correctInsertSequence,
+                            StartAdapterBases = 5,
+                            EndAdapterBases = 5
+                        };
 
-                    // Construct the correct trial template!
-                    var rcRef = DNA.ReverseComplement(rref);
-                    var refChunk = poaAl.Strand == Strand.Forward ? rref : rcRef;
-                    var correctInsertSequence = refChunk.Substring(poaAl.TemplateStartBase, poaAl.TemplateLength);
-                    var rcCorrectInsert = DNA.ReverseComplement(correctInsertSequence);
+                        // Remap regions to this sequence
+                        var newRegions = passes.Map(p => MapRegionToRef(p, t.ZmwBases, correctInsertSequence, rcCorrectInsert));
 
-                    var trialTemplate = new TrialTemplate() {
-                        Sequence = correctInsertSequence,
-                        StartAdapterBases = 5,
-                        EndAdapterBases = 5
-                    };
-
-                    // Remap regions to this sequence
-                    var newRegions = passes.Map(p => MapRegionToRef(p, t.ZmwBases, correctInsertSequence, rcCorrectInsert));
-
-                    Console.WriteLine(@"Accepting trace. POA Acc: {0}. POA Score: {1}. Ref: {2}", poaAl.Accuracy, poaScore, t.SmithWatermanAlignment.ReferenceName);
-                    ++accepted;
-                    var example = new CCSExample (t, rref, trialTemplate, newRegions);
-                    
-                    var success = tds.AddExample(example);
-                if (success) {
-                    Console.WriteLine ("Accepted");
-                        Interlocked.Increment(ref acceptedAsExamples);
-                } else {
-                    Console.WriteLine ("Not Accepted");
-                }
+                        Console.WriteLine(@"Accepting trace. POA Acc: {0}. POA Score: {1}. Ref: {2}", poaAl.Accuracy, poaScore, t.SmithWatermanAlignment.ReferenceName);
+                        ++accepted;
+                        var example = new CCSExample (t, rref, trialTemplate, newRegions);
+                        
+                        var success = tds.AddExample(example);
+                        if (success) {
+                            Console.WriteLine ("Accepted");
+                                Interlocked.Increment(ref acceptedAsExamples);
+                        } else {
+                            Console.WriteLine ("Not Accepted");
+                        }
                     }
                     catch(Exception thrown) {
                         Console.WriteLine("ERROR\n\n\n"+thrown.Message+"\n\n\nStack Trace\n\n" + thrown.StackTrace);
@@ -488,7 +504,7 @@ namespace PacBio.Consensus
             // Fast path SNR check -- see if the HQRegionSNR Metric passes -- if so then we should be GTG
 			var meanHqRegionSnr = t.ZmwBases.Metrics.HQRegionSNR.Average();
 
-            if (meanHqRegionSnr > 3.5)
+            if (meanHqRegionSnr >= 8.9)
                 return true;
 
 			return false;

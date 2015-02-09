@@ -96,6 +96,7 @@
     <Compile Include="ReadConfigurationAssigner.cs" />
     <Compile Include="TrainingDataStore.cs" />
     <Compile Include="TrainCompare.cs" />
+    <Compile Include="WhiteList.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
