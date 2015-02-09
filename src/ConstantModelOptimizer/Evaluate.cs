@@ -12,12 +12,7 @@ namespace org.broadinstitute
     using PairHMM = Bio.PairHMM.PairHMM;
     using QualityUtils = Bio.Utils.QualityUtils;
 
-	/// <summary>
-	/// Evaluating routine for the PairHMM
-	/// 
-	/// @author Mauricio Carneiro
-	/// @since 8/15/12
-	/// </summary>
+
     public class Evaluate
     {
         public readonly IList<PairHMM> pairHMM = new List<PairHMM>(20);

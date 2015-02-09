@@ -1,15 +1,10 @@
 module PacBio.Analysis.Datasets
 
 open System
-
 open PacBio.Align
 open PacBio.IO
 open PacBio.Utils
-
 open TraceSet
-
-open PacBio.Hmm.ExpectationMaximization
-open PacBio.Hmm.Recursions
 
 //open PacBio.Common.FSUtils.Utils
 //open PacBio.Analysis.CSV

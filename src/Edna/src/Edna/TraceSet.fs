@@ -3,8 +3,6 @@
 open System
 open PacBio.Utils
 open PacBio.IO
-open PacBio.Hmm.Utils
-
 open System.Collections.Generic
 
 let miniCsvReader f =

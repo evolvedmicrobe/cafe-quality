@@ -88,20 +88,20 @@
 
 \section{Introduction}
 
-This document shows some simple tweaks to the old model for $P(R|T)$ that convert it into a probabilistic framework so that we can optimize it using maximum likelihood.  It assumes there are no QV values associated with the reads, and so represents a `constant rate' model.   This model has 29 parameters and can easily be fitted with maximum likelihood.  It is designed to represent a baseline model against which the utility of QV values can be assessed.  
-
-The recursions required for the likelihood calculation in this model are nearly identical to the current recursions, so require almost no code changes.  It also makes the central assumption that all the transition probabilities are shared across latent states, as shown in Figure 1, so only requires one $I \times J$ matrix to perform the recursion, .
+This document shows some simple tweaks to the old model for $P(R|T)$ that convert it into a probabilistic framework so that we can optimize it using maximum likelihood.  It assumes there are no QV values associated with the reads, and so this represents a `constant rate' model that forms a baseline against which the utility of QV values can be compared.   This model has only 29 parameters.
+  
+Importantly, the recursions required for the likelihood calculation in this model are nearly identical to the current recursions, so should require very few changes to the underlying codebase.  It also makes the central assumption that all the transition probabilities are shared across latent states, as shown in Figure 1.  The value of this assumption is that it allows us to ``collapse" different nodes so we only need to keep track of the probability of being in either state, and not their individual probabilities.  As a result, it only requires one $I \times J$ matrix to perform the recursion that calculates the likelihood.
 
 
 \begin{figure}[H] %% The [h] means place the figure here.
 	\includegraphics{CCSScoring}
-		\caption{The generative model for reads given a template.  The transition probabilities out of each latent state enclosed in the same dashed box are all equal, greatly reducing the parameters needed and the computational complexity of the likelihood algorithm.  Transitions are determined by the next basepair present in the template, with a merge move possible if it matches the current template.  All possible transitions are indicated by arrows.}
+		\caption{The generative model for reads given a template.  The transition probabilities out of each latent state enclosed in the same dashed box are all equal, greatly reducing the parameters needed and the computational complexity of the likelihood algorithm.  Transitions are determined by the next basepair present in the template, with a merge move possible in a homopolymer context.  All possible transitions are indicated by arrows.}
 \end{figure}
 
 
 \section{Model Parameters and Estimation}
  
- The transitions between states are governed by two adjacent nucleotides, which determines how frequently different moves occur.  Therefore, for a complete model we want to model the transition probabilities as a function of the two neighboring basepairs, with one set of parameters if they occur as a dinucleotide (which allows for a merge move) and another set if they do not (so that a merge is not possible).  Note that at template position $j$, the transitions are governed by the \textit{next} template position, not the current one.  I will consider 8 possible template contexts, one for each homopolymer and non-homopolymer context possible:
+ The transitions between states are governed by two adjacent nucleotides, which determines how frequently different moves occur.  Therefore, for a complete model we want to model the transition probabilities as a function of the two neighboring basepairs, with one set of parameters if they occur as a homopolymeric dinucleotide (which allows for a merge move) and another set if they do not (so that a merge is not possible).  Note that at template position $j$, the transitions are governed by the \textit{next} template position, not the current one.  I will consider 8 possible template contexts, one for each homopolymer and non-homopolymer context possible:
   
  
  \begin{center}
@@ -197,12 +197,12 @@ Note that in the simple scoring version we assume that we know from the data exa
 	\end{cases}
 \]
 
-I think the DeletionTag is adds more problems than it solves, so dropped it.  Also, the merge move is now explicitly incorporated as a deletion step, and multiple merges are allowed.
+I think the DeletionTag adds more problems than it solves, so dropped it.  Also, the merge move is now explicitly incorporated as a deletion step, and multiple merges are allowed.
  
  
 \section{Model Fitting}
 
-Since this is a constant model, we can use Baum-Welch to easily estimate the parameters.  This is just dynamic programming followed by counting.  However, unlike calculating the likelihood where we only need one $I \times J$ matrix, in order to use Baum-Welch we will need 2 separate $I \times J$ matrices for each state to calculate the forwards and backward probabilities.
+Since this is a constant model, we can use Baum-Welch to easily estimate the parameters.  This is just dynamic programming followed by counting.  However, unlike calculating the likelihood where we only need one $I \times J$ matrix, in order to use Baum-Welch we will need 2 separate $I \times J$ matrices for each state to calculate the forwards and backward probabilities, this makes model fitting more computationally intense.
 
 \subsection{$\epsilon$ Estimation}
 
@@ -215,7 +215,7 @@ $\hat{ \epsilon} = \frac{\sum\limits_{i=1}^I \sum\limits_{j=1}^J F(i,j) \cdot B(
 
 Since we are training transition parameters for 8 different contexts, we first need to group all template columns according to which of the 8 different di-nucleotide contexts they belong to.  Once we have done that, we simply iterate the same method for each group.
 
-We simply need to calculate the recursively calculate for each element, the expected number of times a transition occured.
+We simply need to calculate the recursively calculate for each element, the expected number of times a transition occurred.
 
 For example, although we need to calculate them separately, for insertion transitions, we calculate the probability of being in the previous state (if at position $i,j$, sum of all matrices $F(i-1, j)$ positions).  We then calculate the probability of transition using the current parameters as 
 

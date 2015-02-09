@@ -68,19 +68,19 @@ namespace ConstantModelOptimizer
         }
         public void FillMatrics(ParameterSet pars)
         {
-            //Fill matrix
+            //Fill transition probabilites appropriate for each matrix position
             fillTransitionParameters (pars);
             // clean house 
             StateProbabilities.Clear();
 
             //We force ourselves to start and end in a math here
+
+            // FILL THE FORWARD MATRICES
             StateProbabilities.Forward[0][0].Match = 0.0;
             StateProbabilities.Forward[0][0].Total = 0.0;
-
-            // Now let's fill the forward matrices
-            for (int i = 1; i < (Read.Length-1); i++) {
-                for (int j = 1; j < (Template.Length-1); j++) {
-                    fillMatrixPosition(i,j, pars);    
+            for (int i = 1; i < (Read.Length-2); i++) {
+                for (int j = 1; j < (Template.Length-2); j++) {
+                    fillForwardMatrixPosition(i,j, pars);    
                 }
             }
 
@@ -92,9 +92,23 @@ namespace ConstantModelOptimizer
             newState.Match = previous + pars.log_One_Minus_Epsilon + transProbs.log_Match;
             newState.Total = newState.Match; // Only one possible state at end
             forward [Read.Length - 1] [Template.Length - 1] = newState;
+
+
+            // FILL REVERSE MATRIX
+            var endi = Read.Length - 1;
+            var endj = Read.Length - 1;
+            StateProbabilities.Reverse[endi][endj].Match = 0.0;
+            StateProbabilities.Reverse[endi][endj].Total = 0.0;
+            endi--;
+            endj--;
+            for (int i = endi; i > 0; i--) {
+                for (int j = endj; j > 0; j--) {
+                    fillForwardMatrixPosition(i,j, pars);    
+                }
+            }
         }
 
-        private void fillMatrixPosition(int i, int j, ParameterSet pars)
+        private void fillForwardMatrixPosition(int i, int j, ParameterSet pars)
         {
             // To store this new element
             var newState = new LatentStates ();
@@ -103,9 +117,8 @@ namespace ConstantModelOptimizer
             // Match score first
             var forward = StateProbabilities.Forward;
             var previous = forward [i - 1] [j - 1].Total;
-            var toMatchTransitionProb = transProbs.log_Match;
             var emissionProb = Read [i] == Template [j] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
-            newState.Match = previous + toMatchTransitionProb + emissionProb;
+            newState.Match = previous + transProbs.log_Match + emissionProb;
 
             // Now the insertion, which is either a stick or a branch
             var probAbove = forward [i - 1] [j].Total;
@@ -123,11 +136,25 @@ namespace ConstantModelOptimizer
             if (MergePossible [j]) {
                 newState.Merge = probLeft + transProbs.log_Merge; 
             }
-
             // Now to sum it all up
             newState.SetTotal ();
             // And copy in
             forward [i] [j] = newState;
+
+        }
+
+        private void fillReverseMatrixPosition(int i, int j, ParameterSet pars) {
+            // We want to compute the probability we were in the last state, emitted from that state, and then transitioneed here
+
+            var newState = new LatentStates ();
+            var transProbs = CurrentTransitionParameters [j];
+
+            // Match score first
+            var reverse = StateProbabilities.Reverse;
+            var next = reverse [i + 1] [j + 1].Total;
+            var emissionProb = Read [i] == Template [j] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
+            newState.Match = previous + transProbs.log_Match + emissionProb;
+
 
         }
 
