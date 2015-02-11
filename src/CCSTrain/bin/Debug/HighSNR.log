@@ -1,0 +1,65 @@
+Reject Counts:
+UnAligned = 2240
+Al70Acc80 = 101
+ETControl = 0
+Passes<10 = 811
+Passes>20 = 0
+BadSnrChk = 457
+WeirdAlgn = 23
+NotOkay = 0
+TooManyRegions = 23893
+TemplateBlackList = 14313
+Total: 108988
+Tried: 42826
+Viewed: Accepted[816] + Rejected[41838] = 42654
+Accepted as examples: 816
+Loaded assembly: /Users/nigel/git/cafe-quality/src/CCSTrain/bin/Debug/INIFileParser.dll [External]
+Loaded assembly: /Users/nigel/mono64/lib/mono/gac/System.Numerics/4.0.0.0__b77a5c561934e089/System.Numerics.dll [External]
+17:16:41 [ConsensusTrain] Doing full training on 408 examples
+Thread started: <Thread Pool> #15
+Thread started: <Thread Pool> #16
+17:17:32 [ConsensusTrain] Mean LL: 4.7335, Max: 107.6604, Min: 0.0519, Mean Aln Score: -682.59
+17:17:32 [ConsensusTrain] Iteration 0. Training set error: 4.733494
+17:18:16 [ConsensusTrain] Mean LL: 4.1963, Max: 102.4830, Min: 0.0479, Mean Aln Score: -695.58
+17:18:16 [ConsensusTrain] Iteration 1. Training set error: 4.196255
+17:19:00 [ConsensusTrain] Mean LL: 4.6305, Max: 106.6010, Min: 0.0510, Mean Aln Score: -685.10
+17:19:00 [ConsensusTrain] Iteration 2. Training set error: 4.630544
+17:19:45 [ConsensusTrain] Mean LL: 4.7255, Max: 111.9764, Min: 0.0403, Mean Aln Score: -699.87
+
+
+
+22:42:37 [ConsensusTrain] Mean LL: 2.9279, Max: 46.7092, Min: 0.0000, Mean Aln Score: -1312.22
+22:42:37 [ConsensusTrain] Iteration 410. Training set error: 2.92786
+22:43:07 [ConsensusTrain] Mean LL: 1.2134, Max: 45.3118, Min: 0.0000, Mean Aln Score: -1957.05
+22:43:07 [ConsensusTrain] Iteration 411. Training set error: 1.213442
+22:43:36 [ConsensusTrain] Mean LL: 1.2106, Max: 44.9397, Min: 0.0000, Mean Aln Score: -1957.72
+22:43:36 [ConsensusTrain] Iteration 412. Training set error: 1.210639
+22:44:05 [ConsensusTrain] Mean LL: 1.2111, Max: 44.6287, Min: 0.0000, Mean Aln Score: -1958.69
+22:44:05 [ConsensusTrain] Iteration 413. Training set error: 1.211142
+22:44:34 [ConsensusTrain] Mean LL: 1.2135, Max: 45.2115, Min: 0.0000, Mean Aln Score: -1955.87
+22:44:34 [ConsensusTrain] Iteration 414. Training set error: 1.21351
+22:44:34 [ConsensusTrain] Training completed. Termination reason: Converged
+22:44:34 [ConsensusTrain] Function evaluations: 415
+22:44:34 [ConsensusTrain] Training Traces: 408
+22:44:34 [ConsensusTrain] Iterations: 415
+22:44:34 [ConsensusTrain] Elapsed Time: 237.593292016667 mins
+22:44:34 [ConsensusTrain] Got training set error: 1.209981
+DenseVector 17-Double
+  -19.5379  -0.800383
+ 0.0394082  -0.204786
+ 0.0114902  -0.150837
+ -0.640188  -0.365988
+   -5.9745    -0.4025
+  0.081036           
+ -0.321003           
+-0.0091241           
+ -0.297113           
+  -2.30939           
+ 0.0256122           
+   1.44314           
+
+22:45:05 [ConsensusTrain] Mean LL: 1.0901, Max: 20.4201, Min: 0.0000, Mean Aln Score: -1960.57
+22:45:05 [ConsensusTrain] Got test set error: 1.090058
+22:46:55 [ConsensusTrain] Insertion Rate: 0.0004, Deletion Rate: 0.0006, Miscall Rate: 0.0000, Error Rate: 0.0010, Max: 0.0230, Min: 0.0000
+22:46:55 [ConsensusTrain] Writing CCS MoveSpec to: HighSNR
+

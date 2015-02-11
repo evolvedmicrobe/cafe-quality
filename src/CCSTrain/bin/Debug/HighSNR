@@ -1,0 +1,23 @@
+#
+# HighCovHighSNR16S chemistry
+#
+[HighCovHighSNR16S.AllQVsMergingByChannelModel]
+Match = -0.0202027094
+Mismatch = -19.5379429
+MismatchS = 0.0394081995
+Branch = 0.0114902062
+BranchS = -0.640187562
+DeletionN = -5.97450399
+DeletionWithTag = 0.0810360312
+DeletionWithTagS = -0.321003258
+Nce = -0.00912409648
+NceS = -0.297113508
+Merge_A = -2.30939054
+Merge_C = 0.0256121494
+Merge_G = 1.44313622
+Merge_T = -0.800382614
+MergeS_A = -0.204785869
+MergeS_C = -0.150837034
+MergeS_G = -0.365988463
+MergeS_T = -0.402499765
+
