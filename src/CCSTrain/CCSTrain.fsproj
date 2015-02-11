@@ -19,8 +19,7 @@
     <Tailcalls>false</Tailcalls>
     <PlatformTarget>
     </PlatformTarget>
-    <Commandlineparameters>CCSTrain --fofn /Users/nigel/16S/BEI/train.fofn -l /Users/nigel/16S/BEI/firstFile.cmp.h5  --maxTraces=400
- --ref /Users/nigel/16S/BEI/BEI_Mock.nodups.trimmed.fasta -o 16strained.ini</Commandlineparameters>
+    <Commandlineparameters>CCSTrain --fofn /Users/nigel/CCS_P6_C4/Train/train_no_ecoli.fofn -l /Users/nigel/CCS_P6_C4/Train/aligned_no_ecoli.cmp.h5  --maxTraces=600 --ref /Users/nigel/CCS_P6_C4/Train/References.fna -o HighSNR</Commandlineparameters>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

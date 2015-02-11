@@ -331,7 +331,7 @@ namespace PacBio.Consensus
                               {
                                 {"UnAligned", 0}, {"Al70Acc80", 0}, {"ETControl", 0},
                                 {"Passes<" + MINIMUM_PASSES, 0}, {"Passes>"+MAX_PASSES, 0}, {"BadSnrChk", 0},
-                {"WeirdAlgn", 0}, {"NotOkay",0}, {"TooManyRegions",0}, {"BlackList", 0}, {"SpeciesBlackList",0}
+                                {"WeirdAlgn", 0}, {"NotOkay",0}, {"TooManyRegions",0}, {"TemplateBlackList",0}
                               };
 
             var acceptedAsExamples = 0;
@@ -350,13 +350,7 @@ namespace PacBio.Consensus
                         }
                         Interlocked.Increment(ref  nTried);
                         var name = t.Metadata.MovieName + "/" + t.HoleNumber;
-                        var black_listed = !WhiteList.ZMWisOkay (name);
-                        if(black_listed)
-                        {
-                            ++rejects["BlackList"];
-                            //return;
-                        }
-
+                       
                         if(t.MultiAlignment.Length < 2) {
                             ++rejects["UnAligned"];
                             return;
@@ -366,10 +360,10 @@ namespace PacBio.Consensus
                             return;
                         }
                         var spname = t.MultiAlignment[0].ReferenceName;
-                        black_listed = !WhiteList.SpeciesIsOkay(spname);
+                        var black_listed = !WhiteList.TemplateIsOkay(spname);
                         if(black_listed)
                         {
-                            ++rejects["SpeciesBlackList"];
+                            ++rejects["TemplateBlackList"];
                             return;
                         }
 
@@ -468,7 +462,6 @@ namespace PacBio.Consensus
                 });
 
             int nRejects = rejects.Sum(v => v.Value);
-            WhiteList.sw.Close ();
             Console.WriteLine(@"Reject Counts:");
             rejects.ForEach(r => Console.WriteLine(@"{0} = {1}", r.Key, r.Value));
 
