@@ -15,7 +15,7 @@ type CCSTrain() as this =
     let alignments = ref ""
     let fofn = ref ""
     let outputFile = ref ""
-    let maxIterations = ref -1
+    let maxIterations = ref 1000
     let maxTraces = ref 30
     let snrCut = ref SnrCut.PassAll
 

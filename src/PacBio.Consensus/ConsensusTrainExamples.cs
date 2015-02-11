@@ -310,7 +310,7 @@ namespace PacBio.Consensus
         const int MAX_PASSES  = 20;
 
         public static List<CCSExample> GetExamples(TraceSet traceSet, Dictionary<string, string> referenceContigs, 
-                                                    int examplesPerReference, ReadConfigurationAssigner rca)
+                                                    int examplesNeeded, ReadConfigurationAssigner rca)
         {           
             //Console.WriteLine("Checking references");
 			//ScanSets.VerifyReferences(rawCmpH5);
@@ -319,8 +319,8 @@ namespace PacBio.Consensus
 			//varscans = ScanSets.FromCmpH5(rawCmpH5);
 
             List<CCSExample> goodExamples = new List<CCSExample> ();
+
             // Get this many for each group time 2 to get training and test data
-            int totalNeeded = 2 * referenceContigs.Count * rca.NumberOfSNRGroups * rca.NumberOfCoverageGroups * examplesPerReference;
             HashSet<string> okayRefs = new HashSet<string>(referenceContigs.Keys);
 
             //var ccsTraces = scans.SelectMany(s => s.LazyTraces).Where(CCSTraceFilter);
@@ -331,7 +331,7 @@ namespace PacBio.Consensus
                               {
                                 {"UnAligned", 0}, {"Al70Acc80", 0}, {"ETControl", 0},
                                 {"Passes<" + MINIMUM_PASSES, 0}, {"Passes>"+MAX_PASSES, 0}, {"BadSnrChk", 0},
-                                {"WeirdAlgn", 0}, {"NotOkay",0}, {"TooManyRegions",0}, {"BlackList", 0}
+                {"WeirdAlgn", 0}, {"NotOkay",0}, {"TooManyRegions",0}, {"BlackList", 0}, {"SpeciesBlackList",0}
                               };
 
             var acceptedAsExamples = 0;
@@ -341,7 +341,7 @@ namespace PacBio.Consensus
                 try {
 
                        
-                        if (acceptedAsExamples >= totalNeeded) {
+                        if (acceptedAsExamples >= examplesNeeded) {
                                 if(!endMet) {
                                     Console.WriteLine("Found all I needed!");
                                     endMet = true;
@@ -354,9 +354,9 @@ namespace PacBio.Consensus
                         if(black_listed)
                         {
                             ++rejects["BlackList"];
-                            return;
+                            //return;
                         }
-                       
+
                         if(t.MultiAlignment.Length < 2) {
                             ++rejects["UnAligned"];
                             return;
@@ -365,6 +365,14 @@ namespace PacBio.Consensus
                             ++rejects ["TooManyRegions"];
                             return;
                         }
+                        var spname = t.MultiAlignment[0].ReferenceName;
+                        black_listed = !WhiteList.SpeciesIsOkay(spname);
+                        if(black_listed)
+                        {
+                            ++rejects["SpeciesBlackList"];
+                            return;
+                        }
+
                         if(!CheckSnr(t)) {
                             ++rejects["BadSnrChk"];
                             return;
@@ -460,7 +468,7 @@ namespace PacBio.Consensus
                 });
 
             int nRejects = rejects.Sum(v => v.Value);
-
+            WhiteList.sw.Close ();
             Console.WriteLine(@"Reject Counts:");
             rejects.ForEach(r => Console.WriteLine(@"{0} = {1}", r.Key, r.Value));
 

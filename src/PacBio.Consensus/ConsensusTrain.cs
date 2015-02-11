@@ -126,7 +126,7 @@ namespace PacBio.Consensus
         /// </summary>
         /// <returns>The run.</returns>
         public int InnerRun(List<CCSExample> train, List<CCSExample> test, int hopedForTraces,
-            string outFile, int maxIterations = 100 )
+            string outFile, int maxIterations = 1000 )
         {          
    
             // Check that enough data is available
@@ -174,7 +174,7 @@ namespace PacBio.Consensus
         /// Subcommands must implement this method to carry out the subcommand.
         /// </summary>
         public int Run(string cmpH5File, string fofn, string reference, string outFile, int totalTraces, 
-            int maxIterations = 100, SnrCut snrCut = null)
+            int maxIterations = 1000, SnrCut snrCut = null)
         {
            
             if (String.IsNullOrEmpty(outFile))
@@ -194,13 +194,11 @@ namespace PacBio.Consensus
 
             var totalReferences = refDict.Count;
             Log (LogLevel.WARN, "Found " + totalReferences + " references in file");
-            var tracesPerReference = (int) Math.Ceiling (totalTraces / (double)totalReferences); 
-
 
             // Load training data for each partition
             // This code goes through the entire file and assigns examples to different partitions
             var traceSet = new TraceSet(cmpH5File, fofn);
-            var examples = CCSExample.GetExamples (traceSet, refDict, tracesPerReference * 2, rca);
+            var examples = CCSExample.GetExamples (traceSet, refDict, totalTraces * 2, rca);
             var n_train = examples.Count / 2 + examples.Count % 2;
             var n_test = examples.Count / 2;
             var shuff_examples = examples.Shuffle ();
@@ -208,7 +206,7 @@ namespace PacBio.Consensus
             var train = shuff_examples.Take (n_train).ToList();
             var test = shuff_examples.Skip (n_train).Take (n_test).ToList();
             var res = InnerRun (train,test, totalTraces, outFile, maxIterations);       
-            return 0;
+            return res;
         }
 
 

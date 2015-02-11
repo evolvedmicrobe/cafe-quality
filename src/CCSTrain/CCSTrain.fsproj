@@ -16,10 +16,12 @@
     <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <Externalconsole>true</Externalconsole>
     <Tailcalls>false</Tailcalls>
     <PlatformTarget>
     </PlatformTarget>
+    <Commandlineparameters>CCSTrain --fofn /Users/nigel/16S/BEI/train.fofn -l /Users/nigel/16S/BEI/firstFile.cmp.h5  --maxTraces=400
+ --ref /Users/nigel/16S/BEI/BEI_Mock.nodups.trimmed.fasta -o 16strained.ini</Commandlineparameters>
+    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>false</DebugSymbols>
@@ -30,9 +32,8 @@
     <PlatformTarget>
     </PlatformTarget>
     <Tailcalls>true</Tailcalls>
-    <Commandlineparameters>CCSTrainCompare --fofn /Users/nigel/CCS_P6_C4/input2.fofn -l /Users/nigel/CCS_P6_C4/allAligned.cmp.h5  --maxTraces=400
- --ref /Users/nigel/CCS_P6_C4/References.fna --param1=P6-C4
---param2=P6-C4_1_1</Commandlineparameters>
+    <Commandlineparameters>CCSTrain --fofn /Users/nigel/16S/BEI/train.fofn -l /Users/nigel/16S/BEI/firstFile.cmp.h5  --maxTraces=600
+ --ref /Users/nigel/16S/BEI/BEI_Mock.trimmed.fasta -o 16strained.ini</Commandlineparameters>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
