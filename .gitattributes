@@ -8,3 +8,5 @@
 *.xml binary
 *.XML binary
 *.dylib binary
+*.key binary
+*.pptx binary
