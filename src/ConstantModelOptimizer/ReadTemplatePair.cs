@@ -67,7 +67,7 @@ namespace ConstantModelOptimizer
                 TemplatePositionTransitionGroup [i] = c;
             }
         }
-        public void FillMatrics(ParameterSet pars)
+        public void FillMatrices(ParameterSet pars)
         {
             // Fill transition probabilites appropriate for each matrix position
             FillTransitionParameters (pars);
@@ -77,26 +77,14 @@ namespace ConstantModelOptimizer
             //We force ourselves to start and end in a match here
 
             // FILL THE FORWARD MATRICES
-
             for (int i = 0; i < (Read.Length-1); i++) {
                 for (int j = 0; j < (Template.Length-1); j++) {
-                    if (j == i) {
-                        Console.WriteLine ("fuck me");
-                    }
                     fillForwardMatrixPosition(i,j, pars);    
                 }
             }
            
             fillForwardMatrixPosition (Read.Length - 1, Template.Length - 1, pars);
-
-            // Now for the final transition, where we condition on ending in a match state.
-            var newState = new LatentStates ();
-            var transProbs = CurrentTransitionParameters [Template.Length - 2];
-            var forward = StateProbabilities.Forward;
-            var previous = forward [Read.Length - 2] [Template.Length - 2].Total;
-            newState.Match = previous + pars.log_One_Minus_Epsilon + transProbs.log_Match;
-            newState.Total = newState.Match; // Only one possible state at end
-            forward [Read.Length - 1] [Template.Length - 1] = newState;
+                  
 
 
             // FILL REVERSE MATRIX
@@ -104,9 +92,13 @@ namespace ConstantModelOptimizer
             var endj = Template.Length - 2;
             for (int i = endi; i >= 0; i--) {
                 for (int j = endj; j >= 0; j--) {
-                    fillReverseMatrixPosition(i,j, pars);    
+                    if (i == 2 && j == 1) {
+                        //    Console.WriteLine("doh!");
+                    }
+                    fillReverseMatrixPosition (i, j, pars);    
                 }
             }
+
 
             System.IO.StreamWriter sw = new System.IO.StreamWriter ("matrix.csv");
             List<Func<LatentStates, string>> grabbers = new List<Func<LatentStates, string>> () { 
@@ -124,18 +116,20 @@ namespace ConstantModelOptimizer
                     sw.WriteLine (cur);
                 }
                 sw.WriteLine ();
-//                sw.WriteLine ("reverse");
-//                mat = StateProbabilities.Reverse;
-//                for (int i = 0; i < mat.Length; i++) {
-//                    var cur = String.Join (",", mat [i].Select (x => v(x)).ToArray ());
-//                    sw.WriteLine (cur);
-//                }
+                sw.WriteLine ("reverse");
+                mat = StateProbabilities.Reverse;
+                for (int i = 0; i < mat.Length; i++) {
+                    var cur = String.Join (",", mat [i].Select (x => v(x)).ToArray ());
+                    sw.WriteLine (cur);
+                }
                 sw.WriteLine ();
             }
             sw.Close();
-            Console.WriteLine (StateProbabilities.Forward.Last().Last().Match + "\t" + StateProbabilities.Reverse [0] [0].Match );
+            // I don't ever save the last match value so need to add it here
+            var lastMatch = Read [0] == Template [0] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
+            Console.WriteLine (StateProbabilities.Forward.Last().Last().Match + "\t" + (StateProbabilities.Reverse [0] [0].Total + lastMatch ) );
 
-        }
+            }
 
         private void fillForwardMatrixPosition(int i, int j, ParameterSet pars)
         {
@@ -241,21 +235,18 @@ namespace ConstantModelOptimizer
             // state -> deletion
             if (j < endj) {
                 var next_dark = reverse [i] [j + 1].Total;
-                probsAfterMove.Dark = next_dark + transProbs.Dark;
+                probsAfterMove.Dark = next_dark + transProbs.log_Dark;
             
                 // state -> merge
                 double next_merge;
                 if (MergePossible [j]) {
                     next_merge = reverse [i] [j + 1].Total;
-                    probsAfterMove.Merge = transProbs.Merge + next_merge;
+                    probsAfterMove.Merge = transProbs.log_Merge + next_merge;
                 }
             }
             probsAfterMove.SetTotal ();
             probsAfterMove.Match = probsAfterMove.Total;
             probsAfterMove.Dark = probsAfterMove.Total;
-////            probsAfterMove.Merge = MergePossible[j] ? probsAfterMove.Total : Double.NegativeInfinity;
-////            probsAfterMove.Stick = isBranch ? Double.NegativeInfinity: probsAfterMove.Total;
-////            probsAfterMove.Branch = isBranch ? probsAfterMove.Total : Double.NegativeInfinity;
             probsAfterMove.Merge = probsAfterMove.Total;
             probsAfterMove.Stick = probsAfterMove.Total;
             probsAfterMove.Branch = probsAfterMove.Total;

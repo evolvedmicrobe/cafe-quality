@@ -16,11 +16,11 @@ namespace ConstantModelOptimizer
             var pars = new ParameterSet ();
             pars.SetDefaults ();
             foreach (var s in scorers) {
-               // s.FillMatrics (pars);
+                s.FillMatrices (pars);
             }
            
             var b = new ReadTemplatePair ("TTTT", "TTTT");
-            b.FillMatrics (pars);
+            b.FillMatrices (pars);
 
         }
           
