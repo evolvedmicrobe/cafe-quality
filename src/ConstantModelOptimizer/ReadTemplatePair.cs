@@ -70,10 +70,10 @@ namespace ConstantModelOptimizer
         {
             //Fill transition probabilites appropriate for each matrix position
             fillTransitionParameters (pars);
-            // clean house 
+            // clean house to be safe
             StateProbabilities.Clear();
 
-            //We force ourselves to start and end in a math here
+            //We force ourselves to start and end in a match here
 
             // FILL THE FORWARD MATRICES
             StateProbabilities.Forward[0][0].Match = 0.0;
@@ -101,11 +101,13 @@ namespace ConstantModelOptimizer
             StateProbabilities.Reverse[endi][endj].Total = 0.0;
             endi--;
             endj--;
-            for (int i = endi; i > 0; i--) {
-                for (int j = endj; j > 0; j--) {
-                    fillForwardMatrixPosition(i,j, pars);    
+            for (int i = (endi-1); i > 0; i--) {
+                for (int j = (endj-1); j > 0; j--) {
+                    fillReverseMatrixPosition(i,j, pars);    
                 }
             }
+
+
         }
 
         private void fillForwardMatrixPosition(int i, int j, ParameterSet pars)
@@ -144,16 +146,55 @@ namespace ConstantModelOptimizer
         }
 
         private void fillReverseMatrixPosition(int i, int j, ParameterSet pars) {
-            // We want to compute the probability we were in the last state, emitted from that state, and then transitioneed here
 
-            var newState = new LatentStates ();
+            // The backwards part of the forward backwards algorithm.  
+            // We want to sum over all possible next states, the probability that we transition from 
+            // this state to that state, then emit the symbol there, then all probabilities leaving that state.
+
             var transProbs = CurrentTransitionParameters [j];
 
-            // Match score first
+            // This might be a bit funky, I need to calculate for the match state the odds that we transition to every other state
+            // and then combine these to get the probability.  I will be doing this by using a fake latent state and add all of them 
+            var probsAfterMove = new LatentStates ();
             var reverse = StateProbabilities.Reverse;
-            var next = reverse [i + 1] [j + 1].Total;
+
+            // The probabilities of each are the same! 
+
+            // state -> match
+            var next_match = reverse [i + 1] [j + 1].Match;
             var emissionProb = Read [i] == Template [j] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
-            newState.Match = previous + transProbs.log_Match + emissionProb;
+            probsAfterMove.Match = next_match + transProbs.log_Match + emissionProb;
+
+            // state -> stick or state -> branch
+            var isBranch = Template [j + 1] = Read [i+1];
+            var next_insert = isBranch ? reverse [i + 1] [j].Branch : reverse [i + 1] [j].Stick;
+            if (isBranch) {
+                probsAfterMove.Branch = next_insert + transProbs.log_Branch; // Emission probability is 1 for the same base
+            } else {
+                probsAfterMove.Stick = next_insert + MathUtils.ONE_THIRD_LOGGED + transProbs.log_Stick;
+            }
+
+            // state -> deletion
+            var next_dark = reverse [i] [j + 1].Dark;
+            probsAfterMove.Dark = next_dark + transProbs.Dark;
+
+            // state -> merge
+            double next_merge;
+            if (MergePossible [j]) {
+                next_merge = reverse [i] [j + 1].Merge;
+                probsAfterMove.Merge = transProbs.Merge + next_merge;
+            }
+
+            probsAfterMove.SetTotal ();
+            probsAfterMove.Match = probsAfterMove.Total;
+            probsAfterMove.Dark = probsAfterMove.Total;
+//            probsAfterMove.Merge = MergePossible[j] ? probsAfterMove.Total : Double.NegativeInfinity;
+//            probsAfterMove.Stick = isBranch ? Double.NegativeInfinity: probsAfterMove.Total;
+//            probsAfterMove.Branch = isBranch ? probsAfterMove.Total : Double.NegativeInfinity;
+            probsAfterMove.Merge = probsAfterMove.Total;
+            probsAfterMove.Stick = probsAfterMove.Total;
+            probsAfterMove.Branch = probsAfterMove.Total;
+            reverse [i] [j] = probsAfterMove;
 
 
         }
@@ -165,7 +206,7 @@ namespace ConstantModelOptimizer
         /// A simpler solution would just use a 0 probability for each event that wasn't possible
         /// </summary>
         /// <param name="pars">Pars.</param>
-        public void fillTransitionParameters(ParameterSet pars)
+        void fillTransitionParameters(ParameterSet pars)
         {
             foreach (var kv in TemplatePositionTypes) {
                 var noMerge = kv.Key[0]=='N';
