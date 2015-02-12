@@ -69,7 +69,7 @@ namespace ConstantModelOptimizer
         public void FillMatrics(ParameterSet pars)
         {
             //Fill transition probabilites appropriate for each matrix position
-            fillTransitionParameters (pars);
+            FillTransitionParameters (pars);
             // clean house to be safe
             StateProbabilities.Clear();
 
@@ -206,7 +206,7 @@ namespace ConstantModelOptimizer
         /// A simpler solution would just use a 0 probability for each event that wasn't possible
         /// </summary>
         /// <param name="pars">Pars.</param>
-        void fillTransitionParameters(ParameterSet pars)
+        void FillTransitionParameters(ParameterSet pars)
         {
             foreach (var kv in TemplatePositionTypes) {
                 var noMerge = kv.Key[0]=='N';

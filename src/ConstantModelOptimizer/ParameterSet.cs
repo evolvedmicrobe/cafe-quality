@@ -6,8 +6,37 @@ namespace ConstantModelOptimizer
 {
 
 
-    public class TransitionParameters
+    public class TransitionParameters 
     {
+        public const int MATCH_POS = 0;
+        public const int STICK_POS = 1;
+        public const int BRANCH_POS = 2;
+        public const int DARK_POS = 3;
+        public const int MERGE_POS = 4;
+
+        public double this[int i] {
+            get{
+                switch (i) {
+                case MATCH_POS:
+                    return match;
+                case STICK_POS:
+                    return stick;
+                case BRANCH_POS:
+                    return branch;
+                case DARK_POS:
+                    return  dark;
+                case MERGE_POS:
+                    return merge;
+                default:
+                    throw new IndexOutOfRangeException ();
+                }
+            }
+        }
+
+        public readonly int Length = 5;
+
+
+
         public double Match {
             get { return match; }
             set {
