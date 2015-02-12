@@ -10,7 +10,12 @@ namespace ConstantModelOptimizer
         public double Match, Stick, Branch, Dark, Merge, Total;
         public LatentStates()
         {
-            Clear ();
+            Match = Double.NegativeInfinity;
+            Stick = Double.NegativeInfinity;
+            Branch = Double.NegativeInfinity;
+            Dark = Double.NegativeInfinity;
+            Merge = Double.NegativeInfinity;
+            Total = Double.NegativeInfinity;
         }
         public void Clear() {
             Match = Double.NegativeInfinity;

@@ -13,6 +13,7 @@ namespace ConstantModelOptimizer
 
         public static void SimulateTemplatesAndReads()
         {
+            List<Tuple<string, string>> pairs = new List<Tuple<string, string>> ();
             System.IO.StreamWriter sw = new System.IO.StreamWriter("Simulations.txt");
             sw.WriteLine("Template\tRead");
             for(int i=0; i<20;i++)
@@ -21,7 +22,8 @@ namespace ConstantModelOptimizer
                 var pars = new ParameterSet ();
                 pars.SetDefaults ();
                 string read = SimulateRead (50, pars, out tpl);
-                sw.WriteLine (tpl + "\n" + read);
+                sw.WriteLine (tpl + "\t" + read);
+                pairs.Add (new Tuple<string, string> (tpl, read));
                 //var read = SimulateRead(50, ParameterSet.
             }
             sw.Close ();
@@ -77,24 +79,10 @@ namespace ConstantModelOptimizer
             return new string(simmed.ToArray());
         }
 
-        /// <summary>
-        /// Duplicated code here, combine this later with the code in ReadTemplatePair.cs
-        /// </summary>
-        /// <param name="pars">Pars.</param>
-        void FillTransitionParameters(ParameterSet pars)
-        {
-            foreach (var kv in TemplatePositionTypes) {
-                var noMerge = kv.Key[0]=='N';
-                var cp =  pars.TransitionProbabilities[kv.Key];
-                foreach (int ind in kv.Value) {
-                    CurrentTransitionParameters [ind] = cp;
-                }
-            }           
-        }
-        public string SimulateTemplate(int templateLength = 50)
+            public static string SimulateTemplate(int templateLength = 50)
         {
             var simmed = Enumerable.Range (0, templateLength).Select (z => SampleBaseUniformly() );
-            return new string (simmed.ToArray);
+            return new string (simmed.ToArray());
         }
 
         public static int SampleMultinomial(TransitionParameters probs)
@@ -108,6 +96,7 @@ namespace ConstantModelOptimizer
                     return i;
                 }
             }
+            throw new Exception ("Not a valid CDF");
         }
 
         public static char SampleBaseUniformly()
@@ -115,7 +104,7 @@ namespace ConstantModelOptimizer
             return bases [rand.Next (4)];
         }
 
-        public static char SampleMatchBase(int currentBase, double misCallProb)
+        public static char SampleMatchBase(char currentBase, double misCallProb)
         {
             var u = rand.NextDouble ();
             if (u > misCallProb) {

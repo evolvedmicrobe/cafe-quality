@@ -124,7 +124,7 @@ namespace ConstantModelOptimizer
 
             // Now the insertion, which is either a stick or a branch
             var probAbove = forward [i - 1] [j].Total;
-            var isBranch = Template [j + 1] = Read [i];
+            var isBranch = Template [j + 1] == Read [i];
             if (isBranch) {
                 newState.Branch = probAbove + transProbs.log_Branch; // Emission probability is 1 for the same base
             } else {
@@ -166,7 +166,7 @@ namespace ConstantModelOptimizer
             probsAfterMove.Match = next_match + transProbs.log_Match + emissionProb;
 
             // state -> stick or state -> branch
-            var isBranch = Template [j + 1] = Read [i+1];
+            var isBranch = Template [j + 1] == Read [i+1];
             var next_insert = isBranch ? reverse [i + 1] [j].Branch : reverse [i + 1] [j].Stick;
             if (isBranch) {
                 probsAfterMove.Branch = next_insert + transProbs.log_Branch; // Emission probability is 1 for the same base

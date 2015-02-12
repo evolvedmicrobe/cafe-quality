@@ -1,3 +1,4 @@
+#if FALSE
 using System;
 using Bio;
 using Bio.Utils;
@@ -177,3 +178,4 @@ namespace ConstantModelOptimizer
 	}
 
 }
+#endif

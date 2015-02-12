@@ -199,7 +199,7 @@ namespace ConstantModelOptimizer
             foreach (char c in "ACGT") {
                 var s = "N" + c.ToString ();
                 s = String.Intern (s);
-                NoHPparameters [s] = new TransitionParametersNoHomopolymer () {
+                TransitionProbabilities [s] = new TransitionParameters () {
                     Match = .85,
                     Branch = 0.05,
                     Dark = 0.05,
@@ -208,7 +208,7 @@ namespace ConstantModelOptimizer
 
                 s = c.ToString () + c.ToString ();
                 s = String.Intern (s);
-                HPparameters [s] = new TransitionParametersHomopolymer () {
+                TransitionProbabilities [s] = new TransitionParameters () {
                     Match = .75,
                     Branch = 0.05,
                     Dark = 0.05,
@@ -248,11 +248,7 @@ namespace ConstantModelOptimizer
         {
             string[] toOut = new string[29];
             toOut[0] = "Mismatch";
-            var values = new Func<TransitionParametersNoHomopolymer, double>[] { (x) => x.Match,
-                x => x.Branch,
-                x=>x.Dark,
-                x=>x.Stick};// , "Branch", "Dark", "Stick", "Merge" };
-            var values2 = new Func<TransitionParametersHomopolymer, double>[] { (x) => x.Match,
+            var values2 = new Func<TransitionParameters, double>[] { (x) => x.Match,
                 x => x.Branch,
                 x=>x.Dark,
                 x=>x.Stick,
@@ -260,13 +256,13 @@ namespace ConstantModelOptimizer
             int j = 1;
             foreach (char c in "ACGT") {
                 var s = "N" + c.ToString ();
-                var pars = NoHPparameters [s];
+                var pars = TransitionProbabilities [s];
                 for (int i = 0; i < 4; i++) {
-                    toOut [j] = values [i](pars).ToString();
+                    toOut [j] = values2 [i](pars).ToString();
                     j++;
                 }
                 s = c.ToString() + c.ToString ();
-                var pars2 = HPparameters [s];
+                var pars2 = TransitionProbabilities [s];
                 for (int i = 0; i < values2.Length; i++) {
                     toOut [j] = values2 [i](pars2).ToString();
                     j++;
