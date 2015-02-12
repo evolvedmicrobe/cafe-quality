@@ -88,15 +88,4 @@
       <Name>PacBio.HDF</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="CCSParameters.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Chemistry\mapping.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Chemistry\" />
-  </ItemGroup>
 </Project>
