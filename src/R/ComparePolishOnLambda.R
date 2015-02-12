@@ -2,7 +2,7 @@ library(ggplot2)
 library(gridExtra)
 library(grid)
 
-setwd("/Users/nigel/git/cafe-quality/NotTracked/master_full")
+setwd("/Users/nigel/git/cafe-quality/NotTracked/")
 
 getld <-function(fname) {
   d= read.csv(fname)
@@ -12,71 +12,39 @@ getld <-function(fname) {
   d$SNPErrorRate = d$NumSNPErrors / d$Length
   d$IndelErrorRate = d$NumIndelErrors / d$Length
   d$MeanGC = (d$SnrG + d$SnrC) / 2
-  d[d$Reference=="lambda_NEB3011",]
+  d$MeanSnr = .25*(d$SnrG + d$SnrC + d$SnrT + d$SnrA) 
+  #d[d$Reference=="lambda_NEB3011",]
+  d[d$Reference=="ALL4MER.V2.01",]
 }
 d = getld("master_5ba5286_combined_reads.csv")
 #d2 = getld("C2_polymer_d067558_combined_reads.csv")
-d2 = getld("del_tag_combined_reads.csv")
-d3 = getld("no_del_combined_reads.csv")
+#d2 = getld("del_tag_combined_reads.csv")
+#d3 = getld("no_del_combined_reads.csv")
+d2 = getld("16s_training_combined_reads.csv")
 
 
-head(d2)
-
-in1 = intersect(intersect(d$ZMW,d2$ZMW),d3$ZMW)
-d3 = d3[d3$ZMW%in%in1,]
+in1 = intersect(d$ZMW,d2$ZMW)
 d2 = d2[d2$ZMW%in%in1,]
 d = d[d$ZMW%in%in1,]
 
-cd = rbind(d,d2,d3)
-cd$Reference=  factor(c(rep("Original",nrow(d)),rep("Always use Del Tag QV",nrow(d2)),rep("Never use Del Tag QV",nrow(d3))), levels = c("Always use Del Tag QV","Original","Never use Del Tag QV"))
+cd = rbind(d,d2)
+cd$Analysis=  factor(c(rep("Original",nrow(d)),rep("New",nrow(d2))))
 cd$MeanGC = .5*(cd$SnrG + cd$SnrC)
-mkPlot<-function(errorType, ylab, title) {
-  fm = formula(paste(errorType,"~NumPasses+Reference"))
-  q = aggregate(fm,cd,mean)
-  v = ggplot(q,aes_string(x="NumPasses", y = errorType, colour="Reference")) + geom_line()+ theme_bw(base_size=8)
-  v = v + labs(x= "Number of Passes", y = paste(ylab, "Error Rate (per bp)"), title=title)
-  v = v + scale_x_continuous(limits=c(0,100))
-  v
-}
 
-
-a = mkPlot("ErrorRate","Total ", "Total Errors")
-b = mkPlot("SNPErrorRate","SNP ", "SNP Errors")
-c = mkPlot("IndelErrorRate","SNP ", "Indel Errors")
-
-grid.arrange(a,b,c)
-
-q = aggregate(ErrorRate~NumPasses+Reference, cd, mean )
-t1= rep("All",nrow(q))
-
-q2 = aggregate(IndelErrorRate~NumPasses+Reference, cd, mean )
-names(q2)[3]<-"ErrorRate"
-t2 = rep("Indel",nrow(q2))
-
-q3 = aggregate(SNPErrorRate~NumPasses+Reference, cd, mean )
-names(q3)[3]<-"ErrorRate"
-t3 = rep("SNP",nrow(q3))
-
-res = rbind(q,q2,q3)
-res$ErrorType=c(t1,t2,t3)
-
-
-
+res = aggregate(ErrorRate~NumPasses+Analysis, cd, FUN=mean)
 head(res)
 ph = function(x) { -10*log10(x)}
 res$QV = sapply(res$ErrorRate,ph)
 
-res = res[res$ErrorType=="All",]
-
-v = ggplot(res,aes(x=NumPasses, y = QV, colour=Reference))+geom_line()+geom_point()+theme_classic(base_size=8)+scale_x_continuous(limits=c(0,60)) 
+v = ggplot(res,aes(x=NumPasses, y = QV, colour=Analysis))+geom_line()+geom_point()+theme_classic(base_size=8)+scale_x_continuous(limits=c(0,60)) 
 v = v+labs(x="Number of Passes", y = "Per Base Error Rate (Phred QV Scale)",title=expression(paste("Accuracy in ",lambda)))
-v = v + geom_vline(xintercept=10, colour="red") +geom_rug(aes(x=JittedPos, y = NULL, colour=NULL),data=sd)
+v = v + geom_vline(xintercept=10, colour="red") +geom_hline(yintercept=30, colour="red")
 v
 
-flipped = dcast(res,NumPasses~Reference,value.var="ErrorRate")
-nd = t(apply(flipped[,2:4],1, function(x) x/x[2]))
+flipped = dcast(res,NumPasses~Analysis,value.var="ErrorRate")
+nd = t(apply(flipped[,2:3],1, function(x) x/x[2]))
 head(nd)
-flipped[,2:4]<-nd
+flipped[,2:3]<-nd
 fmd = melt(flipped, id.vars="NumPasses")
 v2 = ggplot(fmd,aes(x=NumPasses, y = value, colour=variable))+geom_line()+geom_point()+theme_classic(base_size=8)+scale_x_continuous(limits=c(0,60)) 
 v2 = v2+labs(x="Number of Passes", y = "Relative Error Rate",title=expression(paste("Relative Accuracy in ",lambda)))+scale_y_continuous(labels=percent)
