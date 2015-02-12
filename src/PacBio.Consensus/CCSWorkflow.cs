@@ -706,6 +706,10 @@ namespace PacBio.Consensus
                 return new Tuple<CCSResultType, IZmwConsensusBases> (CCSResultType.NotProductive, ZmwConsensusBases.Null(bases.Zmw));
 
 
+            if (bases.Metrics.HQRegionSNR.Average () < 8.9) {
+                return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.OutsideSNR, ZmwConsensusBases.Null(bases.Zmw));   
+            }
+
             if (!Config.SnrCut.Contains(bases.Metrics.HQRegionSNR))
                 return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.OutsideSNR, ZmwConsensusBases.Null(bases.Zmw));
 
@@ -784,7 +788,8 @@ namespace PacBio.Consensus
                 int maxIterations = 7;
                 int iterationsTaken = 0;
 
-                //perf.Time(zmw.HoleNumber, "CCSMutationTesting");
+                // Just to be sure hard coding on this branch
+                ScConfig.Algorithm = RecursionAlgo.Prob;
                 using (var scorer = new MultiReadMutationScorer(regions, bases, initialTpl, ScConfig))
                 {
                     result = FindConsensus.MultiReadConsensusAndQv(scorer, regions, bases.Zmw,

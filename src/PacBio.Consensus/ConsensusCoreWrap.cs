@@ -256,7 +256,7 @@ namespace PacBio.Consensus
     public class ScorerConfig : IDisposable
     {
         public QuiverConfigTable Parameters;
-        public RecursionAlgo Algorithm = RecursionAlgo.Viterbi;
+        public RecursionAlgo Algorithm = RecursionAlgo.Prob;
         public bool HasChemistryOverride = false;
 
         public void Dispose()
