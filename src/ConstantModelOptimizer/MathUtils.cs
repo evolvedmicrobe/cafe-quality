@@ -88,7 +88,7 @@ namespace ConstantModelOptimizer
         public static double logsumlog(double v1, double v2, double v3, double v4, double v5)
         {
             var max = Math.Max(Math.Max(Math.Max(Math.Max(v1, v2), v3),v4),v5);
-            if (max == double.NegativeInfinity)
+            if (Double.IsNegativeInfinity(max))
             {
                 return max;
             }

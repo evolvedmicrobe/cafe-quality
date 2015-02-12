@@ -15,8 +15,8 @@ namespace ConstantModelOptimizer
 
         public DynamicProgrammingMatrixPair (string read, string template)
         {
-            Forward = RectangularArrays.ReturnRectangularLatentStateArray (read.Length + 1, template.Length + 1);
-            Reverse = RectangularArrays.ReturnRectangularLatentStateArray (read.Length + 1, template.Length + 1);
+            Forward = RectangularArrays.ReturnRectangularLatentStateArray (read.Length, template.Length);
+            Reverse = RectangularArrays.ReturnRectangularLatentStateArray (read.Length, template.Length);
 
         }
         /// <summary>

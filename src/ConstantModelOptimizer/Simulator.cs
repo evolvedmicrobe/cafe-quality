@@ -11,7 +11,7 @@ namespace ConstantModelOptimizer
         static char[] bases = new char[] {'A', 'G', 'C', 'T'};
 
 
-        public static void SimulateTemplatesAndReads()
+        public static List<Tuple<string, string>> SimulateTemplatesAndReads()
         {
             List<Tuple<string, string>> pairs = new List<Tuple<string, string>> ();
             System.IO.StreamWriter sw = new System.IO.StreamWriter("Simulations.txt");
@@ -24,9 +24,9 @@ namespace ConstantModelOptimizer
                 string read = SimulateRead (50, pars, out tpl);
                 sw.WriteLine (tpl + "\t" + read);
                 pairs.Add (new Tuple<string, string> (tpl, read));
-                //var read = SimulateRead(50, ParameterSet.
             }
             sw.Close ();
+            return pairs;
         }
 
 

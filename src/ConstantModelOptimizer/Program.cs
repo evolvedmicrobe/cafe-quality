@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
 
 namespace ConstantModelOptimizer
 {
@@ -7,7 +11,18 @@ namespace ConstantModelOptimizer
         public static void Main (string[] args)
         {
             Console.WriteLine ("Hello World!");
-            Simulator.SimulateTemplatesAndReads ();
+            var data = Simulator.SimulateTemplatesAndReads ();
+            var scorers = data.Select( p=> new ReadTemplatePair(p.Item2,p.Item1)).ToList();
+            var pars = new ParameterSet ();
+            pars.SetDefaults ();
+            foreach (var s in scorers) {
+               // s.FillMatrics (pars);
+            }
+           
+            var b = new ReadTemplatePair ("TTTT", "TTTT");
+            b.FillMatrics (pars);
+
         }
+          
     }
 }

@@ -167,7 +167,7 @@ namespace ConstantModelOptimizer
         }
 
         public double log_One_Minus_Epsilon {
-            get{ return log_One_Minus_Epsilon; }
+            get{ return log_one_minus_epsilon; }
         }
 
         private double epsilon;
