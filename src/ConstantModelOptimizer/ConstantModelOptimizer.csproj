@@ -60,6 +60,7 @@
     <Compile Include="LoggedHMM.cs" />
     <Compile Include="LatentStates.cs" />
     <Compile Include="Simulator.cs" />
+    <Compile Include="Optimizer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -16,11 +16,11 @@ namespace ConstantModelOptimizer
             List<Tuple<string, string>> pairs = new List<Tuple<string, string>> ();
             System.IO.StreamWriter sw = new System.IO.StreamWriter("Simulations.txt");
             sw.WriteLine("Template\tRead");
-            for(int i=0; i<20;i++)
+            var pars = new ParameterSet ();
+            pars.SetDefaults ();
+            for(int i=0; i < 5000; i++)
             {
                 string tpl;
-                var pars = new ParameterSet ();
-                pars.SetDefaults ();
                 string read = SimulateRead (50, pars, out tpl);
                 sw.WriteLine (tpl + "\t" + read);
                 pairs.Add (new Tuple<string, string> (tpl, read));
@@ -42,7 +42,11 @@ namespace ConstantModelOptimizer
                 var c2 = template [j + 1].ToString ();
                 var mergePossible = c1 == c2;
                 var c = mergePossible ? c1 + c2 : "N" + c2;
-                transParameters [j] = pars.TransitionProbabilities[c];
+                if (ParameterSet.USE_DINUCLEOTIDE_MODEL) {
+                    transParameters [j] = pars.TransitionProbabilities [c];
+                } else {
+                    transParameters [j] = mergePossible ? pars.GlobalParametersMerge : pars.GlobalParametersNoMerge;
+                }
             }
 
             List<char> simmed = new List<char> (template.Length * 2);
@@ -53,7 +57,7 @@ namespace ConstantModelOptimizer
                 var nextMove = SampleMultinomial(cp);
                 if (nextMove == TransitionParameters.MATCH_POS)
                 {
-                    var nb = SampleMatchBase(template[i], pars.Epsilon);
+                    var nb = SampleMatchBase(template[i+1], pars.Epsilon);
                     i++;
                     simmed.Add(nb);
                 }
@@ -63,15 +67,15 @@ namespace ConstantModelOptimizer
                 }
                 else if(nextMove == TransitionParameters.BRANCH_POS)
                 {
-                    simmed.Add(template[i]);
+                    simmed.Add(template[i+1]);
                 }
                 else if (nextMove == TransitionParameters.STICK_POS)
                 {
                     char bp;
-                    var cur = template[i];
+                    var cur = template[i+1];
                     do {
                         bp = SampleBaseUniformly ();
-                    } while(bp != cur);
+                    } while(bp == cur);
                     simmed.Add(bp);
                 }
             }
@@ -79,7 +83,7 @@ namespace ConstantModelOptimizer
             return new string(simmed.ToArray());
         }
 
-            public static string SimulateTemplate(int templateLength = 50)
+            public static string SimulateTemplate(int templateLength = 100)
         {
             var simmed = Enumerable.Range (0, templateLength).Select (z => SampleBaseUniformly() );
             return new string (simmed.ToArray());

@@ -30,10 +30,17 @@ namespace ConstantModelOptimizer
         /// </summary>
         TransitionParameters[] CurrentTransitionParameters;
 
-
         string Read, Template;
 
 
+        /// <summary>
+        /// This is the probability of the read at the current parameter settings.
+        /// </summary>
+        /// <value>The current data probability.</value>
+        public double CurrentLikelihood {
+            get;
+            private set;
+        }
 
         public ReadTemplatePair (string read, string template)
         {
@@ -56,6 +63,7 @@ namespace ConstantModelOptimizer
             TemplatePositionTransitionGroup = new string[template.Length -1];
             CurrentTransitionParameters = new TransitionParameters[template.Length - 1];
             MergePossible = new bool[template.Length - 1 ];
+
             for (int i = 0; i < (template.Length - 1); i++) {
                 var c1 = template [i].ToString ();
                 var c2 = template [i + 1].ToString ();
@@ -66,8 +74,9 @@ namespace ConstantModelOptimizer
                 TemplatePositionTypes [c].Add (i);
                 TemplatePositionTransitionGroup [i] = c;
             }
+            
         }
-        public void FillMatrices(ParameterSet pars)
+        public double FillMatrices(ParameterSet pars)
         {
             // Fill transition probabilites appropriate for each matrix position
             FillTransitionParameters (pars);
@@ -98,39 +107,59 @@ namespace ConstantModelOptimizer
                     fillReverseMatrixPosition (i, j, pars);    
                 }
             }
+            //DumpMatrices ();
 
 
-            System.IO.StreamWriter sw = new System.IO.StreamWriter ("matrix.csv");
-            List<Func<LatentStates, string>> grabbers = new List<Func<LatentStates, string>> () { 
-                z => z.Match.ToString (),
-                z => z.Stick.ToString (),
-                z => z.Branch.ToString (),
-                z => z.Dark.ToString (),
-                z => z.Merge.ToString ()
-            };
-            foreach (var v in grabbers) {
-                sw.WriteLine ("forward");
-                var mat = StateProbabilities.Forward;
-                for (int i = 0; i < mat.Length; i++) {
-                    var cur = String.Join (",", mat [i].Select (x => v(x)).ToArray ());
-                    sw.WriteLine (cur);
-                }
-                sw.WriteLine ();
-                sw.WriteLine ("reverse");
-                mat = StateProbabilities.Reverse;
-                for (int i = 0; i < mat.Length; i++) {
-                    var cur = String.Join (",", mat [i].Select (x => v(x)).ToArray ());
-                    sw.WriteLine (cur);
-                }
-                sw.WriteLine ();
-            }
-            sw.Close();
             // I don't ever save the last match value so need to add it here
+
+            // Set the likelihood
+            var likelihood = StateProbabilities.Forward.Last ().Last ().Total;
+            CurrentLikelihood = likelihood;
+            //Console.WriteLine (likelihood);
+            // Now check for alpha beta mismatch error
+            var misMatchEps = 1e-6;
             var lastMatch = Read [0] == Template [0] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
-            Console.WriteLine (StateProbabilities.Forward.Last().Last().Match + "\t" + (StateProbabilities.Reverse [0] [0].Total + lastMatch ) );
-
+            var beta_likelihood = (StateProbabilities.Reverse [0] [0].Total + lastMatch);
+            if (Math.Abs (CurrentLikelihood - beta_likelihood) > misMatchEps) {
+                throw new Exception ("Alpha-Beta mismatch error");
             }
+            return CurrentLikelihood;
+        }
 
+        private void DumpMatrices()
+        {
+            Func<double, string> format = delegate(double x) {
+                if(Double.IsNegativeInfinity(x)) {return "0";} else {return Math.Exp(x).ToString();}
+                    };
+
+            
+                        System.IO.StreamWriter sw = new System.IO.StreamWriter ("matrix.csv");
+                        List<Func<LatentStates, double>> grabbers = new List<Func<LatentStates, double>> () { 
+                            z => z.Match,
+                            z => z.Stick,
+                            z => z.Branch,
+                            z => z.Dark,
+                            z => z.Merge, 
+                            z => z.Total
+                        };
+                        foreach (var v in grabbers) {
+                            sw.WriteLine ("forward");
+                            var mat = StateProbabilities.Forward;
+                            for (int i = 0; i < mat.Length; i++) {
+                            var cur = String.Join (",", mat [i].Select (x => format(v(x))).ToArray ());
+                                sw.WriteLine (cur);
+                            }
+                            sw.WriteLine ();
+                            sw.WriteLine ("reverse");
+                            mat = StateProbabilities.Reverse;
+                            for (int i = 0; i < mat.Length; i++) {
+                            var cur = String.Join (",", mat [i].Select (x => format(v(x))).ToArray ());
+                                sw.WriteLine (cur);
+                            }
+                            sw.WriteLine ();
+                        }
+                        sw.Close();
+        }
         private void fillForwardMatrixPosition(int i, int j, ParameterSet pars)
         {
             // To store this new element
@@ -264,14 +293,143 @@ namespace ConstantModelOptimizer
         /// <param name="pars">Pars.</param>
         void FillTransitionParameters(ParameterSet pars)
         {
-            foreach (var kv in TemplatePositionTypes) {
-                var noMerge = kv.Key[0]=='N';
-                var cp =  pars.TransitionProbabilities[kv.Key];
-                foreach (int ind in kv.Value) {
+            if (ParameterSet.USE_DINUCLEOTIDE_MODEL) {
+                foreach (var kv in TemplatePositionTypes) {
+                    var noMerge = kv.Key [0] == 'N';
+                    var cp = pars.TransitionProbabilities [kv.Key];
+                    foreach (int ind in kv.Value) {
                         CurrentTransitionParameters [ind] = cp;
+                    }
                 }
-            }           
+            } else {
+                for (int i = 0; i < MergePossible.Length; i++) {
+                    if (MergePossible [i]) {
+                        CurrentTransitionParameters [i] = pars.GlobalParametersMerge;
+                    } else {
+                        CurrentTransitionParameters [i] = pars.GlobalParametersNoMerge;
+                    }
+                }
+            }
         }
+
+        public LatentStates GetCountsForAllColumns(ParameterSet pars, bool MergePositions) {
+            if (ParameterSet.USE_DINUCLEOTIDE_MODEL) {
+                throw new InvalidProgramException ("Should not be called under these conditions");
+            }
+
+            LatentStates totals = new LatentStates();
+            for (int i =0; i< (Template.Length-2); i++) {
+                if (MergePossible[i] == MergePositions) {
+                var cnts = GetTransitionWeightsForColumn (i, pars);
+                    totals.Addin (cnts);
+                }
+            }
+            return totals;
+                 
+        }
+
+        public LatentStates GetCountsForGroup(string grup, ParameterSet pars) {
+            if (!ParameterSet.USE_DINUCLEOTIDE_MODEL) {
+                throw new InvalidProgramException ("Should not be called under these conditions");
+            }
+            var columns = this.TemplatePositionTypes [grup];
+            LatentStates totals = new LatentStates();
+            foreach(var j in columns)
+            {
+                var cnts = GetTransitionWeightsForColumn (j, pars);
+                totals.Addin (cnts);
+            }
+            return totals;
+        }
+
+
+        public LatentStates GetTransitionWeightsForColumn(int j, ParameterSet pars)
+        {
+            /* This is for the M step in the Baum-Welch algorithm. This method wants
+             * to return the pseudo-counts for the expected number of times we made a K -> L
+             * transition while in this column.  To do this, we will go down the entire column
+             * and calculate the weighted probability we made a transition from K -> L.
+             * For a move from (i,j) to (i+d, j+e), where d, l = 0 or 1 this is equal to:
+             * 
+             *          (F(i,j) * P_{Trans{K->L}} * Emit(i+d, j+e) * B(i+d, j+e) ) / P(Read)
+             * 
+             * This is sort of a mo-fo as it involves lots of progressive additions of exponentials
+             */
+
+            // Throw an exception if first or last column, these have to be matches
+            if (j == Template.Length) {
+                throw new Exception ("Bad column request");
+            }
+
+
+            var F = StateProbabilities.Forward;
+            var B = StateProbabilities.Reverse;
+            var transProbs = CurrentTransitionParameters [j];
+            LatentStates totProbs = new LatentStates ();
+            int maxRowWhereDownMovePossible = Read.Length - 3;
+            int maxColumnWhereLeftMovePossible = Template.Length - 3;
+
+            // We require the last position to be a match, so only iterate to the second to last line
+            for (int i = 0; i < (Read.Length - 1); i++) {
+                var curF = F [i] [j].Total;
+
+                // Local variable to hold the weight for this particular i,j location
+                var new_probs = new LatentStates ();
+
+                // MATCH
+                if (i <= maxRowWhereDownMovePossible) {
+                    var emit_match = Read [i+1] == Template [j+1] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
+                    new_probs.Match = curF + transProbs.log_Match + emit_match + B [i + 1] [j + 1].Total;
+                }
+
+                // INSERTIONS, which can't account for the first or last base as that must be a match.
+                // Insertions are either a stick or a branch
+                if (i <= maxRowWhereDownMovePossible) {
+                    var isBranch = Template [j + 1] == Read [i+1];
+                    if (isBranch) {
+                        new_probs.Branch = curF + transProbs.log_Branch + B[i+1][j].Total; // Emission probability is 1 for the same base
+                    } else {
+                        new_probs.Stick = curF + MathUtils.ONE_THIRD_LOGGED + transProbs.log_Stick + B[i+1][j].Total;
+                    }
+                }
+
+                // DELETION
+                // conditions already checked.
+                // Dark first
+                if (j <= maxColumnWhereLeftMovePossible) {
+                    new_probs.Dark = curF + transProbs.log_Dark + B [i] [j + 1].Total;
+                    if (MergePossible [j]) {
+                        new_probs.Merge = curF + transProbs.log_Merge + B [i] [j + 1].Total; 
+                    }
+                }
+                totProbs.Addin (new_probs);
+            }
+            // Now to remove P(X) from all of them (equivalent to dividing by the total probability for this path).
+            totProbs.RemoveConstant (CurrentLikelihood);
+            return totProbs;
+        }
+
+        public void GetInCorrectEstimate(out double numerator, out double denom) {
+            // We loop from the second row to the second to last, as the first and last positions are assumed to be a match
+            var F = StateProbabilities.Forward;
+            var B = StateProbabilities.Reverse;
+
+            numerator = Double.NegativeInfinity;
+            denom = Double.NegativeInfinity;
+            for (int i = 1; i < Read.Length - 1; i++) {
+                for (int j = 1; j < Template.Length - 1; j++) {
+                    var amt = F [i] [j].Match + B [i] [j].Match;
+                    if (Read [i] != Template [j]) {
+                        numerator = MathUtils.logsumlog (numerator, amt);
+                    }
+                    denom = MathUtils.logsumlog (denom, amt);
+                }
+            }
+            numerator -= CurrentLikelihood;
+            denom -= CurrentLikelihood;
+             
+        }
+
     }
 
 }

@@ -8,6 +8,7 @@ namespace ConstantModelOptimizer
 
     public class TransitionParameters 
     {
+
         public const int MATCH_POS = 0;
         public const int STICK_POS = 1;
         public const int BRANCH_POS = 2;
@@ -121,6 +122,13 @@ namespace ConstantModelOptimizer
 
     public class ParameterSet
     {
+
+        /// <summary>
+        /// Whether to have one set of parameters for each dinucleotide context or not.
+        /// </summary>
+        public const bool USE_DINUCLEOTIDE_MODEL = true;
+
+
         /// <summary>
         /// All the di-nucleotide contexts which have their own values
         /// </summary>
@@ -174,6 +182,14 @@ namespace ConstantModelOptimizer
         private double log_one_minus_epsilon;
         private double log_epsilon_times_one_third;
 
+        /// <summary>
+        /// The parameters to use if we only have one set, 
+        /// and are not dividing by di-nucleotide context.
+        /// </summary>
+        public TransitionParameters GlobalParametersNoMerge;
+        public TransitionParameters GlobalParametersMerge;
+
+
 
         /// <summary>
         /// A dictionary which gives the probabilities of different emmissions for 
@@ -191,24 +207,41 @@ namespace ConstantModelOptimizer
         /// </summary>
         public void SetDefaults()
         {
+            if (USE_DINUCLEOTIDE_MODEL) {
+                TransitionProbabilities = new Dictionary<string, TransitionParameters> ();
+                // Random guesses that are roughly in line with what I think
+                Epsilon = 0.04;
+                // I think merges happen roughly ~10% of the time based on Edna
+                foreach (char c in "ACGT") {
+                    var s = "N" + c.ToString ();
+                    s = String.Intern (s);
+                    TransitionProbabilities [s] = new TransitionParameters () {
+                        Match = .85,
+                        Branch = 0.05,
+                        Dark = 0.05,
+                        Stick = 0.05
+                    };
 
-            TransitionProbabilities = new Dictionary<string, TransitionParameters> ();
-            // Random guesses that are roughly in line with what I think
-            Epsilon = 0.02;
-            // I think merges happen roughly ~10% of the time based on Edna
-            foreach (char c in "ACGT") {
-                var s = "N" + c.ToString ();
-                s = String.Intern (s);
-                TransitionProbabilities [s] = new TransitionParameters () {
+                    s = c.ToString () + c.ToString ();
+                    s = String.Intern (s);
+                    TransitionProbabilities [s] = new TransitionParameters () {
+                        Match = .75,
+                        Branch = 0.05,
+                        Dark = 0.05,
+                        Stick = 0.05,
+                        Merge = 0.1
+                    };
+                }
+            } else {
+                Epsilon = 0.04;
+                GlobalParametersNoMerge = new TransitionParameters () {
                     Match = .85,
                     Branch = 0.05,
                     Dark = 0.05,
                     Stick = 0.05
                 };
 
-                s = c.ToString () + c.ToString ();
-                s = String.Intern (s);
-                TransitionProbabilities [s] = new TransitionParameters () {
+                GlobalParametersMerge = new TransitionParameters () {
                     Match = .75,
                     Branch = 0.05,
                     Dark = 0.05,
@@ -220,13 +253,13 @@ namespace ConstantModelOptimizer
 
         public string GetCSVHeaderLine()
         {
-            string[] toOut = new string[29];
+            string[] toOut = new string[41];
             toOut[0] = "Mismatch";
             var values = new string[] { "Match", "Branch", "Dark", "Stick", "Merge" };
             int j = 1;
             foreach (char c in "ACGT") {
                 var s = "N" + c.ToString ();
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < values.Length; i++) {
                     toOut [j] = s + "." + values [i];
                     j++;
                 }
@@ -246,7 +279,7 @@ namespace ConstantModelOptimizer
         /// <returns>The CSV data line.</returns>
         public string GetCSVDataLine()
         {
-            string[] toOut = new string[29];
+            string[] toOut = new string[41];
             toOut[0] = "Mismatch";
             var values2 = new Func<TransitionParameters, double>[] { (x) => x.Match,
                 x => x.Branch,

@@ -101,6 +101,19 @@ namespace ConstantModelOptimizer
             return Math.Log (sum) + max;
         }
 
+        public static double logsumlog(double v1, double v2)
+        {
+            var max = Math.Max(v1, v2);
+            if (Double.IsNegativeInfinity(max))
+            {
+                return max;
+            }
+            v1 -= max;
+            v2 -= max;
+            var sum = Math.Exp (v1) + Math.Exp (v2);
+            return Math.Log (sum) + max;
+        }
+
 		public static double log10sumLog10(double[] log10p, int start, int finish)
 		{
 			double sum = 0.0;
@@ -159,6 +172,7 @@ namespace ConstantModelOptimizer
 			return log10sumLog10(log10values, 0);
 		}
 
+
 		public static double approximateLog10SumLog10(double small, double big)
 		{
 			// make sure small is really the smaller value
@@ -191,10 +205,6 @@ namespace ConstantModelOptimizer
 		}
 	}
 
-    public static class Arrays
-    {
-
-    }
 
 
 }
