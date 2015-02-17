@@ -109,6 +109,16 @@ namespace ConstantModelOptimizer
         private double log_match, log_branch, log_stick, log_dark, log_merge;
         private double match, branch, stick, dark, merge;
 
+        public TransitionParameters MakeCopy()
+        {
+            var ntp = new TransitionParameters ();
+            ntp.Merge = Merge;
+            ntp.Stick = Stick;
+            ntp.Match = Match;
+            ntp.Branch = Branch;
+            ntp.Dark = Dark;
+            return ntp;
+        }
         public void Normalize()
         {
             var sum = Match+Branch+Stick+Dark+Merge;
@@ -122,7 +132,7 @@ namespace ConstantModelOptimizer
 
     public class ParameterSet
     {
-
+        #region STATICS
         /// <summary>
         /// Whether to have one set of parameters for each dinucleotide context or not.
         /// </summary>
@@ -156,7 +166,7 @@ namespace ConstantModelOptimizer
             DiNucleotideToIndex = diNucleotideToIndex;
             IndexToDiNucleotide = indexToDiNucleotide;
         }
-
+        #endregion
         /// <summary>
         /// The probability that a match is emitted incorrectly
         /// </summary>
@@ -195,6 +205,19 @@ namespace ConstantModelOptimizer
         /// A dictionary which gives the probabilities of different emmissions for 
         /// </summary>
         public Dictionary<string, TransitionParameters> TransitionProbabilities;
+
+        /// <summary>
+        /// Makes a new parameter set by deep copying another.
+        /// </summary>
+        /// <param name="toCopy">To copy.</param>
+        public ParameterSet(ParameterSet toCopy)
+        {
+            this.Epsilon = toCopy.Epsilon;
+            TransitionProbabilities = new Dictionary<string, TransitionParameters> ();
+            foreach (var kv in toCopy.TransitionProbabilities) {
+                this.TransitionProbabilities [kv.Key] = kv.Value.MakeCopy ();
+            }
+        }
 
         public ParameterSet ()
         {
@@ -253,6 +276,59 @@ namespace ConstantModelOptimizer
             }
         }
 
+        public void SetRandomDefaults()
+        {
+            Epsilon = Simulator.SampleMisCallRate ();
+            if (USE_DINUCLEOTIDE_MODEL) {
+                TransitionProbabilities = new Dictionary<string, TransitionParameters> ();
+                // Random guesses that are roughly in line with what I think
+               
+                // I think merges happen roughly ~10% of the time based on Edna
+                foreach (char c in "ACGT") {
+                    var s = "N" + c.ToString ();
+                    s = String.Intern (s);
+                    var np = Simulator.SampleNoMergeRates ();
+
+                    TransitionProbabilities [s] = new TransitionParameters () {
+                        Match = np[0],
+                        Branch = np[1],
+                        Dark = np[2],
+                        Stick = np[3]
+                    };
+                    TransitionProbabilities [s].Normalize ();
+                    s = c.ToString () + c.ToString ();
+                    s = String.Intern (s);
+                    np = Simulator.SampleMergeRates ();
+                    TransitionProbabilities [s] = new TransitionParameters () {
+                        Match = np[0],
+                        Branch = np[1],
+                        Dark = np[2],
+                        Stick = np[3],
+                        Merge = np[4]
+                    };
+                    TransitionProbabilities [s].Normalize ();
+                }
+            } else {
+                var np = Simulator.SampleNoMergeRates ();
+                GlobalParametersNoMerge = new TransitionParameters () {
+                    Match = np[0],
+                    Branch = np[1],
+                    Dark = np[2],
+                    Stick = np[3]
+                };
+                GlobalParametersNoMerge.Normalize ();
+                np = Simulator.SampleMergeRates ();
+                GlobalParametersMerge = new TransitionParameters () {
+                    Match = np[0],
+                    Branch = np[1],
+                    Dark = np[2],
+                    Stick = np[3],
+                    Merge = np[4]
+                };
+                GlobalParametersMerge.Normalize ();
+            }
+        }
+
         public string GetCSVHeaderLine()
         {
             string[] toOut = new string[41];
@@ -282,8 +358,9 @@ namespace ConstantModelOptimizer
         public string GetCSVDataLine()
         {
             string[] toOut = new string[41];
-            toOut[0] = "Mismatch";
-            var values2 = new Func<TransitionParameters, double>[] { (x) => x.Match,
+            toOut[0] = Epsilon.ToString();
+            var values2 = new Func<TransitionParameters, double>[] { 
+                x => x.Match,
                 x => x.Branch,
                 x=>x.Dark,
                 x=>x.Stick,
@@ -292,7 +369,7 @@ namespace ConstantModelOptimizer
             foreach (char c in "ACGT") {
                 var s = "N" + c.ToString ();
                 var pars = TransitionProbabilities [s];
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < values2.Length; i++) {
                     toOut [j] = values2 [i](pars).ToString();
                     j++;
                 }

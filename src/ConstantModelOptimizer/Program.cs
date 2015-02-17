@@ -11,19 +11,19 @@ namespace ConstantModelOptimizer
         public static void Main (string[] args)
         {
             Console.WriteLine ("Hello World!");
-            var data = Simulator.SimulateTemplatesAndReads ();
+            ParameterSet trueParameters;
+            var data = Simulator.SimulateTemplatesAndReads (out trueParameters);
             var scorers = data.Select( p=> new ReadTemplatePair(p.Item2,p.Item1)).ToList();
-            var pars = new ParameterSet ();
+            System.IO.StreamWriter sw = new System.IO.StreamWriter ("TrueParameters2.csv");
+            sw.WriteLine (trueParameters.GetCSVHeaderLine ());
+            sw.WriteLine (trueParameters.GetCSVDataLine ());
+            sw.Close ();
             //scorers = Enumerable.Range (0, 40).Select (x => new ReadTemplatePair ("AGGT", "AGT")).ToList();
-            pars.SetDefaults ();
             var optim = new Optimizer (scorers);
             optim.Optimize ();
-            foreach (var s in scorers) {
-//                s.FillMatrices (pars);
-            }
-           
-            var b = new ReadTemplatePair ("ACGT", "AGT");
-            b.FillMatrices (pars);
+
+            var ll = scorers.Sum (z => z.FillMatrices (trueParameters));
+            Console.WriteLine ("Real LL = " +  ll);
 
         }
           

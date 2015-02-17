@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Random;
 
 namespace ConstantModelOptimizer
 {
@@ -11,17 +13,17 @@ namespace ConstantModelOptimizer
         static char[] bases = new char[] {'A', 'G', 'C', 'T'};
 
 
-        public static List<Tuple<string, string>> SimulateTemplatesAndReads()
+        public static List<Tuple<string, string>> SimulateTemplatesAndReads(out ParameterSet pars)
         {
             List<Tuple<string, string>> pairs = new List<Tuple<string, string>> ();
             System.IO.StreamWriter sw = new System.IO.StreamWriter("Simulations.txt");
             sw.WriteLine("Template\tRead");
-            var pars = new ParameterSet ();
-            pars.SetDefaults ();
+            pars = new ParameterSet ();
+            pars.SetRandomDefaults ();
             for(int i=0; i < 5000; i++)
             {
                 string tpl;
-                string read = SimulateRead (80, pars, out tpl);
+                string read = SimulateRead (60, pars, out tpl);
                 sw.WriteLine (tpl + "\t" + read);
                 pairs.Add (new Tuple<string, string> (tpl, read));
             }
@@ -30,6 +32,25 @@ namespace ConstantModelOptimizer
         }
 
 
+        static Beta miscallRateGenerator = new Beta (1, 19);
+        static Dirichlet noMergeRateGenerator = new Dirichlet(new double[] {8.0,1.0,1.0,1.0});
+        static Dirichlet mergeRateGenerator = new Dirichlet(new double[] {8.0,1.0,1.0,1.0, 3.0});
+
+        public static double SampleMisCallRate()
+        {
+            var rate = miscallRateGenerator.Sample ();
+            return rate;
+        }
+        public static double[] SampleMergeRates()
+        {
+            var rates = mergeRateGenerator.Sample ();
+            return rates;
+        }
+        public static double[] SampleNoMergeRates()
+        {
+            var rates = noMergeRateGenerator.Sample ();
+            return rates;
+        }
         public static string SimulateRead (int templateLength, ParameterSet pars, out string template)
         {
 
@@ -110,6 +131,9 @@ namespace ConstantModelOptimizer
         {
             return bases [rand.Next (4)];
         }
+
+
+       
 
         public static char SampleMatchBase(char currentBase, double misCallProb)
         {

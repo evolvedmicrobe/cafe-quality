@@ -44,6 +44,9 @@
     <Reference Include="PacBio.Utils">
       <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
     </Reference>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>..\..\lib\MathNet.Numerics.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
