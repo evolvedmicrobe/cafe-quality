@@ -216,12 +216,12 @@ namespace ConstantModelOptimizer
                     var s = "N" + c.ToString ();
                     s = String.Intern (s);
                     TransitionProbabilities [s] = new TransitionParameters () {
-                        Match = .85,
+                        Match = .95,
                         Branch = 0.05,
                         Dark = 0.05,
                         Stick = 0.05
                     };
-
+                    TransitionProbabilities [s].Normalize ();
                     s = c.ToString () + c.ToString ();
                     s = String.Intern (s);
                     TransitionProbabilities [s] = new TransitionParameters () {
@@ -231,23 +231,25 @@ namespace ConstantModelOptimizer
                         Stick = 0.05,
                         Merge = 0.1
                     };
+                    TransitionProbabilities [s].Normalize ();
                 }
             } else {
                 Epsilon = 0.04;
                 GlobalParametersNoMerge = new TransitionParameters () {
-                    Match = .85,
-                    Branch = 0.05,
-                    Dark = 0.05,
-                    Stick = 0.05
+                    Match = 1.0,
+                    Branch = 0,
+                    Dark = 0,
+                    Stick = 0
                 };
-
+                GlobalParametersNoMerge.Normalize ();
                 GlobalParametersMerge = new TransitionParameters () {
-                    Match = .75,
-                    Branch = 0.05,
-                    Dark = 0.05,
-                    Stick = 0.05,
-                    Merge = 0.1
+                    Match = 1.0,
+                    Branch = 0.0,
+                    Dark = 0.0,
+                    Stick = 0.0,
+                    Merge = 0.0
                 };
+                GlobalParametersMerge.Normalize ();
             }
         }
 

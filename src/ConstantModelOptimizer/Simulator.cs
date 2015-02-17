@@ -21,7 +21,7 @@ namespace ConstantModelOptimizer
             for(int i=0; i < 5000; i++)
             {
                 string tpl;
-                string read = SimulateRead (50, pars, out tpl);
+                string read = SimulateRead (80, pars, out tpl);
                 sw.WriteLine (tpl + "\t" + read);
                 pairs.Add (new Tuple<string, string> (tpl, read));
             }
@@ -63,7 +63,10 @@ namespace ConstantModelOptimizer
                 }
                 else if (nextMove == TransitionParameters.DARK_POS || 
                     nextMove == TransitionParameters.MERGE_POS) {
-                    i++;
+                    // have to end in a match
+                    if (i < (template.Length -2)) {
+                        i++;
+                    }
                 }
                 else if(nextMove == TransitionParameters.BRANCH_POS)
                 {
@@ -79,7 +82,7 @@ namespace ConstantModelOptimizer
                     simmed.Add(bp);
                 }
             }
-            simmed.Add(template.Last());
+            //simmed.Add(template.Last());
             return new string(simmed.ToArray());
         }
 
@@ -117,7 +120,7 @@ namespace ConstantModelOptimizer
             char toR;
             do {
                 toR = SampleBaseUniformly ();
-            } while(toR != currentBase);
+            } while(toR == currentBase);
             return toR;
         }
     }

@@ -47,8 +47,10 @@ namespace ConstantModelOptimizer
             Read = read;
             Template = template;
 
+            // TODO: Consider reimplementing - we want to end in a match state, 
+            // which typically (for non-simulated data), means the first and last should match.
             if (read [0] != template [0] || read.Last () != template.Last ()) {
-                throw new InvalidProgramException ("Read is expected to start in new ");
+                //throw new InvalidProgramException ("Read is expected to start in new ");
             }
             // Initialize Arrays
             StateProbabilities = new DynamicProgrammingMatrixPair(read,template);
@@ -411,6 +413,7 @@ namespace ConstantModelOptimizer
 
         public void GetInCorrectEstimate(out double numerator, out double denom) {
             // We loop from the second row to the second to last, as the first and last positions are assumed to be a match
+            // In each case, F[i][j]+B[i][j] gives the total probability for a match path
             var F = StateProbabilities.Forward;
             var B = StateProbabilities.Reverse;
 
@@ -418,15 +421,19 @@ namespace ConstantModelOptimizer
             denom = Double.NegativeInfinity;
             for (int i = 1; i < Read.Length - 1; i++) {
                 for (int j = 1; j < Template.Length - 1; j++) {
-                    var amt = F [i] [j].Match + B [i] [j].Match;
+                    //TODO: Move this later.
+                    var amt = F [i] [j].Match + B [i] [j].Total - CurrentLikelihood;
                     if (Read [i] != Template [j]) {
                         numerator = MathUtils.logsumlog (numerator, amt);
                     }
                     denom = MathUtils.logsumlog (denom, amt);
                 }
             }
-            numerator -= CurrentLikelihood;
-            denom -= CurrentLikelihood;
+//            Console.WriteLine ("Matrix Results");
+//            Console.WriteLine (Math.Exp (numerator));
+//            Console.WriteLine (Math.Exp (denom));
+//            var sum = Enumerable.Zip (Template, Read, (z, y) => z == y ? 0 : 1).Sum();
+//            Console.WriteLine (sum);
              
         }
 

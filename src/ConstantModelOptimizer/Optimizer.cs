@@ -19,9 +19,10 @@ namespace ConstantModelOptimizer
         {
             var pars = new ParameterSet ();
             pars.SetDefaults ();
+            pars.Epsilon = 0.02;
             double ll = double.MinValue;
             double ll_dif = double.MaxValue;
-            double termination_dif = 1e-3;
+            double termination_dif = 1e-2;
             System.IO.StreamWriter sw = new System.IO.StreamWriter ("Parameters.csv");
             sw.WriteLine (pars.GetCSVHeaderLine ());
             while (ll_dif > termination_dif) {
@@ -34,8 +35,11 @@ namespace ConstantModelOptimizer
 
                 //var new_ll = data.Sum(z => z.FillMatrices(pars));
                 Console.WriteLine ("Log likelihood: \t" + new_ll);
-                if (new_ll < ll) {
+                if (new_ll < ll && (new_ll / ll) > 1e-4) {
                     // In EM the likelihood always goes up!
+                    // I have observed some cases where the likelihoood only changes by ~1e-4%, 
+                    // and I think this is due to numerical issues with pseudo counts near the optimum.
+                    // Hence, the second condition listed above.
                     throw new ApplicationException ("Someone didn't code the algorithm correctly");
                 }
                 ll_dif = new_ll - ll;
@@ -46,8 +50,8 @@ namespace ConstantModelOptimizer
                 // Update transition probabilities
                 Console.WriteLine ("ctx\tMatch\tStick\tBranch\tDark\tMerge");
                 if (ParameterSet.USE_DINUCLEOTIDE_MODEL) {
-                    Parallel.ForEach (ParameterSet.DiNucleotideContexts, ctx => { 
-//                    foreach (var ctx in ParameterSet.DiNucleotideContexts) {
+//                    Parallel.ForEach (ParameterSet.DiNucleotideContexts, ctx => { 
+                    foreach (var ctx in ParameterSet.DiNucleotideContexts) {
                         // Get all the pseudo-counts across datasets
 
                         var cnts = new LatentStates ();
@@ -67,7 +71,8 @@ namespace ConstantModelOptimizer
                         cp.Merge = Math.Exp (cnts.Merge);
                         Console.WriteLine (String.Join ("\t", ctx, cp.Match.ToString (), cp.Stick.ToString (), cp.Branch.ToString (), cp.Dark.ToString (), cp.Merge.ToString ()));
                         //}
-                    });
+                    }
+                    //);
                 } else {
                     var cnts = new LatentStates ();
                     foreach (var d in data) {
