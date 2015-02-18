@@ -32,7 +32,12 @@
     <WarningLevel>3</WarningLevel>
     <StartArguments>--cmp "\\usmp-data3\vol52\Smrtanalysis\userdata\jobs\069\069756\data\aligned_reads.cmp.h5" -o c:\users\pmarks\ed2.csv --fofn "\\usmp-data3\vol52\Smrtanalysis\userdata\jobs\069\069756\input.fofn"</StartArguments>
     <PlatformTarget>x86</PlatformTarget>
-    <Commandlineparameters>--cmp /home/UNIXHOME/dalexander/Projects/Bugs/25281-EDNA/data/aligned_reads.cmp.h5 -fofn /home/UNIXHOME/dalexander/Projects/Bugs/25281-EDNA/input.fofn -h5out /tmp/foo.h5 -o /tmp/foo.csv</Commandlineparameters>
+    <Commandlineparameters>-v -v -n 1 --cmp /Users/nigel/PacBioData/EdnaData/aligned_reads.cmp.h5 -o edna.csv -fofn /Users/nigel/PacBioData/EdnaData/input.fofn</Commandlineparameters>
+    <EnvironmentVariables>
+      <EnvironmentVariables>
+        <Variable name="DYLD_LIBRARY_PATH" value="/Users/nigel/analysisPrograms/hdf5/" />
+      </EnvironmentVariables>
+    </EnvironmentVariables>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -68,9 +73,6 @@
 xcopy /D /E /I /Y "$(ProjectDir)..\..\..\..\tools\ConsensusTools\lib\HDF5\Windows_x86\*.dll" $(TargetDir)
 xcopy /D /E /I /Y "$(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\libConsensusCore.*" "$(TargetDir)"
 </PostBuildEvent>
-    <PostBuildEvent Condition=" '$(OS)' != 'Windows_NT' ">
- rsync -l $(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\libConsensusCore.* $(TargetDir)
- </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
@@ -97,12 +99,6 @@ xcopy /D /E /I /Y "$(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\l
     <Reference Include="FSharp.Core">
       <HintPath>\Library\Frameworks\Mono.framework\Libraries\mono\4.5\FSharp.Core.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.PowerPack">
-      <HintPath>..\..\..\..\third-party\dotnet\FSPowerPack.Core.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.dll</HintPath>
-    </Reference>
-    <Reference Include="NDesk.Options">
-      <HintPath>..\..\..\..\third-party\dotnet\NDesk.Options.0.2.1\lib\NDesk.Options.dll</HintPath>
-    </Reference>
     <ProjectReference Include="..\..\..\PacBio.HDF\PacBio.HDF.csproj">
       <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
       <Name>PacBio.HDF</Name>
@@ -111,14 +107,27 @@ xcopy /D /E /I /Y "$(ProjectDir)..\..\..\..\lib\cpp\ConsensusCore\build\CSharp\l
       <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
       <Name>ConsensusCore</Name>
     </ProjectReference>
-    <Reference Include="PacBio.IO">
-      <HintPath>..\..\..\..\lib\PacBio.IO.dll</HintPath>
+    <Reference Include="PacBio.Hmm">
+      <HintPath>..\PacBio.Hmm.dll</HintPath>
     </Reference>
     <Reference Include="PacBio.Utils">
       <HintPath>..\..\..\..\lib\PacBio.Utils.dll</HintPath>
     </Reference>
+    <Reference Include="PacBio.IO">
+      <HintPath>..\..\..\..\lib\PacBio.IO.dll</HintPath>
+    </Reference>
     <Reference Include="PacBio.Align">
       <HintPath>..\..\..\..\lib\PacBio.Align.dll</HintPath>
     </Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\..\..\lib\FSharp.PowerPack.dll</HintPath>
+    </Reference>
+    <Reference Include="NDesk.Options">
+      <HintPath>..\..\..\..\lib\NDesk.Options.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\..\ConstantModelOptimizer\ConstantModelOptimizer.csproj">
+      <Project>{280EFB2B-3722-4147-974E-44E6D5517115}</Project>
+      <Name>ConstantModelOptimizer</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

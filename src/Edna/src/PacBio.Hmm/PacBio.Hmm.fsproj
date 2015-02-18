@@ -75,6 +75,7 @@
     <Compile Include="utils.fs" />
     <Compile Include="lm2.fs" />
     <Compile Include="lm2test.fs" />
+    <Compile Include="minimize.fs" />
     <Compile Include="hmm.fs" />
     <Compile Include="em.fs" />
     <Compile Include="tests.fs" />
@@ -87,14 +88,11 @@
     <Reference Include="FSharp.Core">
       <HintPath>\Library\Frameworks\Mono.framework\Libraries\mono\4.5\FSharp.Core.dll</HintPath>
     </Reference>
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\..\..\..\lib\FSharp.PowerPack.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
-      <HintPath>..\..\..\..\third-party\dotnet\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="MathNet.Numerics.FSharp">
-      <HintPath>..\..\..\..\..\prebuilt.out\mathnet_numerics\mathnet-numerics-3.2.1\lib\net45\MathNet.Numerics.FSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="MathNet.Numerics">
-      <HintPath>..\..\..\..\..\prebuilt.out\mathnet_numerics\mathnet-numerics-3.2.1\lib\net45\MathNet.Numerics.dll</HintPath>
+      <HintPath>..\..\..\..\lib\nunit.framework.dll</HintPath>
     </Reference>
     <ProjectReference Include="..\..\..\PacBio.HDF\PacBio.HDF.csproj">
       <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
@@ -104,5 +102,11 @@
       <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
       <Name>ConsensusCore</Name>
     </ProjectReference>
+    <Reference Include="PacBio.Utils">
+      <HintPath>..\..\..\..\lib\PacBio.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>..\MathNet.Numerics.FSharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

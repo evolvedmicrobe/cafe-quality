@@ -2,60 +2,75 @@ module PacBio.Hmm.Recursions
 
 open System
 open System.Collections.Generic 
+open Microsoft.FSharp.Math
 open PacBio.Utils
 open System.Diagnostics
 open PacBio.Align
 open PacBio.Hmm.Utils
-open MathNet.Numerics.LinearAlgebra
-open MathNet.Numerics
-open System.Linq
-
-(* PacBio HMM Overview
-
-  Important types:
-
-   ednaParams -- high level 'physical' parameters we want to estimate
-   transEmDists -- compact representation of transistion and emission distributions of HMM states
-   int model -- an   HMM model, including a template sequence, that generates integer observation (observation
-                are 1,2,3,4 for the 4 colour channels, with 0 resevered for the null observation
-   sufficientStatistics -- counts of the observation of different event types.
 
 
-  The HMM equations for transition-tied observations with nulls:
-  HMM Forward variable:
-  q_i -> State sequence, indexed by time variable i
-  S_i -> List of available states, indexed by i, 
-  S_N -> final state
- 
-  Transition probabilities:
-  a_{ij} = P(q_t = S_i | q_{t-1} = S_j, L)
-  Observation probabilities:
-  b_{ij}(O) = P(O | q_t = S_i, q_{t-1} = S_j, L)
- 
-  Forward variable:
-  A_{n,t}(i) = P(O_1, O_2, ... O_n, q_t = S_i | L) 
- 
-  Induction of forward variable:
-  P(O_1 O_2 .. O_n, q_t = S_i | L) =    \Sum_j [ P(O_1, O_2, .. O_{n-1}, q_{t-1} = S_j | L) a_{ij} b_{ij}(O_n) ] 
-                                      + \Sum_j [ P(O_1, O_2, .. O_{n}, q_t = S_j | L) a_{ij} b_{ij}(null) ] 
-  
-  A_{n,t}(i) = \Sum_j [ A_{n-1, t-1}(j) a_{ij} b_{ij}(O_n) ] + \Sum_j [ A_{n, t-1} a_{ij} b_{ij}(null) ]
- 
-  Probability of Seq: P(O_1, O_2, ... O_n, q_t = S_N)
- 
-  Viterbi D variable: Probability of most likely state sequence
- 
-  D_{n,t}(i) = max_{q_1 .. q_t}  P(q_1 .. q_t = i, O_1 .. O_n | L)
-                 
-  No null observations:
-             = max_j ( D_{n-1, t-1}(j) a_{i,j} b_{i,j}(O_n) )
- 
-  With null observations:
-             = max {  max_j( D_{n, t-1}(j) a_{i,j} b_{i,j}(null) ), max_j( D_{n-1, t-1}(j) a_{i,j} b_{i,j}(O_n) )  } 
- *)
+// PacBio HMM Overview
+//
+//  Important types:
+//
+//   ednaParams -- high level 'physical' parameters we want to estimate
+//   transEmDists -- compact representation of transistion and emission distributions of HMM states
+//   int model -- an HMM model, including a template sequence, that generates integer observation (observation
+//                are 1,2,3,4 for the 4 colour channels, with 0 resevered for the null observation
+//   sufficientStatistics -- counts of the observation of different event types.
+//
+//
+ // The HMM equations for transition-tied observations with nulls:
+ // HMM Forward variable:
+ // q_i -> State sequence, indexed by time variable i
+ // S_i -> List of available states, indexed by i, 
+ // S_N -> final state
+ //
+ // Transition probabilities:
+ // a_{ij} = P(q_t = S_i | q_{t-1} = S_j, L)
+ // Observation probabilities:
+ // b_{ij}(O) = P(O | q_t = S_i, q_{t-1} = S_j, L)
+ //
+ // Forward variable:
+ // A_{n,t}(i) = P(O_1, O_2, ... O_n, q_t = S_i | L) 
+ //
+ // Induction of forward variable:
+ // P(O_1 O_2 .. O_n, q_t = S_i | L) =    \Sum_j [ P(O_1, O_2, .. O_{n-1}, q_{t-1} = S_j | L) a_{ij} b_{ij}(O_n) ] 
+ //                                     + \Sum_j [ P(O_1, O_2, .. O_{n}, q_t = S_j | L) a_{ij} b_{ij}(null) ] 
+ // 
+ // A_{n,t}(i) = \Sum_j [ A_{n-1, t-1}(j) a_{ij} b_{ij}(O_n) ] + \Sum_j [ A_{n, t-1} a_{ij} b_{ij}(null) ]
+ //
+ // Probability of Seq: P(O_1, O_2, ... O_n, q_t = S_N)
+ //
+ // Viterbi D variable: Probability of most likely state sequence
+ //
+ // D_{n,t}(i) = max_{q_1 .. q_t}  P(q_1 .. q_t = i, O_1 .. O_n | L)
+ //                
+ // No null observations:
+ //            = max_j ( D_{n-1, t-1}(j) a_{i,j} b_{i,j}(O_n) )
+ //
+ // With null observations:
+ //            = max {  max_j( D_{n, t-1}(j) a_{i,j} b_{i,j}(null) ), max_j( D_{n-1, t-1}(j) a_{i,j} b_{i,j}(O_n) )  } 
+ //
 
 
+// A categorical distribution over 'a values
+type 'a dist = (float * 'a) list
 
+let rand = new Random(0)
+
+// Pull a random sample from a distribution
+let sampleDist (dist : dist<'a>) = 
+    let rec choose d p =
+        match d with
+            | (prob, o) :: _ when p-prob < 0. -> o
+            | (prob, _) :: tl -> choose tl (p-prob)
+            | (prob, o) :: [] -> o
+            | _ -> failwith("Got a bad distribution")
+    choose dist (rand.NextDouble())
+
+// Check that we have a valid distribution - sum of probabilities should be close to 1.
+let checkDist (d : dist<'a>) = Math.Abs((List.fold (fun ip (p, _) -> ip + p) 0. d) - 1.) < 0.0001
 
 // You either see a numbered base or nothing     
 type 'a observation =
@@ -71,18 +86,28 @@ type 'a state =
 and 'a transition = 
     Transition of (int * int * dist<'a observation>)
 
-//let (|ToVect|) (a:'a[]) = Vector.Generic.ofArray a
-//let (|ToArr|)  (a:Vector<'a>) = Vector.Generic.toArray a
+// helper
+let (+>) a b = Seq.append a b
+
+
+let (|ToVect|) (a:'a[]) = Vector.Generic.ofArray a
+let (|ToArr|)  (a:Vector<'a>) = Vector.Generic.toArray a
+
+
+module Array2D =
+    // Linearize an array
+    let toArray (a: 'a[,]) =
+        let (r,c) = (a.GetLength(0), a.GetLength(1)) 
+        Array.init (r*c) (fun i -> 
+                            let (ci,ri) = Math.DivRem(i,r)
+                            a.[ri,ci])
+    let ofArray r c (a: 'a[]) = Array2D.init r c (fun i j -> a.[j*r + i])
+    
 
 
 // final 'high-level' Edna parameters -- this is what is output
 // see helper functions associated with this type below
-type ednaParams = { 
-    numbases:int; 
-    insert:float[,]; 
-    miscall:float[,]; 
-    dark:float[]; 
-    merge:float[] }
+type ednaParams = { numbases:int; insert:float[,]; miscall:float[,]; dark:float[]; merge:float[] }
 
 type ednaParams with
     // Methods for blitting this type to and from linear arrays.  Comes in handy when trying to interface with 
@@ -115,16 +140,16 @@ type ednaParams with
             merge = Array.create 4 0.12
         }
         
-    (* Each row defines a constraint on the flattened version of a byBaseErrorParams.
-       We make one constraint for each column of the miscall matrix that forces it to add up to 1.
-       The constrained solver will only ever choose parameter vectors where Ax=b. *)
+    // Each row defines a constraint on the flattened version of a byBaseErrorParams.
+    // We make one constraint for each column of the miscall matrix that forces it to add up to 1.
+    // The constrained solver will only ever choose parameter vectors where Ax=b.
     static member constraint_array2_A n =        
         let cc r c = if c >= n*r && c < n*(r+1) then 1.0 else 0.0          
         Array2D.init n (n*(2*n+2)) cc
 
     static member constraint_matrix_A n =        
         let cc r c = if c >= n*r && c < n*(r+1) then 1.0 else 0.0          
-        Matrix.Build.Dense(n, (n*(2*n+2)), cc)
+        Matrix.init n (n*(2*n+2)) cc
 
     static member constraint_array_b n = Array.create n 1.
 
@@ -183,6 +208,7 @@ type transEmDists = { pStay: float[]; pMerge: float[]; moveDists: float[][]; sta
             pMerge = pMerge
         }
 
+
     static member has_changed absTol relTol oldpars newpars =
         let a1 = transEmDists.toArray oldpars
         let a2 = transEmDists.toArray newpars
@@ -205,14 +231,60 @@ type transEmDistsErr = { dists : transEmDists; errors: transEmDists }
 // An HMM model with some important metadata
 type 'a model = { states: unit -> 'a state list; template:int[]; numbases:int; baseConvert: 'a->int; symbolMap: 'a->int; dists: transEmDists }
 
-// CoCheckSumNearOneoat[] to a vector, leaving a space at the beginning for the dark observation
-let PadVec (arr:float[]) = Vector<float>.Build.Dense( (arr.Length + 1), (fun i -> if i=0 then 0. else arr.[i-1]) )
+// Check to ensure all the probabilities add up to 1.
+let rec verify_model (model : 'a state list) =        
+    let checkObs  (_, Transition(f,t,d)) = checkDist d
+    let checkTrans = function
+        | State(n, tlist) -> (checkDist tlist) && (Seq.forall checkObs tlist)
+        | _ -> true            
+    List.forall checkTrans model
+
+
+// Copy the float[] to a vector, leaving a space at the beginning for the dark observation
+let PadVec (arr:float[]) = Vector.init (arr.Length + 1) (fun i -> if i=0 then 0. else arr.[i-1])
+let bv (arr:float[]) = Vector.init (arr.Length + 1) (fun i -> if i=0 then 0. else arr.[i-1])
 
 let PadMat (arr:float[,]) = 
-    let m = DenseMatrix.init (arr.GetLength(0)+1) (arr.GetLength(1)+1) (fun i j -> if i=0 || j=0 then 0. else arr.[i-1,j-1])
-    m.[0,0] <- 1.0
+    let m = Matrix.init (arr.GetLength(0)+1) (arr.GetLength(1)+1) (fun i j -> if i=0 || j=0 then 0. else arr.[i-1,j-1])
+    m.[0,0] <- 1.
     m
 
+// Check the matrix is stochastic (columns sum to 1)
+let isStochastic acc (m : matrix) = 
+    let cols = m.NumCols
+    let rows = m.NumRows
+
+    let mutable pass = true
+
+    for c in 0 .. cols - 1 do
+        let mutable s = 0.0
+        for r in 0 .. rows - 1 do
+            s <- s + m.[r, c]
+
+        if Math.Abs(s - 1.) > acc then pass <- false
+
+    pass
+
+let fixup (m : matrix) = 
+    let cols = m.NumCols
+    let rows = m.NumRows
+
+    let colSums = Array.create cols 0.0
+
+    for c in 0 .. cols - 1 do
+        let mutable s = 0.0
+        for r in 0 .. rows - 1 do
+            s <- s + m.[r, c]
+
+        for r in 0 .. rows - 1 do
+            Matrix.set m r c (m.[r, c] / s)
+
+    m
+
+
+let makeStochastic m =
+    let colSum = m |> Matrix.foldByCol (+) (RowVector.create (m.NumCols) 0.)
+    Matrix.init m.NumRows m.NumCols (fun i j -> m.[i,j] / colSum.[j]) 
 
 
 // convert ednaParams to transEmDists using the mapping of physical error parameters into
@@ -248,22 +320,22 @@ let ednaParamsToTransEmDists (e:ednaParams) =
     let pMerge = channels |> Array.map (fun i -> (1.0 - pStay.[i-1]) * merge.[i])
 
     // Fill out the dark matrix that takes an observation matrix and makes some of it go dark, according to the dark vector
-    let darkMat = DenseMatrix.zero<float> (e.numbases+1) (e.numbases+1)
+    let darkMat = Matrix.zero (e.numbases+1) (e.numbases+1)
     Vector.toArray dark |> Array.iteri (fun idx darkVal -> darkMat.[0,idx] <- darkVal; darkMat.[idx,idx] <- 1. - darkVal)
     
     // Vector with a one in given index and zeros elsewhere
-    let cog_vec bs = DenseVector.init (e.numbases+1) (fun i -> if  i=bs then 1. else 0.)
+    let cog_vec bs = Vector.init (e.numbases+1) (fun i -> if  i=bs then 1. else 0.)
     // Constant vector
-    let vconst c = DenseVector.create (e.numbases+1) c
+    let vconst c = Vector.create (e.numbases+1) c
 
-    let moveDist bs = (miscallMat * darkMat * (cog_vec bs)).ToArray() 
+    let moveDist bs = miscallMat * darkMat * (cog_vec bs) |> Vector.toArray
     let moveDists = channels |> Array.map moveDist
     
-    let stayDist bs = vStay.[bs-1].ToArray()
+    let stayDist bs = Vector.ofArray(vStay.[bs-1]) |> Vector.toArray
     let stayDists = channels |> Array.map stayDist
 
     // when merging, we must emit the cognate base
-    let mergeDists = channels |> Array.map (fun bs -> (cog_vec bs).Clone())
+    let mergeDists = channels |> Array.map (fun bs -> cog_vec bs |> Vector.toArray)
 
     // Check that the error probabilities are valid
     let cp p = if p >= 0. && p < 1. then true else false
@@ -294,26 +366,30 @@ let transEmDistsToEdnaParams (dists : transEmDistsErr) =
     if distArray |> Array.exists Double.IsNaN then 
         printfn "Got NaN in Param convert"
 
-    let startGenParamsVect = DenseVector.raw (ednaParams.toArray ednaParams.starter )
+    let startGenParamsVect = ednaParams.toArray ednaParams.starter |> Vector.ofArray
 
-    let fmin (trialGenParamsVect : Vector<float>) = 
-        let  trialGenParamsArray =  trialGenParamsVect.Map((fun v -> Math.Max(MinP, Math.Min(MaxP, v)))).ToArray()
+    let fmin (trialGenParamsVect : vector) = 
+        let  trialGenParamsArray = trialGenParamsVect.InternalValues
+
         // lm may not respect the lb and ub that you give it, so fix the argument.
+        let trialGenParamsArray = trialGenParamsArray |> Array.map (fun v -> Math.Max(MinP, Math.Min(MaxP, v)))
         let trialGenParams = ednaParams.ofArray numbases trialGenParamsArray
+
         let trialDistArray = transEmDists.toArray (ednaParamsToTransEmDists trialGenParams)
-        let diffVect = DenseVector.init distArray.Length (fun i -> (distArray.[i] - trialDistArray.[i]) / errorArray.[i])
+
+        let diffVect = Vector.init distArray.Length (fun i -> (distArray.[i] - trialDistArray.[i]) / errorArray.[i])
         diffVect
 
     // Use a constrained LM solver to enforce a normalized miscall matrix
     let A = ednaParams.constraint_matrix_A numbases
     let b = ednaParams.constraint_array_b numbases
-    let lb = DenseVector.create startGenParamsVect.Count MinP
-    let ub = DenseVector.create startGenParamsVect.Count MaxP
+    let lb = Vector.create startGenParamsVect.Length MinP
+    let ub = Vector.create startGenParamsVect.Length MaxP
         
     // lmsove_con does not respect the lb and ub that you give it, so fix the argument.
     let eps = 1e-7
     let opts = { lm2.OptimizationOptions.standard(50) with Eps1 = eps; Eps2 = eps; Eps3 = eps }
-    let ra = lm2.lmBoxConstrains (Some(lb)) (Some(ub)) A (Vector.ofArray b) fmin startGenParamsVect opts`
+    let ra = lm2.lmBoxConstrains (Some(lb)) (Some(ub)) A (Vector.ofArray b) fmin startGenParamsVect opts
 
     //printfn "solved: %A" ra
 

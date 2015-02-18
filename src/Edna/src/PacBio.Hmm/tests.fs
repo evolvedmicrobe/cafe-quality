@@ -11,6 +11,9 @@ open NUnit.Framework
 open NUnit.Framework.Constraints
 open NUnit.Framework
 
+open Microsoft.FSharp.Math
+
+open PacBio.Hmm.Minimize
 open PacBio.Hmm.Recursions
 open PacBio.Hmm.ExpectationMaximization
 open PacBio.Hmm.Utils
@@ -97,7 +100,7 @@ type TestUtils() =
         
     [<Test>]
     member x.Histogram() =
-        let r = new Random()
+        let r = new Random(42)
         let n = 100
         let s = [ for i in {1..n} -> r.NextDouble() ]
         
@@ -194,7 +197,7 @@ type TestHmm() =
              
                     
         let errs = [| 0.1; 0.2; 0.3; 0.4; 0.5; 0.6; 0.7; 0.8; 0.9; 1.0; 1.1; 1.2;|]
-        let r = new Random()
+        let r = new Random(42)
         
         let lengths = [200; 400; 600; 800; 1000; 1200; 1400]
         let randLen() = lengths.[r.Next(lengths.Length)]
@@ -436,7 +439,8 @@ let doEMParamterEstimation(reads, template, _guessParams, trueParams, trueModel)
     Debug.WriteLine(sprintf "True errors params: %A" (ednaParamsToTransEmDists trueParams))
     Debug.WriteLine(sprintf "Best model error params: %A" bestP.dists)
     Assert.That(ordered, Is.True,  "The EM did not converge monotonically: " + likelihoodString)
-    Assert.That(bestLL >= trueLikelihood, "The EM did not find a model at least as good as the true model: " + likelihoodString + (sprintf "LL of true: %f" trueLikelihood))
+    Assert.That(bestLL >= trueLikelihood,
+                (sprintf "The EM did not find a model at least as good as the true model: LL of found=%f, LL of true=%f" bestLL trueLikelihood))
     emProgression
 
 
@@ -756,7 +760,7 @@ type LevenbergMarquardt() =
     [<Test>]
     member x.TrigMinimize() =
     
-        let r = new Random()
+        let r = new Random(42)
         
         // The parameters to generate the fitting data
         let trueParams = Vector.ofArray [| 10.; 20.; 6.; 50. |]

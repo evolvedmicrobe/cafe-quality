@@ -3,11 +3,17 @@
 open System
 open System.Collections.Generic
 open System.IO
+
 open PacBio.Align
 open PacBio.IO
 open PacBio.HDF
 open PacBio.Utils
+
 open TraceSet
+
+open PacBio.Hmm.ExpectationMaximization
+open PacBio.Hmm.Recursions
+
 open PacBio.Analysis.Datasets
 open PacBio.Analysis.CSV
 

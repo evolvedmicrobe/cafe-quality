@@ -24,14 +24,15 @@ open PacBio.Analysis.CSV
 open PacBio.Analysis.ResultsWriting
 
 open TraceSet
-
+open ConstantModelOptimizer
 
 
 
 let Log = PacBioLogger.GetLogger("Edna")
 
-let logProgress msg =
-    Log.Log(LogLevel.INFO, msg)
+let logProgress (msg : string) =
+    Console.WriteLine(msg)
+    Log.Log(LogLevel.WARN, msg)
 
 let logError msg =
     Log.Log(LogLevel.ERROR, msg)
@@ -75,6 +76,7 @@ let innerHmmPerTrace (tags : (string*string) list) (traceSet : TraceSet) (csvOut
     
 
     let preTrainDataSize = 25
+    // Returns a set of 
     let bestModelPars =
         // Take the last 25 of [0..max(end, 75)]
         let preTrainData =
@@ -94,14 +96,20 @@ let innerHmmPerTrace (tags : (string*string) list) (traceSet : TraceSet) (csvOut
         estimateTransEmDists transEmDists.starter 0.005 0.03 10 preTrainData     
 
 
-    let traceProcInner (i, ((tr : Trace, al), intAl))= 
+    let traceProcInner (i, ((tr : Trace, al), (intAl : (int array * int[])))) = 
         try
             let sw = new Stopwatch()
             sw.Start()
 
-            let pars = estimateTransEmDists bestModelPars.dists 0.005 0.05 6 [intAl]
+            let initialGuess = bestModelPars.dists
+
+            // Drop in a line here, and grab the data, intAl is just a tuple with (Read, Template)
+            //Console.WriteLine(("T= " + intAl.Item1.Length.ToString()) + (" ; R = " + intAl.Item2.Length.ToString()))
+            let name = tr.Metadata.MovieName + "/" + tr.HoleNumber.ToString()
+            EdnaToLisaConverter.ConvertEdnaToLisa(name, (fst intAl), (snd intAl))
+            let pars = estimateTransEmDists  initialGuess 0.005 0.05 6 [intAl]
             let genPars = transEmDistsToEdnaParams pars
-        
+         
             let n = tr.Metadata.BaseMap.Length
             let noMissing = (Array.create n -1.0, Array.create n -1.0)
 

@@ -2,90 +2,26 @@
 module PacBio.Hmm.Utils
 
 open System
-open System.Reflection
-open System.Linq
 open System.Collections.Generic
+open System.Reflection
+open Microsoft.FSharp.Math
+open System.Linq
 open System.Threading
 open System.Threading.Tasks
-open MathNet.Numerics
-open MathNet.Numerics.LinearAlgebra
+
 
 // Identity function
 let id a = a
 
-// helper
-let (+>) a b = Seq.append a b
-
-
-// A categorical distribution over 'a values
-type 'a dist = (float * 'a) list
-
-let rand = new Random(0)
-
-// Pull a random sample from a distribution
-let sampleDist (dist : dist<'a>) = 
-    let rec choose d p =
-        match d with
-            | (prob, o) :: _ when p-prob < 0. -> o
-            | (prob, _) :: tl -> choose tl (p-prob)
-            | (prob, o) :: [] -> o
-            | _ -> failwith("Got a bad distribution")
-    choose dist (rand.NextDouble())
-
-// Check that matrix is stochastic (columns sum to 1)
-let isStochastic acc (m : Matrix<float>) = 
-    let rowsums = m.RowSums()
-    let diff = rowsums - 1.0
-    diff.AbsoluteMaximum() <= acc
-
-// Normalize rows by row sums
-let fixup (m : Matrix<float>) =
-    let rowsums = m.RowSums()
-    rowsums.MapInplace((fun x -> 1.0/x))
-    let normalizer = Matrix<float>.Build.Diagonal(rowsums.ToArray())
-    normalizer * m
-
-//Normalize cols by column sum
-let makeStochastic (m:Matrix<float>) =
-    let colSum = m.ColumnSums()
-    DenseMatrix.init m.RowCount m.ColumnCount    (fun i j -> m.[i,j] / colSum.[j]) 
-
-
-
-// Check to ensure all the probabilities add up to 1.
-let rec verify_model (model : 'a state list) =        
-    let checkObs  (_, Transition(f,t,d)) = checkDist d
-    let checkTrans = function
-        | State(n, tlist) -> (checkDist tlist) && (Seq.forall checkObs tlist)
-        | _ -> true            
-    ListCheckSumNearOneheckTrans model
-
-module Array2D =
-    // Linearize an array
-    let toArray (a: 'a[,]) =
-        let (r,c) = (a.GetLength(0), a.GetLength(1)) 
-        Array.init (r*c) (fun i -> 
-                            let (ci,ri) = Math.DivRem(i,r)
-                            a.[ri,ci])
-    let ofArray r c (a: 'a[]) = Array2D.init r c (fun i j -> a.[j*r + i])
-    
-
-
-
-
-// Check that we have a valid distribution - sum of probabilities should be close to 1.
-let CheckSumNearOne (d : dist<'a>) = Math.Abs((List.fold (fun ip (p, _) -> ip + p) 0. d) - 1.) < 0.0001
-
-
-//let vcompare f (v1:Vector<float>) (v2:Vector<float>) = Vector.map2 f v1 v2
-////Make curried version of Max,Min
-////TODO: Has to be a better way to make vmax function
-//let _max (x:float) (y:float) = Math.Max(x, y)
-//let _min (x:float) (y:float) = Math.Min(x, y)
-//
-//let vmax = vcompare _max
-//let vmin = vcompare _min
-//
+// Set up some constraints.
+let vcom f (v1:vector) (v2:vector) = Vector.mapi (fun i e1 -> f(e1, v2.[i])) v1
+let vmax = vcom Math.Max
+let vmin = vcom Math.Min
+let vs = Vector.ofArray [| 0.001; 0.001; 0.001; 0.001 |]
+let vl = Vector.ofArray [| 0.999; 0.999; 0.999; 0.999 |]
+let pconstrain v = 
+    let v = vmin vl (vmax v vs)
+    v
 
 let memoize f = 
     // Simple memoizer
@@ -114,8 +50,7 @@ let nmemoize f =
     (ev_func, (fun () -> !n))
 
 module Seq =
-    //TODO: Default random class is totally busted due to error, replace
-    let r = new Random()
+    let r = new Random(42)
     // Sample with replacement
     // Be careful to cache the result -- otherwise people will get a different result every time the enumerate the returned seq
     let sample n s = 

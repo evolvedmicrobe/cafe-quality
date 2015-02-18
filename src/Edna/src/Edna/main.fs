@@ -46,6 +46,8 @@ let maxTraces : int option ref = ref None
 
 // some quick code for finding the cmp.hf file
 
+
+
 let _main args =
     let showHelp = ref false
 
@@ -65,7 +67,7 @@ let _main args =
         popts |> Seq.iter (fun (a,d,f) -> o.Add(a,d, new Action<string>(f)) |> ignore)
         o.Parse <| Environment.GetCommandLineArgs () |> ignore
 
-        Console.WriteLine ("Edna Nigel's version")
+        Console.WriteLine ("Edna {0}", BuildVersion.Copyright)
 
         // Process a cmp h5 (in cmph5 order)
         match !cmpH5Target with

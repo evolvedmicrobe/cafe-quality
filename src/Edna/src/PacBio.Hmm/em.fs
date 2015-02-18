@@ -2,6 +2,7 @@ module PacBio.Hmm.ExpectationMaximization
 
 open System
 open System.Collections.Generic 
+open Microsoft.FSharp.Math
 open PacBio.Utils
 open PacBio.Hmm.Recursions    
 open Microsoft.FSharp.Math         

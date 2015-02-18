@@ -1,33 +1,18 @@
 ﻿module lm2
-(*  Module to compute levenberg-marquadt optimization of a given function.
-    Note from Nigel: Based on variable names and the unit tests, this 
-    appears to be an F# port of the levmar library, in particular lm_core.c
 
-    *References*
-    Wiki: https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm
-    LevMar: http://users.ics.forth.gr/~lourakis/levmar/
-    LevMar Algorithm Description: http://users.ics.forth.gr/~lourakis/levmar/levmar.pdf
-    Recent Review of LM Options: http://arxiv.org/abs/1201.5885v1
-*)
+open MathNet.Numerics.LinearAlgebra.Factorization
 
-open MathNet.Numerics.LinearAlgebra.Double.Solvers
 open MathNet.Numerics.LinearAlgebra.Double
 open MathNet.Numerics.LinearAlgebra
 open System
-open PacBio.Hmm.Utils
 
-let L2 = Vector.fold (fun acc v -> acc + v**2.) 0.0
+let L2 = Math.Vector.fold (fun acc v -> acc + v**2.) 0.0
 type OptimizationOptions = {
-    (* Lowest step size used for computing numeric derivatives 
-     when calculating the jacobian. *)
     Delta : float;
-    (* EPS Values are stopping conditions. See description in levmar. *)        
-    Eps1 : float; //  ||J^T e||_inf the infinity norm, e.g. highest absolute value 
-    Eps2 : float; // ||Dp||_2 is the amount by which p is currently being shifted at each iteration; 
-    Eps3 : float; //||e||_2 is a measure of the error between the model function at the current estimate for p and the data.
-    // Scale factor for initial dampening, set by levmar
+    Eps1 : float;
+    Eps2 : float;
+    Eps3 : float;
     Tau : float;
-    // Maximum LM iterations allowed
     MaxIters : int;
     }
 
@@ -41,28 +26,114 @@ type OptimizationOptions with
         MaxIters = maxIters
     }
 
-MathNet.Numerics.Control.UseSingleThread()
+MathNet.Numerics.Control.DisableParallelization <- true
+
+// Find the Y and Z such that x = Y * b + Z * x_z  and Ax=b for all x_z
+let elim (A : matrix) (b : vector) =
+    let m = A.NumRows // number of constraints
+    let n = A.NumCols // number of variables
+
+    // Find 'rank-revealing' QR decomposition of A^T
+    let dm = DenseMatrix.OfArray(A.Transpose.ToArray2D())
+    MathNet.Numerics.LinearAlgebra.Factorization.Dens
+    let qr = new DenseQR(dm)
+    let _ = qr.Solve(dm) 
+
+    let r = qr.R
+    let eps = 1e-10
+    let rank = m
+
+    let rInvTrans = r.SubMatrix(0, rank, 0, rank).Inverse().Transpose()
+
+    if not qr.IsFullRank then 
+        failwith("Constraint matrix must be full rank")
+
+    let q = qr.Q
+    let y = q.SubMatrix(0, n, 0, rank) * rInvTrans
+    let Y = y.ToArray() |> Matrix.ofArray2D
+
+    let c = Y * b
+    let Z = q.SubMatrix(0, n, rank, n-rank).ToArray() |> Matrix.ofArray2D
+    (Y, Z, c)
 
 
-(* Compute a numerically calculated jacobian matrix using a delta of either the parameter given, or 1e-4 the current parameter value *)
-//TODO: Avoid numeric derivatives?
-let jacobian (f : Vector<float> -> Vector<float>) (p : Vector<float>) (hx : Vector<float>) delta  =
-    let jac = DenseMatrix.zero<float> hx.Count p.Count
-    for j in 0 .. (p.Count - 1) do
+
+let jacobian (f : vector -> vector) (p : vector) (hx : vector) delta =
+    //let jac = Matrix.create (hx.Length) (p.Length) 0.0
+    let jac = new MathNet.Numerics.LinearAlgebra.Double.DenseMatrix(hx.Length, p.Length)
+    
+    for j in 0..(p.Length - 1) do
         let d = max delta (p.[j] * 1e-4)
         let tmp = p.[j]
+
         p.[j] <- p.[j] + d
         let hxx = f p
         p.[j] <- tmp
-        for i in 0 .. (hx.Count - 1) do
-            jac.[i,j] <- (hxx.[i] - hx.[i]) / d // dydx
+
+        for i in 0..(hx.Length - 1) do
+            jac.[i,j] <- (hxx.[i] - hx.[i]) / d
+
     jac
+
+(*
+// WIP in Schnabel's backtracking line search method
+let lineSearch (f : vector -> vector) (x : vector) (p : vector) (grad : vector) =
+
+    let lambda = 1.
+
+    let xpls = x + lambda * p
+
+    let hx = f xpls
+
+    // Loop
+    let loop lambda k =
+
+        let hx_L2 = L2 hx
+        let fpls = 0.5 * hx_L2
+
+        let kNew =
+            let tLambda =  
+                if k = 0 then 
+                    -lambda * slp / (fpls - f - slp) * 0.2 
+                else
+                    let t1 = fpls - f - lambda * slp
+                    let t2 = pfpls - f - plmbda * slp
+                    let t3 = 1. / (lambda - plmabda);
+                    let a3 = 3. * t3 * (t1 / (lambda**2) - t2 / (plambda**2))
+                    let b = t3 * (t2 * lambda / plambda**2 - t1 * plambda / lambda**2)
+                    let disc = b**2 - a3 * slp
+
+                    let tl = if (disc > b * b) then
+                        //  only one positive critical point, must be minimum */
+                        (-b + if a3 < 0 then -Math.Sqrt(disc) else Math.Sqrt(disc)) / a3;
+                    else
+                        ///* both critical points positive, first is minimum */
+                        (-b + if a3 < 0 then Math.Sqrt(disc) else -Math.Sqrt(disc)) / a3;
+
+                    let tlambda = min(tl, lambda * 0.5)
+
+
+
+    // Check for solution
+    //if fpls <= f0 + slp * alpha * lambda then
+*)
+
+type constraints = { ub : vector option; lb : vector option }
+type constraints with
+    member x.Clip (v : vector) = 
+        let clip i (v : float) =
+            let c1 = match x.ub with None -> v | Some(ubv) -> min ubv.[i] v
+            match x.lb with None -> c1 | Some(lbv) -> max lbv.[i] c1
+
+
+        v |> Math.Vector.mapi (fun i v -> clip i v)
+
 
 
 type stop = SmallGrad | SmallDp | MaxIters | Singular | SmallErr | InvalidObjective | NoFurther | NotDone
 
 type lmState = {
-    p : Vector<float>;
+    p : vector;
     mu : float option;
     nu : float;
     stop : stop;
@@ -70,107 +141,97 @@ type lmState = {
 }
 
 type lmResult = {
-    p : Vector;
+    p : vector;
     stop : stop;
     iterations : int;
 }
 
+
+
 let epsilon = 1e-12
 let isFinite v = (not (System.Double.IsInfinity v)) && (not (System.Double.IsNaN v))
 
-(* Perform a Levenberg-Marquadt minimization of the following function using
-the given error function, parameter vector and optimization options.
-Note: The error should directly calculate the residuals (unsquared), not the sum of squares, the 
-squared errors or the predicted values.
+let lm (f : vector -> vector) (p0 : vector)  (opts : OptimizationOptions) =
 
-Note: If profiling shows this as an Edna bottleneck, lots of possible improvements, including:
-    1 - Avoid recomputing matrices after rejected steps
-    2 - Modify arrays in place rather than copy.
-    3 - Use Cholesky instead of LU (possible accuracy loss, but we are using floats).
- *)
-let lm (f : Vector<float> -> Vector<float>) (p0 : Vector<float>)  (opts : OptimizationOptions) =
+    // Starting point    
+    let e0 = f p0   
 
-    (* Compute initial dampening factor,
-       setting it near the maximum of the diagonal gives a rough balance 
-       between steepest descent and gauss-newton *)
+    // Dimensions in objective function output
+    let n = e0.Length
+
+    // Dimensions in solution (number of function params)       
+    let m = p0.Length
+
+    // Compute initial mu
     let initMu (jacTjac : Matrix<float>) = (jacTjac.Diagonal().Maximum()) * opts.Tau
 
-    // Take one LM step
+    // Take on LM step
     let stepP (state : lmState) =
-        let error = f (state.p) //compute current error 
-        let error_L2 = error.L2Norm() //compute penalty
+        let eVect = f (state.p)
+        let e = new DenseVector(eVect.InternalValues)
+        let e_L2 = e.Norm(2.0)
 
-        // Numerically compute jacobian
-        let jac = jacobian f state.p error opts.Delta 
-
+        let mutable jac = jacobian f state.p eVect opts.Delta 
         let jacT = jac.Transpose()
-        //TODO: Consider speeding up multiplication as this is symmetric? 
-        let jacTjac = jacT * jac  //Hessian approximation
-        let jacTe = jacT * error  
+
+        let jacTjac = jacT * jac
+        let jacTe = jacT * e
 
         let j = ref 0
         let numActive = ref 0
-        //value to check as stopping condition 
-        let jacTe_inf = jacTe.AbsoluteMaximum()  
-        let p_L2 = L2 state.p // Get sum of squared parameters, equivalent to the norm without the square root
-                
-        // Initialize the dampening factor
+
+        let jacTe_inf = jacTe.AbsoluteMaximum()  //Vector.fold (fun acc v -> max acc (abs v)) 0.0 jacTe
+        let p_L2 = L2 state.p
+
+        
         let mu = match state.mu with Some(mu) -> mu | None -> initMu jacTjac
         let nu = state.nu
 
-        // Modify jacTjac to augment normal equations
+        // Modify jacTjac
         let dia = jacTjac.Diagonal()
-        for i in 0..(jacTjac.RowCount-1) do
-            (*  FIXME: 
-                As written this appears to not use the Marquadt dampening matrix.
-                This decision propogates from the original levmar library and in turn the lecture notes by 
-                K. Madsen, H.B. Nielsen, O. Tingleff levmar is based on.  In particular, it seems the program
-                attempts to calculate the update by solving:
-                (jacTjac + \mu I)Dp = jacTe rather than:
-                (jacTjac + \mu diag(jacTjac)DP = jacTe as is described on wikipedia.
-                The later framework (which involves a multiplication rather than a simple addition) is used by 
-                numerical recipes and some other routines.  However, this is still a valid algorithm and appears
-                related to the approach in the old fortran routine minpack, with some justification for it (and a
-                possible improvement) given in this 2012 article: http://arxiv.org/abs/1201.5885v1 
-                (see section 2.2 for a discussion of choosing the dampening matrix). 
-                Not altering at present as it appears to work...
-            *)
+        for i in 0..(m-1) do
             jacTjac.[i,i] <- dia.[i] + mu
         
-        // Solve for parameter update, (jacTjac + \mu I)Dp = jacTe, using LU decompostion
-        //FIXME: We don't know if this was solved successfully or not!  Figure out if issolved == true
-        let Dp = - (jacTjac.LU().Solve(jacTe))
-        let Dp_L2 = Dp.L2Norm()
+        let luSolve = new DenseLU(jacTjac :?> DenseMatrix)
+        let Dp = -luSolve.Solve(jacTe)
+        let Dp_L2 = Dp.Norm(2.0)
+        let DpVect = Vector.ofArray(Dp.ToArray())
 
-        // update parameter
-        let pDp = state.p + Dp        
+        // NOTE -- we don't know if this was solved successfully or not!  Figure out if issolved == true
+        // Assume it worked for now        
+
+        // Constrain parameter
+        let p = state.p
+        let pDp = p + DpVect
+        
 
         // Compute the objective at the new location
-        let new_error = f pDp
-        let new_error_L2 = new_error.L2Norm()
+        let eDpVect = f pDp
+        let eDp = new DenseVector(eDpVect.InternalValues)
+        let eDp_L2 = eDp.Norm(2.0)
 
         // Score improvement
-        let dF = error_L2 - new_error_L2
+        let dF = e_L2 - eDp_L2
         let dL = Dp.DotProduct(mu * Dp - jacTe)
 
-        //printfn "error: %A" error
+        //printfn "e: %A" e
         //printfn "dF: %A" dF
         //printfn "dL: %A" dL 
 
         // Check stopping conditions
         let stopCheck =
-            if error_L2 < opts.Eps3 then SmallErr
+            if e_L2 < opts.Eps3 then SmallErr
             else if jacTe_inf < opts.Eps1 then SmallGrad
             else if Dp_L2 <= opts.Eps2 * p_L2 then 
                 //printfn "SmallDp. err: %A, Dp: %A" eVect Dp
                 //printfn "jac: %A jac" jac
                 SmallDp
             else if Dp_L2 >= (p_L2+opts.Eps2)/(epsilon**2.0) then Singular
-            else if not (isFinite new_error_L2) then InvalidObjective
+            else if not (isFinite eDp_L2) then InvalidObjective
             else if nu > 1e8 then NoFurther
             else NotDone
 
-        // reduction in error, increment is accepted
+        // return updates
         if dF > 0. && dL > 0. then
             { mu = Some(mu * (max 0.33 (1. - (2. * dF / dL - 1.)**3.)));
               nu = 2.0;
@@ -178,7 +239,7 @@ let lm (f : Vector<float> -> Vector<float>) (p0 : Vector<float>)  (opts : Optimi
               stop = stopCheck;
               iterations = state.iterations + 1;
             }
-          else //reject step, note we could avoid recomputing jacobian, hessian, etc. after this.
+          else
             { mu = Some(mu * state.nu);
               nu = state.nu * 2.0;
               p = state.p;
@@ -197,6 +258,69 @@ let lm (f : Vector<float> -> Vector<float>) (p0 : Vector<float>)  (opts : Optimi
                 | _ -> r
 
 
-    let start = { mu = None; nu = 2.0; p = p0; stop = NotDone; iterations = 0;}
+    let start = { mu = None; nu = 2.0; p = p0; stop = NotDone; iterations = 0 }
     
     lmLoop start 0
+
+
+
+let lmLinearConstraints (A : matrix) (b : vector) (f : vector -> vector) (p0 : vector)  (opts : OptimizationOptions) =
+    let (Y, Z, c) = elim A b
+
+    let bP0 = A * p0
+    let d = b - bP0
+    if d |> Seq.exists (fun v -> v > 1e-3)  then failwith("initial argument doesn't satisfy constraint")
+
+    let pp = Z.Transpose * (p0 - c)
+
+    // Find a solution the reduced objective function
+    let fNew (x_z : vector) = 
+        let x = c + Z * x_z
+        f x
+
+    let newResult = lm fNew pp opts
+
+    // Convert the result back to the full solution
+    { newResult with p = c + Z * newResult.p }
+
+type ct = Interval of float * float | Low of float | High of float
+
+let lmBoxConstrains (lb : vector option) (ub : vector option) (A : matrix) (b : vector) (f : vector -> vector) (p0 : vector)  (opts : OptimizationOptions) =
+    let (Y, Z, c) = elim A b
+    let n = p0.Length // Size of original problem
+    let inf = System.Double.PositiveInfinity
+    let w = 5e1
+    
+    let bP0 = A * p0
+    let d = b - bP0
+    if d |> Seq.exists (fun v -> v > 1e-3)  then failwith("initial argument doesn't satisfy constraint")
+    
+    let pp = Z.Transpose * (p0 - c)
+
+    let constraints = Seq.init n id |> Seq.choose (fun i ->
+        match lb, ub with 
+            | Some(lb), Some(ub) when lb.[i] > -inf && ub.[i] < inf -> Some(Interval(lb.[i], ub.[i]), i)
+            | Some(lb), _ when lb.[i] > -inf -> Some(Low(lb.[i]), i)
+            | _, Some(ub) when ub.[i] < inf -> Some(High(ub.[i]), i)
+            | _ -> None) |> Array.ofSeq
+
+    let augment v boxConst =
+        match boxConst with
+            | Interval(low, high) -> 
+                let tmp = (2.0 * v - (low + high)) / (high-low)
+                w * Math.Max(tmp**2.0-1.0, 0.0)
+            | Low(low) -> w * Math.Max(low - v, 0.0)
+            | High(high) -> w * Math.Max(v - high, 0.0)
+            
+    // Find a solution the reduced objective function
+    let fNew (x_z : vector) = 
+        let x = c + Z * x_z
+        let mainResults = (f x) |> Math.Vector.toArray
+
+        let constraintResults = constraints |> Array.map (fun (con, idx) -> augment (x.[idx]) con)
+        Array.append mainResults constraintResults |> Vector.ofArray
+
+    let newResult = lm fNew pp opts
+
+    // Convert the result back to the full solution
+    { newResult with p = c + Z * newResult.p }
