@@ -8,6 +8,8 @@ namespace ConstantModelOptimizer
 
     public class ReadTemplatePair
     {
+        public string Name;
+
         DynamicProgrammingMatrixPair StateProbabilities;
 
         /// <summary>
@@ -30,7 +32,10 @@ namespace ConstantModelOptimizer
         /// </summary>
         TransitionParameters[] CurrentTransitionParameters;
 
-        string Read, Template;
+
+
+        public readonly string Read; //{ get; private set; }
+        public readonly string Template;// { get; private set; }
 
 
         /// <summary>

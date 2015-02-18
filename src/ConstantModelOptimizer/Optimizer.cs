@@ -15,11 +15,17 @@ namespace ConstantModelOptimizer
         {
             this.data = data;
         }
-        public void Optimize()
+        public ParameterSet Optimize(ParameterSet startParms = null)
         {
-            var pars = new ParameterSet ();
-            pars.SetRandomDefaults ();
-            pars.Epsilon = 0.02;
+            ParameterSet pars;
+            if (startParms == null) {
+                pars = new ParameterSet ();
+                pars.SetRandomDefaults ();
+            } else {
+                pars = new ParameterSet (startParms);
+            }
+
+
             double ll = double.MinValue;
             double ll_dif = double.MaxValue;
             double termination_dif = 1e-2;
@@ -132,7 +138,7 @@ namespace ConstantModelOptimizer
                 sw.Flush ();
             }
             sw.Close ();
-
+            return pars;
         }
 
     }

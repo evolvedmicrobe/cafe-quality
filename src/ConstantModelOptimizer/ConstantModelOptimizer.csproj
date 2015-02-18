@@ -64,6 +64,7 @@
     <Compile Include="LatentStates.cs" />
     <Compile Include="Simulator.cs" />
     <Compile Include="Optimizer.cs" />
+    <Compile Include="EdnaToLisaConverter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
