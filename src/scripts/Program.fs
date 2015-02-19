@@ -2,8 +2,9 @@
 
 open System
 open DelTagInvestigation
+open DumpForLisa
 
 [<EntryPoint>]
 let main args =
-    DelTagInvestigation.main
+    DumpForLisa.main
 

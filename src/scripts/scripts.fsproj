@@ -24,6 +24,7 @@
     <EnvironmentVariables>
       <EnvironmentVariables>
         <Variable name="DYLD_LIBRARY_PATH" value="/Users/nigel/analysisPrograms/hdf5/" />
+        <Variable name="MONO_LOG_LEVEL" value="debug" />
       </EnvironmentVariables>
     </EnvironmentVariables>
   </PropertyGroup>
@@ -75,6 +76,7 @@
     <None Include="ExamineQVValues.fs" />
     <None Include="MakeCSVForJohn.fs" />
     <Compile Include="ExamineDelTags.fs" />
+    <Compile Include="DumpForLisa.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
