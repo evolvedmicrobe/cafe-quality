@@ -65,6 +65,17 @@
     <Compile Include="Simulator.cs" />
     <Compile Include="Optimizer.cs" />
     <Compile Include="EdnaToLisaConverter.cs" />
+    <Compile Include="AlignmentSplitter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\bio\Bio.csproj">
+      <Project>{B53E11DF-F9A9-4939-893E-78E59872089A}</Project>
+      <Name>Bio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VariantCaller\VariantCaller.csproj">
+      <Project>{C1EA5B21-991D-4455-BAA7-05CFD8C04B88}</Project>
+      <Name>VariantCaller</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
