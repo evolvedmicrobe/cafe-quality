@@ -20,10 +20,8 @@ let getOutputRead (parentRead : ReadFromZMW) (subRead : CCSSubRead) =
    try
        let toAlign = new Sequence(DnaAlphabet.Instance, subRead.Seq,false)
        let mutable alns = all4MerRef.AlignSequence(toAlign)
-       Console.WriteLine(alns.Count)
        if alns.Count <> 1 then 
            None else
-           Console.WriteLine("Here")
            let mutable top = alns.[0]
            let tmp_tpl = top.FirstSequence.Where( (fun z -> z <> (byte '-'))) |> Seq.map (fun u -> char u) |> Seq.toArray
            let tmp_rd = top.SecondSequence.Where( (fun z -> z <> (byte '-'))) |> Seq.map (fun u -> char u) |> Seq.toArray
