@@ -32,8 +32,7 @@ getData <-function(bp) {
   colnames(hcd) = cnames
   nd = rbind(ncd,hcd)
   nd$Context = c(rep(ctx1,nrow(ncd)),rep(ctx2, nrow(hcd)))
-  nd$HP = c(rep(FALSE,nrow(ncd)),rep(TRUE, nrow(hcd)))
-  
+  nd$Homopolymer = c(rep(FALSE,nrow(ncd)),rep(TRUE, nrow(hcd)))
   return(nd)
 }
 a = getData("A")
@@ -43,11 +42,17 @@ t = getData("T")
 nd = rbind(a,c,g,t)
 nd$HP = factor(nd$HP)
 mkplot <- function(y) {
-  v = ggplot(nd, aes_string(x="SNR", y = y, color="Context", linetype="HP"))+geom_point()+geom_line()+theme_bw(base_size=20)
+  v = ggplot(nd, aes_string(x="SNR", y = y, color="BP", linetype="Homopolymer"))+geom_point()+geom_line()+theme_bw(base_size=8) + labs(x="Channel SNR")
   return(v)
 }
-mkplot(colnames(nd)[4])
-mkplot(colnames(nd)[5])
+pdf("BinnedSnrEstimates.pdf", width=12, height = 8)
+a = mkplot(colnames(nd)[4])
+b = mkplot(colnames(nd)[5])
+c = mkplot(colnames(nd)[6])
+d = mkplot(colnames(nd)[7])
+grid.arrange(a,b,c,d)
+dev.off()
+
 
 
 do.call(grid.arrange,b)
