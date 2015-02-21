@@ -28,7 +28,7 @@ namespace ConstantModelOptimizer
 
             double ll = double.MinValue;
             double ll_dif = double.MaxValue;
-            double termination_dif = 1e-2;
+            double termination_dif = 0.1;
             System.IO.StreamWriter sw = new System.IO.StreamWriter ("Parameters2.csv");
             sw.WriteLine ("Likelihood," + pars.GetCSVHeaderLine ());
             bool first = false;
@@ -51,10 +51,12 @@ namespace ConstantModelOptimizer
                     // I have observed some cases where the likelihoood only changes by ~1e-4%, 
                     // and I think this is due to numerical issues with pseudo counts near the optimum.
                     // Hence, the second condition listed above.
-                    if ((1.0 - new_ll / ll) > 1e-4) {
+                    if (Math.Abs(1.0 - new_ll / ll) < 1e-2) {
                         break;
                     }
-                    throw new ApplicationException ("Someone didn't code the algorithm correctly");
+                    Console.WriteLine ("Someone didn't code this correctly");
+                    break;
+                    //throw new ApplicationException ("Someone didn't code the algorithm correctly");
                 }
                 ll_dif = new_ll - ll;
                 ll = new_ll;
@@ -62,7 +64,7 @@ namespace ConstantModelOptimizer
                 // M - Step
 
                 // Update transition probabilities
-                Console.WriteLine ("ctx\tMatch\tStick\tBranch\tDark\tMerge");
+               // Console.WriteLine ("ctx\tMatch\tStick\tBranch\tDark\tMerge");
                 if (ParameterSet.USE_DINUCLEOTIDE_MODEL) {
                     Parallel.ForEach (ParameterSet.DiNucleotideContexts, ctx => { 
 //                    foreach (var ctx in ParameterSet.DiNucleotideContexts) {
@@ -83,7 +85,7 @@ namespace ConstantModelOptimizer
                         cp.Branch = Math.Exp (cnts.Branch);
                         cp.Dark = Math.Exp (cnts.Dark);
                         cp.Merge = Math.Exp (cnts.Merge);
-                        Console.WriteLine (String.Join ("\t", ctx, cp.Match.ToString (), cp.Stick.ToString (), cp.Branch.ToString (), cp.Dark.ToString (), cp.Merge.ToString ()));
+                        //Console.WriteLine (String.Join ("\t", ctx, cp.Match.ToString (), cp.Stick.ToString (), cp.Branch.ToString (), cp.Dark.ToString (), cp.Merge.ToString ()));
                         //}
                     }
                     );
@@ -130,7 +132,7 @@ namespace ConstantModelOptimizer
 
 
                 var incorrect = Math.Exp(pseudo_incorrect - pseudo_total);
-                Console.WriteLine("Eps\t" + incorrect);
+               // Console.WriteLine("Eps\t" + incorrect);
                 pars.Epsilon = incorrect;
                 if (ParameterSet.USE_DINUCLEOTIDE_MODEL) {
                     sw.WriteLine (new_ll + "," +  pars.GetCSVDataLine ());
