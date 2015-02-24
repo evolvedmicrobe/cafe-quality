@@ -159,21 +159,4 @@ namespace ConsensusCore {
         DEBUG_ONLY(CheckInvariants(j);)
     }
 
-    //
-    // SSE
-    //
-    inline __m128
-    DenseMatrix::Get4(int i, int j) const
-    {
-        assert(0 <= i && i <= Rows() - 4);
-        return _mm_loadu_ps(&boost_dense_matrix::operator()(i, j).value);
-    }
-
-    inline void
-    DenseMatrix::Set4(int i, int j, __m128 v4)
-    {
-        assert(columnBeingEdited_ == j);
-        assert(0 <= i && i <= Rows() - 4);
-        _mm_storeu_ps(&boost_dense_matrix::operator()(i, j).value, v4);
-    }
-}
+  }

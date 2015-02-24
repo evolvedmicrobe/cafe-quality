@@ -42,13 +42,11 @@
 #include "Quiver/QuiverConfig.hpp"
 
 namespace ConsensusCore {
-    QuiverConfig::QuiverConfig(const QvModelParams& qvParams,
-                               int movesAvailable,
+    QuiverConfig::QuiverConfig(const ModelParams& qvParams,
                                const BandingOptions& bandingOptions,
-                               float fastScoreThreshold,
-                               float addThreshold)
+                               double fastScoreThreshold,
+                               double addThreshold)
         : QvParams(qvParams),
-          MovesAvailable(movesAvailable),
           Banding(bandingOptions),
           FastScoreThreshold(fastScoreThreshold),
           AddThreshold(addThreshold)
@@ -56,7 +54,6 @@ namespace ConsensusCore {
 
     QuiverConfig::QuiverConfig(const QuiverConfig& qvConfig)
         : QvParams(qvConfig.QvParams),
-          MovesAvailable(qvConfig.MovesAvailable),
           Banding(qvConfig.Banding),
           FastScoreThreshold(qvConfig.FastScoreThreshold),
           AddThreshold(qvConfig.AddThreshold)

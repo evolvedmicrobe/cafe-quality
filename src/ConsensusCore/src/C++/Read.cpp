@@ -43,39 +43,29 @@
 #include "Features.hpp"
 #include "Types.hpp"
 #include "Read.hpp"
+#include "TransitionParameters.hpp"
 
 namespace ConsensusCore {
 
-    Read::Read(QvSequenceFeatures features,
+    Read::Read(std::vector<TransitionParameters> qvValues,
                std::string name,
-               std::string chemistry)
-        : Features(features),
+               std::string seq)
+        : trans_probs(qvValues),
           Name(name),
-          Chemistry(chemistry)
+          Sequence(seq)
     {}
 
     Read::Read(const Read& other)
-        : Features(other.Features),
+        : trans_probs(other.trans_probs),
           Name(other.Name),
-          Chemistry(other.Chemistry)
+          Sequence(other.Sequence)
     {}
 
     int Read::Length() const
     {
-        return Features.Length();
+        return Sequence.length();
     }
 
-    std::string Read::ToString() const
-    {
-        return (boost::format("%s (%s) Length=%d Data=%s")
-                % Name % Chemistry % Length() % Checksum::Of(Features)).str();
-
-    }
-
-    Read Read::Null()
-    {
-        return Read(QvSequenceFeatures(""), "", "");
-    }
 
     MappedRead::MappedRead(const Read& read,
                            StrandEnum strand,

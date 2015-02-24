@@ -35,7 +35,6 @@ namespace boost {
 %include "Statistics.i"
 %include "Version.i"
 
-%include "Edna.i"
 
 %init %{
 #ifdef SWIGPYTHON

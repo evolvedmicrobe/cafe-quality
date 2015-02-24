@@ -50,15 +50,15 @@ namespace ConsensusCore
     class ReadScorer
     {
     public:
-        explicit ReadScorer(QuiverConfig& config);
+        explicit ReadScorer(const QuiverConfig& config);
 
-        float Score
+        double Score
         (const std::string& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
-        const PairwiseAlignment* Align
-        (const std::string& tpl, const Read& read) const
-            throw(AlphaBetaMismatchException);
+//        const PairwiseAlignment* Align
+//        (const std::string& tpl, const Read& read) const
+//            throw(AlphaBetaMismatchException);
 
         const SparseMatrix* Alpha
         (const std::string& tpl, const Read& read) const

@@ -41,7 +41,7 @@
 #include <utility>
 #include <vector>
 
-#include "LFloat.hpp"
+#include "LDouble.hpp"
 #include "Types.hpp"
 #include "Utils.hpp"
 
@@ -64,8 +64,6 @@ namespace ConsensusCore {
         bool IsAllocated(int i) const;
         float Get(int i) const;
         void Set(int i, float v);
-        __m128 Get4(int i) const;
-        void Set4(int i, __m128 v);
         void Clear();
 
     public:

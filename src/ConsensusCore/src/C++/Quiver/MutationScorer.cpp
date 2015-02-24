@@ -33,18 +33,15 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
 
-// Author: Patrick Marks and David Alexander
 
 #include "Quiver/MutationScorer.hpp"
 
 #include <string>
 
-#include "Edna/EdnaEvaluator.hpp"
 #include "Matrix/DenseMatrix.hpp"
 #include "Matrix/SparseMatrix.hpp"
 #include "Quiver/QvEvaluator.hpp"
 #include "Quiver/SimpleRecursor.hpp"
-#include "Quiver/SseRecursor.hpp"
 #include "Mutation.hpp"
 
 #define EXTEND_BUFFER_COLUMNS 8
@@ -83,7 +80,7 @@ namespace ConsensusCore
     }
 
     template<typename R>
-    float
+    double
     MutationScorer<R>::Score() const
     {
         return (*beta_)(0, 0);
@@ -127,21 +124,21 @@ namespace ConsensusCore
         return evaluator_;
     }
 
-    template<typename R>
-    const PairwiseAlignment* MutationScorer<R>::Alignment() const
-    {
-        return recursor_->Alignment(*evaluator_, *alpha_);
-    }
+//    template<typename R>
+//    const PairwiseAlignment* MutationScorer<R>::Alignment() const
+//    {
+//        return recursor_->Alignment(*evaluator_, *alpha_);
+//    }
 
     template<typename R>
-    float
+    double
     MutationScorer<R>::ScoreMutation(const Mutation& m) const
     {
         int betaLinkCol = 1 + m.End();
         int absoluteLinkColumn = 1 + m.End() + m.LengthDiff();
         std::string oldTpl = evaluator_->Template();
         std::string newTpl = ApplyMutation(m, oldTpl);
-        float score;
+        double score;
 
         bool atBegin = (m.Start() < 3);
         bool atEnd   = (m.End() > (int)oldTpl.length() - 2);
@@ -242,10 +239,7 @@ namespace ConsensusCore
     }
 
     template class MutationScorer<SimpleQvRecursor>;
-    template class MutationScorer<SseQvRecursor>;
     template class MutationScorer<SparseSimpleQvRecursor>;
     template class MutationScorer<SparseSimpleQvSumProductRecursor>;
-    template class MutationScorer<SparseSseQvRecursor>;
-    template class MutationScorer<SparseSseQvSumProductRecursor>;
-    template class MutationScorer<SparseSseEdnaRecursor>;
+
 }

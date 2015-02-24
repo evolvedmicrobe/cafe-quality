@@ -42,7 +42,6 @@
 #include <climits>
 #include <utility>
 
-#include "Edna/EdnaEvaluator.hpp"
 #include "Matrix/DenseMatrix.hpp"
 #include "Matrix/SparseMatrix.hpp"
 #include "Quiver/detail/Combiner.hpp"
@@ -54,10 +53,11 @@
 using std::min;
 using std::max;
 
-#define NEG_INF -FLT_MAX
 
 namespace ConsensusCore {
 
+    // Will fill the alpha-beta matrices assuming the ends are pinned to the
+    // match state.
     template<typename M, typename E, typename C>
     void
     SimpleRecursor<M, E, C>::FillAlpha(const E& e, const M& guide, M& alpha) const
@@ -78,9 +78,9 @@ namespace ConsensusCore {
             int requiredEndRow = min(I + 1, hintEndRow);
 
             int i;
-            float score = NEG_INF;
-            float thresholdScore = NEG_INF;
-            float maxScore = NEG_INF;
+            double score = NEG_INF;
+            double thresholdScore = NEG_INF;
+            double maxScore = NEG_INF;
 
             alpha.StartEditingColumn(j, hintBeginRow, hintEndRow);
 
@@ -89,43 +89,36 @@ namespace ConsensusCore {
                  i < I + 1 && (score >= thresholdScore || i < requiredEndRow);
                  ++i)
             {
-                float thisMoveScore;
+                double thisMoveScore;
                 score = NEG_INF;
 
                 // Start:
                 if (i == 0 && j == 0)
                 {
-                    score = 0.0f;
+                    score = 0.0;
                 }
 
-                // Incorporation:
+                // Match:
                 if (i > 0 && j > 0)
                 {
-                    thisMoveScore = alpha(i - 1, j - 1) + e.Inc(i - 1, j - 1);
+                    thisMoveScore = alpha(i - 1, j - 1) + e.Match(i - 1, j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
-                // Extra:
+                // Stick or Branch:
                 if (i > 0)
                 {
-                    thisMoveScore = alpha(i - 1, j) + e.Extra(i - 1, j);
+                    thisMoveScore = alpha(i - 1, j) + e.Insertion(i - 1, j);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Delete:
                 if (j > 0)
                 {
-                    thisMoveScore = alpha(i, j - 1) + e.Del(i, j - 1);
+                    thisMoveScore = alpha(i, j - 1) + e.Deletion(j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
-
-                // Merge:
-                if ((this->movesAvailable_ & MERGE) && j > 1 && i > 0)
-                {
-                    thisMoveScore = alpha(i - 1, j - 2) + e.Merge(i - 1, j - 2);
-                    score = C::Combine(score, thisMoveScore);
-                }
-
+                
                 //  Save score
                 alpha.Set(i, j, score);
 
@@ -191,30 +184,24 @@ namespace ConsensusCore {
                 // Incorporation:
                 if (i < I && j < J)
                 {
-                    thisMoveScore = beta(i + 1, j + 1) + e.Inc(i, j);
+                    thisMoveScore = beta(i + 1, j + 1) + e.Match(i, j);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Extra:
                 if (i < I)
                 {
-                    thisMoveScore = beta(i + 1, j) + e.Extra(i, j);
+                    thisMoveScore = beta(i + 1, j) + e.Insertion(i, j);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Delete:
                 if (j < J)
                 {
-                    thisMoveScore = beta(i, j + 1) + e.Del(i, j);
+                    thisMoveScore = beta(i, j + 1) + e.Deletion(j);
                     score = C::Combine(score, thisMoveScore);
                 }
 
-                // Merge:
-                if ((this->movesAvailable_ & MERGE) && j < J - 1 && i < I)
-                {
-                    thisMoveScore = beta(i + 1, j + 2) + e.Merge(i, j);
-                    score = C::Combine(score, thisMoveScore);
-                }
 
                 //  Save score
                 beta.Set(i, j, score);
@@ -274,25 +261,15 @@ namespace ConsensusCore {
             {
                 // Incorporate
                 thisMoveScore = alpha(i, alphaColumn - 1) +
-                                e.Inc(i, absoluteColumn - 1) +
+                                e.Match(i, absoluteColumn - 1) +
                                 beta(i + 1, betaColumn);
                 v = C::Combine(v, thisMoveScore);
 
-                // Merge (2 possible ways):
-                thisMoveScore = alpha(i, alphaColumn - 2) +
-                                e.Merge(i, absoluteColumn - 2) +
-                                beta(i + 1, betaColumn);
-                v = C::Combine(v, thisMoveScore);
-
-                thisMoveScore = alpha(i, alphaColumn - 1) +
-                                e.Merge(i, absoluteColumn - 1) +
-                                beta(i + 1, betaColumn + 1);
-                v = C::Combine(v, thisMoveScore);
-            }
+                }
 
             // Delete:
             thisMoveScore = alpha(i, alphaColumn - 1) +
-                            e.Del(i, absoluteColumn - 1) +
+                            e.Deletion(absoluteColumn - 1) +
                             beta(i, betaColumn);
             v = C::Combine(v, thisMoveScore);
         }
@@ -348,23 +325,23 @@ namespace ConsensusCore {
 
             for (i = beginRow; i < endRow; i++)
             {
-                float thisMoveScore;
+                double thisMoveScore;
                 score = NEG_INF;
 
-                // Incorporation:
+                // Match:
                 if (i > 0 && j > 0)
                 {
                     float prev = extCol == 0 ?
                             alpha(i - 1, j - 1) :
                             ext(i - 1, extCol - 1);
-                    thisMoveScore = prev + e.Inc(i - 1, j - 1);
+                    thisMoveScore = prev + e.Match(i - 1, j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
-                // Extra:
+                // Stick or Branch:
                 if (i > 0)
                 {
-                    thisMoveScore = ext(i - 1, extCol) + e.Extra(i - 1, j);
+                    thisMoveScore = ext(i - 1, extCol) + e.Insertion(i - 1, j);
                     score = C::Combine(score, thisMoveScore);
                 }
 
@@ -374,19 +351,10 @@ namespace ConsensusCore {
                     float prev = extCol == 0 ?
                             alpha(i, j - 1) :
                             ext(i, extCol - 1);
-                    thisMoveScore = prev + e.Del(i, j - 1);
+                    thisMoveScore = prev + e.Deletion(j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
-
-                // FIXME: is the merge code below incorrect for numExtColumns > 2?
-                // Merge:
-                if ((this->movesAvailable_ & MERGE) && j > 1 && i > 0)
-                {
-                    float prev = alpha(i - 1, j - 2);
-                    thisMoveScore = prev + e.Merge(i - 1, j - 2);
-                    score = C::Combine(score, thisMoveScore);
-                }
-
+              
                 ext.Set(i, extCol, score);
             }
             assert (i == endRow);
@@ -459,14 +427,14 @@ namespace ConsensusCore {
                     float prev = (extCol == lastExtColumn) ?
                         beta(i + 1, j + 1) :
                         ext(i + 1, extCol + 1);
-                    thisMoveScore = prev + e.Inc(i, jp);
+                    thisMoveScore = prev + e.Match(i, jp);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Extra:
                 if (i < I)
                 {
-                    thisMoveScore = ext(i + 1, extCol) + e.Extra(i, jp);
+                    thisMoveScore = ext(i + 1, extCol) + e.Insertion(i, jp);
                     score = C::Combine(score, thisMoveScore);
                 }
 
@@ -476,15 +444,7 @@ namespace ConsensusCore {
                     float prev = (extCol == lastExtColumn) ?
                         beta(i, j + 1) :
                         ext(i, extCol + 1);
-                    thisMoveScore = prev + e.Del(i, jp);
-                    score = C::Combine(score, thisMoveScore);
-                }
-
-                // FIXME: is the merge code below incorrect for numExtColumns > 2?
-                // Merge:
-                if ((this->movesAvailable_ & MERGE) && j < J - 1 && i < I)
-                {
-                    thisMoveScore = beta(i + 1, j + 2) + e.Merge(i, jp);
+                    thisMoveScore = prev + e.Deletion(jp);
                     score = C::Combine(score, thisMoveScore);
                 }
 
@@ -496,13 +456,13 @@ namespace ConsensusCore {
 
 
     template<typename M, typename E, typename C>
-    SimpleRecursor<M, E, C>::SimpleRecursor(int movesAvailable, const BandingOptions& banding)
-        : detail::RecursorBase<M, E, C>(movesAvailable, banding)
+    SimpleRecursor<M, E, C>::SimpleRecursor(const BandingOptions& banding)
+        : detail::RecursorBase<M, E, C>(banding)
     {}
 
 
-    template class SimpleRecursor<DenseMatrix,  QvEvaluator, detail::ViterbiCombiner>;
+
     template class SimpleRecursor<SparseMatrix, QvEvaluator, detail::ViterbiCombiner>;
     template class SimpleRecursor<SparseMatrix, QvEvaluator, detail::SumProductCombiner>;
-    template class SimpleRecursor<SparseMatrix, EdnaEvaluator, detail::SumProductCombiner>;
+
 }

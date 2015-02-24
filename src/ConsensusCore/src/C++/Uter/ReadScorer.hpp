@@ -36,44 +36,40 @@
 // Author: David Alexander
 
 #pragma once
-#include <xmmintrin.h>
-#include <cfloat>
-#include <ostream>
 
-namespace ConsensusCore {
+#include <string>
+#include "Quiver/QuiverConfig.hpp"
+#include "Types.hpp"
 
-    /// \brief A class representing a floating point number on the logarithmic scale
-    struct lfloat
+namespace ConsensusCore
+{
+    // A ReadScorer provides a simple but inefficient means of scoring
+    // a single read against a template.  This is only to be used for
+    // testing, not in production code.
+    template<typename R>
+    class ReadScorer
     {
-        float value;
+    public:
+        explicit ReadScorer(QuiverConfig& config);
 
-        lfloat()
-        {
-            value = -FLT_MAX;
-        }
+        float Score
+        (const std::string& tpl, const Read& read) const
+            throw(AlphaBetaMismatchException);
 
-        lfloat(float f)  // NOLINT(runtime/explicit)
-        {
-            value = f;
-        }
+        const PairwiseAlignment* Align
+        (const std::string& tpl, const Read& read) const
+            throw(AlphaBetaMismatchException);
 
-        lfloat& operator=(float f)
-        {
-            value = f;
-            return *this;
-        }
+        const SparseMatrix* Alpha
+        (const std::string& tpl, const Read& read) const
+            throw(AlphaBetaMismatchException);
 
-        operator const float& () const   { return value; }
-        operator float& ()               { return value; }
+        const SparseMatrix* Beta
+        (const std::string& tpl, const Read& read) const
+            throw(AlphaBetaMismatchException);
 
-        friend std::ostream& operator<<(std::ostream& out, const lfloat& f)
-        {
-            out << f.value;
-            return out;
-        }
+
+    private:
+        QuiverConfig _quiverConfig;
     };
-
-    template<typename T>  const float  Zero()  { return T(); }
-    template<typename T>  const __m128 Zero4() { return _mm_set_ps1(T()); }
 }
-

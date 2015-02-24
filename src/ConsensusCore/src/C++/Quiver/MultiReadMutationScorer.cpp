@@ -50,6 +50,7 @@
 #include "Sequence.hpp"
 #include "Utils.hpp"
 
+
 #define MIN_FAVORABLE_SCOREDIFF 0.04  // Chosen such that 0.49 = 1 / (1 + exp(minScoreDiff))
 
 namespace ConsensusCore
@@ -127,9 +128,9 @@ namespace ConsensusCore
 
 
     template<typename R>
-    MultiReadMutationScorer<R>::MultiReadMutationScorer(const QuiverConfigTable& quiverConfigByChemistry,
+    MultiReadMutationScorer<R>::MultiReadMutationScorer(const QuiverConfig& config,
                                                         std::string tpl)
-        : quiverConfigByChemistry_(quiverConfigByChemistry),
+        : quiv_config(config),
           fwdTemplate_(tpl),
           revTemplate_(ReverseComplement(tpl)),
           reads_()
@@ -137,15 +138,12 @@ namespace ConsensusCore
         DEBUG_ONLY(CheckInvariants());
         fastScoreThreshold_ = 0;
         QuiverConfigTable::const_iterator it;
-        for (it = quiverConfigByChemistry_.begin(); it != quiverConfigByChemistry_.end(); it++)
-        {
-            fastScoreThreshold_ = std::min(fastScoreThreshold_, it->second.FastScoreThreshold);
-        }
+
     }
 
     template<typename R>
     MultiReadMutationScorer<R>::MultiReadMutationScorer(const MultiReadMutationScorer<R>& other)
-        : quiverConfigByChemistry_(other.quiverConfigByChemistry_),
+        : quiv_config(other.quiv_config),
           fastScoreThreshold_(other.fastScoreThreshold_),
           fwdTemplate_(other.fwdTemplate_),
           revTemplate_(other.revTemplate_),
@@ -245,14 +243,13 @@ namespace ConsensusCore
     }
 
     template<typename R>
-    bool MultiReadMutationScorer<R>::AddRead(const MappedRead& mr, float threshold)
+    bool MultiReadMutationScorer<R>::AddRead(const MappedRead& mr, double threshold)
     {
         DEBUG_ONLY(CheckInvariants());
-        const QuiverConfig* config = &quiverConfigByChemistry_.At(mr.Chemistry);
         EvaluatorType ev(mr,
                          Template(mr.Strand, mr.TemplateStart, mr.TemplateEnd),
-                         config->QvParams);
-        RecursorType recursor(config->MovesAvailable, config->Banding);
+                         quiv_config.QvParams);
+        RecursorType recursor(quiv_config.Banding);
 
         ScorerType* scorer;
         try
@@ -269,7 +266,7 @@ namespace ConsensusCore
             int I = ev.ReadLength();
             int J = ev.TemplateLength();
             int maxSize = static_cast<int>(0.5 + threshold * (I + 1) * (J + 1));
-
+            
             if (scorer->Alpha()->AllocatedEntries() >= maxSize ||
                 scorer->Beta()->AllocatedEntries() >= maxSize)
             {
@@ -288,14 +285,13 @@ namespace ConsensusCore
     bool MultiReadMutationScorer<R>::AddRead(const MappedRead& mr)
     {
         DEBUG_ONLY(CheckInvariants());
-        const QuiverConfig* config = &quiverConfigByChemistry_.At(mr.Chemistry);
-        return AddRead(mr, config->AddThreshold);
+        return AddRead(mr, quiv_config.AddThreshold);
     }
 
     template<typename R>
-    float MultiReadMutationScorer<R>::Score(const Mutation& m) const
+    double MultiReadMutationScorer<R>::Score(const Mutation& m) const
     {
-        float sum = 0;
+        double sum = 0;
         foreach (const ReadStateType& rs, reads_)
         {
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
@@ -309,7 +305,7 @@ namespace ConsensusCore
     }
 
     template<typename R>
-    float MultiReadMutationScorer<R>::Score(MutationType mutationType,
+    double MultiReadMutationScorer<R>::Score(MutationType mutationType,
                                             int position, char base) const
     {
         Mutation m(mutationType, position, base);
@@ -317,9 +313,9 @@ namespace ConsensusCore
     }
 
     template<typename R>
-    float MultiReadMutationScorer<R>::FastScore(const Mutation& m) const
+    double MultiReadMutationScorer<R>::FastScore(const Mutation& m) const
     {
-        float sum = 0;
+        double sum = 0;
         foreach (const ReadStateType& rs, reads_)
         {
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
@@ -337,10 +333,10 @@ namespace ConsensusCore
     }
 
     template<typename R>
-    std::vector<float>
-    MultiReadMutationScorer<R>::Scores(const Mutation& m, float unscoredValue) const
+    std::vector<double>
+    MultiReadMutationScorer<R>::Scores(const Mutation& m, double unscoredValue) const
     {
-        std::vector<float> scoreByRead;
+        std::vector<double> scoreByRead;
         foreach (const ReadStateType& rs, reads_)
         {
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
@@ -358,9 +354,9 @@ namespace ConsensusCore
     }
 
     template<typename R>
-    std::vector<float> MultiReadMutationScorer<R>::Scores(MutationType mutationType,
+    std::vector<double> MultiReadMutationScorer<R>::Scores(MutationType mutationType,
                                                           int position, char base,
-                                                          float unscoredValue) const
+                                                          double unscoredValue) const
     {
         Mutation m(mutationType, position, base);
         return Scores(m, unscoredValue);
@@ -369,7 +365,7 @@ namespace ConsensusCore
     template<typename R>
     bool MultiReadMutationScorer<R>::IsFavorable(const Mutation& m) const
     {
-        float sum = 0;
+        double sum = 0;
         foreach (const ReadStateType& rs, reads_)
         {
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
@@ -385,7 +381,7 @@ namespace ConsensusCore
     template<typename R>
     bool MultiReadMutationScorer<R>::FastIsFavorable(const Mutation& m) const
     {
-        float sum = 0;
+        double sum = 0;
         foreach (const ReadStateType& rs, reads_)
         {
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
@@ -456,9 +452,9 @@ namespace ConsensusCore
 
 
     template<typename R>
-    float MultiReadMutationScorer<R>::BaselineScore() const
+    double MultiReadMutationScorer<R>::BaselineScore() const
     {
-        float sum = 0;
+        double sum = 0;
         foreach (const ReadStateType& rs, reads_)
         {
             if (rs.IsActive) sum += rs.Scorer->Score();
@@ -468,9 +464,9 @@ namespace ConsensusCore
 
 
     template<typename R>
-    std::vector<float> MultiReadMutationScorer<R>::BaselineScores() const
+    std::vector<double> MultiReadMutationScorer<R>::BaselineScores() const
     {
-        std::vector<float> scoreByRead;
+        std::vector<double> scoreByRead;
         foreach (const ReadStateType& rs, reads_)
         {
             if (rs.IsActive) scoreByRead.push_back(rs.Scorer->Score());
@@ -578,6 +574,6 @@ namespace ConsensusCore
     }
 
 
-    template class MultiReadMutationScorer<SparseSseQvRecursor>;
-    template class MultiReadMutationScorer<SparseSseQvSumProductRecursor>;
+    template class MultiReadMutationScorer<SparseSimpleQvRecursor>;
+    template class MultiReadMutationScorer<SparseSimpleQvSumProductRecursor>;
 }

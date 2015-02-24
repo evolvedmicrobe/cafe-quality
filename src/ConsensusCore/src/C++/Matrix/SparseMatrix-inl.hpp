@@ -43,7 +43,7 @@
 
 #include "Interval.hpp"
 #include "Matrix/SparseMatrix.hpp"
-#include "LFloat.hpp"
+#include "LDouble.hpp"
 
 using std::min;
 using std::max;
@@ -125,7 +125,7 @@ namespace ConsensusCore {
     inline const float&
     SparseMatrix::operator() (int i, int j) const
     {
-        static const float emptyCell = Zero<lfloat>();
+        static const float emptyCell = Zero<ldouble>();
         if (columns_[j] == NULL)
         {
             return emptyCell;
@@ -163,26 +163,4 @@ namespace ConsensusCore {
         DEBUG_ONLY(CheckInvariants(j);)
     }
 
-    //
-    // SSE
-    //
-    inline __m128
-    SparseMatrix::Get4(int i, int j) const
-    {
-        if (columns_[j] == NULL)
-        {
-            return Zero4<lfloat>();
-        }
-        else
-        {
-            return columns_[j]->Get4(i);
-        }
-    }
-
-    inline void
-    SparseMatrix::Set4(int i, int j, __m128 v4)
-    {
-        assert(columnBeingEdited_ == j);
-        columns_[j]->Set4(i, v4);
-    }
 }

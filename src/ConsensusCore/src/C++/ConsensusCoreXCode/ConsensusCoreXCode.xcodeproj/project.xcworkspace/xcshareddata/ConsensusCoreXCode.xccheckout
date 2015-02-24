@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>FCFBBABC-FA92-482F-BD40-53956DE56DC3</string>
 	<key>IDESourceControlProjectName</key>
-	<string>ConsensusCoreXcode</string>
+	<string>ConsensusCoreXCode</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>2CA57BB1C8C9CBBF8DCA953D0E72234EEE961F52</key>
 		<string>https://github.com/evolvedmicrobe/cafe-quality.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>src/ConsensusCore/src/C++/ConsensusCoreXcode/ConsensusCoreXcode.xcodeproj</string>
+	<string>src/ConsensusCore/src/C++/ConsensusCoreXCode/ConsensusCoreXCode.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>2CA57BB1C8C9CBBF8DCA953D0E72234EEE961F52</key>

@@ -33,36 +33,44 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
 
-// Author: David Alexander
 
 #pragma once
+#include <cfloat>
+#include <ostream>
+#include "Quiver/MathUtils.h"
+namespace ConsensusCore {
 
-#include <vector>
-
-namespace ConsensusCore
-{
-    /// \brief A parameter vector for analysis using the QV model
-    struct EdnaModelParams
+    /// \brief A class representing a floating point number on the logarithmic scale
+    struct ldouble
     {
-        std::vector<float> pStay_;
-        std::vector<float> pMerge_;
-        std::vector<float> moveDists_;
-        std::vector<float> stayDists_;
+        double value;
 
-        // By providing a single constructor with default arguments,
-        // we allow Python and other SWIG client languages to use
-        // named parameters. However if the user forgets to set one of
-        // the parameters, trouble!
+        ldouble()
+        {
+            value = NEG_INF;
+        }
 
-        EdnaModelParams(std::vector<float> pStay,
-                        std::vector<float> pMerge,
-                        std::vector<float> moveDists,
-                        std::vector<float> stayDists)
-            : pStay_(pStay)
-            , pMerge_(pMerge)
-            , moveDists_(moveDists)
-            , stayDists_(stayDists)
-        {}
+        ldouble(double f)  // NOLINT(runtime/explicit)
+        {
+            value = f;
+        }
+
+        ldouble& operator=(double f)
+        {
+            value = f;
+            return *this;
+        }
+
+        operator const double& () const   { return value; }
+        operator double& ()               { return value; }
+
+        friend std::ostream& operator<<(std::ostream& out, const ldouble& f)
+        {
+            out << f.value;
+            return out;
+        }
     };
+
+    template<typename T>  const double  Zero()  { return T(); }
 }
 

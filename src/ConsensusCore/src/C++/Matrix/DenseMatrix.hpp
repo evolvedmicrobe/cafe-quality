@@ -37,14 +37,13 @@
 
 #pragma once
 
-#include <xmmintrin.h>
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <utility>
 #include <vector>
 
 #include "Interval.hpp"
-#include "LFloat.hpp"
+#include "LDouble.hpp"
 #include "Matrix/AbstractMatrix.hpp"
 #include "Types.hpp"
 #include "Utils.hpp"
@@ -57,7 +56,7 @@ namespace ConsensusCore {
     using boost::numeric::ublas::column_major;
 #endif  // SWIG
 
-    typedef matrix<lfloat, column_major> boost_dense_matrix;
+    typedef matrix<ldouble, column_major> boost_dense_matrix;
 
     class DenseMatrix
         : public AbstractMatrix
@@ -100,9 +99,6 @@ namespace ConsensusCore {
         void Set(int i, int j, float v);
         void ClearColumn(int j);
 
-    public:  // SSE accessors, which access 4 successive entries in a column
-        __m128 Get4(int i, int j) const;
-        void Set4(int i, int j, __m128 v);
 
     public:
         // Method SWIG clients can use to get a native matrix (e.g. Numpy)

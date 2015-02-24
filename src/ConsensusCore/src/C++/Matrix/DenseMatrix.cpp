@@ -43,7 +43,7 @@
 #include <cassert>
 #include <vector>
 
-#include "LFloat.hpp"
+#include "LDouble.hpp"
 
 using boost::numeric::ublas::matrix;
 using boost::numeric::ublas::row_major;
@@ -90,7 +90,7 @@ namespace ConsensusCore {
     DenseMatrix::ToHostMatrix(float** mat, int* rows, int* cols) const
     {
         // TODO(dalexander): make sure SWIG client deallocates this memory -- use %newobject flag
-        matrix<lfloat, row_major> rowMajorPeer(*this);
+        matrix<ldouble, row_major> rowMajorPeer(*this);
         *mat = new float[Rows() * Columns()];
         std::copy(rowMajorPeer.data().begin(), rowMajorPeer.data().end(), *mat);
         *rows = Rows();

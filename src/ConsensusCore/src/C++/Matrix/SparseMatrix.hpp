@@ -37,7 +37,6 @@
 
 #pragma once
 
-#include <xmmintrin.h>
 #include <utility>
 #include <vector>
 
@@ -79,9 +78,6 @@ namespace ConsensusCore {
         void Set(int i, int j, float v);
         void ClearColumn(int j);
 
-    public:  // SSE accessors, which access 4 successive entries in a column
-        __m128 Get4(int i, int j) const;
-        void Set4(int i, int j, __m128 v);
 
     public:
         // Method SWIG clients can use to get a native matrix (e.g. Numpy)

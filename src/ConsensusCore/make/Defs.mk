@@ -26,8 +26,8 @@ VPATH           := src/C++/                     \
 CXX_LIB         := $(abspath $(OBJDIR)/libConsensusCore.a)
 CXX_SRCS        := $(notdir $(shell find src/C++/ -name "*.cpp" | grep -v '\#'))
 
-CXX_OPT_FLAGS_DEBUG   := -O0 -g
-CXX_OPT_FLAGS_RELEASE := -O3 -DNDEBUG -g
+CXX_OPT_FLAGS_DEBUG   := -O0 -g -Wno-c++11-extensions
+CXX_OPT_FLAGS_RELEASE := -O3 -DNDEBUG -g -Wno-c++11-extensions
 
 ifeq ($(DEBUG),)
         CXX_OPT_FLAGS = $(CXX_OPT_FLAGS_RELEASE)
@@ -45,10 +45,10 @@ else
 endif
 
 ifeq ($(GXX),clang++)
-    CXX_FLAGS           = $(GXX_FLAGS) $(CXX_OPT_FLAGS) -stdlib=libstdc++ -msse3 -fPIC -Qunused-arguments -fno-omit-frame-pointer
+    CXX_FLAGS           = $(GXX_FLAGS) $(CXX_OPT_FLAGS) -stdlib=libstdc++ -msse3 -fPIC -Qunused-arguments -fno-omit-frame-pointer -Wno-c++11-extensions
     CXX_STRICT_FLAGS    = $(GXX_FLAGS) $(CXX_FLAGS) -pedantic -ansi -Wall
 else
-    CXX_FLAGS           = $(CXX_OPT_FLAGS) $(CXX_EXTRA_ARGS) -msse3 -fPIC -fno-omit-frame-pointer
+    CXX_FLAGS           = $(CXX_OPT_FLAGS) $(CXX_EXTRA_ARGS) -msse3 -fPIC -fno-omit-frame-pointer -Wno-c++11-extensions
     CXX_STRICT_FLAGS    = $(CXX_FLAGS) -pedantic -ansi -Wall
 endif
 

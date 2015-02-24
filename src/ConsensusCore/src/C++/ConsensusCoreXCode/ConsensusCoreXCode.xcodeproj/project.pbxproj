@@ -7,26 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A6C56DE21A9BDF4700FAEC11 /* TransitionParameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C56DE01A9BDF4700FAEC11 /* TransitionParameters.cpp */; };
+		A6C56DE31A9BDF4700FAEC11 /* TransitionParameters.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6C56DE11A9BDF4700FAEC11 /* TransitionParameters.hpp */; };
 		A6FB7C541A242A000054F5D7 /* AffineAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7BE71A242A000054F5D7 /* AffineAlignment.cpp */; };
 		A6FB7C551A242A000054F5D7 /* AffineAlignment.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BE81A242A000054F5D7 /* AffineAlignment.hpp */; };
 		A6FB7C561A242A000054F5D7 /* Checksum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7BE91A242A000054F5D7 /* Checksum.cpp */; };
 		A6FB7C571A242A000054F5D7 /* Checksum.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BEA1A242A000054F5D7 /* Checksum.hpp */; };
 		A6FB7C581A242A000054F5D7 /* Coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7BEB1A242A000054F5D7 /* Coverage.cpp */; };
 		A6FB7C591A242A000054F5D7 /* Coverage.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BEC1A242A000054F5D7 /* Coverage.hpp */; };
-		A6FB7C5A1A242A000054F5D7 /* EdnaConfig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BEE1A242A000054F5D7 /* EdnaConfig.hpp */; };
-		A6FB7C5B1A242A000054F5D7 /* EdnaCounts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7BEF1A242A000054F5D7 /* EdnaCounts.cpp */; };
-		A6FB7C5C1A242A000054F5D7 /* EdnaCounts.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BF01A242A000054F5D7 /* EdnaCounts.hpp */; };
-		A6FB7C5D1A242A000054F5D7 /* EdnaEvaluator.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BF11A242A000054F5D7 /* EdnaEvaluator.hpp */; };
-		A6FB7C5E1A242A000054F5D7 /* EdnaConfig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BF21A242A000054F5D7 /* EdnaConfig.hpp */; };
-		A6FB7C5F1A242A000054F5D7 /* EdnaCounts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7BF31A242A000054F5D7 /* EdnaCounts.cpp */; };
-		A6FB7C601A242A000054F5D7 /* EdnaCounts.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BF41A242A000054F5D7 /* EdnaCounts.hpp */; };
-		A6FB7C611A242A000054F5D7 /* EdnaEvaluator.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BF51A242A000054F5D7 /* EdnaEvaluator.hpp */; };
 		A6FB7C621A242A000054F5D7 /* Feature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7BF61A242A000054F5D7 /* Feature.cpp */; };
 		A6FB7C631A242A000054F5D7 /* Feature.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BF71A242A000054F5D7 /* Feature.hpp */; };
 		A6FB7C641A242A000054F5D7 /* Features.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7BF81A242A000054F5D7 /* Features.cpp */; };
 		A6FB7C651A242A000054F5D7 /* Features.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BF91A242A000054F5D7 /* Features.hpp */; };
 		A6FB7C661A242A000054F5D7 /* Interval.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BFA1A242A000054F5D7 /* Interval.hpp */; };
-		A6FB7C671A242A000054F5D7 /* LFloat.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BFB1A242A000054F5D7 /* LFloat.hpp */; };
+		A6FB7C671A242A000054F5D7 /* LDouble.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BFB1A242A000054F5D7 /* LDouble.hpp */; };
 		A6FB7C681A242A000054F5D7 /* concurrent_queue.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BFF1A242A000054F5D7 /* concurrent_queue.hpp */; };
 		A6FB7C691A242A000054F5D7 /* cpplog.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C001A242A000054F5D7 /* cpplog.hpp */; };
 		A6FB7C6B1A242A000054F5D7 /* outputdebugstream.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C031A242A000054F5D7 /* outputdebugstream.hpp */; };
@@ -66,8 +60,6 @@
 		A6FB7C8D1A242A010054F5D7 /* RecursorBase-inl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C2A1A242A000054F5D7 /* RecursorBase-inl.hpp */; };
 		A6FB7C8E1A242A010054F5D7 /* RecursorBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7C2B1A242A000054F5D7 /* RecursorBase.cpp */; };
 		A6FB7C8F1A242A010054F5D7 /* RecursorBase.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C2C1A242A000054F5D7 /* RecursorBase.hpp */; };
-		A6FB7C901A242A010054F5D7 /* sse_mathfun.h in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C2D1A242A000054F5D7 /* sse_mathfun.h */; };
-		A6FB7C911A242A010054F5D7 /* SseMath.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C2E1A242A000054F5D7 /* SseMath.hpp */; };
 		A6FB7C921A242A010054F5D7 /* Diploid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7C2F1A242A000054F5D7 /* Diploid.cpp */; };
 		A6FB7C931A242A010054F5D7 /* Diploid.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C301A242A000054F5D7 /* Diploid.hpp */; };
 		A6FB7C941A242A010054F5D7 /* MultiReadMutationScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7C311A242A000054F5D7 /* MultiReadMutationScorer.cpp */; };
@@ -86,8 +78,6 @@
 		A6FB7CA11A242A010054F5D7 /* ReadScorer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C3E1A242A000054F5D7 /* ReadScorer.hpp */; };
 		A6FB7CA21A242A010054F5D7 /* SimpleRecursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7C3F1A242A000054F5D7 /* SimpleRecursor.cpp */; };
 		A6FB7CA31A242A010054F5D7 /* SimpleRecursor.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C401A242A000054F5D7 /* SimpleRecursor.hpp */; };
-		A6FB7CA41A242A010054F5D7 /* SseRecursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7C411A242A000054F5D7 /* SseRecursor.cpp */; };
-		A6FB7CA51A242A010054F5D7 /* SseRecursor.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C421A242A000054F5D7 /* SseRecursor.hpp */; };
 		A6FB7CA61A242A010054F5D7 /* Read.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7C431A242A000054F5D7 /* Read.cpp */; };
 		A6FB7CA71A242A010054F5D7 /* Read.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C441A242A000054F5D7 /* Read.hpp */; };
 		A6FB7CA81A242A010054F5D7 /* Sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7C451A242A000054F5D7 /* Sequence.cpp */; };
@@ -106,6 +96,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A6C56DDF1A9BCAFE00FAEC11 /* MathUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MathUtils.h; sourceTree = "<group>"; };
+		A6C56DE01A9BDF4700FAEC11 /* TransitionParameters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TransitionParameters.cpp; path = ../TransitionParameters.cpp; sourceTree = "<group>"; };
+		A6C56DE11A9BDF4700FAEC11 /* TransitionParameters.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransitionParameters.hpp; path = ../TransitionParameters.hpp; sourceTree = "<group>"; };
 		A6FB7BE21A2429E90054F5D7 /* libConsensusCoreDev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libConsensusCoreDev.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6FB7BE71A242A000054F5D7 /* AffineAlignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AffineAlignment.cpp; path = ../AffineAlignment.cpp; sourceTree = "<group>"; };
 		A6FB7BE81A242A000054F5D7 /* AffineAlignment.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AffineAlignment.hpp; path = ../AffineAlignment.hpp; sourceTree = "<group>"; };
@@ -113,20 +106,12 @@
 		A6FB7BEA1A242A000054F5D7 /* Checksum.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Checksum.hpp; path = ../Checksum.hpp; sourceTree = "<group>"; };
 		A6FB7BEB1A242A000054F5D7 /* Coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Coverage.cpp; path = ../Coverage.cpp; sourceTree = "<group>"; };
 		A6FB7BEC1A242A000054F5D7 /* Coverage.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Coverage.hpp; path = ../Coverage.hpp; sourceTree = "<group>"; };
-		A6FB7BEE1A242A000054F5D7 /* EdnaConfig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EdnaConfig.hpp; sourceTree = "<group>"; };
-		A6FB7BEF1A242A000054F5D7 /* EdnaCounts.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EdnaCounts.cpp; sourceTree = "<group>"; };
-		A6FB7BF01A242A000054F5D7 /* EdnaCounts.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EdnaCounts.hpp; sourceTree = "<group>"; };
-		A6FB7BF11A242A000054F5D7 /* EdnaEvaluator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EdnaEvaluator.hpp; sourceTree = "<group>"; };
-		A6FB7BF21A242A000054F5D7 /* EdnaConfig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EdnaConfig.hpp; path = ../Edna/EdnaConfig.hpp; sourceTree = "<group>"; };
-		A6FB7BF31A242A000054F5D7 /* EdnaCounts.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EdnaCounts.cpp; path = ../Edna/EdnaCounts.cpp; sourceTree = "<group>"; };
-		A6FB7BF41A242A000054F5D7 /* EdnaCounts.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EdnaCounts.hpp; path = ../Edna/EdnaCounts.hpp; sourceTree = "<group>"; };
-		A6FB7BF51A242A000054F5D7 /* EdnaEvaluator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EdnaEvaluator.hpp; path = ../Edna/EdnaEvaluator.hpp; sourceTree = "<group>"; };
 		A6FB7BF61A242A000054F5D7 /* Feature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Feature.cpp; path = ../Feature.cpp; sourceTree = "<group>"; };
 		A6FB7BF71A242A000054F5D7 /* Feature.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Feature.hpp; path = ../Feature.hpp; sourceTree = "<group>"; };
 		A6FB7BF81A242A000054F5D7 /* Features.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Features.cpp; path = ../Features.cpp; sourceTree = "<group>"; };
 		A6FB7BF91A242A000054F5D7 /* Features.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Features.hpp; path = ../Features.hpp; sourceTree = "<group>"; };
 		A6FB7BFA1A242A000054F5D7 /* Interval.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Interval.hpp; path = ../Interval.hpp; sourceTree = "<group>"; };
-		A6FB7BFB1A242A000054F5D7 /* LFloat.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = LFloat.hpp; path = ../LFloat.hpp; sourceTree = "<group>"; };
+		A6FB7BFB1A242A000054F5D7 /* LDouble.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = LDouble.hpp; path = ../LDouble.hpp; sourceTree = "<group>"; };
 		A6FB7BFE1A242A000054F5D7 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		A6FB7BFF1A242A000054F5D7 /* concurrent_queue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = concurrent_queue.hpp; sourceTree = "<group>"; };
 		A6FB7C001A242A000054F5D7 /* cpplog.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cpplog.hpp; sourceTree = "<group>"; };
@@ -170,8 +155,6 @@
 		A6FB7C2A1A242A000054F5D7 /* RecursorBase-inl.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = "RecursorBase-inl.hpp"; sourceTree = "<group>"; };
 		A6FB7C2B1A242A000054F5D7 /* RecursorBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RecursorBase.cpp; sourceTree = "<group>"; };
 		A6FB7C2C1A242A000054F5D7 /* RecursorBase.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RecursorBase.hpp; sourceTree = "<group>"; };
-		A6FB7C2D1A242A000054F5D7 /* sse_mathfun.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sse_mathfun.h; sourceTree = "<group>"; };
-		A6FB7C2E1A242A000054F5D7 /* SseMath.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SseMath.hpp; sourceTree = "<group>"; };
 		A6FB7C2F1A242A000054F5D7 /* Diploid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Diploid.cpp; sourceTree = "<group>"; };
 		A6FB7C301A242A000054F5D7 /* Diploid.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Diploid.hpp; sourceTree = "<group>"; };
 		A6FB7C311A242A000054F5D7 /* MultiReadMutationScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MultiReadMutationScorer.cpp; sourceTree = "<group>"; };
@@ -190,8 +173,6 @@
 		A6FB7C3E1A242A000054F5D7 /* ReadScorer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ReadScorer.hpp; sourceTree = "<group>"; };
 		A6FB7C3F1A242A000054F5D7 /* SimpleRecursor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimpleRecursor.cpp; sourceTree = "<group>"; };
 		A6FB7C401A242A000054F5D7 /* SimpleRecursor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SimpleRecursor.hpp; sourceTree = "<group>"; };
-		A6FB7C411A242A000054F5D7 /* SseRecursor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SseRecursor.cpp; sourceTree = "<group>"; };
-		A6FB7C421A242A000054F5D7 /* SseRecursor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SseRecursor.hpp; sourceTree = "<group>"; };
 		A6FB7C431A242A000054F5D7 /* Read.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Read.cpp; path = ../Read.cpp; sourceTree = "<group>"; };
 		A6FB7C441A242A000054F5D7 /* Read.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Read.hpp; path = ../Read.hpp; sourceTree = "<group>"; };
 		A6FB7C451A242A000054F5D7 /* Sequence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Sequence.cpp; path = ../Sequence.cpp; sourceTree = "<group>"; };
@@ -223,23 +204,20 @@
 		A6FB7BD31A2429A00054F5D7 = {
 			isa = PBXGroup;
 			children = (
+				A6C56DE01A9BDF4700FAEC11 /* TransitionParameters.cpp */,
+				A6C56DE11A9BDF4700FAEC11 /* TransitionParameters.hpp */,
 				A6FB7BE71A242A000054F5D7 /* AffineAlignment.cpp */,
 				A6FB7BE81A242A000054F5D7 /* AffineAlignment.hpp */,
 				A6FB7BE91A242A000054F5D7 /* Checksum.cpp */,
 				A6FB7BEA1A242A000054F5D7 /* Checksum.hpp */,
 				A6FB7BEB1A242A000054F5D7 /* Coverage.cpp */,
 				A6FB7BEC1A242A000054F5D7 /* Coverage.hpp */,
-				A6FB7BED1A242A000054F5D7 /* Edna */,
-				A6FB7BF21A242A000054F5D7 /* EdnaConfig.hpp */,
-				A6FB7BF31A242A000054F5D7 /* EdnaCounts.cpp */,
-				A6FB7BF41A242A000054F5D7 /* EdnaCounts.hpp */,
-				A6FB7BF51A242A000054F5D7 /* EdnaEvaluator.hpp */,
 				A6FB7BF61A242A000054F5D7 /* Feature.cpp */,
 				A6FB7BF71A242A000054F5D7 /* Feature.hpp */,
 				A6FB7BF81A242A000054F5D7 /* Features.cpp */,
 				A6FB7BF91A242A000054F5D7 /* Features.hpp */,
 				A6FB7BFA1A242A000054F5D7 /* Interval.hpp */,
-				A6FB7BFB1A242A000054F5D7 /* LFloat.hpp */,
+				A6FB7BFB1A242A000054F5D7 /* LDouble.hpp */,
 				A6FB7BFC1A242A000054F5D7 /* Logging */,
 				A6FB7C081A242A000054F5D7 /* Matrix */,
 				A6FB7C121A242A000054F5D7 /* AbstractMatrix.hpp */,
@@ -279,18 +257,6 @@
 				A6FB7BE21A2429E90054F5D7 /* libConsensusCoreDev.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		A6FB7BED1A242A000054F5D7 /* Edna */ = {
-			isa = PBXGroup;
-			children = (
-				A6FB7BEE1A242A000054F5D7 /* EdnaConfig.hpp */,
-				A6FB7BEF1A242A000054F5D7 /* EdnaCounts.cpp */,
-				A6FB7BF01A242A000054F5D7 /* EdnaCounts.hpp */,
-				A6FB7BF11A242A000054F5D7 /* EdnaEvaluator.hpp */,
-			);
-			name = Edna;
-			path = ../Edna;
 			sourceTree = "<group>";
 		};
 		A6FB7BFC1A242A000054F5D7 /* Logging */ = {
@@ -372,8 +338,7 @@
 				A6FB7C3E1A242A000054F5D7 /* ReadScorer.hpp */,
 				A6FB7C3F1A242A000054F5D7 /* SimpleRecursor.cpp */,
 				A6FB7C401A242A000054F5D7 /* SimpleRecursor.hpp */,
-				A6FB7C411A242A000054F5D7 /* SseRecursor.cpp */,
-				A6FB7C421A242A000054F5D7 /* SseRecursor.hpp */,
+				A6C56DDF1A9BCAFE00FAEC11 /* MathUtils.h */,
 			);
 			name = Quiver;
 			path = ../Quiver;
@@ -386,8 +351,6 @@
 				A6FB7C2A1A242A000054F5D7 /* RecursorBase-inl.hpp */,
 				A6FB7C2B1A242A000054F5D7 /* RecursorBase.cpp */,
 				A6FB7C2C1A242A000054F5D7 /* RecursorBase.hpp */,
-				A6FB7C2D1A242A000054F5D7 /* sse_mathfun.h */,
-				A6FB7C2E1A242A000054F5D7 /* SseMath.hpp */,
 			);
 			path = detail;
 			sourceTree = "<group>";
@@ -421,13 +384,11 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A6FB7C601A242A000054F5D7 /* EdnaCounts.hpp in Headers */,
 				A6FB7C701A242A000054F5D7 /* DenseMatrix-inl.hpp in Headers */,
 				A6FB7C681A242A000054F5D7 /* concurrent_queue.hpp in Headers */,
 				A6FB7C731A242A000054F5D7 /* SparseMatrix-inl.hpp in Headers */,
 				A6FB7C851A242A010054F5D7 /* PairwiseAlignment.hpp in Headers */,
 				A6FB7C9C1A242A010054F5D7 /* QuiverConfig.hpp in Headers */,
-				A6FB7C5C1A242A000054F5D7 /* EdnaCounts.hpp in Headers */,
 				A6FB7CA31A242A010054F5D7 /* SimpleRecursor.hpp in Headers */,
 				A6FB7C551A242A000054F5D7 /* AffineAlignment.hpp in Headers */,
 				A6FB7C9E1A242A010054F5D7 /* QuiverConsensus.hpp in Headers */,
@@ -436,7 +397,7 @@
 				A6FB7CA91A242A010054F5D7 /* Sequence.hpp in Headers */,
 				A6FB7C661A242A000054F5D7 /* Interval.hpp in Headers */,
 				A6FB7C801A242A010054F5D7 /* SparseVector.hpp in Headers */,
-				A6FB7C671A242A000054F5D7 /* LFloat.hpp in Headers */,
+				A6FB7C671A242A000054F5D7 /* LDouble.hpp in Headers */,
 				A6FB7CA71A242A010054F5D7 /* Read.hpp in Headers */,
 				A6FB7C831A242A010054F5D7 /* Mutation.hpp in Headers */,
 				A6FB7C591A242A000054F5D7 /* Coverage.hpp in Headers */,
@@ -444,10 +405,7 @@
 				A6FB7CAD1A242A010054F5D7 /* Simulator.hpp in Headers */,
 				A6FB7C931A242A010054F5D7 /* Diploid.hpp in Headers */,
 				A6FB7C951A242A010054F5D7 /* MultiReadMutationScorer.hpp in Headers */,
-				A6FB7CA51A242A010054F5D7 /* SseRecursor.hpp in Headers */,
 				A6FB7C8B1A242A010054F5D7 /* PoaGraph.hpp in Headers */,
-				A6FB7C5A1A242A000054F5D7 /* EdnaConfig.hpp in Headers */,
-				A6FB7C911A242A010054F5D7 /* SseMath.hpp in Headers */,
 				A6FB7C7C1A242A010054F5D7 /* SparseMatrix-inl.hpp in Headers */,
 				A6FB7CA11A242A010054F5D7 /* ReadScorer.hpp in Headers */,
 				A6FB7C891A242A010054F5D7 /* PoaConsensus.hpp in Headers */,
@@ -455,19 +413,15 @@
 				A6FB7C8D1A242A010054F5D7 /* RecursorBase-inl.hpp in Headers */,
 				A6FB7C691A242A000054F5D7 /* cpplog.hpp in Headers */,
 				A6FB7C791A242A010054F5D7 /* DenseMatrix-inl.hpp in Headers */,
-				A6FB7C5E1A242A000054F5D7 /* EdnaConfig.hpp in Headers */,
 				A6FB7C721A242A000054F5D7 /* DenseMatrix.hpp in Headers */,
 				A6FB7C6E1A242A000054F5D7 /* Logging.hpp in Headers */,
 				A6FB7CB01A242A010054F5D7 /* Types.hpp in Headers */,
-				A6FB7C5D1A242A000054F5D7 /* EdnaEvaluator.hpp in Headers */,
 				A6FB7C631A242A000054F5D7 /* Feature.hpp in Headers */,
 				A6FB7CAB1A242A010054F5D7 /* Random.hpp in Headers */,
-				A6FB7C611A242A000054F5D7 /* EdnaEvaluator.hpp in Headers */,
 				A6FB7C981A242A010054F5D7 /* MutationEnumerator.hpp in Headers */,
 				A6FB7CB41A242A010054F5D7 /* Version.hpp in Headers */,
 				A6FB7C651A242A000054F5D7 /* Features.hpp in Headers */,
 				A6FB7C571A242A000054F5D7 /* Checksum.hpp in Headers */,
-				A6FB7C901A242A010054F5D7 /* sse_mathfun.h in Headers */,
 				A6FB7C761A242A010054F5D7 /* SparseVector-inl.hpp in Headers */,
 				A6FB7C6B1A242A000054F5D7 /* outputdebugstream.hpp in Headers */,
 				A6FB7C7F1A242A010054F5D7 /* SparseVector-inl.hpp in Headers */,
@@ -479,6 +433,7 @@
 				A6FB7C781A242A010054F5D7 /* AbstractMatrix.hpp in Headers */,
 				A6FB7C7B1A242A010054F5D7 /* DenseMatrix.hpp in Headers */,
 				A6FB7C871A242A010054F5D7 /* PoaConfig.hpp in Headers */,
+				A6C56DE31A9BDF4700FAEC11 /* TransitionParameters.hpp in Headers */,
 				A6FB7C771A242A010054F5D7 /* SparseVector.hpp in Headers */,
 				A6FB7C751A242A000054F5D7 /* SparseMatrix.hpp in Headers */,
 				A6FB7CAF1A242A010054F5D7 /* Binomial.hpp in Headers */,
@@ -540,7 +495,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A6FB7BD71A2429A00054F5D7 /* Build configuration list for PBXProject "ConsensusCoreXcode" */;
+			buildConfigurationList = A6FB7BD71A2429A00054F5D7 /* Build configuration list for PBXProject "ConsensusCoreXCode" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -564,7 +519,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A6FB7CA61A242A010054F5D7 /* Read.cpp in Sources */,
-				A6FB7C5F1A242A000054F5D7 /* EdnaCounts.cpp in Sources */,
 				A6FB7C881A242A010054F5D7 /* PoaConsensus.cpp in Sources */,
 				A6FB7CB11A242A010054F5D7 /* Utils.cpp in Sources */,
 				A6FB7C641A242A000054F5D7 /* Features.cpp in Sources */,
@@ -580,7 +534,6 @@
 				A6FB7CA21A242A010054F5D7 /* SimpleRecursor.cpp in Sources */,
 				A6FB7CAE1A242A010054F5D7 /* Binomial.cpp in Sources */,
 				A6FB7C8E1A242A010054F5D7 /* RecursorBase.cpp in Sources */,
-				A6FB7CA41A242A010054F5D7 /* SseRecursor.cpp in Sources */,
 				A6FB7C861A242A010054F5D7 /* PoaConfig.cpp in Sources */,
 				A6FB7C581A242A000054F5D7 /* Coverage.cpp in Sources */,
 				A6FB7C561A242A000054F5D7 /* Checksum.cpp in Sources */,
@@ -588,13 +541,13 @@
 				A6FB7CA81A242A010054F5D7 /* Sequence.cpp in Sources */,
 				A6FB7C541A242A000054F5D7 /* AffineAlignment.cpp in Sources */,
 				A6FB7C621A242A000054F5D7 /* Feature.cpp in Sources */,
+				A6C56DE21A9BDF4700FAEC11 /* TransitionParameters.cpp in Sources */,
 				A6FB7C7A1A242A010054F5D7 /* DenseMatrix.cpp in Sources */,
 				A6FB7C841A242A010054F5D7 /* PairwiseAlignment.cpp in Sources */,
 				A6FB7C821A242A010054F5D7 /* Mutation.cpp in Sources */,
 				A6FB7C9B1A242A010054F5D7 /* QuiverConfig.cpp in Sources */,
 				A6FB7C6D1A242A000054F5D7 /* Logging.cpp in Sources */,
 				A6FB7C7D1A242A010054F5D7 /* SparseMatrix.cpp in Sources */,
-				A6FB7C5B1A242A000054F5D7 /* EdnaCounts.cpp in Sources */,
 				A6FB7CAC1A242A010054F5D7 /* Simulator.cpp in Sources */,
 				A6FB7C8A1A242A010054F5D7 /* PoaGraph.cpp in Sources */,
 			);
@@ -735,7 +688,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A6FB7BD71A2429A00054F5D7 /* Build configuration list for PBXProject "ConsensusCoreXcode" */ = {
+		A6FB7BD71A2429A00054F5D7 /* Build configuration list for PBXProject "ConsensusCoreXCode" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A6FB7BD91A2429A00054F5D7 /* Debug */,
@@ -751,6 +704,7 @@
 				A6FB7BDD1A2429A00054F5D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A6FB7BE41A2429E90054F5D7 /* Build configuration list for PBXNativeTarget "ConsensusCoreDev" */ = {
 			isa = XCConfigurationList;
@@ -759,6 +713,7 @@
 				A6FB7BE61A2429E90054F5D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -38,20 +38,20 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
-#include "Features.hpp"
 #include "Types.hpp"
+#include "TransitionParameters.hpp"
 
 namespace ConsensusCore
 {
     struct Read {
-        QvSequenceFeatures Features;
+        std::vector<TransitionParameters> trans_probs;
+        std::string Sequence;
         std::string Name;
-        std::string Chemistry;
 
-        Read(QvSequenceFeatures features,
-             std::string name,
-             std::string chemistry);
+        Read(std::vector<TransitionParameters> qvValues,
+             std::string name, std::string sequence);
 
         Read(const Read& other);
 

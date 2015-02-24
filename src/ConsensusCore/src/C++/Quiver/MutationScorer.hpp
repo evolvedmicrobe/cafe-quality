@@ -44,7 +44,6 @@
 //  We should move all template instantiations out to another
 //  header, I presume.
 #include "Quiver/SimpleRecursor.hpp"
-#include "Quiver/SseRecursor.hpp"
 #include "Types.hpp"
 #include "Mutation.hpp"
 
@@ -70,14 +69,14 @@ namespace ConsensusCore
         void Template(std::string tpl)
             throw(AlphaBetaMismatchException);
 
-        float Score() const;
-        float ScoreMutation(const Mutation& m) const;
+        double Score() const;
+        double ScoreMutation(const Mutation& m) const;
 
     public:
         // Accessors that are handy for debugging.
         const MatrixType* Alpha() const;
         const MatrixType* Beta() const;
-        const PairwiseAlignment* Alignment() const;
+//        const PairwiseAlignment* Alignment() const;
         const EvaluatorType* Evaluator() const;
         const int NumFlipFlops() const { return numFlipFlops_; }
 
@@ -91,10 +90,7 @@ namespace ConsensusCore
     };
 
     typedef MutationScorer<SimpleQvRecursor>       SimpleQvMutationScorer;
-    typedef MutationScorer<SseQvRecursor>          SseQvMutationScorer;
     typedef MutationScorer<SparseSimpleQvRecursor> SparseSimpleQvMutationScorer;
-    typedef MutationScorer<SparseSseQvRecursor>    SparseSseQvMutationScorer;
     typedef MutationScorer<SparseSimpleQvSumProductRecursor> SparseSimpleQvSumProductMutationScorer;
-    typedef MutationScorer<SparseSseQvSumProductRecursor>    SparseSseQvSumProductMutationScorer;
-    typedef MutationScorer<SparseSseEdnaRecursor>  SparseSseEdnaMutationScorer;
+    
 }

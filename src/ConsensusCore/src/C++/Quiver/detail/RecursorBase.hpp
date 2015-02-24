@@ -101,14 +101,13 @@ namespace ConsensusCore {
 
 
         /// \brief Read out the alignment from the computed alpha matrix.
-        const PairwiseAlignment* Alignment(const E& e, const M& alpha) const;
+        //const PairwiseAlignment* Alignment(const E& e, const M& alpha) const;
 
 
-        RecursorBase(int movesAvailable, const BandingOptions& banding);
+        RecursorBase(const BandingOptions& banding);
         virtual ~RecursorBase();
 
     protected:
-        int movesAvailable_;
         BandingOptions bandingOptions_;
     };
 }}

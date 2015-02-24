@@ -7,7 +7,6 @@
 #include "Quiver/MutationScorer.hpp"
 #include "Quiver/QuiverConfig.hpp"
 #include "Quiver/SimpleRecursor.hpp"
-#include "Quiver/SseRecursor.hpp"
 #include "Quiver/ReadScorer.hpp"
 #include "Quiver/Diploid.hpp"
 #include "Quiver/QuiverConsensus.hpp"
@@ -44,7 +43,6 @@ using namespace ConsensusCore;
 %include "Quiver/MutationScorer.hpp"
 %include "Quiver/QuiverConfig.hpp"
 %include "Quiver/SimpleRecursor.hpp"
-%include "Quiver/SseRecursor.hpp"
 %include "Quiver/ReadScorer.hpp"
 %include "Quiver/Diploid.hpp"
 %include "Quiver/QuiverConsensus.hpp"
@@ -52,12 +50,7 @@ using namespace ConsensusCore;
  
 namespace ConsensusCore {
 
-    //
-    // ReadScorers for individual queries.
-    //
-    %template(SparseSseQvSumProductReadScorer) ReadScorer<SparseSseQvSumProductRecursor>;
-    %template(SparseSseQvReadScorer) ReadScorer<SparseSseQvRecursor>;
-
+  
 
 
     //
@@ -66,35 +59,20 @@ namespace ConsensusCore {
     %template(QvRecursorBase)           detail::RecursorBase<DenseMatrix, QvEvaluator, detail::ViterbiCombiner>;
     %template(SimpleQvRecursor)         SimpleRecursor<DenseMatrix, QvEvaluator, detail::ViterbiCombiner>;
     %template(SimpleQvMutationScorer)   MutationScorer<SimpleQvRecursor>;
-    %template(SseQvRecursor)            SseRecursor<DenseMatrix, QvEvaluator, detail::ViterbiCombiner>;
-    %template(SseQvMutationScorer)      MutationScorer<SseQvRecursor>;
-
+    
     //
     // Sparse matrix support
     //
     %template(SparseQvRecursorBase)           detail::RecursorBase<SparseMatrix, QvEvaluator, detail::ViterbiCombiner>;
     %template(SparseSimpleQvRecursor)         SimpleRecursor<SparseMatrix, QvEvaluator, detail::ViterbiCombiner>;
     %template(SparseSimpleQvMutationScorer)   MutationScorer<SparseSimpleQvRecursor>;
-    %template(SparseSseQvRecursor)            SseRecursor<SparseMatrix, QvEvaluator, detail::ViterbiCombiner>;
-    %template(SparseSseQvMutationScorer)      MutationScorer<SparseSseQvRecursor>;
-
-    %template(SparseSseQvMultiReadMutationScorer) MultiReadMutationScorer<SparseSseQvRecursor>;
-
+    
+    
     //
     // Sparse matrix sum-product support
     //
     %template(SparseQvSumProductRecursorBase)           detail::RecursorBase<SparseMatrix, QvEvaluator, detail::SumProductCombiner>;
     %template(SparseSimpleQvSumProductRecursor)         SimpleRecursor<SparseMatrix, QvEvaluator, detail::SumProductCombiner>;
     %template(SparseSimpleQvSumProductMutationScorer)   MutationScorer<SparseSimpleQvSumProductRecursor>;
-    %template(SparseSseQvSumProductRecursor)            SseRecursor<SparseMatrix, QvEvaluator, detail::SumProductCombiner>;
-    %template(SparseSseQvSumProductMutationScorer)      MutationScorer<SparseSseQvSumProductRecursor>;
-
-    %template(SparseSseQvSumProductMultiReadMutationScorer) MultiReadMutationScorer<SparseSseQvSumProductRecursor>;
-
-    //
-    // Edna evaluator support
-    //
-    %template(SparseEdnaRecursorBase)           detail::RecursorBase<SparseMatrix, EdnaEvaluator, detail::SumProductCombiner>;
-    %template(SparseSseEdnaRecursor)            SseRecursor<SparseMatrix, EdnaEvaluator, detail::SumProductCombiner>;
-    %template(SparseSseEdnaMutationScorer)      MutationScorer<SparseSseEdnaRecursor>;
+        
 }

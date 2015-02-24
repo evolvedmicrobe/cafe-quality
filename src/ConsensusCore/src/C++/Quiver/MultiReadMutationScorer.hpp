@@ -33,7 +33,7 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
 
-// Author: David Alexander
+// Author: David Alexander and Nigel Delaney
 
 #pragma once
 
@@ -46,9 +46,10 @@
 #include "Types.hpp"
 #include "Read.hpp"
 #include "Matrix/AbstractMatrix.hpp"
+#include "Matrix/SparseMatrix.hpp"
 #include "Quiver/MutationScorer.hpp"
 #include "Quiver/QuiverConfig.hpp"
-#include "Quiver/SseRecursor.hpp"
+
 
 namespace ConsensusCore {
 
@@ -73,11 +74,11 @@ namespace ConsensusCore {
         // Reads provided must be clipped to the reference/scaffold window implied by the
         // template, however they need not span the window entirely---nonspanning reads
         // must be provided with (0-based) template start/end coordinates.
-        virtual bool AddRead(const MappedRead& mappedRead, float threshold) = 0;
+        virtual bool AddRead(const MappedRead& mappedRead, double threshold) = 0;
         virtual bool AddRead(const MappedRead& mappedRead) = 0;
 
-        virtual float Score(const Mutation& m) const = 0;
-        virtual float FastScore(const Mutation& m) const = 0;
+        virtual double Score(const Mutation& m) const = 0;
+        virtual double FastScore(const Mutation& m) const = 0;
 
         // Return a vector (of length NumReads) of the difference in
         // the score of each read caused by the template mutation.  In
@@ -85,8 +86,8 @@ namespace ConsensusCore {
         // (i.e., it is too close to the end of the template, or the
         // read does not span the mutation site) that entry in the
         // vector is 0
-        virtual std::vector<float> Scores(const Mutation& m, float unscoredValue) const = 0;
-        virtual std::vector<float> Scores(const Mutation& m) const = 0;
+        virtual std::vector<double> Scores(const Mutation& m, double unscoredValue) const = 0;
+        virtual std::vector<double> Scores(const Mutation& m) const = 0;
 
         virtual bool IsFavorable(const Mutation& m) const = 0;
         virtual bool FastIsFavorable(const Mutation& m) const = 0;
@@ -101,19 +102,19 @@ namespace ConsensusCore {
 #if !defined(SWIG) || defined(SWIGCSHARP)
         // Alternate entry points for C# code, not requiring zillions of object
         // allocations.
-        virtual float Score(MutationType mutationType, int position, char base) const = 0;
-        virtual std::vector<float> Scores(MutationType mutationType,
+        virtual double Score(MutationType mutationType, int position, char base) const = 0;
+        virtual std::vector<double> Scores(MutationType mutationType,
                                           int position, char base,
-                                          float unscoredValue) const = 0;
-        virtual std::vector<float> Scores(MutationType mutationType,
+                                          double unscoredValue) const = 0;
+        virtual std::vector<double> Scores(MutationType mutationType,
                                           int position, char base) const = 0;
 #endif
 
         // Return the actual sum of scores for the current template.
         // TODO(dalexander): need to refactor to make the semantics of
         // the various "Score" functions clearer.
-        virtual float BaselineScore() const = 0;
-        virtual std::vector<float> BaselineScores() const = 0;
+        virtual double BaselineScore() const = 0;
+        virtual std::vector<double> BaselineScores() const = 0;
 
 
         virtual std::string ToString() const = 0;
@@ -153,7 +154,7 @@ namespace ConsensusCore {
         typedef typename detail::ReadState<ScorerType>    ReadStateType;
 
     public:
-        MultiReadMutationScorer(const QuiverConfigTable& paramsByChemistry, std::string tpl);
+        MultiReadMutationScorer(const QuiverConfig& params, std::string tpl);
         MultiReadMutationScorer(const MultiReadMutationScorer<R>& scorer);
         virtual ~MultiReadMutationScorer();
 
@@ -168,11 +169,11 @@ namespace ConsensusCore {
         // Reads provided must be clipped to the reference/scaffold window implied by the
         // template, however they need not span the window entirely---nonspanning reads
         // must be provided with (0-based) template start/end coordinates.
-        bool AddRead(const MappedRead& mappedRead, float threshold);
+        bool AddRead(const MappedRead& mappedRead, double threshold);
         bool AddRead(const MappedRead& mappedRead);
 
-        float Score(const Mutation& m) const;
-        float FastScore(const Mutation& m) const;
+        double Score(const Mutation& m) const;
+        double FastScore(const Mutation& m) const;
 
         // Return a vector (of length NumReads) of the difference in
         // the score of each read caused by the template mutation.  In
@@ -180,8 +181,8 @@ namespace ConsensusCore {
         // (i.e., it is too close to the end of the template, or the
         // read does not span the mutation site) that entry in the
         // vector is -FLT_MAX, which is to be interpreted as NA.
-        std::vector<float> Scores(const Mutation& m, float unscoredValue) const;
-        std::vector<float> Scores(const Mutation& m) const
+        std::vector<double> Scores(const Mutation& m, double unscoredValue) const;
+        std::vector<double> Scores(const Mutation& m) const
         {
             return Scores(m, 0.0f);
         }
@@ -199,11 +200,11 @@ namespace ConsensusCore {
 #if !defined(SWIG) || defined(SWIGCSHARP)
         // Alternate entry points for C# code, not requiring zillions of object
         // allocations.
-        float Score(MutationType mutationType, int position, char base) const;
-        std::vector<float> Scores(MutationType mutationType,
+        double Score(MutationType mutationType, int position, char base) const;
+        std::vector<double> Scores(MutationType mutationType,
                                   int position, char base,
-                                  float unscoredValue) const;
-        std::vector<float> Scores(MutationType mutationType,
+                                  double unscoredValue) const;
+        std::vector<double> Scores(MutationType mutationType,
                                   int position, char base) const
         {
             return Scores(mutationType, position, base, 0.0f);
@@ -214,8 +215,8 @@ namespace ConsensusCore {
         // Return the actual sum of scores for the current template.
         // TODO(dalexander): need to refactor to make the semantics of
         // the various "Score" functions clearer.
-        float BaselineScore() const;
-        std::vector<float> BaselineScores() const;
+        double BaselineScore() const;
+        std::vector<double> BaselineScores() const;
 
     public:
         std::string ToString() const;
@@ -224,15 +225,17 @@ namespace ConsensusCore {
         void CheckInvariants() const;
 
     private:
-        QuiverConfigTable quiverConfigByChemistry_;
-        float fastScoreThreshold_;
+        QuiverConfig quiv_config;
+        double fastScoreThreshold_;
         std::string fwdTemplate_;
         std::string revTemplate_;
         std::vector<ReadStateType> reads_;
     };
 
-    typedef MultiReadMutationScorer<SparseSseQvRecursor> \
-      SparseSseQvMultiReadMutationScorer;
-    typedef MultiReadMutationScorer<SparseSseQvSumProductRecursor> \
-      SparseSseQvSumProductMultiReadMutationScorer;
+    typedef MultiReadMutationScorer<SparseSimpleQvRecursor> \
+      SparseSimpleQvMultiReadMutationScorer;
+    
+    // This is the main one that will be used in the loop.
+    typedef MultiReadMutationScorer<SparseSimpleQvSumProductRecursor> \
+      SparseSimpleSumProductMultiReadMutationScorer;
 }

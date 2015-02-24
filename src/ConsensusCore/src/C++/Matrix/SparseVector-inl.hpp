@@ -33,16 +33,15 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
 
-// Author: David Alexander
+// Author: David Alexander and Nigel Delaney
 
 #include <algorithm>
 #include <cassert>
 #include <vector>
 
 #include "Matrix/SparseVector.hpp"
-
+#include "Quiver/MathUtils.h"
 #define PADDING          8
-#define LZERO            (-FLT_MAX)
 #define SHRINK_THRESHOLD 0.8
 
 namespace ConsensusCore
@@ -60,7 +59,7 @@ namespace ConsensusCore
         logicalLength_     =  logicalLength;
         allocatedBeginRow_ =  max(beginRow - PADDING, 0);
         allocatedEndRow_   =  min(endRow   + PADDING, logicalLength_);
-        storage_           =  new vector<float>(allocatedEndRow_ - allocatedBeginRow_, LZERO);
+        storage_           =  new vector<float>(allocatedEndRow_ - allocatedBeginRow_, NEG_INF);
         nReallocs_         =  0;
         DEBUG_ONLY(CheckInvariants());
     }
@@ -104,7 +103,7 @@ namespace ConsensusCore
         {
             // use swap trick to free allocated but unused memory,
             // see: http://stackoverflow.com/questions/253157/how-to-downsize-stdvector
-            std::vector<float>(newAllocatedEnd - newAllocatedBegin, LZERO).swap(*storage_);
+            std::vector<float>(newAllocatedEnd - newAllocatedBegin, NEG_INF).swap(*storage_);
             nReallocs_++;
         }
         else
@@ -139,10 +138,10 @@ namespace ConsensusCore
         // "Zero"-fill the allocated but unused space.
         std::fill(storage_->begin(),
                   storage_->begin() + (allocatedBeginRow_ - newAllocatedBegin),
-                  LZERO);
+                  NEG_INF);
         std::fill(storage_->begin() + (allocatedEndRow_- newAllocatedBegin),
                   storage_->end(),
-                  LZERO);
+                  NEG_INF);
         // Update pointers.
         allocatedBeginRow_ = newAllocatedBegin;
         allocatedEndRow_   = newAllocatedEnd;
@@ -166,7 +165,7 @@ namespace ConsensusCore
         }
         else
         {
-            static const float emptyCell_ = LZERO;
+            static const float emptyCell_ = NEG_INF;
             return emptyCell_;
         }
     }
@@ -192,43 +191,11 @@ namespace ConsensusCore
         DEBUG_ONLY(CheckInvariants());
     }
 
-    inline __m128
-    SparseVector::Get4(int i) const
-    {
-        assert(i >= 0 && i < logicalLength_ - 3);
-        if (i >= allocatedBeginRow_ && i < allocatedEndRow_ - 3)
-        {
-            return _mm_loadu_ps(&(*storage_)[i-allocatedBeginRow_]);
-        }
-        else
-        {
-            return _mm_set_ps(Get(i+3), Get(i+2), Get(i+1), Get(i+0));
-        }
-    }
-
-    inline void
-    SparseVector::Set4(int i, __m128 v4)
-    {
-        assert(i >= 0 && i < logicalLength_ - 3);
-        if (i >= allocatedBeginRow_ && i < allocatedEndRow_ - 3)
-        {
-            _mm_storeu_ps(&(*storage_)[i-allocatedBeginRow_], v4);
-        }
-        else
-        {
-            float vbuf[4];
-            _mm_storeu_ps(vbuf, v4);
-            Set(i+0, vbuf[0]);
-            Set(i+1, vbuf[1]);
-            Set(i+2, vbuf[2]);
-            Set(i+3, vbuf[3]);
-        }
-    }
-
+    
     inline void
     SparseVector::Clear()
     {
-        std::fill(storage_->begin(), storage_->end(), LZERO);
+        std::fill(storage_->begin(), storage_->end(), NEG_INF);
     }
 
     inline int
