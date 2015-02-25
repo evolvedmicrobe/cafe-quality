@@ -52,29 +52,34 @@ dev.off()
 
 
 # Now to simulate and fit with a multinomial model
-a = getData("C")
-moves = c("Match","Branch","Dark","Stick")
-cd = a[a$Context=="CC",]
-results = c()
-contexts = levels(factor(nd$Context))
-ctx = "NA"
-for(i in 1:nrow(cd)) {
-  n=5000
-  outcomes = sample(moves,n, prob=cd[i,4:7], replace=TRUE)
-  td = data.frame(Context=factor(rep(ctx,n), levels= contexts), Outcome = outcomes, SNR=rep(cd$SNR[i],n))
-  results = rbind(results,td)
-}
-mod<-multinom(Outcome~SNR+I(SNR^2)+I(SNR^3), results)
-summary(mod)
-exp(coef(mod))
-
-rng = range(results$SNR)
-tmpSNR = seq(rng[1], rng[2], .02)
-toy = data.frame(SNR=rep(tmpSNR,4),Outcome=rep(moves,each=length(tmpSNR)))
-hd = cbind(toy,predict(mod, newdata=toy, type="probs"))
-mhd = melt(hd[,-2], id.vars=c("SNR"), value.name="probability")
-ggplot(mhd,aes(x=SNR,y=probability,colour=variable))+geom_line()
-table(results$SNR,results$Outcome)
+fitModel <- function(ctx) {
+  bp = substr(ctx,2,2)
+  print(bp)
+  a = getData(bp)
+  moves = c("Match","Branch","Dark","Stick")
+  cd = a[a$Context==ctx,]
+  results = c()
+  contexts = levels(factor(nd$Context))
+  ctx = "NA"
+  for(i in 1:nrow(cd)) {
+    n=5000
+    outcomes = sample(moves,n, prob=cd[i,4:7], replace=TRUE)
+    td = data.frame(Context=factor(rep(ctx,n), levels= contexts), Outcome = outcomes, SNR=rep(cd$SNR[i],n))
+    results = rbind(results,td)
+  }
+  mod<-multinom(Outcome~SNR+I(SNR^2)+I(SNR^3), results)
+  summary(mod)
+  exp(coef(mod))
+  
+  rng = range(results$SNR)
+  tmpSNR = seq(rng[1], rng[2], .02)
+  toy = data.frame(SNR=rep(tmpSNR,4),Outcome=rep(moves,each=length(tmpSNR)))
+  toy$CTX = rep(ctx,nrow(toy))
+  hd = cbind(toy,predict(mod, newdata=toy, type="probs"))
+  mhd = melt(hd[,-2], id.vars=c("SNR"), value.name="probability")
+  pl=ggplot(mhd,aes(x=SNR,y=probability,colour=variable))+geom_line()
+  tb=table(results$SNR,results$Outcome)
+  list(tbl=bl, plot=pl, model=mod)
 #b = mlogit.data(results, shape="wide", choice="Outcome")
 #m <- mlogit(Outcome ~ SNR / 0 ,b)
 #summary(m)
