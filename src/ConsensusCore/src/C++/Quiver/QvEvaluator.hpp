@@ -33,18 +33,14 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
 
-// Author: David Alexander
+
 
 #pragma once
 
 
-#include <xmmintrin.h>
-#include <pmmintrin.h>
 
 #include <algorithm>
 #include <cassert>
-#include <cfloat>
-#include <climits>
 #include <cmath>
 #include <iostream>
 #include <string>
@@ -91,7 +87,7 @@ namespace ConsensusCore
     class QvEvaluator
     {
     public:
-        typedef ModelParams      ParamsType;
+        typedef ModelParams ParamsType;
 
     public:
         QvEvaluator(const Read& read,
@@ -142,16 +138,30 @@ namespace ConsensusCore
         {
             return pinStart_;
         }
-
+        /**
+         Returns true if the read bp at position i matches the template basepair
+         at position j.
+         @param i read location
+         @param j template location
+         @returns tru if matching
+         */
         bool IsMatch(int i, int j) const
         {
             assert(0 <= i && i < ReadLength());
             assert (0 <= j && j < TemplateLength());
             return (read_.Sequence[i] == tpl_[j]);
         }
-        /* This calculates the incorporation (Match) score by comparing read base i
-           and template base j, this corresponds to positions [(i+1),(j+1)] in
-           the alpha matrix.
+        
+        /**
+         This calculates the incorporation (Match) score by comparing read base i
+         and template base j, this corresponds to positions [(i+1),(j+1)] in
+         the alpha matrix.  The transition probability to a match is determined by the
+         j -1 base.
+         @param i the read position (0 - indexed)
+         @param j the template position (j-indexed), the likelihood of transitioning to a match is stored in the preceding template position (j-1)
+         @returns the probability of transitioning to a match state and emitting that base.
+         */
+        /*
         */
         double Match(int i, int j) const
         {
@@ -159,12 +169,20 @@ namespace ConsensusCore
                    0 <= i && i < ReadLength() );
             auto emission_prob = (IsMatch(i, j)) ?
                 params_.log_one_minus_miscallprobability :
-                params_.log_miscallprobability + log_one_third;
-            return read_.trans_probs[i-1].Match + emission_prob;
+                params_.log_miscall_probability_times_one_third;
+            return read_.trans_probs[j-1].Match + emission_prob;
         }
-        /* This calculates the deletion score for a move out of template position j
-           corresponding to alpha column j+1 -> j+2
+        
+        
+        /**
+            This calculates the deletion score for a move out of template position j
+            corresponding to alpha column j+1 -> j+2.
+            The emission probability for a deletion is 1, and the transition probability 
+            is determined by the parameters at the jth base.
+         @param j template position to get probability from
+         @returns Log scale transition probability.
          */
+        
         double Deletion(int j) const
         {
             // Can't delete the last template base
@@ -172,22 +190,23 @@ namespace ConsensusCore
             return read_.trans_probs[j].Deletion;
         }
 
-        /* This calculates the insertion score by comparing read base i
+        /** This calculates the insertion score by comparing read base i
          and template base j, this corresponds to positions [(i+1),(j+1)] in
          the alpha matrix.
          
          Note that for this comparison, the transition parameters are determined by
          template base J, but whether it is a branch or stick is determined by template
          base J+1
-         Typically, this will be called as [(i-1), j]
+         @param i The index of the base that will be inserted
+         @param j The index of the template base that determines the insertion probability
+         @returns The probability of transitioning to insertion and emitting read.
          */
         double Insertion(int i, int j) const
         {
-            assert(1 <= j && j <= (TemplateLength() -1) &&
+            assert(1 <= j && j < (TemplateLength()-1) &&
                    0 <= i && i < (ReadLength() -1) );
             
-            return (j < TemplateLength() && IsMatch(i, j)) ?
-            read_.trans_probs[j-1].Branch : read_.trans_probs[j-1].Stick + log_one_third;
+            return IsMatch(i, j+1) ? read_.trans_probs[j].Branch : read_.trans_probs[j].Stick + log_one_third;
         }
     
 

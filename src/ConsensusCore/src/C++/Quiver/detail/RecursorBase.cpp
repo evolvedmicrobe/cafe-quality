@@ -42,13 +42,12 @@
 #include <string>
 #include <vector>
 
-#include "LFloat.hpp"
+//#include "LDouble.hpp"
 #include "Logging/Logging.hpp"
 #include "Matrix/DenseMatrix.hpp"
 #include "Matrix/SparseMatrix.hpp"
 #include "PairwiseAlignment.hpp"
 #include "Quiver/detail/Combiner.hpp"
-#include "Edna/EdnaEvaluator.hpp"
 #include "Quiver/QuiverConfig.hpp"
 #include "Quiver/QvEvaluator.hpp"
 #include "Types.hpp"
@@ -114,159 +113,159 @@ namespace detail {
         return flipflops;
     }
 
-    struct MoveSpec {
-        Move MoveType;
-        int ReadDelta;
-        int ReferenceDelta;
-    };
+//    struct MoveSpec {
+//        Move MoveType;
+//        int ReadDelta;
+//        int ReferenceDelta;
+//    };
+
+//    template<typename M, typename E, typename C>
+//    const PairwiseAlignment*
+//    RecursorBase<M, E, C>::Alignment(const E& e, const M& a) const
+//    {
+//        ShouldNotReachHere();
+//        if (!boost::is_same<C, ViterbiCombiner>::value)
+//        {
+//            ShouldNotReachHere();
+//        }
+//
+//        int I, J;
+//        I = e.ReadLength();
+//        J = e.TemplateLength();
+//
+//        // Matrix must be filled in before requesting traceback
+//        assert(a(I, J) != lfloat());
+//
+//        int i = I;
+//        int j = J;
+//        float pathScore = 0;
+//
+//        MoveSpec incMove   = { INCORPORATE, 1, 1 };
+//        MoveSpec delMove   = { DELETE_LOCAL,      0, 1 };
+//        MoveSpec extraMove = { EXTRA,       1, 0 };
+//        MoveSpec mergeMove = { MERGE,       1, 2 };
+//        std::vector<MoveSpec> moves;
+//
+//        while (i > 0 || j > 0)
+//        {
+//            MoveSpec bestMove = { INVALID_MOVE, 0, 0 };
+//            float prevScore, moveScore, totalScore;
+//            float bestScore = lfloat();
+//            float bestMoveScore = lfloat();
+//
+//            if (i > 0 && j > 0)
+//            {
+//                prevScore = a(i - 1, j - 1);
+//                moveScore = e.Inc(i - 1, j - 1);
+//                totalScore = prevScore + moveScore;
+//                if (totalScore > bestScore)
+//                {
+//                    // Incorporate (match or mismatch)
+//                    bestMove = incMove;
+//                    bestScore = totalScore;
+//                    bestMoveScore = moveScore;
+//                }
+//            }
+//
+//            if (j > 0)
+//            {
+//                // Delete
+//                prevScore = a(i, j - 1);
+//                bool freeDelete = (!e.PinEnd() && i == I) || (!e.PinStart() && i == 0);
+//                moveScore = freeDelete ? 0 : e.Del(i, j - 1);
+//                totalScore = prevScore + moveScore;
+//                if (totalScore > bestScore)
+//                {
+//                    bestMove = delMove;
+//                    bestScore = totalScore;
+//                    bestMoveScore = moveScore;
+//                }
+//            }
+//
+//            if (i > 0)
+//            {
+//                // Extra
+//                prevScore = a(i - 1, j);
+//                moveScore = e.Extra(i - 1, j);
+//                totalScore = prevScore + moveScore;
+//                if (totalScore > bestScore)
+//                {
+//                    bestMove = extraMove;
+//                    bestScore = totalScore;
+//                    bestMoveScore = moveScore;
+//                }
+//            }
+//
+//            if ((movesAvailable_ & MERGE) && i > 0 && j > 1)
+//            {
+//                // Merge
+//                prevScore = a(i - 1, j - 2);
+//                moveScore = e.Merge(i - 1, j - 2);
+//                totalScore = prevScore + moveScore;
+//                if (totalScore > bestScore)
+//                {
+//                    bestMove = mergeMove;
+//                    bestScore = totalScore;
+//                    bestMoveScore = moveScore;
+//                }
+//            }
+//            assert(AlmostEqual(a(i, j), bestScore));
+//            assert(bestMove.MoveType != INVALID_MOVE);
+//            assert(bestMoveScore != lfloat());
+//
+//            moves.push_back(bestMove);
+//            i -= bestMove.ReadDelta;
+//            j -= bestMove.ReferenceDelta;
+//            pathScore += bestMoveScore;
+//        }
+//        assert(i == 0 && j == 0);
+//
+//        // Reverse moves
+//        std::reverse(moves.begin(), moves.end());
+//
+//        // Replay moves and stringify.
+//        std::string target;
+//        std::string query;
+//        i = 0;
+//        j = 0;
+//        foreach (const MoveSpec& move, moves)
+//        {
+//            switch (move.MoveType) {
+//            case INCORPORATE:
+//                target     += e.Template()[j];
+//                query      += e.Basecalls()[i];
+//                break;
+//            case EXTRA:
+//                target     += '-';
+//                query      += e.Basecalls()[i];
+//                break;
+//            case DELETE_LOCAL:
+//                target     += e.Template()[j];
+//                query      += '-';
+//                break;
+//            case MERGE:
+//                target     += e.Template()[j];
+//                target     += e.Template()[j+1];
+//                query      += '-';
+//                query      += e.Basecalls()[i];
+//                break;
+//            case INVALID_MOVE:
+//                ShouldNotReachHere();
+//                break;
+//            default:
+//                ShouldNotReachHere();
+//            }
+//            i += move.ReadDelta;
+//            j += move.ReferenceDelta;
+//            assert(target.length() == query.length());
+//        }
+//
+//        return new PairwiseAlignment(target, query);
+//    }
 
     template<typename M, typename E, typename C>
-    const PairwiseAlignment*
-    RecursorBase<M, E, C>::Alignment(const E& e, const M& a) const
-    {
-        if (!boost::is_same<C, ViterbiCombiner>::value)
-        {
-            ShouldNotReachHere();
-        }
-
-        int I, J;
-        I = e.ReadLength();
-        J = e.TemplateLength();
-
-        // Matrix must be filled in before requesting traceback
-        assert(a(I, J) != lfloat());
-
-        int i = I;
-        int j = J;
-        float pathScore = 0;
-
-        MoveSpec incMove   = { INCORPORATE, 1, 1 };
-        MoveSpec delMove   = { DELETE_LOCAL,      0, 1 };
-        MoveSpec extraMove = { EXTRA,       1, 0 };
-        MoveSpec mergeMove = { MERGE,       1, 2 };
-        std::vector<MoveSpec> moves;
-
-        while (i > 0 || j > 0)
-        {
-            MoveSpec bestMove = { INVALID_MOVE, 0, 0 };
-            float prevScore, moveScore, totalScore;
-            float bestScore = lfloat();
-            float bestMoveScore = lfloat();
-
-            if (i > 0 && j > 0)
-            {
-                prevScore = a(i - 1, j - 1);
-                moveScore = e.Inc(i - 1, j - 1);
-                totalScore = prevScore + moveScore;
-                if (totalScore > bestScore)
-                {
-                    // Incorporate (match or mismatch)
-                    bestMove = incMove;
-                    bestScore = totalScore;
-                    bestMoveScore = moveScore;
-                }
-            }
-
-            if (j > 0)
-            {
-                // Delete
-                prevScore = a(i, j - 1);
-                bool freeDelete = (!e.PinEnd() && i == I) || (!e.PinStart() && i == 0);
-                moveScore = freeDelete ? 0 : e.Del(i, j - 1);
-                totalScore = prevScore + moveScore;
-                if (totalScore > bestScore)
-                {
-                    bestMove = delMove;
-                    bestScore = totalScore;
-                    bestMoveScore = moveScore;
-                }
-            }
-
-            if (i > 0)
-            {
-                // Extra
-                prevScore = a(i - 1, j);
-                moveScore = e.Extra(i - 1, j);
-                totalScore = prevScore + moveScore;
-                if (totalScore > bestScore)
-                {
-                    bestMove = extraMove;
-                    bestScore = totalScore;
-                    bestMoveScore = moveScore;
-                }
-            }
-
-            if ((movesAvailable_ & MERGE) && i > 0 && j > 1)
-            {
-                // Merge
-                prevScore = a(i - 1, j - 2);
-                moveScore = e.Merge(i - 1, j - 2);
-                totalScore = prevScore + moveScore;
-                if (totalScore > bestScore)
-                {
-                    bestMove = mergeMove;
-                    bestScore = totalScore;
-                    bestMoveScore = moveScore;
-                }
-            }
-            assert(AlmostEqual(a(i, j), bestScore));
-            assert(bestMove.MoveType != INVALID_MOVE);
-            assert(bestMoveScore != lfloat());
-
-            moves.push_back(bestMove);
-            i -= bestMove.ReadDelta;
-            j -= bestMove.ReferenceDelta;
-            pathScore += bestMoveScore;
-        }
-        assert(i == 0 && j == 0);
-
-        // Reverse moves
-        std::reverse(moves.begin(), moves.end());
-
-        // Replay moves and stringify.
-        std::string target;
-        std::string query;
-        i = 0;
-        j = 0;
-        foreach (const MoveSpec& move, moves)
-        {
-            switch (move.MoveType) {
-            case INCORPORATE:
-                target     += e.Template()[j];
-                query      += e.Basecalls()[i];
-                break;
-            case EXTRA:
-                target     += '-';
-                query      += e.Basecalls()[i];
-                break;
-            case DELETE_LOCAL:
-                target     += e.Template()[j];
-                query      += '-';
-                break;
-            case MERGE:
-                target     += e.Template()[j];
-                target     += e.Template()[j+1];
-                query      += '-';
-                query      += e.Basecalls()[i];
-                break;
-            case INVALID_MOVE:
-                ShouldNotReachHere();
-                break;
-            default:
-                ShouldNotReachHere();
-            }
-            i += move.ReadDelta;
-            j += move.ReferenceDelta;
-            assert(target.length() == query.length());
-        }
-
-        return new PairwiseAlignment(target, query);
-    }
-
-    template<typename M, typename E, typename C>
-    RecursorBase<M, E, C>::RecursorBase(int movesAvailable, const BandingOptions& bandingOptions)
-        : movesAvailable_(movesAvailable),
-          bandingOptions_(bandingOptions)
+    RecursorBase<M, E, C>::RecursorBase(const BandingOptions& bandingOptions)
+        : bandingOptions_(bandingOptions)
     {}
 
     template<typename M, typename E, typename C>
@@ -277,5 +276,5 @@ namespace detail {
     template class RecursorBase<DenseMatrix, QvEvaluator, ViterbiCombiner>;
     template class RecursorBase<SparseMatrix, QvEvaluator, ViterbiCombiner>;
     template class RecursorBase<SparseMatrix, QvEvaluator, SumProductCombiner>;
-    template class RecursorBase<SparseMatrix, EdnaEvaluator, SumProductCombiner>;
+
 }}

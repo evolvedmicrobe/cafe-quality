@@ -138,6 +138,9 @@ namespace ConsensusCore
         int absoluteLinkColumn = 1 + m.End() + m.LengthDiff();
         std::string oldTpl = evaluator_->Template();
         std::string newTpl = ApplyMutation(m, oldTpl);
+        
+        //TODO: Add logic here to update the parameters for all reads....
+        
         double score;
 
         bool atBegin = (m.Start() < 3);

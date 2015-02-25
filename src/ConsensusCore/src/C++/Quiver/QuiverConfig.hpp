@@ -41,157 +41,58 @@
 #include <string>
 #include <utility>
 #include <vector>
-
+#include <math.h>
 #include "Utils.hpp"
+#include "Quiver/MathUtils.h"
 
 namespace ConsensusCore
 {
-    enum Move
-    {
-        INVALID_MOVE = 0x0,
-        INCORPORATE  = 0x1,
-        EXTRA        = 0x2,
-        DELETE_LOCAL = 0x4, // Has to be local because winnt.h defines a DELETE that would conflict
-        MERGE        = 0x8,
-        BASIC_MOVES  = (INCORPORATE | EXTRA | DELETE_LOCAL),
-        ALL_MOVES    = (BASIC_MOVES | MERGE)
-    };
 
     /// \brief The banding optimizations to be used by a recursor
     struct BandingOptions
     {
-        float ScoreDiff;
+        double ScoreDiff;
 
-        BandingOptions(int diagonalCross, float scoreDiff)
+        BandingOptions(int diagonalCross, double scoreDiff)
             : ScoreDiff(scoreDiff)
         {}
 
-        BandingOptions(int diagonalCross, float scoreDiff,
-                       float dynamicAdjustFactor, float dynamicAdjustOffset)
+        BandingOptions(int diagonalCross, double scoreDiff,
+                       double dynamicAdjustFactor, double dynamicAdjustOffset)
             : ScoreDiff(scoreDiff)
         {}
     };
 
 
     /// \brief A parameter vector for analysis using the QV model
-    struct QvModelParams
+    struct ModelParams
     {
-        float Match;
-        float Mismatch;
-        float MismatchS;
-        float Branch;
-        float BranchS;
-        float DeletionN;
-        float DeletionWithTag;
-        float DeletionWithTagS;
-        float Nce;
-        float NceS;
-        float Merge[4];
-        float MergeS[4];
-
+        double log_miscallprobability;
+        double log_one_minus_miscallprobability;
+        double log_miscall_probability_times_one_third;
         //
         // Constructor for single merge rate and merge rate slope
         //
-        QvModelParams(float Match,
-                      float Mismatch,
-                      float MismatchS,
-                      float Branch,
-                      float BranchS,
-                      float DeletionN,
-                      float DeletionWithTag,
-                      float DeletionWithTagS,
-                      float Nce,
-                      float NceS,
-                      float Merge,
-                      float MergeS)
-            : Match(Match)
-            , Mismatch(Mismatch)
-            , MismatchS(MismatchS)
-            , Branch(Branch)
-            , BranchS(BranchS)
-            , DeletionN(DeletionN)
-            , DeletionWithTag(DeletionWithTag)
-            , DeletionWithTagS(DeletionWithTagS)
-            , Nce(Nce)
-            , NceS(NceS)
+        ModelParams(double miscall)
+        : log_miscallprobability(log(miscall))
         {
-            for (int base = 0; base < 4; base++)
-            {
-                this->Merge[base]  = Merge;
-                this->MergeS[base] = MergeS;
-            }
+            log_one_minus_miscallprobability = log(1 - miscall);
+            log_miscall_probability_times_one_third = log_one_third + log_miscallprobability;
         }
-
-        //
-        // Constructor for per-channel merge rate and merge rate slope
-        //
-        QvModelParams(float Match,
-                      float Mismatch,
-                      float MismatchS,
-                      float Branch,
-                      float BranchS,
-                      float DeletionN,
-                      float DeletionWithTag,
-                      float DeletionWithTagS,
-                      float Nce,
-                      float NceS,
-                      float Merge_A,
-                      float Merge_C,
-                      float Merge_G,
-                      float Merge_T,
-                      float MergeS_A,
-                      float MergeS_C,
-                      float MergeS_G,
-                      float MergeS_T)
-            : Match(Match)
-            , Mismatch(Mismatch)
-            , MismatchS(MismatchS)
-            , Branch(Branch)
-            , BranchS(BranchS)
-            , DeletionN(DeletionN)
-            , DeletionWithTag(DeletionWithTag)
-            , DeletionWithTagS(DeletionWithTagS)
-            , Nce(Nce)
-            , NceS(NceS)
-        {
-            this->Merge[0] = Merge_A;
-            this->Merge[1] = Merge_C;
-            this->Merge[2] = Merge_G;
-            this->Merge[3] = Merge_T;
-            this->MergeS[0] = MergeS_A;
-            this->MergeS[1] = MergeS_C;
-            this->MergeS[2] = MergeS_G;
-            this->MergeS[3] = MergeS_T;
-        }
-
-
-        // Access to the array-stored params
-
-        float Merge_A() const { return this->Merge[0]; }
-        float Merge_C() const { return this->Merge[1]; }
-        float Merge_G() const { return this->Merge[2]; }
-        float Merge_T() const { return this->Merge[3]; }
-
-        float MergeS_A() const { return this->MergeS[0]; }
-        float MergeS_C() const { return this->MergeS[1]; }
-        float MergeS_G() const { return this->MergeS[2]; }
-        float MergeS_T() const { return this->MergeS[3]; }
     };
 
 
     struct QuiverConfig
     {
-        QvModelParams QvParams;
-        int MovesAvailable;
+        ModelParams QvParams;
         BandingOptions Banding;
-        float FastScoreThreshold;
-        float AddThreshold;
+        double FastScoreThreshold;
+        double AddThreshold;
 
-        QuiverConfig(const QvModelParams& qvParams,
-                     int movesAvailable,
+        QuiverConfig(const ModelParams& qvParams,
                      const BandingOptions& bandingOptions,
-                     float fastScoreThreshold,
-                     float addThreshold = 1.0f);
+                     double fastScoreThreshold,
+                     double addThreshold = 1.0f);
 
         QuiverConfig(const QuiverConfig& qvConfig);
     };

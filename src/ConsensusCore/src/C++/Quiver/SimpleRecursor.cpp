@@ -33,7 +33,6 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
 
-// Author: David Alexander
 
 #include "Quiver/SimpleRecursor.hpp"
 
@@ -55,16 +54,39 @@ using std::max;
 
 
 namespace ConsensusCore {
-
-    // Will fill the alpha-beta matrices assuming the ends are pinned to the
-    // match state.
+    
+    /**
+     Fill in the alpha matrix.  This matrix has the read run along the rows, and the 
+     template run along the columns.  The first row and column do not correspond to
+     a template position.  Therefore the match represented at position (i,j) corresponds
+     to a match between template positions (i+1, j+1).  
+     
+     The alpha matrix is the "Forward" matrix used in the forward/backward algorithm.
+     The i,j position of the matrix represents the probability of all paths up 
+     to the point where theith read position and jth template have been "emitted."
+     The matrix is calculated recursively by examining all possible transitions 
+     into (i,j), and calculating the probability we were in the previous state, 
+     times the probability of a transition into (i,j) times the probability of 
+     emitting the observation that corresponds to (i,j). All probabilities are 
+     calculated and stored as LOG values.
+     
+     Note that in doing this calculation, in order to work with di-nucleotide contexts, we
+     require that the first and last transition be a match.  In other words the start and end of
+     the read and template are "pinned" to each other.
+     
+     @param e An Evaluator type instance, such as QvEvaluator.  This type must be able to 
+     calculate Match, Insertion and Deletion values at given parameters.  Used to populate the matrix.
+     @param guide An object that helps inform how to select the size of "bands" for the 
+     banded algorithm used.
+     @param alpha The matrix to be filled.
+     */
     template<typename M, typename E, typename C>
     void
     SimpleRecursor<M, E, C>::FillAlpha(const E& e, const M& guide, M& alpha) const
     {
         int I = e.ReadLength();
         int J = e.TemplateLength();
-
+        
         assert(alpha.Rows() == I + 1 && alpha.Columns() == J + 1);
         assert(guide.IsNull() ||
                (guide.Rows() == alpha.Rows() && guide.Columns() == alpha.Columns()));
@@ -97,35 +119,41 @@ namespace ConsensusCore {
                 {
                     score = 0.0;
                 }
-
-                // Match:
-                if (i > 0 && j > 0)
-                {
-                    thisMoveScore = alpha(i - 1, j - 1) + e.Match(i - 1, j - 1);
-                    score = C::Combine(score, thisMoveScore);
+                else if(j==0 || i ==0) {
+                    /* The first move must be a match so all others are NEG_INF
+                       along first column/row */
+                    score = NEG_INF;
                 }
+                else {
+                    
+                    // Match:
+                    if (i > 0 && j > 0) // This condition is always true, left for clarity
+                    {
+                        thisMoveScore = alpha(i - 1, j - 1) + e.Match(i - 1, j - 1);
+                        score = C::Combine(score, thisMoveScore);
+                    }
+                    // Stick or Branch:
+                    if (i > 1 && i < I) // Due to pinning, can't "insert" first or last read bpbase
+                    {
+                        thisMoveScore = alpha(i - 1, j) + e.Insertion(i - 1, j - 1);
+                        score = C::Combine(score, thisMoveScore);
+                    }
 
-                // Stick or Branch:
-                if (i > 0)
-                {
-                    thisMoveScore = alpha(i - 1, j) + e.Insertion(i - 1, j);
-                    score = C::Combine(score, thisMoveScore);
-                }
+                    // Deletion:
+                    if (j > 1 && j < J) // Due to pinning, can't "delete" first or last template bp
+                    {
+                        thisMoveScore = alpha(i, j - 1) + e.Deletion(j - 1);
+                        score = C::Combine(score, thisMoveScore);
+                    }
+                    
+                    //  Save score
+                    alpha.Set(i, j, score);
 
-                // Delete:
-                if (j > 0)
-                {
-                    thisMoveScore = alpha(i, j - 1) + e.Deletion(j - 1);
-                    score = C::Combine(score, thisMoveScore);
-                }
-                
-                //  Save score
-                alpha.Set(i, j, score);
-
-                if (score > maxScore)
-                {
-                    maxScore = score;
-                    thresholdScore = maxScore - this->bandingOptions_.ScoreDiff;
+                    if (score > maxScore)
+                    {
+                        maxScore = score;
+                        thresholdScore = maxScore - this->bandingOptions_.ScoreDiff;
+                    }
                 }
             }
 
@@ -140,6 +168,20 @@ namespace ConsensusCore {
         }
     }
 
+    /**
+     Fill the Beta matrix, the backwards half of the forward-backward algorithm.  
+     This represents the probability that starting from the (i,j) state, the combined
+     probability of transitioning out and following all paths through to the end.  
+     
+     In combination with the Alpha matrix, this allows us to calculate all paths that 
+     pass through the (i,j) element, as exp(Alpha(i,j) + Beta(i,j))
+     
+     All probabilities stored in the matrix are stored as LOG probabilities.
+     
+     @param e The evaluator, such as QvEvaluator
+     @param M the guide matrix for banding (this needs more documentation)
+     @param beta The Beta matrix, stored as either a DenseMatrix or a SparseMatrix.
+     */
 
     template<typename M, typename E, typename C>
     void
@@ -163,39 +205,39 @@ namespace ConsensusCore {
             beta.StartEditingColumn(j, hintBeginRow, hintEndRow);
 
             int i;
-            float score = NEG_INF;
-            float thresholdScore = NEG_INF;
-            float maxScore = NEG_INF;
+            double score = NEG_INF;
+            double thresholdScore = NEG_INF;
+            double maxScore = NEG_INF;
 
             int beginRow, endRow = hintEndRow;
             for (i = endRow - 1;
                  i >= 0 && (score >= thresholdScore || i >= requiredBeginRow);
                  --i)
             {
-                float thisMoveScore;
+                double thisMoveScore;
                 score = NEG_INF;
 
                 // Start:
                 if (i == I && j == J)
                 {
-                    score = 0.0f;
+                    score = 0.0;
                 }
 
-                // Incorporation:
+                // Match:
                 if (i < I && j < J)
                 {
                     thisMoveScore = beta(i + 1, j + 1) + e.Match(i, j);
                     score = C::Combine(score, thisMoveScore);
                 }
 
-                // Extra:
-                if (i < I)
+                // Stick or Branch:
+                if (i < (I-1)) // Can only transition to an insertion for the 2nd to last read base
                 {
-                    thisMoveScore = beta(i + 1, j) + e.Insertion(i, j);
+                    thisMoveScore = beta(i + 1, j) + e.Insertion(i, j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
-                // Delete:
+                // Deletion:
                 if (j < J)
                 {
                     thisMoveScore = beta(i, j + 1) + e.Deletion(j);
@@ -235,7 +277,7 @@ namespace ConsensusCore {
     /// read; columns alphaColumn - 1 and alphaColumn - 2 of alpha
     /// will be read.
     template<typename M, typename E, typename C>
-    float
+    double
     SimpleRecursor<M, E, C>::LinkAlphaBeta(const E& e,
                                            const M& alpha, int alphaColumn,
                                            const M& beta, int betaColumn,
@@ -253,7 +295,7 @@ namespace ConsensusCore {
                        beta.UsedRowRange(betaColumn),
                        beta.UsedRowRange(betaColumn + 1));
 
-        float v = NEG_INF, thisMoveScore;
+        double v = NEG_INF, thisMoveScore;
 
         for (int i = usedBegin; i < usedEnd; i++)
         {
@@ -321,7 +363,7 @@ namespace ConsensusCore {
             ext.StartEditingColumn(extCol, beginRow, endRow);
 
             int i;
-            float score;
+            double score;
 
             for (i = beginRow; i < endRow; i++)
             {
@@ -331,7 +373,7 @@ namespace ConsensusCore {
                 // Match:
                 if (i > 0 && j > 0)
                 {
-                    float prev = extCol == 0 ?
+                    double prev = extCol == 0 ?
                             alpha(i - 1, j - 1) :
                             ext(i - 1, extCol - 1);
                     thisMoveScore = prev + e.Match(i - 1, j - 1);
@@ -341,14 +383,14 @@ namespace ConsensusCore {
                 // Stick or Branch:
                 if (i > 0)
                 {
-                    thisMoveScore = ext(i - 1, extCol) + e.Insertion(i - 1, j);
+                    thisMoveScore = ext(i - 1, extCol) + e.Insertion(i - 1, j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Delete:
                 if (j > 0)
                 {
-                    float prev = extCol == 0 ?
+                    double prev = extCol == 0 ?
                             alpha(i, j - 1) :
                             ext(i, extCol - 1);
                     thisMoveScore = prev + e.Deletion(j - 1);
@@ -412,19 +454,19 @@ namespace ConsensusCore {
             ext.StartEditingColumn(extCol, beginRow, endRow);
 
             int i;
-            float score;
+            double score;
 
             for (i = endRow - 1;
                  i >= beginRow;
                  i--)
             {
-                float thisMoveScore;
+                double thisMoveScore;
                 score = NEG_INF;
 
                 // Incorporation:
                 if (i < I && j < J)
                 {
-                    float prev = (extCol == lastExtColumn) ?
+                    double prev = (extCol == lastExtColumn) ?
                         beta(i + 1, j + 1) :
                         ext(i + 1, extCol + 1);
                     thisMoveScore = prev + e.Match(i, jp);
@@ -434,14 +476,14 @@ namespace ConsensusCore {
                 // Extra:
                 if (i < I)
                 {
-                    thisMoveScore = ext(i + 1, extCol) + e.Insertion(i, jp);
+                    thisMoveScore = ext(i + 1, extCol) + e.Insertion(i, jp - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Delete:
                 if (j < J)
                 {
-                    float prev = (extCol == lastExtColumn) ?
+                    double prev = (extCol == lastExtColumn) ?
                         beta(i, j + 1) :
                         ext(i, extCol + 1);
                     thisMoveScore = prev + e.Deletion(jp);

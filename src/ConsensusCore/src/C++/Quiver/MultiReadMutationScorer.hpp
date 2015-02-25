@@ -33,8 +33,6 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
 
-// Author: David Alexander and Nigel Delaney
-
 #pragma once
 
 #include <boost/noncopyable.hpp>

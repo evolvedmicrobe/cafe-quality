@@ -55,9 +55,15 @@
 
 namespace ConsensusCore
 {
+    /**
+     Could the mutation change the contents of the portion of the
+      template that is mapped to the read?
+     @param read A read mapped to some portion of the template
+     @param mut A mutation affecting the template
+     @returns true if the read scores the mutation.
+     @exception <#throws#>
+     */
     //
-    // Could the mutation change the contents of the portion of the
-    // template that is mapped to the read?
     //
     bool ReadScoresMutation(const MappedRead& read, const Mutation& mut)
     {
@@ -72,13 +78,17 @@ namespace ConsensusCore
         }
     }
 
+
     //
-    // Logic for turning a mutation to the global template space to
-    // one in the coordinates understood by each individual mutation
-    // scorer.  This involves translation, complementation, and also
-    // possible clipping, if the mutation is not wholly within the
-    // mapped read.
-    //
+    /**
+     // Logic for turning a mutation to the global template space to
+     // one in the coordinates understood by each individual mutation
+     // scorer.  This involves translation, complementation, and also
+     // possible clipping, if the mutation is not wholly within the
+     // mapped read.
+     @param <#parameter#>
+     @returns <#retval#>
+     */
     Mutation OrientedMutation(const MappedRead& mr,
                               const Mutation& mut)
     {
@@ -241,7 +251,13 @@ namespace ConsensusCore
         }
         DEBUG_ONLY(CheckInvariants());
     }
-
+    /**
+     Add a read to the multi read mutation scorer
+     @param mr A mapped read to addd
+     @param threshold A criteria to ensure that not so much memory is used. If the read consumes more than threshold * (I+1)*(J+1) memory while filling the forward and backwards matrices, the read is not added to the scorer.
+     @returns If the read was added to the scorer.
+     @exception <#throws#>
+     */
     template<typename R>
     bool MultiReadMutationScorer<R>::AddRead(const MappedRead& mr, double threshold)
     {
@@ -280,7 +296,11 @@ namespace ConsensusCore
         DEBUG_ONLY(CheckInvariants());
         return isActive;
     }
-
+    /**
+     Add a read to the scorer using the default memory threshold.
+     @param mr A mapped read to add
+     @returns If the read was included
+     */
     template<typename R>
     bool MultiReadMutationScorer<R>::AddRead(const MappedRead& mr)
     {

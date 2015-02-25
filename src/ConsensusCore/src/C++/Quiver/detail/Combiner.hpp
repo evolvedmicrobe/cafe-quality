@@ -52,7 +52,7 @@ namespace detail {
     class ViterbiCombiner
     {
     public:
-        static float Combine(float x, float y)
+        static double Combine(double x, double y)
         {
             return std::max(x, y);
         }
@@ -64,7 +64,7 @@ namespace detail {
     class SumProductCombiner
     {
     public:
-        static float Combine(float x, float y)
+        static double Combine(double x, double y)
         {
             return logadd(x, y);
         }
