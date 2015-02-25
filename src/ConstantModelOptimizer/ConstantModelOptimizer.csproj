@@ -26,6 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
+    <Commandlineparameters>G 14</Commandlineparameters>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -66,6 +67,7 @@
     <Compile Include="Optimizer.cs" />
     <Compile Include="EdnaToLisaConverter.cs" />
     <Compile Include="AlignmentSplitter.cs" />
+    <Compile Include="LoadData.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
