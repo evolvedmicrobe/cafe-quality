@@ -40,6 +40,8 @@ let full_deletion_rc = deletionHPSeq.GetReverseComplementedSequence().ConvertToS
 
 let hpRef = new  Reference(hpSeq);
 
+let convertToProb x = Math.Pow(-x / 10.0,10.0)
+
 (* Calculate the size of the indel in the 5 bp homopolymer
    I am doing this two ways, one by aligning and calling variants, 
    and a second by counting the homopolymers in the region, to account for SNPs within
@@ -63,7 +65,7 @@ let DeletionSize (sub:Sequence) =
 
 (* To avoid alignment issues, I am going to just grab the region, look for the longest continuous stretch of 
     the homopolymer base, and count the number of merge spikes, deletion tags and its length *)
-type homoPolymerReport = { Length: int; MergeSpikes: int; DeletionTags: int}
+type homoPolymerReport = { Length: int; MergeSpikes: int; DeletionTags: int; ErrorProb: double}
 
 let cntHPEvents (read: ReadFromZMW)  =
     // First task, where is the longest homopolymer stretch ?
@@ -91,6 +93,7 @@ let cntHPEvents (read: ReadFromZMW)  =
                                 Seq.map (fun i -> read.BaseCalls.[i] = bp && read.MergeQV.[i] > (byte 70)) |> 
                                 Seq.where id |> Seq.length
         let delTagCount = hpRange |> Seq.where (fun j -> (j+1) < read.BaseCalls.Length && read.DeletionTag.[j+1] = (byte)bp) |> Seq.length
+        let expectedErrors = hpRange |> Seq.map (fun x -> convertToProb(read.MergeQV[x]) + convertToProb(read.DeletionQV[x]) 
         {Length = Length; MergeSpikes = spikeCount; DeletionTags = delTagCount}
 
 
