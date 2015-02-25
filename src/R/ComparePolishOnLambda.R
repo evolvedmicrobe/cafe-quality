@@ -2,7 +2,7 @@ library(ggplot2)
 library(gridExtra)
 library(grid)
 
-setwd("/Users/nigel/git/cafe-quality/NotTracked/master_full")
+setwd("/Users/nigel/git/cafe-quality/NotTracked/")
 
 getld <-function(fname) {
   d= read.csv(fname)
@@ -12,71 +12,106 @@ getld <-function(fname) {
   d$SNPErrorRate = d$NumSNPErrors / d$Length
   d$IndelErrorRate = d$NumIndelErrors / d$Length
   d$MeanGC = (d$SnrG + d$SnrC) / 2
-  d[d$Reference=="lambda_NEB3011",]
+  snr=d[,grep("Snr",colnames(d))]
+  d$MinSNR = apply(snr,1,min)
+  d$MeanSNR = apply(snr,1,mean)
+  d$RoundGC = factor(round(4*floor(d$MeanSNR/4)))
+  d$RoundRQ = factor(round(5*floor(100*d$PredictedRawAccuracy/5))+2.5)
+  s = nrow(d)
+  #d = d[d$PredictedRawAccuracy > .85,]
+  e = nrow(d)
+  print(e/s)
+  d=d[d$Reference=="lambda_NEB3011",]
+  #d=d[d$Reference=="HP.V1.02",]
+  #d = d[d$Reference=="ALL4MER.V2.01",]
+  return(d)
 }
 d = getld("master_5ba5286_combined_reads.csv")
 #d2 = getld("C2_polymer_d067558_combined_reads.csv")
-d2 = getld("del_tag_combined_reads.csv")
-d3 = getld("no_del_combined_reads.csv")
+#d2 = getld("del_tag_combined_reads.csv")
+#d3 = getld("no_del_combined_reads.csv")
+d2 = getld("16s_go2_combined_reads.csv")
 
 
-head(d2)
-
-in1 = intersect(intersect(d$ZMW,d2$ZMW),d3$ZMW)
-d3 = d3[d3$ZMW%in%in1,]
+in1 = intersect(d$ZMW,d2$ZMW)
 d2 = d2[d2$ZMW%in%in1,]
 d = d[d$ZMW%in%in1,]
+cd = rbind(d,d2)
+cd$Analysis =  factor(c(rep("Original",nrow(d)),rep("New",nrow(d2))))
 
-cd = rbind(d,d2,d3)
-cd$Reference=  factor(c(rep("Original",nrow(d)),rep("Always use Del Tag QV",nrow(d2)),rep("Never use Del Tag QV",nrow(d3))), levels = c("Always use Del Tag QV","Original","Never use Del Tag QV"))
-cd$MeanGC = .5*(cd$SnrG + cd$SnrC)
-mkPlot<-function(errorType, ylab, title) {
-  fm = formula(paste(errorType,"~NumPasses+Reference"))
-  q = aggregate(fm,cd,mean)
-  v = ggplot(q,aes_string(x="NumPasses", y = errorType, colour="Reference")) + geom_line()+ theme_bw(base_size=8)
-  v = v + labs(x= "Number of Passes", y = paste(ylab, "Error Rate (per bp)"), title=title)
-  v = v + scale_x_continuous(limits=c(0,100))
-  v
-}
-
-
-a = mkPlot("ErrorRate","Total ", "Total Errors")
-b = mkPlot("SNPErrorRate","SNP ", "SNP Errors")
-c = mkPlot("IndelErrorRate","SNP ", "Indel Errors")
-
-grid.arrange(a,b,c)
-
-q = aggregate(ErrorRate~NumPasses+Reference, cd, mean )
-t1= rep("All",nrow(q))
-
-q2 = aggregate(IndelErrorRate~NumPasses+Reference, cd, mean )
-names(q2)[3]<-"ErrorRate"
-t2 = rep("Indel",nrow(q2))
-
-q3 = aggregate(SNPErrorRate~NumPasses+Reference, cd, mean )
-names(q3)[3]<-"ErrorRate"
-t3 = rep("SNP",nrow(q3))
-
-res = rbind(q,q2,q3)
-res$ErrorType=c(t1,t2,t3)
-
-
-
+res = aggregate(ErrorRate~NumPasses+Analysis+RoundRQ, cd, FUN=mean)
 head(res)
 ph = function(x) { -10*log10(x)}
 res$QV = sapply(res$ErrorRate,ph)
 
-res = res[res$ErrorType=="All",]
+pdf("ErrorHistogram.pdf")
+ggplot(d2[d2$NumPasses>8 & d2$ErrorRate>0,], aes(x=ErrorRate)) + geom_histogram() + theme_bw(base_size=12) + labs(x="CCS Empirical Error Rate", y = "Count", title="Histogram of Error Rate With > 8 Passes")
+dev.off()
 
-v = ggplot(res,aes(x=NumPasses, y = QV, colour=Reference))+geom_line()+geom_point()+theme_classic(base_size=8)+scale_x_continuous(limits=c(0,60)) 
-v = v+labs(x="Number of Passes", y = "Per Base Error Rate (Phred QV Scale)",title=expression(paste("Accuracy in ",lambda)))
-v = v + geom_vline(xintercept=10, colour="red") +geom_rug(aes(x=JittedPos, y = NULL, colour=NULL),data=sd)
+#pdf("ErrorInAll4Mer.pdf")
+res = res[res$Analysis=="New",]
+v = ggplot(res,aes(x=NumPasses, y = QV, colour=RoundRQ))+geom_line()+geom_point()+theme_classic(base_size=11)+scale_x_continuous(limits=c(0,25)) 
+v = v+labs(x="Number of Passes", y = "Per Base Error Rate (Phred QV Scale)",title="Mean accuracy in ALL4MERS with > 0.85 Raw Accuracy ")
+v = v + geom_vline(xintercept=10, colour="red") +geom_hline(yintercept=30, colour="red")+scale_colour_discrete(name="Binned Raw\nQuality")
+v
+#dev.off()
+
+
+
+qplot(d2$MinSNR,d2$MeanSNR)
+ggplot(d2,aes(x=MinSNR,fill=Reference))+geom_density(alpha=.2)+geom_vline(xintercept=3.5, col="red")
+ggplot(d2,aes(x=MeanGC,fill=Reference))+geom_density(alpha=.2)+geom_vline(xintercept=3.5, col="red")
+
+dq2 = aggregate(IndelErrorRate~NumPasses+RoundGC, d2, mean )
+ph = function(x) { -10*log10(x)}
+dq2$IndelErrorRate = ph(dq2$IndelErrorRate)
+pdf("ErrorBySNR.pdf")
+v = ggplot(dq2[dq2$NumPasses>1,],aes(x=NumPasses, y = IndelErrorRate, colour=RoundGC)) + geom_line()+ theme_bw(base_size=8)
+v = v + labs(x= "Number of Passes", y ="Indel Error Rate (Phred Scaled)")
+v = v + scale_x_continuous(limits=c(0,100))
+v
+dev.off()
+names(q2)[3]<-"ErrorRate"
+t2 = rep("Indel",nrow(q2))
+
+
+
+
+#pdf("ErrorInAll4Mer.pdf")
+v = ggplot(res,aes(x=NumPasses, y = QV, colour=Analysis))+geom_line()+geom_point()+theme_classic(base_size=11)+scale_x_continuous(limits=c(0,60)) 
+v = v+labs(x="Number of Passes", y = "Per Base Error Rate (Phred QV Scale)",title="Mean accuracy in ALL4MERS ")
+v = v + geom_vline(xintercept=10, colour="red") +geom_hline(yintercept=30, colour="red")
+v
+#dev.off()
+
+
+pdf("ErrorInLambda.pdf")
+v = ggplot(res,aes(x=NumPasses, y = QV, colour=Analysis))+geom_line()+geom_point()+theme_classic(base_size=11)+scale_x_continuous(limits=c(0,60)) 
+v = v+labs(x="Number of Passes", y = "Per Base Error Rate (Phred QV Scale)",title=expression(paste("Mean accuracy in ",lambda, " with > 0.85 Raw Accuracy")))
+v = v + geom_vline(xintercept=10, colour="red") +geom_hline(yintercept=30, colour="red")
+v
+dev.off()
+
+
+res2 = aggregate(NumErrors~NumPasses+Analysis, cd, FUN=sum)
+v = ggplot(res2,aes(x=NumPasses, y = NumErrors, colour=Analysis))+geom_line()+geom_point()+theme_classic(base_size=11)+scale_x_continuous(limits=c(0,60)) 
+v = v+labs(x="Number of Passes", y = "Per Base Error Rate (Phred QV Scale)",title=expression(paste("Mean accuracy in ",lambda)))
+v = v + scale_x_continuous(limits= c(10,20)) + scale_y_continuous(limits=c(0,1000))
 v
 
-flipped = dcast(res,NumPasses~Reference,value.var="ErrorRate")
-nd = t(apply(flipped[,2:4],1, function(x) x/x[2]))
+
+cds = cd[cd$NumPasses==10,]
+cds$QV = ph(cds$ErrorRate)
+cds$QV[is.infinite(cds$QV)]=40
+
+plot(cds$QV,cds$MeanGC)
+ggplot(cds,aes(x=QV,fill=Analysis))+geom_histogram(alpha=.5,position="dodge")
+ggplot(cds,aes(x=QV,colour=Analysis))+geom_freqpoly(alpha=.5)
+
+flipped = dcast(res,NumPasses~Analysis,value.var="ErrorRate")
+nd = t(apply(flipped[,2:3],1, function(x) x/x[2]))
 head(nd)
-flipped[,2:4]<-nd
+flipped[,2:3]<-nd
 fmd = melt(flipped, id.vars="NumPasses")
 v2 = ggplot(fmd,aes(x=NumPasses, y = value, colour=variable))+geom_line()+geom_point()+theme_classic(base_size=8)+scale_x_continuous(limits=c(0,60)) 
 v2 = v2+labs(x="Number of Passes", y = "Relative Error Rate",title=expression(paste("Relative Accuracy in ",lambda)))+scale_y_continuous(labels=percent)
@@ -84,6 +119,7 @@ v2
 pdf("LambdaComparison.pdf",width=10, height  =3.5)
 grid.arrange(v,v2,ncol=2)
 dev.off()
+>>>>>>> 83becb1... Changes to comparison script
 
 pdf("errors.pdf",width=11,height=8.5)
 grid.arrange(a,b,c,v, ncol = 2)
@@ -100,11 +136,11 @@ median(lb$ErrorRate)
 ## Variant analysis
 dv = read.csv("master_5ba5286_all_variants.csv")
 ldv = dv[dv$Ref=="lambda_NEB3011",]
-ldv2 = read.csv("C2_polymer_fix_d067558_all_variants.csv" )
+ldv2 = read.csv("16s_go2_all_variants.csv" )
 ldv2 = ldv2[ldv2$Ref=="lambda_NEB3011",]
 
 cdv = rbind(ldv,ldv2)
-cdv$Ref = c(rep("Original",nrow(ldv)),rep("Polished",nrow(ldv2)))
+cdv$Analysis = c(rep("Original",nrow(ldv)),rep("New",nrow(ldv2)))
 cdv = cdv[cdv$zmw%in%in1,]
 cdv$homopolymerChar[cdv$homopolymerChar=="T"]="A"
 cdv$homopolymerChar[cdv$homopolymerChar=="G"]="C"
@@ -123,7 +159,7 @@ s=seq(0,30)
 y = sapply(s,errorDrop)
 b=data.frame(NumPasses = s, pr = y)
 pdf(height=4,width=4,"ImprovementsByCoverage.pdf")
-ggplot(b,aes(x=NumPasses,y=pr))+geom_point()+labs(x="Minimum Number of Passes Required", y = "Percentage of Errors Removed", title ="How Polishing Effect Varies by Coverage Cutoff")+theme_bw(base_size=8)+geom_hline(yintercept=1, color="red")
+ggplot(b,aes(x=NumPasses,y=pr))+geom_point()+labs(x="Minimum Number of Passes Required", y = "Percentage of Errors Removed", title ="How Polishing Effect Varies by Coverage Cutoff")+theme_bw(base_size=8)
 dev.off()
 
 
@@ -136,103 +172,108 @@ errorDrop2 <-function(minGC) {
   res[2,2]/res[1,2]
 }
 
-
-
-s=seq(0,15)
+s=seq(7,15)
 y2 = sapply(s,errorDrop2)
 b=data.frame(NumPasses = s, pr = y2)
 
-pdf(height=4,width=4,"ImprovementsByCoverage.pdf")
+pdf(height=4,width=4,"ImprovementsBySNR.pdf")
 ggplot(b,aes(x=NumPasses,y=pr))+geom_point()+labs(x="Minimum Number of Passes Required",
                                                   y = "Percentage of Errors Removed",
-                                                  title ="How Polishing Effect Varies by Coverage Cutoff")+theme_bw()
+                                                  title ="How Polishing Effect Varies by GC SNR Cutoff")+theme_bw()
 dev.off()
 
 
 ### CONTOUR PLOT
 errorContour <-function(minGC, minPasses) {
-  ok = cd$ZMW[cd$MeanGC>=(minGC - 2) & cd$MeanGC>=(minGC + 2) & cd$NumPasses>=minPasses]
-  gd = cdv[cdv$zmw%in%ok,] 
-  head(gd)
-  res = aggregate(Pos~Ref,gd,length)
+  ok = cd$ZMW[cd$MeanGC>=(minGC - 1) & cd$MeanGC<=(minGC + 1) & cd$NumPasses>=(minPasses-1) & cd$NumPasses<=(minPasses+1)]
+  print(minGC)
+  print(minPasses)
+  gd = cdv[cdv$zmw%in%ok,]
+  print(nrow(gd))
+  
+  res = aggregate(Pos~Analysis,gd,length)
   print(res)
   1-res[2,2]/res[1,2]
 }
 k = Vectorize(errorContour)
-x = seq(0,14,.5) # Min GC
-y = seq(0,20) # Min Passes
+x = seq(7,13,.5) # Min GC
+y = seq(2,20) # Min Passes
 z = outer(x,y,k)
 
 pdf("ErrorsRemovedContourPolish2orMore.pdf",width=6.5,height=5)
-filled.contour(x,y,z, xlab="Mean G+C SNR",ylab="Minimum Number of Passes", main="% Errors Removed By SNR and Coverage")
+filled.contour(x,y,z, color.palette=rainbow, xlab="Mean G+C SNR",ylab="Minimum Number of Passes", main="% Errors Removed By SNR and Coverage")
 dev.off()
 
 pdf("LogScaleErrors.pdf", width=10.5, height=7.5)
 par(mfrow=c(2,2))
 errorCount <-function(minGC, minPasses) {
-  ok = d[d$MeanGC>=(minGC - 2) & d$MeanGC>=(minGC + 2) & d$NumPasses>=minPasses,]
+  ok = d[d$MeanGC>=(minGC - 2) & d$MeanGC<=(minGC + 2) & d$NumPasses>(minPasses-2) & d$NumPasses<(minPasses+2),]
   sum(ok$NumIndelErrors)
 }
 k = Vectorize(errorCount)
-x = seq(0,14,.5) # Min GC
-y = seq(0,20) # Min Passes
+x = seq(1,14,.5) # Min GC
+y = seq(1,20) # Min Passes
 z = outer(x,y,k)
-filled.contour(x,y,z, xlab="Mean G+C SNR",
+filled.contour(x,y,z,color.palette=rainbow, xlab="Mean G+C SNR",
                ylab="Minimum Number of Passes", 
                main="Total Indel Errors by\nSNR and Coverage", 
                key.title=title(main="Count"))
 
-filled.contour(x,y,log10(z), xlab="Mean G+C SNR",
+filled.contour(x,y,log10(z),color.palette=rainbow, xlab="Mean G+C SNR",
                ylab="Minimum Number of Passes", 
                main="Log Total Indel Errors by\nSNR and Coverage", 
                key.title=title(main="Log10\nCount"))
 
 
 readCount <-function(minGC, minPasses) {
-  sum(d$Length[d$MeanGC>=(minGC - 2) & d$MeanGC>=(minGC + 2) & d$NumPasses>=minPasses & d$Length<2500])
+  sum(d$Length[d$MeanGC>=(minGC - 2) & d$MeanGC<=(minGC + 2) & d$NumPasses>=(minPasses-1) & d$NumPasses<=(minPasses+1) & d$Length<2500])
 }
 k = Vectorize(readCount)
-x = seq(0,14,.5) # Min GC
-y = seq(0,20) # Min Passes
+x = seq(1,14,.5) # Min GC
+y = seq(1,20) # Min Passes
 z = outer(x,y,k)
 
-filled.contour(x,y,z, xlab="Mean G+C SNR",
+filled.contour(x,y,z,color.palette=rainbow, xlab="Mean G+C SNR",
                ylab="Minimum Number of Passes", 
                main="Total CCS Basepairs", 
                key.title=title(main="BP\nCount"))
 
-
 errorRate <-function(minGC, minPasses) {
-  ok = d[d$MeanGC>=(minGC - 2) & d$MeanGC>=(minGC + 2) & d$NumPasses>=minPasses & d$Length<2500,]
+  ok = d[d$MeanGC>=(minGC - 2) & d$MeanGC<=(minGC + 2) & d$NumPasses>=(minPasses-1) & d$NumPasses<=(minPasses+1) & d$Length<2500,]
   mean(ok$IndelErrorRate)
 }
 k = Vectorize(errorRate)
-x = seq(0,14,.5) # Min GC
-y = seq(0,20) # Min Passes
+x = seq(3,14,.5) # Min GC
+y = seq(1,20) # Min Passes
 z = outer(x,y,k)
 
-filled.contour(x,y,log10(z), xlab="Mean G+C SNR",
+filled.contour(x,y,log10(z),color.palette=rainbow, xlab="Mean G+C SNR",
                ylab="Minimum Number of Passes", 
                main="CCS Log10 Indel Error Rate")
 
 dev.off()
 
 
+
+
+
+
+
 minPasses=20
 ok = cd$ZMW[cd$NumPasses>=minPasses]
 gd = cdv[cdv$zmw%in%ok,] 
-res = aggregate(Pos~Ref+type+homopolymerLength+homopolymerChar+indeltype,gd,length)
+res = aggregate(Pos~Analysis+type+homopolymerLength+homopolymerChar+indeltype,gd,length)
 
 head(res)
 
 
-res2 = res[res$homopolymerChar=="C" & res$Ref=="Original",]
+res2 = res[res$homopolymerChar=="C",]
 head(res2)
 pdf("LambdaIndelErrorsPolishedAllData.pdf",width=6,height=4)
-v = ggplot(res2,aes(x=homopolymerLength,y=Pos, colour=Ref))+facet_grid( .~indeltype)+geom_point(size=3)+theme_bw(base_size=9)
+v = ggplot(res2,aes(x=homopolymerLength,y=Pos, colour=Analysis))+facet_grid( .~indeltype)+geom_point(size=3)+theme_bw(base_size=9)
 v = v +labs(x="Homopolymer Length",y="Count of Total Errors", 
-            title=expression(paste(lambda, " G/C indel errors divided by genomic context for all reads with >20X coverage")))
-v = v + scale_colour_discrete(name="Method",labels = c("Original","Full Polish"))#+geom_vline(xintercept=3.5,colour="red")
+            title=expression(paste(lambda, " G/C indel errors divided by genomic context for all Reads")))
+v = v + scale_colour_discrete(name="Method")#+geom_vline(xintercept=3.5,colour="red")
 v
 dev.off()
 
