@@ -798,6 +798,8 @@ namespace PacBio.Consensus
             // We should revisit this later when we fix the model.
             float recalibratedPredAcc = RecalibratedAccuracyPrediction(bases.Zmw.Movie.SequencingChemistry, result.PredictedAccuracy, result.NumPasses);
             ((ZmwMetricsBases)result.Metrics).ReadScore = recalibratedPredAcc;
+            #else
+            ((ZmwMetricsBases)result.Metrics).ReadScore = result.PredictedAccuracy;
             #endif
 
             // Check that the read appears to be reasonably accurate based on the CCS QVs
