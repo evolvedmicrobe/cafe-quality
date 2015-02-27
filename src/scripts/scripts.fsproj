@@ -75,6 +75,7 @@
     <None Include="ExamineQVValues.fs" />
     <None Include="MakeCSVForJohn.fs" />
     <Compile Include="ExamineDelTags.fs" />
+    <Compile Include="16S_Check.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

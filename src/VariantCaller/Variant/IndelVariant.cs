@@ -96,5 +96,9 @@ namespace VariantCaller
             }
             return len;
         }
+        public override string ToString ()
+        {
+            return string.Format ("[IndelVariant: InHomopolymer={0}, HomopolymerLengthInReference={1}, HomopolymerBase={2}]", InHomopolymer, HomopolymerLengthInReference, HomopolymerBase);
+        }
     }
 }

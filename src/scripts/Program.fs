@@ -2,8 +2,9 @@
 
 open System
 open DelTagInvestigation
+open Caller16S
 
 [<EntryPoint>]
 let main args =
-    DelTagInvestigation.main
+    Caller16S.main
 
