@@ -14,9 +14,15 @@
 #include <unordered_map>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <cmath>
+#include <vector>
 using namespace std;
+
+
 namespace ConsensusCore {
     
+    template<class T>
+    using Matrix = std::vector<std::vector<T> >;
+
     /**
      A data structure to store SNR values.
      */
@@ -37,7 +43,7 @@ namespace ConsensusCore {
     class ContextParameterProvider {
         public:
             static std::shared_ptr<TransitionParameters> GetTransitionParameters(const string& context, const SNR& snrs);
-        
+    
 
        
     };
