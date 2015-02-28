@@ -119,7 +119,7 @@ namespace ConsensusCore {
     // Accessors
     //
     inline void
-    DenseMatrix::Set(int i, int j, float v)
+    DenseMatrix::Set(int i, int j, double v)
     {
         assert(columnBeingEdited_ == j);
         boost_dense_matrix::operator()(i, j) = v;
@@ -132,13 +132,13 @@ namespace ConsensusCore {
         return true;
     }
 
-    inline float
+    inline double
     DenseMatrix::Get(int i, int j) const
     {
         return (*this)(i, j);
     }
 
-    inline const float&
+    inline const double&
     DenseMatrix::operator() (int i, int j) const
     {
         return boost_dense_matrix::operator()(i, j);
@@ -152,7 +152,7 @@ namespace ConsensusCore {
         // contiguously)
         int begin, end;
         boost::tie(begin, end) = usedRanges_[j];
-        std::fill_n((float*)&boost_dense_matrix::operator()(begin, j),  // NOLINT
+        std::fill_n((double*)&boost_dense_matrix::operator()(begin, j),  // NOLINT
                     end - begin,
                     value_type());
         usedRanges_[j] = Interval(0, 0);

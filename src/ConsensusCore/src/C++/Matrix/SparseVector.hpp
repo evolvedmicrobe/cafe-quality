@@ -60,10 +60,10 @@ namespace ConsensusCore {
         void ResetForRange(int beginRow, int endRow);
 
     public:
-        const float& operator()(int i) const;
+        const double& operator()(int i) const;
         bool IsAllocated(int i) const;
-        float Get(int i) const;
-        void Set(int i, float v);
+        double Get(int i) const;
+        void Set(int i, double v);
         void Clear();
 
     public:
@@ -78,7 +78,7 @@ namespace ConsensusCore {
         void ExpandAllocated(int newAllocatedBegin, int newAllocatedEnd);
 
     private:
-        std::vector<float>* storage_;
+        std::vector<double>* storage_;
 
         // the "logical" length of the vector, of which only
         // a subset of entries are actually allocated

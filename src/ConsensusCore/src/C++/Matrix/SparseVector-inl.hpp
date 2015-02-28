@@ -59,7 +59,7 @@ namespace ConsensusCore
         logicalLength_     =  logicalLength;
         allocatedBeginRow_ =  max(beginRow - PADDING, 0);
         allocatedEndRow_   =  min(endRow   + PADDING, logicalLength_);
-        storage_           =  new vector<float>(allocatedEndRow_ - allocatedBeginRow_, NEG_INF);
+        storage_           =  new vector<double>(allocatedEndRow_ - allocatedBeginRow_, NEG_INF);
         nReallocs_         =  0;
         DEBUG_ONLY(CheckInvariants());
     }
@@ -71,7 +71,7 @@ namespace ConsensusCore
           allocatedEndRow_(other.allocatedEndRow_),
           nReallocs_(0)
     {
-        storage_           =  new vector<float>(*other.storage_);
+        storage_           =  new vector<double>(*other.storage_);
         nReallocs_         =  0;
         DEBUG_ONLY(CheckInvariants());
     }
@@ -103,7 +103,7 @@ namespace ConsensusCore
         {
             // use swap trick to free allocated but unused memory,
             // see: http://stackoverflow.com/questions/253157/how-to-downsize-stdvector
-            std::vector<float>(newAllocatedEnd - newAllocatedBegin, NEG_INF).swap(*storage_);
+            std::vector<double>(newAllocatedEnd - newAllocatedBegin, NEG_INF).swap(*storage_);
             nReallocs_++;
         }
         else
@@ -134,7 +134,7 @@ namespace ConsensusCore
         //      storage[(begin - newBegin) ... (end - newBegin)]
         memmove(&(*storage_)[allocatedBeginRow_ - newAllocatedBegin],
                 &(*storage_)[0],
-                (allocatedEndRow_ - allocatedBeginRow_) * sizeof(float)); // NOLINT
+                (allocatedEndRow_ - allocatedBeginRow_) * sizeof(double)); // NOLINT
         // "Zero"-fill the allocated but unused space.
         std::fill(storage_->begin(),
                   storage_->begin() + (allocatedBeginRow_ - newAllocatedBegin),
@@ -156,7 +156,7 @@ namespace ConsensusCore
         return i >= allocatedBeginRow_ && i < allocatedEndRow_;
     }
 
-    inline const float&
+    inline const double&
     SparseVector::operator()(int i) const
     {
         if (IsAllocated(i))
@@ -165,19 +165,19 @@ namespace ConsensusCore
         }
         else
         {
-            static const float emptyCell_ = NEG_INF;
+            static const double emptyCell_ = NEG_INF;
             return emptyCell_;
         }
     }
 
-    inline float
+    inline double
     SparseVector::Get(int i) const
     {
         return (*this)(i);
     }
 
     inline void
-    SparseVector::Set(int i, float v)
+    SparseVector::Set(int i, double v)
     {
         DEBUG_ONLY(CheckInvariants());
         assert (i >= 0 && i < logicalLength_);

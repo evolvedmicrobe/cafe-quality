@@ -72,17 +72,17 @@ namespace ConsensusCore {
         int AllocatedEntries() const;  // an entry may be allocated but not used
 
     public:  // Accessors
-        const float& operator()(int i, int j) const;
+        const double& operator()(int i, int j) const;
         bool IsAllocated(int i, int j) const;
-        float Get(int i, int j) const;
-        void Set(int i, int j, float v);
+        double Get(int i, int j) const;
+        void Set(int i, int j, double v);
         void ClearColumn(int j);
 
 
     public:
         // Method SWIG clients can use to get a native matrix (e.g. Numpy)
         // mat must be filled as a ROW major matrix
-        void ToHostMatrix(float** mat, int* rows, int* cols) const;
+        void ToHostMatrix(double** mat, int* rows, int* cols) const;
 
     private:
         void CheckInvariants(int column) const;

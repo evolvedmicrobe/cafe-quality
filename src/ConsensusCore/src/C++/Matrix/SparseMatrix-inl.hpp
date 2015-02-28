@@ -122,10 +122,10 @@ namespace ConsensusCore {
     //
     // Accessors
     //
-    inline const float&
+    inline const double&
     SparseMatrix::operator() (int i, int j) const
     {
-        static const float emptyCell = Zero<ldouble>();
+        static const double emptyCell = Zero<ldouble>();
         if (columns_[j] == NULL)
         {
             return emptyCell;
@@ -142,14 +142,14 @@ namespace ConsensusCore {
         return columns_[j] != NULL && columns_[j]->IsAllocated(i);
     }
 
-    inline float
+    inline double
     SparseMatrix::Get(int i, int j) const
     {
         return (*this)(i, j);
     }
 
     inline void
-    SparseMatrix::Set(int i, int j, float v)
+    SparseMatrix::Set(int i, int j, double v)
     {
         assert(columnBeingEdited_ == j);
         columns_[j]->Set(i, v);

@@ -55,6 +55,6 @@ namespace ConsensusCore {
 
     public:  // Accessors
         virtual bool IsAllocated(int i, int j) const = 0;
-        virtual float Get(int i, int j) const = 0;
+        virtual double Get(int i, int j) const = 0;
     };
 }

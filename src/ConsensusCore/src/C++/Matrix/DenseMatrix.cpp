@@ -87,11 +87,11 @@ namespace ConsensusCore {
     }
 
     void
-    DenseMatrix::ToHostMatrix(float** mat, int* rows, int* cols) const
+    DenseMatrix::ToHostMatrix(double** mat, int* rows, int* cols) const
     {
         // TODO(dalexander): make sure SWIG client deallocates this memory -- use %newobject flag
         matrix<ldouble, row_major> rowMajorPeer(*this);
-        *mat = new float[Rows() * Columns()];
+        *mat = new double[Rows() * Columns()];
         std::copy(rowMajorPeer.data().begin(), rowMajorPeer.data().end(), *mat);
         *rows = Rows();
         *cols = Columns();

@@ -110,10 +110,10 @@ namespace ConsensusCore {
     }
 
     void
-    SparseMatrix::ToHostMatrix(float** mat, int* rows, int* cols) const
+    SparseMatrix::ToHostMatrix(double** mat, int* rows, int* cols) const
     {
-        const float nan = std::numeric_limits<float>::quiet_NaN();
-        *mat = new float[Rows() * Columns()];
+        const double nan = std::numeric_limits<double>::quiet_NaN();
+        *mat = new double[Rows() * Columns()];
         *rows = Rows();
         *cols = Columns();
         for (int i = 0; i < Rows(); i++) {
