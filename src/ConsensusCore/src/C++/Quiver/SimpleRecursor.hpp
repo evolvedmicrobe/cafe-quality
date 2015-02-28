@@ -51,7 +51,7 @@ namespace ConsensusCore {
         void FillAlpha(const E& e, const M& guide, M& alpha) const;
         void FillBeta(const E& e, const M& guide, M& beta) const;
 
-        float LinkAlphaBeta(const E& e,
+        double LinkAlphaBeta(const E& e,
                             const M& alpha, int alphaColumn,
                             const M& beta, int betaColumn,
                             int absoluteColumn) const;

@@ -48,17 +48,17 @@ namespace detail {
 
     template<typename M>
     inline Interval RowRange(int j, const M& matrix,
-                             float scoreDiff)
+                             double scoreDiff)
     {
         int beginRow, endRow;
         boost::tie(beginRow, endRow) = matrix.UsedRowRange(j);
         int maxRow = beginRow;
-        float maxScore = matrix(maxRow, j);
+        double maxScore = matrix(maxRow, j);
         int i;
 
         for (i = beginRow + 1; i < endRow; i++)
         {
-            float score = matrix(i, j);
+            double score = matrix(i, j);
 
             if (score > maxScore)
             {
@@ -67,7 +67,7 @@ namespace detail {
             }
         }
 
-        float thresholdScore = maxScore - scoreDiff;
+        double thresholdScore = maxScore - scoreDiff;
 
         for (i = beginRow;
              i < maxRow && matrix(i, j) < thresholdScore;
@@ -95,7 +95,7 @@ namespace detail {
             return false;
         }
 
-        float scoreDiff = bandingOptions_.ScoreDiff;
+        double scoreDiff = bandingOptions_.ScoreDiff;
         Interval interval(*beginRow, *endRow);
 
         if (useGuide)

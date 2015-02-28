@@ -65,7 +65,7 @@ namespace ConsensusCore {
 
         /// \brief Calculate the recursion score by "linking" partial alpha and/or
         ///        beta matrices.
-        virtual float LinkAlphaBeta(const E& e,
+        virtual double LinkAlphaBeta(const E& e,
                                     const M& alpha, int alphaColumn,
                                     const M& beta, int betaColumn,
                                     int absoluteColumn) const = 0;
