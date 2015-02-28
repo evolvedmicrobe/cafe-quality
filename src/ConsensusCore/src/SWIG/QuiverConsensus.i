@@ -10,7 +10,8 @@
 #include "Quiver/ReadScorer.hpp"
 #include "Quiver/Diploid.hpp"
 #include "Quiver/QuiverConsensus.hpp"
-
+#include "ContextParameterProvider.hpp"
+#include "TransitionParameters.hpp"
 using namespace ConsensusCore;
 %}
 
@@ -46,7 +47,8 @@ using namespace ConsensusCore;
 %include "Quiver/ReadScorer.hpp"
 %include "Quiver/Diploid.hpp"
 %include "Quiver/QuiverConsensus.hpp"
-
+%include "ContextParameterProvider.hpp"
+%include "TransitionParameters.hpp"
  
 namespace ConsensusCore {
 
