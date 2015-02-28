@@ -10,9 +10,10 @@
 #include "Quiver/ReadScorer.hpp"
 #include "Quiver/Diploid.hpp"
 #include "Quiver/QuiverConsensus.hpp"
-#include "ContextParameterProvider.hpp"
 #include "TransitionParameters.hpp"
+#include "ContextParameterProvider.hpp"
 using namespace ConsensusCore;
+using namespace std;
 %}
 
 #ifdef SWIGPYTHON
@@ -47,12 +48,14 @@ using namespace ConsensusCore;
 %include "Quiver/ReadScorer.hpp"
 %include "Quiver/Diploid.hpp"
 %include "Quiver/QuiverConsensus.hpp"
+%include "TransitionParameters.hpp" 
 %include "ContextParameterProvider.hpp"
-%include "TransitionParameters.hpp"
- 
+
+
 namespace ConsensusCore {
 
-  
+
+
 
 
     //

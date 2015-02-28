@@ -34,9 +34,6 @@
   <!--   <Compile Include="Properties\AssemblyInfo.cs" /> -->
   <!-- </ItemGroup> -->
   <!-- <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" /> -->
-  <ItemGroup>
-    <Compile Include="build\CSharp\ConsensusCore.cs" />
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="BeforeBuild">
     <Exec Command="export PATH=/usr/local/bin:$PATH;./configure" Condition=" '$(OS)' != 'Windows_NT' " />
@@ -45,4 +42,10 @@
   <Target Name="BeforeClean" BeforeTargets="Clean">
     <Exec Command="make clean" Condition=" '$(OS)' != 'Windows_NT' " />
   </Target>
+  <ItemGroup>
+    <Folder Include="build\CSharp\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="build\CSharp\ConsensusCore.cs" />
+  </ItemGroup>
 </Project>

@@ -22,6 +22,9 @@ namespace ConsensusCore {
         double CalculateTotal() const;
         void RemoveConstant(double value);
         
+        // Define copy and default constructors for SWIG
+        TransitionParameters();
+        TransitionParameters(const TransitionParameters& other );
     };
 }
 #endif /* defined(__ConsensusCoreXCode__TransitionParameters__) */

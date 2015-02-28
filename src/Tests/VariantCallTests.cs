@@ -1,11 +1,12 @@
-﻿using System;
+﻿#if FALSE
+using System;
 using Bio;
 using VariantCaller;
 using NUnit.Framework;
 
 
 
-namespace TestAlgorithms
+namespace Tests
 {
     [TestFixture ()]
     public class VariantCallTests
@@ -78,3 +79,4 @@ CACCCTCATGTTCATACACCTATCCCCCATTCTCCTCCTATCCCTCAACCCCGACATCAT".Replace("\n","").R
 
     }
 }
+#endif

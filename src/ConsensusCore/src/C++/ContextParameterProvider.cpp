@@ -62,7 +62,7 @@ namespace ConsensusCore {
     
     static std::unordered_map<std::string, Matrix<double>* > parameter_store = { {"AA", &AA},{"CC", &CC},{"GG", &GG},{"NA", &NA},{"NC", &NC},{"NG", &NG},{"NT", &NT},{"TT", &TT}};
     
-    std::shared_ptr<TransitionParameters>
+    TransitionParameters
     ContextParameterProvider::GetTransitionParameters(const string& context, const SNR& snrs)
     {
         auto params = *parameter_store[context];
@@ -104,8 +104,8 @@ namespace ConsensusCore {
         for(int i=0; i< 3; i++) {
             predicts[i] = log(predicts[i]) - sum;
         }
-        
-        return std::shared_ptr<TransitionParameters> (new TransitionParameters(predicts[1], predicts[2], branch, predicts[0]));
+        TransitionParameters tp(predicts[1], predicts[2], branch, predicts[0]);
+        return tp;
     }
     
 }

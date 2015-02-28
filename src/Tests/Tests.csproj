@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="VariantCallTests.cs" />
+    <Compile Include="SnrTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -42,9 +43,9 @@
       <Project>{B53E11DF-F9A9-4939-893E-78E59872089A}</Project>
       <Name>Bio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\VariantCaller\VariantCaller.csproj">
-      <Project>{C1EA5B21-991D-4455-BAA7-05CFD8C04B88}</Project>
-      <Name>VariantCaller</Name>
+    <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
+      <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
+      <Name>ConsensusCore</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

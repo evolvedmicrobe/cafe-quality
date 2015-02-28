@@ -42,7 +42,7 @@ namespace ConsensusCore {
      */
     class ContextParameterProvider {
         public:
-            static std::shared_ptr<TransitionParameters> GetTransitionParameters(const string& context, const SNR& snrs);
+            static TransitionParameters GetTransitionParameters(const string& context, const SNR& snrs);
     
 
        
