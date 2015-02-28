@@ -45,10 +45,10 @@ else
 endif
 
 ifeq ($(GXX),clang++)
-    CXX_FLAGS           = $(GXX_FLAGS) $(CXX_OPT_FLAGS) -stdlib=libstdc++ -msse3 -fPIC -Qunused-arguments -fno-omit-frame-pointer -Wno-c++11-extensions
+    CXX_FLAGS           = $(GXX_FLAGS) $(CXX_OPT_FLAGS) -msse3 -fPIC -Qunused-arguments -fno-omit-frame-pointer -Wno-c++11-extensions -std=c++11
     CXX_STRICT_FLAGS    = $(GXX_FLAGS) $(CXX_FLAGS) -pedantic -ansi -Wall
 else
-    CXX_FLAGS           = $(CXX_OPT_FLAGS) $(CXX_EXTRA_ARGS) -msse3 -fPIC -fno-omit-frame-pointer -Wno-c++11-extensions
+    CXX_FLAGS           = $(CXX_OPT_FLAGS) $(CXX_EXTRA_ARGS) -msse3 -fPIC -fno-omit-frame-pointer -Wno-c++11-extensions -std=c++11
     CXX_STRICT_FLAGS    = $(CXX_FLAGS) -pedantic -ansi -Wall
 endif
 
