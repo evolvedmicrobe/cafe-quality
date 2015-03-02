@@ -91,8 +91,8 @@
     <Compile Include="PartialOrderAlignment.cs" />
     <Compile Include="PoaLocal.cs" />
     <Compile Include="ReadPartition.cs" />
-    <Compile Include="ConsensusTrain.cs" />
     <Compile Include="ConsensusTrainExamples.cs" />
+    <Compile Include="SnrCut.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
