@@ -47,10 +47,10 @@
 
 namespace ConsensusCore {
 
-    Read::Read(std::vector<TransitionParameters> qvValues,
+    Read::Read(
                std::string name,
                std::string seq)
-        : trans_probs(qvValues),
+        : 
           Name(name),
           Sequence(seq)
     {}

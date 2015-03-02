@@ -50,8 +50,7 @@ namespace ConsensusCore
         std::string Sequence;
         std::string Name;
 
-        Read(std::vector<TransitionParameters> qvValues,
-             std::string name, std::string sequence);
+        Read(std::string name, std::string sequence);
 
         Read(const Read& other);
 
