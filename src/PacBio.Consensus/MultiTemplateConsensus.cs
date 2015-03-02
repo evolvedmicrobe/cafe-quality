@@ -116,9 +116,9 @@ namespace PacBio.Consensus
                 get { return MetricSomeReadsToMaster(Scorer.MappedReads, null); }
             }
 
-            public float[] GetBaselineScores()
+            public double[] GetBaselineScores()
             {
-                return MetricSomeReadsToMaster(Scorer.GetBaselineScores(), (float) -Math.Sqrt(Single.MaxValue));
+                return MetricSomeReadsToMaster(Scorer.GetBaselineScores(),  -Math.Sqrt(Single.MaxValue));
             }
 
             public int[] AllocatedEntries
@@ -145,7 +145,7 @@ namespace PacBio.Consensus
             /// will have a mapping ratio of 0, reads mapped to only this scorer will have a mapping ratio of Inf.
             /// </summary>
             /// <returns></returns>
-            public float[] MappingRatios()
+            public double[] MappingRatios()
             {
                 var allMappingRatios = Master.MappingRatios();
                 var myIndex = Master.Scorers.FindIndex(sc => sc == this);
@@ -193,7 +193,7 @@ namespace PacBio.Consensus
             /// Get the mutation score vector for mutation m for the reads in this scorer.
             /// The mutation scores are appropriately weighted, given the mapping ratios passed in.
             /// </summary>
-            public float[] ScoreMutationWeighted(Mutation m, float[] scorerMappingRatios)
+            public double[] ScoreMutationWeighted(Mutation m, double[] scorerMappingRatios)
             {
                 var scores = Scorer.GetScores(m); 
                 var myMappingRatios = MetricAllReadsToSome(scorerMappingRatios);
@@ -215,7 +215,7 @@ namespace PacBio.Consensus
                             // Partial mapping
                             var p1 = r/(1 + r);
                             var expScore = Math.Exp(scores[i])*p1 + (1 - p1);
-                            return (float) Math.Log(expScore);
+                            return  Math.Log(expScore);
                         }
                 });
 
@@ -283,15 +283,15 @@ namespace PacBio.Consensus
         /// <summary>
         /// Compute the mapping odds ratio for each template for each read that we hold 
         /// </summary>
-        public float[][] MappingRatios()
+        public double[][] MappingRatios()
         {
             var baselines = Scorers.Map(s => s.GetBaselineScores());
 
-            var mappingRatios = new float[Scorers.Count][];
+            var mappingRatios = new double[Scorers.Count][];
 
             for (var thisScorer = 0; thisScorer < Scorers.Count; thisScorer++)
             {
-                mappingRatios[thisScorer] = new float[NumReads];
+                mappingRatios[thisScorer] = new double[NumReads];
 
                 for (var read = 0; read < NumReads; read++)
                 {
@@ -305,7 +305,7 @@ namespace PacBio.Consensus
                         }
                         
                     }
-                    var ratio = (float) (1.0/invMappingRatio);
+                    var ratio =  (1.0/invMappingRatio);
                     mappingRatios[thisScorer][read] = ratio;
                 }
             }
@@ -313,26 +313,26 @@ namespace PacBio.Consensus
             return mappingRatios;
         }
 
-        public float[][] MappingPosteriors()
+        public double[][] MappingPosteriors()
         {
             var mapRatios = MappingRatios();
 
             var mapPosteriors = mapRatios.Map(v => v.Map(r =>
                 {                
-                    if (r > Math.Sqrt(float.MaxValue))
+                    if (r > Math.Sqrt(double.MaxValue))
                 {
                     // Read maps essentially uniquely to this haplotype.
-                    return 1.0f;
+                    return 1.0;
                 }
-                else if (r < Math.Sqrt(float.Epsilon))
+                    else if (r < Math.Sqrt(double.Epsilon))
                 {
                     // Doesn't map strongy enough to affect outcome.
-                    return 0.0f;
+                    return 0.0;
                 }
                 else
                 {
                     // Partial mapping
-                    return r/(1.0f + r);
+                    return r/(1.0 + r);
                 }}));
 
             return mapPosteriors;
@@ -464,10 +464,10 @@ namespace PacBio.Consensus
         }
 
 
-        public float[][] CoverageLevels()
+        public double[][] CoverageLevels()
         {
             var mappingPosterior = MappingPosteriors();
-            var result = Scorers.Map(s => new float[s.Template.Length]);
+            var result = Scorers.Map(s => new double[s.Template.Length]);
 
             for (int sc = 0; sc < Scorers.Count; sc++)
             {

@@ -35,46 +35,9 @@ namespace PacBio.Consensus
     /// </summary>
     public class ConsensusCoreWrap
     {
-        public static QvSequenceFeatures MakeQvSequenceFeatures(int startBase, int length, IZmwBases b)
-        {
-            using (FloatArray delQv = MakeFloatArray(b.DeletionQV, startBase, length),
-                              delTag = MakeFloatArray(b.DeletionTag, startBase, length),
-                              insQv = MakeFloatArray(b.InsertionQV, startBase, length),
-                              subsQv = MakeFloatArray(b.SubstitutionQV, startBase, length),
-                              mergeQv = MakeFloatArray(b.MergeQV, startBase, length)
-                )
-            {
-                return new QvSequenceFeatures(b.Sequence.Substring(startBase, length), insQv.cast(), subsQv.cast(),
-                                              delQv.cast(), delTag.cast(), mergeQv.cast());
-            }
-        }
-
-        public static QvSequenceFeatures MakeQvSequenceFeatures(int referenceChunkStart, int referenceChunkSize,
-                                                                IAlnSummary alnSummary)
-        {
-            var alignment = alnSummary.ReadAlignment();
-
-            var useCell =
-                alignment.Cells.Select(
-                    c =>
-                    c.Template >= referenceChunkStart && c.Template < referenceChunkStart + referenceChunkSize &&
-                    c.Mode != AlignMode.Delete).ToArray();
 
 
-            using (FloatArray delQv = MakeFloatArray(FilterArray(alnSummary.ReadMetric<byte>("DeletionQV"), useCell)),
-                              delTag = MakeFloatArray(FilterArray(alnSummary.ReadMetric<sbyte>("DeletionTag"), useCell)),
-                              insQv = MakeFloatArray(FilterArray(alnSummary.ReadMetric<byte>("InsertionQV"), useCell)),
-                              subsQv = MakeFloatArray(FilterArray(alnSummary.ReadMetric<byte>("SubstitutionQV"), useCell)),
-                              mergeQv = MakeFloatArray(FilterArray(alnSummary.ReadMetric<byte>("MergeQV"), useCell)))
-            {
-                var sequence = new string(FilterArray(alignment.ReadMarkup().ToCharArray(), useCell));
-                Debug.Assert(!(sequence.Contains("-")));
-
-                return new QvSequenceFeatures(sequence, insQv.cast(), subsQv.cast(),
-                                              delQv.cast(), delTag.cast(), mergeQv.cast());
-            }
-        }
-
+     
         private static T[] FilterArray<T>(IEnumerable<T> array, IList<bool> filter)
         {
             return array.Where((v, idx) => filter[idx]).ToArray();
@@ -137,74 +100,24 @@ namespace PacBio.Consensus
         }
 
 
-        public static float[] QvModelParamsToArray(QvModelParams p)
-        {
-            var mergeArray = FloatArray.frompointer(p.Merge);
-            var mergeSArray = FloatArray.frompointer(p.MergeS);
-
-            var d = new[]
-            {
-                p.Match,
-                p.Mismatch,
-                p.MismatchS,
-                p.Branch,
-                p.BranchS,
-                p.DeletionN,
-                p.DeletionWithTag,
-                p.DeletionWithTagS,
-                p.Nce,
-                p.NceS,
-                mergeArray.getitem(0),
-                mergeArray.getitem(1),
-                mergeArray.getitem(2),
-                mergeArray.getitem(3),
-                mergeSArray.getitem(0),
-                mergeSArray.getitem(1),
-                mergeSArray.getitem(2),
-                mergeSArray.getitem(3)
-            };
-
-            return d;
-        }
-
-
-        public static QvModelParams QvModelParamsFromArray(float[] arr)
-        {
-            var m = new QvModelParams(
-                arr[0],
-                arr[1],
-                arr[2],
-                arr[3],
-                arr[4],
-                arr[5],
-                arr[6],
-                arr[7],
-                arr[8],
-                arr[9],
-                arr[10],
-                arr[11],
-                arr[12],
-                arr[13],
-                arr[14],
-                arr[15],
-                arr[16],
-                arr[17]
-            );
-
-            return m;
-        }
+      
+       
     }
 
     public class ScorerConfig : IDisposable
     {
-        public QuiverConfigTable Parameters;
-        public RecursionAlgo Algorithm = RecursionAlgo.Viterbi;
-        public bool HasChemistryOverride = false;
+        public SNR Snr;
+
+        public RecursionAlgo Algorithm = RecursionAlgo.Prob;
+
 
         public void Dispose()
         {
-            if (Parameters != null)
-                Parameters.Dispose();
+            if (Snr != null) {
+                Snr.Dispose ();
+                Snr = null;
+            }
+
         }
     }
 
@@ -262,11 +175,11 @@ namespace PacBio.Consensus
 
             if (config.Algorithm == RecursionAlgo.Viterbi)
             {
-                scorer = new SparseSseQvMultiReadMutationScorer(config.Parameters, strandTpl);
+                //scorer = new SparseSseQvMultiReadMutationScorer(config.Parameters, strandTpl);
             }
             else if (config.Algorithm == RecursionAlgo.Prob)
             {
-                scorer = new SparseSseQvSumProductMultiReadMutationScorer(config.Parameters, strandTpl);
+               // scorer = new SparseSseQvSumProductMultiReadMutationScorer(config.Parameters, strandTpl);
             }
             else
             {
@@ -276,10 +189,9 @@ namespace PacBio.Consensus
             foreach (var r in regions)
             {
                 var name = TraceReference.CreateSpringfieldSubread(bases, r.Start, r.End);
-                var chem = config.HasChemistryOverride ? "*" : bases.Zmw.Movie.SequencingChemistry;
-
-                using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
-                using (var read = new Read(qsf, name, chem))
+                var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
+                //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
+                using (var read = new Read( name, seq))
                 using (var mappedRead = new MappedRead(read, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd,
                                                        r.AdapterHitBefore, r.AdapterHitAfter))
                 {
@@ -313,11 +225,11 @@ namespace PacBio.Consensus
 
             if (config.Algorithm == RecursionAlgo.Viterbi)
             {
-                scorer = new SparseSseQvMultiReadMutationScorer(config.Parameters, strandTpl);
+                //scorer = new SparseSseQvMultiReadMutationScorer(config.Parameters, strandTpl);
             }
             else if (config.Algorithm == RecursionAlgo.Prob)
             {
-                scorer = new SparseSseQvSumProductMultiReadMutationScorer(config.Parameters, strandTpl);
+               // scorer = new SparseSseQvSumProductMultiReadMutationScorer(config.Parameters, strandTpl);
             }
             else
             {
@@ -329,10 +241,10 @@ namespace PacBio.Consensus
                 var r = regAndBases.Item1;
                 var bases = regAndBases.Item2;
                 var name = TraceReference.CreateSpringfieldSubread(bases, r.Start, r.End);
-                var chem = config.HasChemistryOverride ? "*" : bases.Zmw.Movie.SequencingChemistry;
-
-                using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
-                using (var read = new Read(qsf, name, chem))
+                //var chem = config.HasChemistryOverride ? "*" : bases.Zmw.Movie.SequencingChemistry;
+                var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
+                //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
+                using (var read = new Read( name, seq))
                 using (var mappedRead = new MappedRead(read, (StrandEnum)r.Strand, r.TemplateStart, r.TemplateEnd,
                                             r.AdapterHitBefore, r.AdapterHitAfter))
                 {
@@ -354,62 +266,7 @@ namespace PacBio.Consensus
         }
 
 
-        /// <summary>
-        /// Construct a mutation evalutor for the pulse observations in encapsulated by read, on template TrialTemplate.
-        /// </summary>
-        public MultiReadMutationScorer(IEnumerable<IAlnSummary> alignments, int referenceChunkStart,
-                                       TrialTemplate trialTemplate, ScorerConfig config)
-        {
-            StartAdapterBases = trialTemplate.StartAdapterBases;
-            EndAdapterBases = trialTemplate.EndAdapterBases;
-
-            var strandTpl = trialTemplate.GetSequence(Strand.Forward);
-
-            if (config.Algorithm == RecursionAlgo.Viterbi)
-            {
-                scorer = new SparseSseQvMultiReadMutationScorer(config.Parameters, strandTpl);
-            }
-            else if (config.Algorithm == RecursionAlgo.Prob)
-            {
-                scorer = new SparseSseQvSumProductMultiReadMutationScorer(config.Parameters, strandTpl);
-            }
-            else
-            {
-                throw new ApplicationException("unrecognized recursion algorthim");
-            }
-
-            var referenceChunkSize = trialTemplate.Sequence.Length;
-            var referenceChunkEnd = referenceChunkStart + referenceChunkSize;
-
-            foreach (var a in alignments)
-            {
-                // we have to subtract out the current referenceChunk start because the provided
-                // trialTemplate has already been chunked.
-                // TODO (lhepler) -- fix how this is handled, it is very inelegant at this moment
-                var templateStart = Math.Max(a.TemplateStart, referenceChunkStart) - referenceChunkStart;
-                var templateEnd = Math.Min(a.TemplateEnd, referenceChunkEnd) - referenceChunkStart;
-                var chem = config.HasChemistryOverride ? "*" : a.SequencingChemistry;
-
-                using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(referenceChunkStart, referenceChunkSize, a))
-                using (var read = new Read(qsf, a.ReadName, chem))
-                using (var mappedRead = new MappedRead(read, (StrandEnum)a.Strand, templateStart, templateEnd))
-                {
-                    if (!scorer.AddRead(mappedRead, AddThreshold))
-                    {
-                        #if DIAGNOSTIC
-                        scorer.AddRead(mappedRead, 1.0f);
-
-                        var prefix = name.Replace("/", ".");
-
-                        WriteAlphaBetaMatrices(readBitmap.Count, prefix);
-                        #else
-                        Log(LogLevel.DEBUG, "Skipped adding read '{0}' -- more than {1}% of entries used.", a.ReadName, AddThreshold * 100);
-                        #endif
-                    }
-                }
-            }
-        }
-
+       
 
         /// <summary>
         /// Gets the number of allocated cells for each added MappedRead
@@ -520,7 +377,7 @@ namespace PacBio.Consensus
         {
             get { return scorer.NumReads(); }
         }
-
+        #if FALSE
         /// <summary>
         /// Copy constructor
         /// </summary>
@@ -551,9 +408,9 @@ namespace PacBio.Consensus
             // Invoke copy constructor
             return new MultiReadMutationScorer(this);
         }
+        #endif
 
-
-        public float BaselineScore()
+        public double BaselineScore()
         {
             return scorer.BaselineScore();
         }
@@ -565,12 +422,12 @@ namespace PacBio.Consensus
         /// </summary>
         /// <param name="m">The mutation to apply to the original template</param>
         /// <returns>The ratio of the mutated and original template likelihoods</returns>
-        public float ScoreMutation(Mutation m)
+        public double ScoreMutation(Mutation m)
         {
             return scorer.Score(m.Type, m.TemplatePosition, m.Base);
         }
-        
-        public float ScoreMutationFast(Mutation m)
+
+        public double ScoreMutationFast(Mutation m)
         {
             using (var ccMutation = m.ToConsensusCoreType())
             {
@@ -578,11 +435,11 @@ namespace PacBio.Consensus
             }
         }
 
-        public float ScoreMutationWeighted(Mutation m, float[] mappingRatios)
+        public double ScoreMutationWeighted(Mutation m, double[] mappingRatios)
         {
             var scores = GetScores(m);
 
-            var acc = 0.0f;
+            double acc = 0.0;
 
             for (int i = 0; i < scores.Length; i++)
             {
@@ -600,7 +457,7 @@ namespace PacBio.Consensus
                     // Partial mapping
                     var expScore = (Math.Exp(scores[i]) + (1.0f/mappingRatios[i])) / (1.0f + (1.0f/mappingRatios[i]));
                     var score = Math.Log(expScore);
-                    acc += (float) score;
+                    acc += (double) score;
                 }
             }
 
@@ -611,7 +468,7 @@ namespace PacBio.Consensus
         /// Score a compound mutation by packing the single base mutations into a single multi-base mutation.
         /// FIXME - not debugged in ConsensusCore yet.
         /// </summary>
-        public float ScoreCompoundMutation(List<Mutation> mutations)
+        public double ScoreCompoundMutation(List<Mutation> mutations)
         {
             var ccMuts = mutations.Map(m => new ConsensusCore.Mutation(m.Type, m.TemplatePosition, m.Base));
 
@@ -639,11 +496,11 @@ namespace PacBio.Consensus
         /// <summary>
         /// Get the Quiver score deltas for this mutation for each read with a default value for unobserved mutations
         /// </summary>
-        public float[] GetScoresWithDefault(Mutation m, float defaultValue)
+        public double[] GetScoresWithDefault(Mutation m, double defaultValue)
         {
             using (var scores = scorer.Scores(m.Type, m.TemplatePosition, m.Base, defaultValue))
             {
-                var r = new float[scores.Count];
+                var r = new double[scores.Count];
                 scores.CopyTo(r);
                 return r;
             }
@@ -652,7 +509,7 @@ namespace PacBio.Consensus
         /// <summary>
         /// Aggregate the quiver score deltas according to some supplied function
         /// </summary>
-        public float AggregateScoresWithDefault(Mutation m, float defaultValue, Func<float, float, float> f)
+        public double AggregateScoresWithDefault(Mutation m, double defaultValue, Func<double, double, double> f)
         {
             using (var scores = scorer.Scores(m.Type, m.TemplatePosition, m.Base, defaultValue))
             {
@@ -663,7 +520,7 @@ namespace PacBio.Consensus
         /// <summary>
         /// Get the Quiver score deltas for this mutation for each read.
         /// </summary>
-        public float[] GetScores(Mutation m)
+        public double[] GetScores(Mutation m)
         {
             return GetScoresWithDefault(m, 0);
         }
@@ -671,11 +528,11 @@ namespace PacBio.Consensus
         /// <summary>
         /// Get the baseline Quiver score of each read.
         /// </summary>
-        public float[] GetBaselineScores()
+        public double[] GetBaselineScores()
         {
             using (var scores = scorer.BaselineScores())
             {
-                var r = new float[scores.Count];
+                var r = new double[scores.Count];
                 scores.CopyTo(r);
                 return r;
             }
@@ -757,7 +614,7 @@ namespace PacBio.Consensus
                     FileAccess.Write,
                     FileShare.None))
             {
-                binaryFormatter.Serialize(serializationStream, new Tuple<float[][], int[]>(mutScoreVectors, positions));
+                binaryFormatter.Serialize(serializationStream, new Tuple<double[][], int[]>(mutScoreVectors, positions));
             }
         }
     }

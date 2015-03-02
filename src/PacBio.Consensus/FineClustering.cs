@@ -421,8 +421,8 @@ namespace PacBio.Consensus
 
         public int Coverage;
         public string[] SubreadIds;
-        public float[] MappingScores;
-        public float PredictedAccuracy;
+        public double[] MappingScores;
+        public double PredictedAccuracy;
 
         public string FastaName;
         public string Sequence;

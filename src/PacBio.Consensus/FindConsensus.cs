@@ -158,7 +158,7 @@ namespace PacBio.Consensus
     public struct MutationScore
     {
         public Mutation Mutation;
-        public float Score;
+        public double Score;
         public bool Exists;
     }
 
@@ -518,7 +518,7 @@ namespace PacBio.Consensus
         }
 
 
-        public static int ImproveConsensus(MultiReadMutationScorer scorer, int maxIterations, float[] mappingRatios = null, bool fast = false)
+        public static int ImproveConsensus(MultiReadMutationScorer scorer, int maxIterations, double[] mappingRatios = null, bool fast = false)
         {
             Func<Mutation, MutationScore> scoreMutation;
 
@@ -591,7 +591,7 @@ namespace PacBio.Consensus
             return iters;
         }
 
-        public static List<MutationScore> ComputeAllQVs(MultiReadMutationScorer scorer, float[] mappingRatios = null)
+        public static List<MutationScore> ComputeAllQVs(MultiReadMutationScorer scorer, double[] mappingRatios = null)
         {
             Func<Mutation, MutationScore> scoreMutation;
 
@@ -611,10 +611,10 @@ namespace PacBio.Consensus
             return allScores;
         }
 
-        private static float MutationProbability(MutationScore sc)
+        private static double MutationProbability(MutationScore sc)
         {
             if (!sc.Exists)
-                return 0.0f;
+                return 0.0;
 
             return ScoreToErrorProb(sc.Score);
         }
@@ -624,13 +624,13 @@ namespace PacBio.Consensus
         /// </summary>
         /// <param name="score"></param>
         /// <returns></returns>
-        public static float ScoreToErrorProb(float score)
+        public static double ScoreToErrorProb(double score)
         {
             // Use a logit transform
-            var errProb = (1.0f / (1.0 + Math.Exp(-score)));
+            var errProb = (1.0 / (1.0 + Math.Exp(-score)));
 
             // Cap the apparent QV at 50
-            return (float) Math.Max(1e-5, errProb);
+            return Math.Max(1e-5, errProb);
         }
 
         public class ConsensusQVs

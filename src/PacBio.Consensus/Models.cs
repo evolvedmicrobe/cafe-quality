@@ -49,8 +49,8 @@ namespace PacBio.Consensus
         {
             get
             {
-                var path = Path.Combine(InternalParameterDirectory, "QuiverParameters.ini");
-                return LoadParametersFromFile(path);
+                //TODO: Implement
+                return null;
             }
         }
 
@@ -58,8 +58,8 @@ namespace PacBio.Consensus
         {
             get
             {
-                var path = Path.Combine(InternalParameterDirectory, "CCSParameters.ini");
-                return LoadParametersFromFile(path);
+                //TODO: Implement
+                return null;
             }
         }
 
@@ -76,7 +76,6 @@ namespace PacBio.Consensus
         {
             public string SequencingChemistry;
             public string ModelType;
-            public QvModelParams ModelParams;
         }
 
 
@@ -93,7 +92,7 @@ namespace PacBio.Consensus
                 : base(message, inner)
             {}
         }
-
+        #if FALSE
         /// <summary>
         /// Load the Quiver parameters available in parameterFile, and return a QuiverConfigTable of all included parameter sets
         /// </summary>
@@ -285,7 +284,7 @@ namespace PacBio.Consensus
                 parser.WriteData(sr, iniData);
             }
         }
-
+       
         private static ParameterSet ParseParams(SectionData section)
         {
             var f = ModelFactor;
@@ -349,6 +348,7 @@ namespace PacBio.Consensus
                     ModelParams = p
                 };
         }
+        #endif
     }
 
     public class ChemistryMapping
