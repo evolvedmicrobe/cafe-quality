@@ -80,12 +80,10 @@
     <Compile Include="CoarseClustering.cs" />
     <Compile Include="ConsensusCoreWrap.cs" />
     <Compile Include="FindConsensus.cs" />
-    <Compile Include="FineClustering.cs" />
     <Compile Include="GenerateBarcodes.cs" />
     <Compile Include="GenerateMutations.cs" />
     <Compile Include="VariantDetection.cs" />
     <Compile Include="Models.cs" />
-    <Compile Include="MultiTemplateConsensus.cs" />
     <Compile Include="MutationEvaluation.cs" />
     <Compile Include="MutationSelector.cs" />
     <Compile Include="PartialOrderAlignment.cs" />
