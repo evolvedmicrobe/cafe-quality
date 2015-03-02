@@ -93,6 +93,7 @@
     <Compile Include="ReadPartition.cs" />
     <Compile Include="ConsensusTrainExamples.cs" />
     <Compile Include="SnrCut.cs" />
+    <Compile Include="PhredQVs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
