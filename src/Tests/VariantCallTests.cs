@@ -1,5 +1,4 @@
-﻿#if FALSE
-using System;
+﻿using System;
 using Bio;
 using VariantCaller;
 using NUnit.Framework;
@@ -79,4 +78,3 @@ CACCCTCATGTTCATACACCTATCCCCCATTCTCCTCCTATCCCTCAACCCCGACATCAT".Replace("\n","").R
 
     }
 }
-#endif

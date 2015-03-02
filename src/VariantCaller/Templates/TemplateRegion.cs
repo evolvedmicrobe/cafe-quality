@@ -50,10 +50,11 @@ namespace VariantCaller
         static TemplateRegion()
         {
             // This obviously can't stand.
-            var ccsFileLocation = @"/Users/nigel/git/cafe-quality/data/CCSParameters.ini";
-            var scoringConfig = ParameterLoading.LoadParametersFromFile(ccsFileLocation);
-            q_config_p6c4 = scoringConfig.Parameters.At("P6-C4");
-            q_config_c2 = scoringConfig.Parameters.At ("C2");
+            //var ccsFileLocation = @"/Users/nigel/git/cafe-quality/data/CCSParameters.ini";
+            //var scoringConfig = ParameterLoading.LoadParametersFromFile(ccsFileLocation);
+            //q_config_p6c4 = scoringConfig.Parameters.At("P6-C4");
+            //q_config_c2 = scoringConfig.Parameters.At ("C2");
+
         }
 
         /// <summary>

@@ -61,7 +61,7 @@ fitModel <- function(ctx) {
   results = c()
   contexts = levels(factor(nd$Context))
   for(i in 1:nrow(cd)) {
-    n=5000
+    n=10000
     outcomes = sample(moves,n, prob=cd[i,4:7], replace=TRUE)
     td = data.frame(Context=factor(rep(ctx,n), levels= contexts), Outcome = outcomes, SNR=rep(cd$SNR[i],n))
     results = rbind(results,td)
@@ -90,7 +90,7 @@ for(ctx in ctxs) {
   write.csv(coef(b$model), file=paste(b$ctx,".params"))
 }
 dev.off()
-#Verify the observed probabilities make sens
+#Verify the observed probabilities make sense
 coef(b$model)
 snr = seq(6.5,12)
 snr = cbind(rep(1,length(snr)),snr, snr^2, snr^3)
@@ -103,3 +103,12 @@ apply(probs,2, function(x) { 1-sum(x)})
 #summary(m)
 #head(results)
 
+# Get some unit test values
+b = fitModel("NA")
+snr = 6.0
+snr = cbind(1,snr, snr^2, snr^3)
+co =coef(b$model)
+r = co%*%t(snr)
+r = rbind(log(1),r)
+probs = apply(r,2, function(x) exp(x) / (sum(exp(x))))
+log(probs)

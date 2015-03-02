@@ -18,6 +18,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <EnvironmentVariables>
+      <EnvironmentVariables>
+        <Variable name="MONO_LOG_LEVEL" value="debug" />
+      </EnvironmentVariables>
+    </EnvironmentVariables>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -46,6 +51,10 @@
     <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
       <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
       <Name>ConsensusCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VariantCaller\VariantCaller.csproj">
+      <Project>{C1EA5B21-991D-4455-BAA7-05CFD8C04B88}</Project>
+      <Name>VariantCaller</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>
