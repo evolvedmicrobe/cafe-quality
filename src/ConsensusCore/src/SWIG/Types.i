@@ -28,6 +28,7 @@ namespace std {
   %template(IntervalVector)         std::vector<ConsensusCore::Interval>;
   %template(IntVector)              std::vector<int>;
   %template(FloatVector)            std::vector<float>;
+  %template(DoubleVector)           std::vector<double>;
   %template(StringVector)           std::vector<string>;
   %template(FeaturesVector)         std::vector<const ConsensusCore::SequenceFeatures*>;
 };
