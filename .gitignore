@@ -29,6 +29,8 @@ Bio.csproj.FilesWrittenAbsolute.txt
 *AssemblyAttribute.cs
 *FilesWrittenAbsolute.txt
 */bin/Release/*
+src/Tests/bin/*
+src/ConsensusCore/build/*
 */obj/*
 */bin/*
 src/ConsensusCore/Debug/*
