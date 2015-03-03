@@ -37,15 +37,13 @@ type CircularConsensus() as this =
         this.optA "zmwCount=" zmwCount "Number of ZMW blocks in a range to process."
         this.optA "minLength=" minLength "Minimum length of CCS reads in bases."
         this.optA "maxLength=" maxLength "Maximum length of CCS reads in bases."
-        this.optF "directional" (fun _ -> doDirectional := true) "Create separate CCS from forward and reverse subreads. Default = false" 
         this.optF "csv" (fun _ -> doOutputCsv := true) "Output diagnostic information to a CSV file"
 #if DEBUG
         this.optF "snrCut=" (fun s -> snrCut := SnrCut.Parse(s)) "Only process ZMWs within a given window of SNR space"
 #endif  
         this.AllowsAnyAdditionalArguments () |> ignore
 
-    let paramsFile = "CCSParameters.ini"
-
+   
     override this.Run(args) =
         let zmwResultReport = new CcsResultsReport(true)
         this.PrepareOutputDirectory !outputPath
@@ -54,13 +52,11 @@ type CircularConsensus() as this =
             let basReader = BaseReader.CreateSource basFile
             let pulseFeatures = Set.empty // FIXME: okay for now, but should use PacBio.Data APIs in the future
             let chemistries = Set.singleton basReader.SequencingChemistry
-            use scorerConfig = this.LoadQuiverConfig paramsFile pulseFeatures chemistries
-
+   
             let config = new ConsensusConfig(MinPredictedAccuracy = !minPredictedAccuracy / 100.0f,
                                              MinFullPasses = !minFullPasses,
                                              MinLength = !minLength,
                                              MaxLength = !maxLength,
-                                             ScConfig = scorerConfig,
                                              SnrCut = !snrCut)
 
             let range = new ZmwRange(Start = !zmwStart, Count = !zmwCount, Block = 1, Stride = 1)
@@ -72,13 +68,11 @@ type CircularConsensus() as this =
             let h5Sink = new ConsensusBaseSink (ccsH5, basReader.Movie.ScanDataGroup, "ConsensusBaseCalls")
             let csvSink = new CsvSink (csv)
 
-            if String.empty this.ChemistryModelOverride then
-                let chemInfo = basReader.ChemistryBarcode
-                this.logf Info "Got SequencingChemistry '%s' from ba[sx].h5/metadata.xml" basReader.SequencingChemistry
-                h5Sink.AddChemistryInformation (chemInfo.BindingKit, chemInfo.SequencingKit, chemInfo.ChangelistID)
-            else
-                h5Sink.AddChemistryInformation this.ChemistryModelOverride
 
+            let chemInfo = basReader.ChemistryBarcode
+            this.logf Info "Got SequencingChemistry '%s' from ba[sx].h5/metadata.xml" basReader.SequencingChemistry
+            h5Sink.AddChemistryInformation (chemInfo.BindingKit, chemInfo.SequencingKit, chemInfo.ChangelistID)
+         
             let sinkFunc (rawBases, consensusBasesResult) =
                 let consensusBases = snd consensusBasesResult
                 fastaSink.OnNext consensusBases
