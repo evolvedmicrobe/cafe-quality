@@ -103,11 +103,27 @@ apply(probs,2, function(x) { 1-sum(x)})
 #summary(m)
 #head(results)
 
+
+getLastModel <- function(ctx) {
+  read.csv(file=paste(ctx,".params"), row.names=1)
+}
+
+
 # Get some unit test values
-b = fitModel("NA")
+b = getLastModel("NA")
+
 snr = 6.0
 snr = cbind(1,snr, snr^2, snr^3)
-co =coef(b$model)
+co = as.matrix(b)
+r = co%*%t(snr)
+r = rbind(log(1),r)
+probs = apply(r,2, function(x) exp(x) / (sum(exp(x))))
+log(probs)
+
+b = getLastModel("NC")
+snr = 8.0
+snr = cbind(1,snr, snr^2, snr^3)
+co = as.matrix(b)
 r = co%*%t(snr)
 r = rbind(log(1),r)
 probs = apply(r,2, function(x) exp(x) / (sum(exp(x))))

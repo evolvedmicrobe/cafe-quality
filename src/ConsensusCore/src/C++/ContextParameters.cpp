@@ -10,6 +10,17 @@
 
 using namespace std;
 namespace ConsensusCore {
+    
+    ContextParameters::ContextParameters() {
+        
+    }
+    ContextParameters:: ContextParameters(const ContextParameters& arg)
+    {
+        for(string ctx : contexts) {
+            auto p = arg.param_map.at(ctx);
+            param_map[ctx] = TransitionParameters(p);
+        }
+    }
     ContextParameters::ContextParameters(SNR snr)
     {
         for(string ctx : contexts) {

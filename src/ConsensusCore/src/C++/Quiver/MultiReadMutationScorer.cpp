@@ -49,6 +49,7 @@
 #include "Mutation.hpp"
 #include "Sequence.hpp"
 #include "Utils.hpp"
+#include "ContextParameters.hpp"
 
 
 #define MIN_FAVORABLE_SCOREDIFF 0.04  // Chosen such that 0.49 = 1 / (1 + exp(minScoreDiff))

@@ -499,10 +499,6 @@ namespace PacBio.Consensus
 
     public class ConsensusConfig
     {
-        /// <summary>
-        /// Quiver parameters
-        /// </summary>
-        public ScorerConfig ScConfig;
 
         /// <summary>
         /// Minimum number of full passes for CCS reads. Must replace default value
@@ -574,7 +570,6 @@ namespace PacBio.Consensus
 
         private ReadPartition partitioner;
 
-        public ScorerConfig ScConfig;
 
 
         public CCSStream(ConsensusConfig config)
@@ -590,7 +585,7 @@ namespace PacBio.Consensus
             Adapter = "ATCTCTCTCttttcctcctcctccgttgttgttgttGAGAGAGAT".ReverseComplement();
             partitioner = new ReadPartition(Adapter);
             AdapterPadBases = 8;
-            ScConfig = config.ScConfig;
+
         }
 
 
@@ -782,13 +777,29 @@ namespace PacBio.Consensus
             {
                 // Refine the initial guess using a more sophisticated scoring scheme
                 int maxIterations = 7;
-                int iterationsTaken = 0;
+                int iterationsTaken = 0; // in order T, G, A, C
+                var snrs = bases.Metrics.HQRegionSNR;
+                using (var snr = new SNR (snrs [2], snrs [3], snrs [1], snrs [0])) {
+                    using (var ctx_params = new ContextParameters (snr)) {
+                       /* Lance had set these to hard code 18, -12.5 if chemistry known
+                        * Otherwise 24, -50 if chemistry is unspecified.  Not sure which is 
+                        * correct, going to use 18, -12.5 for now. 
+                        * TODO: Research meaning of these parameters
+                        */
+                        ScorerConfig config = new ScorerConfig ();
+                        config.Algorithm = RecursionAlgo.Prob;
+                        var diag_cross = 4;
+                        var scoreDiff = 18;
+                        var fastScoreThreshold = -12.5;
+                        var bo = new BandingOptions (diag_cross, scoreDiff);
+                        var qc = new QuiverConfig(ctx_params,bo,fastScoreThreshold);
 
-                //perf.Time(zmw.HoleNumber, "CCSMutationTesting");
-                using (var scorer = new MultiReadMutationScorer(regions, bases, initialTpl, ScConfig))
-                {
-                    result = FindConsensus.MultiReadConsensusAndQv(scorer, regions, bases.Zmw,
-                        maxIterations, out iterationsTaken);
+                       //perf.Time(zmw.HoleNumber, "CCSMutationTesting");
+                        using (var scorer = new MultiReadMutationScorer (regions, bases, initialTpl, config)) {
+                            result = FindConsensus.MultiReadConsensusAndQv (scorer, regions, bases.Zmw,
+                                maxIterations, out iterationsTaken);
+                        }
+                    }
                 }
             }
 

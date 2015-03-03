@@ -44,6 +44,12 @@
 #include <math.h>
 #include "Utils.hpp"
 #include "Quiver/MathUtils.h"
+#include "ContextParameters.hpp"
+
+
+/* Hard coded mismatch probability for now.
+   This is derived as the mean in PlotBinnedTraining.R */
+#define MISMATH_PROBABILITY 0.002671256
 
 namespace ConsensusCore
 {
@@ -73,28 +79,32 @@ namespace ConsensusCore
         //
         // Constructor for single merge rate and merge rate slope
         //
-        ModelParams(double miscall)
-        : log_miscallprobability(log(miscall))
+        ModelParams()
+        : log_miscallprobability(log(MISMATH_PROBABILITY))
         {
-            log_one_minus_miscallprobability = log(1 - miscall);
+            log_one_minus_miscallprobability = log(1 - MISMATH_PROBABILITY);
             log_miscall_probability_times_one_third = log_one_third + log_miscallprobability;
         }
     };
 
 
-    struct QuiverConfig
+    class QuiverConfig
     {
-        ModelParams QvParams;
-        BandingOptions Banding;
-        double FastScoreThreshold;
-        double AddThreshold;
+        public:
+            ModelParams QvParams;
+            ContextParameters Ctx_params;
+            BandingOptions Banding;
+            double FastScoreThreshold;
+            double AddThreshold;
 
-        QuiverConfig(const ModelParams& qvParams,
-                     const BandingOptions& bandingOptions,
-                     double fastScoreThreshold,
-                     double addThreshold = 1.0f);
+            QuiverConfig(const ContextParameters& dinucleotide_params,
+                         const BandingOptions& bandingOptions,
+                         double fastScoreThreshold = -12.5,
+                         double addThreshold = 1.0f);
 
-        QuiverConfig(const QuiverConfig& qvConfig);
+            QuiverConfig(const QuiverConfig& qvConfig);
+        
+            // Assuming compiler generated destructor is sufficient.
     };
 
 

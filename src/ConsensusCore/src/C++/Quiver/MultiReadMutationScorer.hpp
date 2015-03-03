@@ -152,7 +152,7 @@ namespace ConsensusCore {
         typedef typename detail::ReadState<ScorerType>    ReadStateType;
 
     public:
-        MultiReadMutationScorer(const QuiverConfig& params, std::string tpl);
+        MultiReadMutationScorer(const QuiverConfig& config, std::string tpl);
         MultiReadMutationScorer(const MultiReadMutationScorer<R>& scorer);
         virtual ~MultiReadMutationScorer();
 
@@ -182,7 +182,7 @@ namespace ConsensusCore {
         std::vector<double> Scores(const Mutation& m, double unscoredValue) const;
         std::vector<double> Scores(const Mutation& m) const
         {
-            return Scores(m, 0.0f);
+            return Scores(m, 0.0);
         }
 
         bool IsFavorable(const Mutation& m) const;
@@ -205,7 +205,7 @@ namespace ConsensusCore {
         std::vector<double> Scores(MutationType mutationType,
                                   int position, char base) const
         {
-            return Scores(mutationType, position, base, 0.0f);
+            return Scores(mutationType, position, base, 0.0);
         }
 #endif
 

@@ -3,6 +3,8 @@
 #include "Sequence.hpp"
 #include "Mutation.hpp"
 #include "Read.hpp"
+#include "ContextParameterProvider.hpp"
+#include "ContextParameters.hpp"
 #include "Quiver/MultiReadMutationScorer.hpp"
 #include "Quiver/MutationScorer.hpp"
 #include "Quiver/QuiverConfig.hpp"
@@ -11,7 +13,7 @@
 #include "Quiver/Diploid.hpp"
 #include "Quiver/QuiverConsensus.hpp"
 #include "TransitionParameters.hpp"
-#include "ContextParameterProvider.hpp"
+
 using namespace ConsensusCore;
 using namespace std;
 %}
@@ -39,6 +41,9 @@ using namespace std;
 %include "Sequence.hpp"
 %include "Mutation.hpp"
 %include "Read.hpp"
+%include "TransitionParameters.hpp" 
+%include "ContextParameterProvider.hpp"
+%include "ContextParameters.hpp"
 %include "Quiver/detail/Combiner.hpp"
 %include "Quiver/detail/RecursorBase.hpp"
 %include "Quiver/MultiReadMutationScorer.hpp"
@@ -48,14 +53,10 @@ using namespace std;
 %include "Quiver/ReadScorer.hpp"
 %include "Quiver/Diploid.hpp"
 %include "Quiver/QuiverConsensus.hpp"
-%include "TransitionParameters.hpp" 
-%include "ContextParameterProvider.hpp"
+
 
 
 namespace ConsensusCore {
-
-
-
 
 
     //
@@ -70,8 +71,9 @@ namespace ConsensusCore {
     //
     %template(SparseQvRecursorBase)           detail::RecursorBase<SparseMatrix, QvEvaluator, detail::ViterbiCombiner>;
     %template(SparseSimpleQvRecursor)         SimpleRecursor<SparseMatrix, QvEvaluator, detail::ViterbiCombiner>;
+
     %template(SparseSimpleQvMutationScorer)   MutationScorer<SparseSimpleQvRecursor>;
-    
+    %template(SparseQvViterbiMultiReadMutationScorer) MultiReadMutationScorer<SparseSimpleQvRecursor>;
     
     //
     // Sparse matrix sum-product support
@@ -79,5 +81,9 @@ namespace ConsensusCore {
     %template(SparseQvSumProductRecursorBase)           detail::RecursorBase<SparseMatrix, QvEvaluator, detail::SumProductCombiner>;
     %template(SparseSimpleQvSumProductRecursor)         SimpleRecursor<SparseMatrix, QvEvaluator, detail::SumProductCombiner>;
     %template(SparseSimpleQvSumProductMutationScorer)   MutationScorer<SparseSimpleQvSumProductRecursor>;
-        
+
+
+    %template(SparseQvSumProductMultiReadMutationScorer) MultiReadMutationScorer<SparseSimpleQvSumProductRecursor>;
+
+
 }

@@ -27,6 +27,10 @@ namespace ConsensusCore {
     class ContextParameters {
     public:
         ContextParameters(SNR snrs);
+        // Empty constructor for swig
+        ContextParameters();
+        // Copy constructor for swig
+        ContextParameters(const ContextParameters& arg);
         TransitionParameters& GetParametersForContext(char bp1, char bp2);
     private:
         unordered_map<string, TransitionParameters&> param_map;

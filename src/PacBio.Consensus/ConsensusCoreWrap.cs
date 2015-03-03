@@ -106,16 +106,16 @@ namespace PacBio.Consensus
 
     public class ScorerConfig : IDisposable
     {
-        public SNR Snr;
+        public QuiverConfig Qconfig;
 
         public RecursionAlgo Algorithm = RecursionAlgo.Prob;
 
 
         public void Dispose()
         {
-            if (Snr != null) {
-                Snr.Dispose ();
-                Snr = null;
+            if (Qconfig != null) {
+                Qconfig.Dispose ();
+                Qconfig = null;
             }
 
         }
@@ -175,11 +175,11 @@ namespace PacBio.Consensus
 
             if (config.Algorithm == RecursionAlgo.Viterbi)
             {
-                //scorer = new SparseSseQvMultiReadMutationScorer(config.Parameters, strandTpl);
+                scorer = new SparseQvViterbiMultiReadMutationScorer(config.Qconfig, strandTpl);
             }
             else if (config.Algorithm == RecursionAlgo.Prob)
             {
-               // scorer = new SparseSseQvSumProductMultiReadMutationScorer(config.Parameters, strandTpl);
+                scorer = new SparseQvSumProductMultiReadMutationScorer(config.Qconfig, strandTpl);
             }
             else
             {
@@ -225,11 +225,11 @@ namespace PacBio.Consensus
 
             if (config.Algorithm == RecursionAlgo.Viterbi)
             {
-                //scorer = new SparseSseQvMultiReadMutationScorer(config.Parameters, strandTpl);
+                scorer = new SparseQvViterbiMultiReadMutationScorer(config.Qconfig, strandTpl);
             }
             else if (config.Algorithm == RecursionAlgo.Prob)
             {
-               // scorer = new SparseSseQvSumProductMultiReadMutationScorer(config.Parameters, strandTpl);
+                scorer = new SparseQvSumProductMultiReadMutationScorer(config.Qconfig, strandTpl);
             }
             else
             {

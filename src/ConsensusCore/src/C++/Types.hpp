@@ -47,7 +47,7 @@
 namespace ConsensusCore {
     struct BandingOptions;
     class DenseMatrix;
-    struct QuiverConfig;
+    class QuiverConfig;
     class PairwiseAlignment;
     class AnnotatedPairwiseAlignment;
     struct PoaConfig;
