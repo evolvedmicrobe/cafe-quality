@@ -46,6 +46,7 @@
 #include "Quiver/SimpleRecursor.hpp"
 #include "Types.hpp"
 #include "Mutation.hpp"
+#include "ContextParameters.hpp"
 
 namespace ConsensusCore
 {
@@ -65,12 +66,12 @@ namespace ConsensusCore
         virtual ~MutationScorer();
 
     public:
-        std::string Template() const;
-        void Template(std::string tpl)
+        TemplateParameterPair Template() const;
+        void Template(TemplateParameterPair tpl)
             throw(AlphaBetaMismatchException);
 
         double Score() const;
-        double ScoreMutation(const Mutation& m) const;
+        double ScoreMutation(const Mutation& m, const ContextParameters& params) const;
 
     public:
         // Accessors that are handy for debugging.

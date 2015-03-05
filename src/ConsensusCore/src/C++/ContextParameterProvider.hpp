@@ -15,7 +15,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <cmath>
 #include <vector>
-using namespace std;
+
 
 
 namespace ConsensusCore {
@@ -42,10 +42,7 @@ namespace ConsensusCore {
      */
     class ContextParameterProvider {
         public:
-            static TransitionParameters GetTransitionParameters(const string& context, const SNR& snrs);
-    
-
-       
+        static TransitionParameters GetTransitionParameters(const std::string& context, const SNR& snrs);
     };
 }
 

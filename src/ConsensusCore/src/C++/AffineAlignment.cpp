@@ -116,8 +116,8 @@ namespace
          // description from Durbin et. al
          using boost::numeric::ublas::matrix;
 
-         int I = query.length();
-         int J = target.length();
+         int I = (int)query.length();
+         int J = (int)target.length();
          matrix<float> M(I + 1, J + 1);
          matrix<float> GAP(I + 1, J + 1);
 

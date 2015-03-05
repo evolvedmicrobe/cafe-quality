@@ -45,7 +45,7 @@
 #include <iostream>
 #include <string>
 #include <utility>
-
+#include <vector>
 
 #include "Quiver/QuiverConfig.hpp"
 #include "Quiver/MathUtils.h"
@@ -53,6 +53,8 @@
 #include "Types.hpp"
 #include "Utils.hpp"
 #include "Read.hpp"
+#include "TransitionParameters.hpp"
+#include "TemplateParameterPair.hpp"
 
 #ifndef SWIG
 using std::min;
@@ -91,13 +93,14 @@ namespace ConsensusCore
 
     public:
         QvEvaluator(const Read& read,
-                    const std::string& tpl,
+                    const TemplateParameterPair& tpl,
                     const ModelParams& params)
             : read_(read),
               params_(params),
               tpl_(tpl),
               pinStart_(true),
               pinEnd_(true)
+        
         {}
 
         ~QvEvaluator()
@@ -108,12 +111,12 @@ namespace ConsensusCore
             return read_.Name;
         }
 
-        std::string Template() const
+        TemplateParameterPair Template() const
         {
             return tpl_;
         }
 
-        void Template(std::string tpl)
+        void Template(TemplateParameterPair tpl)
         {
             tpl_ = tpl;
         }
@@ -126,7 +129,7 @@ namespace ConsensusCore
 
         int TemplateLength() const
         {
-            return tpl_.length();
+            return (int)tpl_.tpl.length();
         }
 
         bool PinEnd() const
@@ -138,6 +141,7 @@ namespace ConsensusCore
         {
             return pinStart_;
         }
+        
         /**
          Returns true if the read bp at position i matches the template basepair
          at position j.
@@ -149,7 +153,7 @@ namespace ConsensusCore
         {
             assert(0 <= i && i < ReadLength());
             assert (0 <= j && j < TemplateLength());
-            return (read_.Sequence[i] == tpl_[j]);
+            return (read_.Sequence[i] == tpl_.tpl[j]);
         }
         
         /**
@@ -170,7 +174,7 @@ namespace ConsensusCore
             auto emission_prob = (IsMatch(i, j)) ?
                 params_.log_one_minus_miscallprobability :
                 params_.log_miscall_probability_times_one_third;
-            return read_.trans_probs[j-1].Match + emission_prob;
+            return tpl_.trans_probs[j-1].Match + emission_prob;
         }
         
         
@@ -182,12 +186,11 @@ namespace ConsensusCore
          @param j template position to get probability from
          @returns Log scale transition probability.
          */
-        
         double Deletion(int j) const
         {
             // Can't delete the last template base
             assert(0 <= j && j < TemplateLength());
-            return read_.trans_probs[j].Deletion;
+            return tpl_.trans_probs[j].Deletion;
         }
 
         /** This calculates the insertion score by comparing read base i
@@ -206,7 +209,7 @@ namespace ConsensusCore
             assert(1 <= j && j < (TemplateLength()-1) &&
                    0 <= i && i < (ReadLength() -1) );
             
-            return IsMatch(i, j+1) ? read_.trans_probs[j].Branch : read_.trans_probs[j].Stick + log_one_third;
+            return IsMatch(i, j+1) ? tpl_.trans_probs[j].Branch : tpl_.trans_probs[j].Stick + log_one_third;
         }
     
 
@@ -215,7 +218,7 @@ namespace ConsensusCore
     protected:
         Read read_;
         ModelParams params_;
-        std::string tpl_;
+        TemplateParameterPair tpl_;
         bool pinStart_;
         bool pinEnd_;
     };

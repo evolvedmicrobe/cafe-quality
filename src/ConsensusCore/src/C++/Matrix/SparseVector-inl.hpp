@@ -203,7 +203,7 @@ namespace ConsensusCore
     {
         // We want the real memory usage.  std::vector is holding some memory back
         // from us.
-        return storage_->capacity();
+        return (int)storage_->capacity();
     }
 
     inline void

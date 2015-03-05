@@ -46,7 +46,6 @@
 namespace ConsensusCore
 {
     struct Read {
-        std::vector<TransitionParameters> trans_probs;
         std::string Sequence;
         std::string Name;
 

@@ -168,7 +168,7 @@ namespace ConsensusCore
             LDEBUG << "Round " << iter;
             LDEBUG << "State of MMS: " << std::endl << mms.ToString();
 
-            if (tplHistory.find(hash(mms.Template())) != tplHistory.end())
+            if (tplHistory.find(hash(mms.Template().tpl)) != tplHistory.end())
             {
                 LDEBUG << "Cycle detected!";
             }
@@ -183,7 +183,7 @@ namespace ConsensusCore
             // Try all mutations in iteration 0.  In subsequent iterations, try mutations
             // nearby those used in previous iteration.
             //
-            E mutationEnumerator = MutationEnumerator<E, O>(mms.Template(), opts);
+            E mutationEnumerator = MutationEnumerator<E, O>(mms.Template().tpl, opts);
             vector<Mutation> mutationsToTry;
             if (iter == 0) {
                 mutationsToTry = mutationEnumerator.Mutations();
@@ -221,12 +221,14 @@ namespace ConsensusCore
             //
             if (bestSubset.size() > 1)
             {
-                std::string nextTpl = ApplyMutations(ProjectDown(bestSubset), mms.Template());
-                if (tplHistory.find(hash(nextTpl)) != tplHistory.end())
-                {
-                    LDEBUG << "Attempting to avoid cycle";
-                    bestSubset = std::vector<ScoredMutation>(bestSubset.begin(), bestSubset.begin() + 1);
-                }
+                /* Removed as this was not SNR aware */
+                ShouldNotReachHere();
+//                std::string nextTpl = ApplyMutations(ProjectDown(bestSubset), mms.Template(),);
+//                if (tplHistory.find(hash(nextTpl)) != tplHistory.end())
+//                {
+//                    LDEBUG << "Attempting to avoid cycle";
+//                    bestSubset = std::vector<ScoredMutation>(bestSubset.begin(), bestSubset.begin() + 1);
+//                }
             }
 
             LDEBUG << "Applying mutations:";
@@ -235,7 +237,7 @@ namespace ConsensusCore
                 LDEBUG << "\t" << smut;
             }
 
-            tplHistory.insert(hash(mms.Template()));
+            tplHistory.insert(hash(mms.Template().tpl));
             mms.ApplyMutations(ProjectDown(bestSubset));
         }
 
@@ -260,8 +262,8 @@ namespace ConsensusCore
     std::vector<int> ConsensusQVs(AbstractMultiReadMutationScorer& mms)
     {
         std::vector<int> QVs;
-        UniqueSingleBaseMutationEnumerator mutationEnumerator(mms.Template());
-        for (size_t pos = 0; pos < mms.Template().length(); pos++)
+        UniqueSingleBaseMutationEnumerator mutationEnumerator(mms.Template().tpl);
+        for (size_t pos = 0; pos < mms.Template().tpl.length(); pos++)
         {
             double scoreSum = 0.0;
             foreach (const Mutation& m, mutationEnumerator.Mutations(pos, pos + 1))

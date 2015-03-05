@@ -9,6 +9,7 @@
 #include "ContextParameters.hpp"
 
 using namespace std;
+
 namespace ConsensusCore {
     
     ContextParameters::ContextParameters() {
@@ -30,17 +31,17 @@ namespace ConsensusCore {
     }
     
     TransitionParameters&
-    ContextParameters::GetParametersForContext(char bp1, char bp2) {
+    ContextParameters::GetParametersForContext(char bp1, char bp2) const {
         string s;
         if( bp1 == bp2)
         {
-            s +=bp1;
+            s += bp1;
             s += bp2;
         }
         else {
             s += 'N';
             s += bp2;
         }
-        return param_map[s];
+        return param_map.at(s);
     }
 }

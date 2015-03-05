@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-using namespace std;
+
 namespace ConsensusCore {
     /**
      This class represents a collection of context parameters for a given set of
@@ -31,10 +31,10 @@ namespace ConsensusCore {
         ContextParameters();
         // Copy constructor for swig
         ContextParameters(const ContextParameters& arg);
-        TransitionParameters& GetParametersForContext(char bp1, char bp2);
+        TransitionParameters& GetParametersForContext(char bp1, char bp2) const;
     private:
-        unordered_map<string, TransitionParameters&> param_map;
-        vector<string> contexts {"AA", "NA", "CC", "NC", "TT", "NT", "GG", "NG"};
+        std::unordered_map<std::string, TransitionParameters&> param_map;
+        std::vector<std::string> contexts {"AA", "NA", "CC", "NC", "TT", "NT", "GG", "NG"};
     };
 };
 

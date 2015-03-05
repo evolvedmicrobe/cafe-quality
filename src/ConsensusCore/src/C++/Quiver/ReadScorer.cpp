@@ -57,7 +57,7 @@ namespace ConsensusCore
     {}
 
     template<typename R>
-    double ReadScorer<R>::Score(const string& tpl, const Read& read) const
+    double ReadScorer<R>::Score(const TemplateParameterPair& tpl, const Read& read) const
         throw(AlphaBetaMismatchException)
     {
         int I, J;
@@ -65,7 +65,7 @@ namespace ConsensusCore
         QvEvaluator e(read, tpl, _quiverConfig.QvParams);
 
         I = read.Length();
-        J = tpl.length();
+        J = (int)tpl.tpl.length();
         SparseMatrix alpha(I+1, J+1), beta(I+1, J+1);
         r.FillAlphaBeta(e, alpha, beta);
 
@@ -90,7 +90,7 @@ namespace ConsensusCore
 
     template<typename R>
     const SparseMatrix*
-    ReadScorer<R>::Alpha(const string& tpl, const Read& read) const
+    ReadScorer<R>::Alpha(const TemplateParameterPair& tpl, const Read& read) const
         throw(AlphaBetaMismatchException)
     {
         int I, J;
@@ -98,7 +98,7 @@ namespace ConsensusCore
         QvEvaluator e(read, tpl, _quiverConfig.QvParams);
 
         I = read.Length();
-        J = tpl.length();
+        J = tpl.tpl.length();
         SparseMatrix *alpha = new SparseMatrix(I+1, J+1);
         SparseMatrix *beta  = new SparseMatrix(I+1, J+1);
         r.FillAlphaBeta(e, *alpha, *beta);
@@ -107,7 +107,7 @@ namespace ConsensusCore
 
     template<typename R>
     const SparseMatrix*
-    ReadScorer<R>::Beta(const string& tpl, const Read& read) const
+    ReadScorer<R>::Beta(const TemplateParameterPair& tpl, const Read& read) const
         throw(AlphaBetaMismatchException)
     {
         int I, J;
@@ -115,7 +115,7 @@ namespace ConsensusCore
         QvEvaluator e(read, tpl, _quiverConfig.QvParams);
 
         I = read.Length();
-        J = tpl.length();
+        J = tpl.tpl.length();
         SparseMatrix *alpha = new SparseMatrix(I+1, J+1);
         SparseMatrix *beta  = new SparseMatrix(I+1, J+1);
         r.FillAlphaBeta(e, *alpha, *beta);

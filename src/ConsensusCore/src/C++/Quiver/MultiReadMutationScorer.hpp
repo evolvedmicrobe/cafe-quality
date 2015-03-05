@@ -62,8 +62,8 @@ namespace ConsensusCore {
         virtual int NumReads() const = 0;
         virtual const MappedRead* Read(int readIndex) const = 0;
 
-        virtual std::string Template(StrandEnum strand = FORWARD_STRAND) const = 0;
-        virtual std::string Template(StrandEnum strand,
+        virtual TemplateParameterPair Template(StrandEnum strand = FORWARD_STRAND) const = 0;
+        virtual TemplateParameterPair Template(StrandEnum strand,
                                      int templateStart,
                                      int templateEnd) const = 0;
 
@@ -160,8 +160,8 @@ namespace ConsensusCore {
         int NumReads() const;
         const MappedRead* Read(int readIndex) const;
 
-        std::string Template(StrandEnum strand = FORWARD_STRAND) const;
-        std::string Template(StrandEnum strand, int templateStart, int templateEnd) const;
+        TemplateParameterPair Template(StrandEnum strand = FORWARD_STRAND) const;
+        TemplateParameterPair Template(StrandEnum strand, int templateStart, int templateEnd) const;
         void ApplyMutations(const std::vector<Mutation>& mutations);
 
         // Reads provided must be clipped to the reference/scaffold window implied by the
@@ -225,8 +225,8 @@ namespace ConsensusCore {
     private:
         QuiverConfig quiv_config;
         double fastScoreThreshold_;
-        std::string fwdTemplate_;
-        std::string revTemplate_;
+        TemplateParameterPair fwdTemplate_;
+        TemplateParameterPair revTemplate_;
         std::vector<ReadStateType> reads_;
     };
 

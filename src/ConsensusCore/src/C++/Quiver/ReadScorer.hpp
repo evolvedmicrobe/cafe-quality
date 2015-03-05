@@ -53,7 +53,7 @@ namespace ConsensusCore
         explicit ReadScorer(const QuiverConfig& config);
 
         double Score
-        (const std::string& tpl, const Read& read) const
+        (const TemplateParameterPair& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
 //        const PairwiseAlignment* Align
@@ -61,11 +61,11 @@ namespace ConsensusCore
 //            throw(AlphaBetaMismatchException);
 
         const SparseMatrix* Alpha
-        (const std::string& tpl, const Read& read) const
+        (const TemplateParameterPair& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
         const SparseMatrix* Beta
-        (const std::string& tpl, const Read& read) const
+        (const TemplateParameterPair& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
 

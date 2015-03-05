@@ -792,7 +792,7 @@ namespace PacBio.Consensus
                         var scoreDiff = 18;
                         var fastScoreThreshold = -12.5;
                         var bo = new BandingOptions (diag_cross, scoreDiff);
-                        var qc = new QuiverConfig(ctx_params,bo,fastScoreThreshold);
+                        var qc = new QuiverConfig(ctx_params, bo, fastScoreThreshold);
 
                        //perf.Time(zmw.HoleNumber, "CCSMutationTesting");
                         using (var scorer = new MultiReadMutationScorer (regions, bases, initialTpl, config)) {

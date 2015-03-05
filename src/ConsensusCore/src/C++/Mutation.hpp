@@ -37,13 +37,22 @@
 
 #pragma once
 
+#include <algorithm>
+#include <boost/format.hpp>
+#include <cassert>
 #include <string>
 #include <vector>
-#include <utility>
-#include <ostream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <tuple>
 
 #include "Types.hpp"
+#include "PairwiseAlignment.hpp"
 #include "Utils.hpp"
+#include "TransitionParameters.hpp"
+#include "TemplateParameterPair.hpp"
+#include "ContextParameters.hpp"
 
 namespace ConsensusCore
 {
@@ -98,13 +107,13 @@ namespace ConsensusCore
         bool operator<(const Mutation& other) const;
 
     public:
-        ScoredMutation WithScore(float score) const;
+        ScoredMutation WithScore(double score) const;
     };
 
     std::ostream& operator<<(std::ostream& out, const Mutation& m);
 
-    std::string ApplyMutation(const Mutation& mut, const std::string& tpl);
-    std::string ApplyMutations(const std::vector<Mutation>& muts, const std::string& tpl);
+    TemplateParameterPair ApplyMutation(const Mutation& mut, const TemplateParameterPair& tpl, const ContextParameters& ctx_params);
+    TemplateParameterPair ApplyMutations(const std::vector<Mutation>& muts, const TemplateParameterPair& tpl, const ContextParameters& ctx_params);
 
     std::string MutationsToTranscript(const std::vector<Mutation>& muts,
                                       const std::string& tpl);
@@ -116,12 +125,12 @@ namespace ConsensusCore
     class ScoredMutation : public Mutation
     {
     private:
-        float score_;
+        double score_;
 
     public:
         ScoredMutation();
-        ScoredMutation(const Mutation& m, float score);
-        float Score() const;
+        ScoredMutation(const Mutation& m, double score);
+        double Score() const;
         std::string ToString() const;
     };
 

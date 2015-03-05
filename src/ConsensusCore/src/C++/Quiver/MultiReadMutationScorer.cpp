@@ -50,6 +50,7 @@
 #include "Sequence.hpp"
 #include "Utils.hpp"
 #include "ContextParameters.hpp"
+#include "TemplateParameterPair.hpp"
 
 
 #define MIN_FAVORABLE_SCOREDIFF 0.04  // Chosen such that 0.49 = 1 / (1 + exp(minScoreDiff))
@@ -142,8 +143,8 @@ namespace ConsensusCore
     MultiReadMutationScorer<R>::MultiReadMutationScorer(const QuiverConfig& config,
                                                         std::string tpl)
         : quiv_config(config),
-          fwdTemplate_(tpl),
-          revTemplate_(ReverseComplement(tpl)),
+          fwdTemplate_(tpl, config.Ctx_params),
+          revTemplate_(ReverseComplement(tpl), config.Ctx_params),
           reads_()
     {
         DEBUG_ONLY(CheckInvariants());
@@ -178,7 +179,7 @@ namespace ConsensusCore
     int
     MultiReadMutationScorer<R>::TemplateLength() const
     {
-        return fwdTemplate_.length();
+        return fwdTemplate_.tpl.length();
     }
 
     template<typename R>
@@ -196,14 +197,14 @@ namespace ConsensusCore
     }
 
     template<typename R>
-    std::string
+    TemplateParameterPair
     MultiReadMutationScorer<R>::Template(StrandEnum strand) const
     {
         return (strand == FORWARD_STRAND ? fwdTemplate_ : revTemplate_);
     }
 
     template<typename R>
-    std::string
+    TemplateParameterPair
     MultiReadMutationScorer<R>::Template(StrandEnum strand,
                                          int templateStart,
                                          int templateEnd) const
@@ -211,11 +212,11 @@ namespace ConsensusCore
         int len = templateEnd - templateStart;
         if (strand == FORWARD_STRAND)
         {
-            return fwdTemplate_.substr(templateStart, len);
+            return fwdTemplate_.GetSubSection(templateStart, len);
         }
         else
         {
-            return revTemplate_.substr(TemplateLength() - templateEnd, len);
+            return revTemplate_.GetSubSection(TemplateLength() - templateEnd, len);
         }
     }
 
@@ -224,9 +225,9 @@ namespace ConsensusCore
     MultiReadMutationScorer<R>::ApplyMutations(const std::vector<Mutation>& mutations)
     {
         DEBUG_ONLY(CheckInvariants());
-        std::vector<int> mtp = TargetToQueryPositions(mutations, fwdTemplate_);
-        fwdTemplate_ = ConsensusCore::ApplyMutations(mutations, fwdTemplate_);
-        revTemplate_ = ReverseComplement(fwdTemplate_);
+        std::vector<int> mtp = TargetToQueryPositions(mutations, fwdTemplate_.tpl);
+        fwdTemplate_ = ConsensusCore::ApplyMutations(mutations, fwdTemplate_, quiv_config.Ctx_params);
+        revTemplate_ = TemplateParameterPair(ReverseComplement(fwdTemplate_.tpl), quiv_config.Ctx_params);
 
         foreach (ReadStateType& rs, reads_)
         {
@@ -318,7 +319,7 @@ namespace ConsensusCore
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
             {
                 Mutation orientedMut = OrientedMutation(*rs.Read, m);
-                sum += (rs.Scorer->ScoreMutation(orientedMut) -
+                sum += (rs.Scorer->ScoreMutation(orientedMut, quiv_config.Ctx_params) -
                         rs.Scorer->Score());
             }
         }
@@ -342,7 +343,7 @@ namespace ConsensusCore
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
             {
                 Mutation orientedMut = OrientedMutation(*rs.Read, m);
-                sum += (rs.Scorer->ScoreMutation(orientedMut) -
+                sum += (rs.Scorer->ScoreMutation(orientedMut, quiv_config.Ctx_params) -
                         rs.Scorer->Score());
                 if (sum < fastScoreThreshold_)
                 {
@@ -363,7 +364,7 @@ namespace ConsensusCore
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
             {
                 Mutation orientedMut = OrientedMutation(*rs.Read, m);
-                scoreByRead.push_back(rs.Scorer->ScoreMutation(orientedMut) -
+                scoreByRead.push_back(rs.Scorer->ScoreMutation(orientedMut, quiv_config.Ctx_params) -
                                       rs.Scorer->Score());
             }
             else
@@ -392,7 +393,7 @@ namespace ConsensusCore
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
             {
                 Mutation orientedMut = OrientedMutation(*rs.Read, m);
-                sum += (rs.Scorer->ScoreMutation(orientedMut) -
+                sum += (rs.Scorer->ScoreMutation(orientedMut, quiv_config.Ctx_params) -
                         rs.Scorer->Score());
             }
         }
@@ -408,7 +409,7 @@ namespace ConsensusCore
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
             {
                 Mutation orientedMut = OrientedMutation(*rs.Read, m);
-                sum += (rs.Scorer->ScoreMutation(orientedMut) -
+                sum += (rs.Scorer->ScoreMutation(orientedMut, quiv_config.Ctx_params) -
                         rs.Scorer->Score());
                 if (sum < fastScoreThreshold_)
                 {
@@ -499,16 +500,16 @@ namespace ConsensusCore
     void MultiReadMutationScorer<R>::CheckInvariants() const
     {
 #ifndef NDEBUG
-        assert(revTemplate_ == ReverseComplement(fwdTemplate_));
+        assert(revTemplate_.tpl == ReverseComplement(fwdTemplate_.tpl));
         foreach (const ReadStateType& rs, reads_)
         {
             rs.CheckInvariants();
             if (rs.IsActive) {
-                assert(rs.Scorer->Template() == Template(rs.Read->Strand,
+                assert(rs.Scorer->Template().tpl == Template(rs.Read->Strand,
                                                          rs.Read->TemplateStart,
-                                                         rs.Read->TemplateEnd));
-                assert(0 <= rs.Read->TemplateStart && rs.Read->TemplateStart <= fwdTemplate_.size());
-                assert(0 <= rs.Read->TemplateEnd && rs.Read->TemplateEnd <= fwdTemplate_.size());
+                                                         rs.Read->TemplateEnd).tpl);
+                assert(0 <= rs.Read->TemplateStart && rs.Read->TemplateStart <= fwdTemplate_.tpl.size());
+                assert(0 <= rs.Read->TemplateEnd && rs.Read->TemplateEnd <= fwdTemplate_.tpl.size());
                 assert(rs.Read->TemplateStart <= rs.Read->TemplateEnd);
             }
         }
@@ -521,7 +522,7 @@ namespace ConsensusCore
     {
         std::stringstream ss;
 
-        ss << "Template: " << Template() << std::endl;
+        ss << "Template: " << Template().tpl << std::endl;
         ss << "Score: " << BaselineScore() << std::endl;
 
         ss << "Reads:" << std::endl;

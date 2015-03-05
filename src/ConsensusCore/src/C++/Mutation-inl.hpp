@@ -147,7 +147,7 @@ namespace ConsensusCore {
     Mutation::LengthDiff() const
     {
         if (IsInsertion())
-            return newBases_.length();
+            return (int)newBases_.length();
         else if (IsDeletion())
             return start_ - end_;
         else

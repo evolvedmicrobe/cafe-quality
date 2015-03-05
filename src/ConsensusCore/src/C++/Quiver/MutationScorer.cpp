@@ -43,6 +43,7 @@
 #include "Quiver/QvEvaluator.hpp"
 #include "Quiver/SimpleRecursor.hpp"
 #include "Mutation.hpp"
+#include "TemplateParameterPair.hpp"
 
 #define EXTEND_BUFFER_COLUMNS 8
 
@@ -86,14 +87,14 @@ namespace ConsensusCore
         return (*beta_)(0, 0);
     }
 
-    template<typename R> std::string
+    template<typename R> TemplateParameterPair
     MutationScorer<R>::Template() const
     {
         return evaluator_->Template();
     }
 
     template<typename R>
-    void MutationScorer<R>::Template(std::string tpl)
+    void MutationScorer<R>::Template(TemplateParameterPair tpl)
         throw(AlphaBetaMismatchException)
     {
         delete alpha_;
@@ -132,24 +133,25 @@ namespace ConsensusCore
 
     template<typename R>
     double
-    MutationScorer<R>::ScoreMutation(const Mutation& m) const
+    MutationScorer<R>::ScoreMutation(const Mutation& m, const ContextParameters& ctx_params) const
     {
         int betaLinkCol = 1 + m.End();
         int absoluteLinkColumn = 1 + m.End() + m.LengthDiff();
-        std::string oldTpl = evaluator_->Template();
-        std::string newTpl = ApplyMutation(m, oldTpl);
+        TemplateParameterPair old_Tpl = evaluator_->Template();
+        TemplateParameterPair new_tpl = ApplyMutation(m, old_Tpl, ctx_params);
+     
         
         //TODO: Add logic here to update the parameters for all reads....
         
         double score;
 
         bool atBegin = (m.Start() < 3);
-        bool atEnd   = (m.End() > (int)oldTpl.length() - 2);
+        bool atEnd   = (m.End() > (int)old_Tpl.tpl.length() - 2);
 
         if (!atBegin && !atEnd)
         {
             // Install mutated template
-            evaluator_->Template(newTpl);
+            evaluator_->Template(new_tpl);
 
             int extendStartCol, extendLength;
 
@@ -180,10 +182,10 @@ namespace ConsensusCore
             //
             // Extend alpha to end
             //
-            evaluator_->Template(newTpl);
+            evaluator_->Template(new_tpl);
 
             int extendStartCol = m.Start() - 1;
-            int extendLength = newTpl.length() - extendStartCol + 1;
+            int extendLength = new_tpl.tpl.length() - extendStartCol + 1;
 
             recursor_->ExtendAlpha(*evaluator_, *alpha_,
                                    extendStartCol, *extendBuffer_, extendLength);
@@ -199,7 +201,7 @@ namespace ConsensusCore
             //
             // Extend beta back
             //
-            evaluator_->Template(newTpl);
+            evaluator_->Template(new_tpl);
 
             int extendLastCol = m.End();
             int extendLength = m.End() + m.LengthDiff() + 1;
@@ -216,14 +218,14 @@ namespace ConsensusCore
             // Just do the whole fill
             //
             MatrixType alphaP(evaluator_->ReadLength() + 1,
-                              newTpl.length() + 1);
-            evaluator_->Template(newTpl);
+                              new_tpl.tpl.length() + 1);
+            evaluator_->Template(new_tpl);
             recursor_->FillAlpha(*evaluator_, MatrixType::Null(), alphaP);
-            score = alphaP(evaluator_->ReadLength(), newTpl.length());
+            score = alphaP(evaluator_->ReadLength(), new_tpl.tpl.length());
         }
 
         // Restore the original template.
-        evaluator_->Template(oldTpl);
+        evaluator_->Template(old_Tpl);
 
         // if (fabs(score - Score()) > 50) { Breakpoint(); }
 

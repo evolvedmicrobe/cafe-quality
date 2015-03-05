@@ -121,7 +121,7 @@ namespace ConsensusCore {
     //
     static float HomozygousLogLikelihood(const fmat& siteScores)
     {
-        int G = siteScores.size2();
+        int G = (int)siteScores.size2();
         fvec gScores(G);
         for (int g = 0; g < G; g++)
         {
@@ -138,8 +138,8 @@ namespace ConsensusCore {
     {
         assert (siteScores.size2() == MUTATIONS_PER_SITE);
 
-        int I = siteScores.size1();
-        int G = siteScores.size2();
+        int I = (int)siteScores.size1();
+        int G = (int)siteScores.size2();
         float log2 = log(2);
 
         vector<float> varScores;

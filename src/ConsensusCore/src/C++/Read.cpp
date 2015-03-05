@@ -56,14 +56,13 @@ namespace ConsensusCore {
     {}
 
     Read::Read(const Read& other)
-        : trans_probs(other.trans_probs),
-          Name(other.Name),
+        : Name(other.Name),
           Sequence(other.Sequence)
     {}
 
     int Read::Length() const
     {
-        return Sequence.length();
+        return (int)Sequence.length();
     }
 
 

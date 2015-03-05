@@ -36,23 +36,11 @@
 // Author: Patrick Marks, David Alexander
 
 #include "Mutation.hpp"
-
-#include <algorithm>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 #include <cassert>
-#include <string>
-#include <vector>
 
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-
-#include "Types.hpp"
-#include "PairwiseAlignment.hpp"
-#include "Utils.hpp"
 
 using std::max;
+using namespace std;
 
 namespace ConsensusCore
 {
@@ -81,50 +69,69 @@ namespace ConsensusCore
     }
 
 
-    ScoredMutation Mutation::WithScore(float score) const
+    ScoredMutation Mutation::WithScore(double score) const
     {
         return ScoredMutation(*this, score);
     }
 
-
+    // NOTE: Start is not just equal to Mut.Start() here because the location of a mutation can change
+    // as earlier mutations are applied.
     static void
-    _ApplyMutationInPlace(const Mutation& mut, int start, std::string* tpl)
+    _ApplyMutationInPlace(const Mutation& mut, int start, TemplateParameterPair& tpl, const ContextParameters& ctx_params)
     {
         if (mut.IsSubstitution())
         {
-            (*tpl).replace(start, mut.End() - mut.Start(), mut.NewBases());
+            tpl.tpl.replace(start, mut.End() - mut.Start(), mut.NewBases());
+            tpl.trans_probs[start] = ctx_params.GetParametersForContext(tpl.tpl.at(start), tpl.tpl.at(start+1));
         }
         else if (mut.IsDeletion())
         {
-            (*tpl).erase(start, mut.End() - mut.Start());
+            tpl.tpl.erase(start, mut.End() - mut.Start());
+            //TODO: Check the end is exclusive
+            tpl.trans_probs.erase(tpl.trans_probs.begin() + start, tpl.trans_probs.begin() + start + ( mut.End()- mut.Start()));
+            if(start > 0) {
+                tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
+            }
         }
         else if (mut.IsInsertion())
         {
-            (*tpl).insert(start, mut.NewBases());
+            tpl.tpl.insert(start, mut.NewBases());
+            auto new_params = ctx_params.GetParametersForContext(tpl.tpl.at(start), tpl.tpl.at(start+1));
+            tpl.trans_probs.insert(tpl.trans_probs.begin() + start, new_params);
+            tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
         }
     }
 
-    std::string
-    ApplyMutation(const Mutation& mut, const std::string& tpl)
+    TemplateParameterPair
+    ApplyMutation(const Mutation& mut, const TemplateParameterPair& tpl, const ContextParameters& ctx_params)
     {
-        std::string tplCopy(tpl);
-        _ApplyMutationInPlace(mut, mut.Start(), &tplCopy);
-        return tplCopy;
+        auto tplCopy = string(tpl.tpl);
+        auto new_probs = vector<TransitionParameters>(tpl.trans_probs);
+        TemplateParameterPair new_tpl;
+        new_tpl.tpl = tplCopy;
+        new_tpl.trans_probs = new_probs;
+        _ApplyMutationInPlace(mut, mut.Start(), new_tpl, ctx_params);
+        return new_tpl;
     }
 
-    std::string
-    ApplyMutations(const std::vector<Mutation>& muts, const std::string& tpl)
+    TemplateParameterPair
+    ApplyMutations(const std::vector<Mutation>& muts, const TemplateParameterPair& tpl,  const ContextParameters& ctx_params)
     {
-        std::string tplCopy(tpl);
+        // Make a new copy
+        auto tplCopy = string(tpl.tpl);
+        auto new_probs = vector<TransitionParameters>(tpl.trans_probs);
+        TemplateParameterPair new_tpl (tplCopy, new_probs);
+        
+        // Apply mutations
         std::vector<Mutation> sortedMuts(muts);
         std::sort(sortedMuts.begin(), sortedMuts.end());
         int runningLengthDiff = 0;
         foreach (const Mutation& mut, sortedMuts)
         {
-            _ApplyMutationInPlace(mut, mut.Start() + runningLengthDiff, &tplCopy);
+            _ApplyMutationInPlace(mut, mut.Start() + runningLengthDiff, new_tpl, ctx_params);
             runningLengthDiff += mut.LengthDiff();
         }
-        return tplCopy;
+        return new_tpl;
     }
 
     std::string MutationsToTranscript(const std::vector<Mutation>& mutations,
@@ -197,7 +204,7 @@ namespace ConsensusCore
     }
 
 
-    ScoredMutation::ScoredMutation(const Mutation& m, float score)
+    ScoredMutation::ScoredMutation(const Mutation& m, double score)
         : Mutation(m),
           score_(score)
     {}
@@ -207,7 +214,7 @@ namespace ConsensusCore
           score_(0)
     {}
 
-    float ScoredMutation::Score() const
+    double ScoredMutation::Score() const
     {
         return score_;
     }

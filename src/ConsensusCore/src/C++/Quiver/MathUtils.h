@@ -16,7 +16,7 @@
 #include <cmath>
 
 #define NEG_INF - INFINITY
-using namespace std;
+
 
 const double log_one_third = -1.098612289;
 

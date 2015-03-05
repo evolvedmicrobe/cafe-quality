@@ -106,7 +106,7 @@ namespace detail {
 
         if (fabs(a(I, J) - b(0, 0)) > ALPHA_BETA_MISMATCH_TOLERANCE)
         {
-            LDEBUG << "Could not mate alpha, beta.  Read: " << e.ReadName() << " Tpl: " << e.Template();
+            LDEBUG << "Could not mate alpha, beta.  Read: " << e.ReadName() << " Tpl: " << e.Template().tpl;
             throw AlphaBetaMismatchException();
         }
 
