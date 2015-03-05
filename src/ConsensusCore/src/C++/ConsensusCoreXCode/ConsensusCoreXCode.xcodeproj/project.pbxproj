@@ -7,8 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A600C2671AA1664D00DB6D55 /* ContextParameterProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A600C2651AA1664C00DB6D55 /* ContextParameterProvider.cpp */; };
+		A600C2681AA1664D00DB6D55 /* ContextParameterProvider.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A600C2661AA1664D00DB6D55 /* ContextParameterProvider.hpp */; };
+		A62ECDA91AA68192004D4833 /* TemplateParameterPair.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A62ECDA71AA68192004D4833 /* TemplateParameterPair.hpp */; };
 		A6C56DE21A9BDF4700FAEC11 /* TransitionParameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C56DE01A9BDF4700FAEC11 /* TransitionParameters.cpp */; };
 		A6C56DE31A9BDF4700FAEC11 /* TransitionParameters.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6C56DE11A9BDF4700FAEC11 /* TransitionParameters.hpp */; };
+		A6D56A791AA415F900784E21 /* ContextParameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6D56A771AA415F900784E21 /* ContextParameters.cpp */; };
+		A6D56A7A1AA415F900784E21 /* ContextParameters.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6D56A781AA415F900784E21 /* ContextParameters.hpp */; };
 		A6FB7C541A242A000054F5D7 /* AffineAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7BE71A242A000054F5D7 /* AffineAlignment.cpp */; };
 		A6FB7C551A242A000054F5D7 /* AffineAlignment.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7BE81A242A000054F5D7 /* AffineAlignment.hpp */; };
 		A6FB7C561A242A000054F5D7 /* Checksum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6FB7BE91A242A000054F5D7 /* Checksum.cpp */; };
@@ -96,9 +101,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A600C2651AA1664C00DB6D55 /* ContextParameterProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextParameterProvider.cpp; path = ../ContextParameterProvider.cpp; sourceTree = "<group>"; };
+		A600C2661AA1664D00DB6D55 /* ContextParameterProvider.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ContextParameterProvider.hpp; path = ../ContextParameterProvider.hpp; sourceTree = "<group>"; };
+		A62ECDA71AA68192004D4833 /* TemplateParameterPair.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TemplateParameterPair.hpp; path = ../TemplateParameterPair.hpp; sourceTree = "<group>"; };
 		A6C56DDF1A9BCAFE00FAEC11 /* MathUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MathUtils.h; sourceTree = "<group>"; };
 		A6C56DE01A9BDF4700FAEC11 /* TransitionParameters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TransitionParameters.cpp; path = ../TransitionParameters.cpp; sourceTree = "<group>"; };
 		A6C56DE11A9BDF4700FAEC11 /* TransitionParameters.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransitionParameters.hpp; path = ../TransitionParameters.hpp; sourceTree = "<group>"; };
+		A6D56A771AA415F900784E21 /* ContextParameters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextParameters.cpp; path = ../ContextParameters.cpp; sourceTree = "<group>"; };
+		A6D56A781AA415F900784E21 /* ContextParameters.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ContextParameters.hpp; path = ../ContextParameters.hpp; sourceTree = "<group>"; };
 		A6FB7BE21A2429E90054F5D7 /* libConsensusCoreDev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libConsensusCoreDev.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6FB7BE71A242A000054F5D7 /* AffineAlignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AffineAlignment.cpp; path = ../AffineAlignment.cpp; sourceTree = "<group>"; };
 		A6FB7BE81A242A000054F5D7 /* AffineAlignment.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AffineAlignment.hpp; path = ../AffineAlignment.hpp; sourceTree = "<group>"; };
@@ -204,6 +214,11 @@
 		A6FB7BD31A2429A00054F5D7 = {
 			isa = PBXGroup;
 			children = (
+				A62ECDA71AA68192004D4833 /* TemplateParameterPair.hpp */,
+				A6D56A771AA415F900784E21 /* ContextParameters.cpp */,
+				A6D56A781AA415F900784E21 /* ContextParameters.hpp */,
+				A600C2651AA1664C00DB6D55 /* ContextParameterProvider.cpp */,
+				A600C2661AA1664D00DB6D55 /* ContextParameterProvider.hpp */,
 				A6C56DE01A9BDF4700FAEC11 /* TransitionParameters.cpp */,
 				A6C56DE11A9BDF4700FAEC11 /* TransitionParameters.hpp */,
 				A6FB7BE71A242A000054F5D7 /* AffineAlignment.cpp */,
@@ -397,6 +412,7 @@
 				A6FB7CA91A242A010054F5D7 /* Sequence.hpp in Headers */,
 				A6FB7C661A242A000054F5D7 /* Interval.hpp in Headers */,
 				A6FB7C801A242A010054F5D7 /* SparseVector.hpp in Headers */,
+				A62ECDA91AA68192004D4833 /* TemplateParameterPair.hpp in Headers */,
 				A6FB7C671A242A000054F5D7 /* LDouble.hpp in Headers */,
 				A6FB7CA71A242A010054F5D7 /* Read.hpp in Headers */,
 				A6FB7C831A242A010054F5D7 /* Mutation.hpp in Headers */,
@@ -410,6 +426,7 @@
 				A6FB7CA11A242A010054F5D7 /* ReadScorer.hpp in Headers */,
 				A6FB7C891A242A010054F5D7 /* PoaConsensus.hpp in Headers */,
 				A6FB7C811A242A010054F5D7 /* Mutation-inl.hpp in Headers */,
+				A6D56A7A1AA415F900784E21 /* ContextParameters.hpp in Headers */,
 				A6FB7C8D1A242A010054F5D7 /* RecursorBase-inl.hpp in Headers */,
 				A6FB7C691A242A000054F5D7 /* cpplog.hpp in Headers */,
 				A6FB7C791A242A010054F5D7 /* DenseMatrix-inl.hpp in Headers */,
@@ -433,6 +450,7 @@
 				A6FB7C781A242A010054F5D7 /* AbstractMatrix.hpp in Headers */,
 				A6FB7C7B1A242A010054F5D7 /* DenseMatrix.hpp in Headers */,
 				A6FB7C871A242A010054F5D7 /* PoaConfig.hpp in Headers */,
+				A600C2681AA1664D00DB6D55 /* ContextParameterProvider.hpp in Headers */,
 				A6C56DE31A9BDF4700FAEC11 /* TransitionParameters.hpp in Headers */,
 				A6FB7C771A242A010054F5D7 /* SparseVector.hpp in Headers */,
 				A6FB7C751A242A000054F5D7 /* SparseMatrix.hpp in Headers */,
@@ -533,6 +551,7 @@
 				A6FB7C921A242A010054F5D7 /* Diploid.cpp in Sources */,
 				A6FB7CA21A242A010054F5D7 /* SimpleRecursor.cpp in Sources */,
 				A6FB7CAE1A242A010054F5D7 /* Binomial.cpp in Sources */,
+				A600C2671AA1664D00DB6D55 /* ContextParameterProvider.cpp in Sources */,
 				A6FB7C8E1A242A010054F5D7 /* RecursorBase.cpp in Sources */,
 				A6FB7C861A242A010054F5D7 /* PoaConfig.cpp in Sources */,
 				A6FB7C581A242A000054F5D7 /* Coverage.cpp in Sources */,
@@ -542,6 +561,7 @@
 				A6FB7C541A242A000054F5D7 /* AffineAlignment.cpp in Sources */,
 				A6FB7C621A242A000054F5D7 /* Feature.cpp in Sources */,
 				A6C56DE21A9BDF4700FAEC11 /* TransitionParameters.cpp in Sources */,
+				A6D56A791AA415F900784E21 /* ContextParameters.cpp in Sources */,
 				A6FB7C7A1A242A010054F5D7 /* DenseMatrix.cpp in Sources */,
 				A6FB7C841A242A010054F5D7 /* PairwiseAlignment.cpp in Sources */,
 				A6FB7C821A242A010054F5D7 /* Mutation.cpp in Sources */,
