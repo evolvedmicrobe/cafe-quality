@@ -23,13 +23,20 @@ const double log_one_third = -1.098612289;
 // computes log(a + b) given log(a) and log(b)
 inline double logadd(double lna, double lnb)
 {
-    auto max_val = std::max(lna, lnb);
+    double max_val, min_val;
+    if (lna >= lnb) {
+        max_val = lna;
+        min_val = lnb;
+    }
+    else {
+        max_val = lnb;
+        min_val = lna;
+    }
     if (max_val == NEG_INF) {
         return  max_val;
     }
-    lna -= max_val;
-    lnb -= max_val;
-    auto sum = std::exp(lna) + std::exp(lnb);
+    min_val -= max_val;
+    auto sum = std::exp(min_val) + 1.0;
     sum = std::log(sum) + max_val;
     return sum;
 }
