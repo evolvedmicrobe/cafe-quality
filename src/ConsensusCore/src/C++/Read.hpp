@@ -46,8 +46,9 @@
 namespace ConsensusCore
 {
     struct Read {
-        std::string Sequence;
         std::string Name;
+        std::string Sequence;
+        
 
         Read(std::string name, std::string sequence);
 

@@ -59,7 +59,12 @@ namespace ConsensusCore {
         : Name(other.Name),
           Sequence(other.Sequence)
     {}
-
+    
+    std::string
+    Read::ToString() const
+    {
+        return Sequence;
+    }
     int Read::Length() const
     {
         return (int)Sequence.length();
