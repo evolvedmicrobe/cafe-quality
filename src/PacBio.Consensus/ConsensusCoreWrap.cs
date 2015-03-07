@@ -578,7 +578,7 @@ namespace PacBio.Consensus
         /// </summary>
         public TrialTemplate Template
         {
-            get { return new TrialTemplate(scorer.Template(), StartAdapterBases, EndAdapterBases); }
+            get { return new TrialTemplate(scorer.Template().tpl, StartAdapterBases, EndAdapterBases); }
         }
 
 

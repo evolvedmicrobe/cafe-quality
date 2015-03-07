@@ -32,8 +32,6 @@ namespace ConstantModelOptimizer
         /// </summary>
         TransitionParameters[] CurrentTransitionParameters;
 
-
-
         public readonly string Read; //{ get; private set; }
         public readonly string Template;// { get; private set; }
 

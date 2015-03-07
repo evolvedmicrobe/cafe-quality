@@ -221,8 +221,7 @@ namespace ConstantModelOptimizer
 
         public ParameterSet ()
         {
-
-
+            TransitionProbabilities = new Dictionary<string, TransitionParameters> ();
         }
 
         /// <summary>
