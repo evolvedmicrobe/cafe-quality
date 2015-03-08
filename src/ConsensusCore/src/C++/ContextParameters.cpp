@@ -7,7 +7,6 @@
 //
 
 #include "ContextParameters.hpp"
-
 using namespace std;
 
 namespace ConsensusCore {
@@ -18,15 +17,15 @@ namespace ConsensusCore {
     ContextParameters:: ContextParameters(const ContextParameters& arg)
     {
         for(string ctx : contexts) {
-            auto p = arg.param_map.at(ctx);
-            param_map[ctx] = TransitionParameters(p);
+           auto p = arg.param_map.at(ctx);
+           param_map.insert({ ctx, p });
         }
     }
     ContextParameters::ContextParameters(SNR snr)
     {
         for(string ctx : contexts) {
             auto p = ContextParameterProvider::GetTransitionParameters(ctx, snr);
-            param_map[ctx] = p;
+            param_map.insert({ctx, p});
         }
     }
     
