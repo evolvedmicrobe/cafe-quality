@@ -56,7 +56,7 @@
 
 // TODO(dalexander): put these into a RecursorConfig struct
 #define MAX_FLIP_FLOPS                  5
-#define ALPHA_BETA_MISMATCH_TOLERANCE   0.2
+#define ALPHA_BETA_MISMATCH_TOLERANCE   .001 // TODO: Hmmm... not sure what the heck to do about these...
 #define REBANDING_THRESHOLD             0.04
 
 using std::max;
@@ -103,8 +103,8 @@ namespace detail {
             }
             flipflops++;
         }
-
-        if (fabs(a(I, J) - b(0, 0)) > ALPHA_BETA_MISMATCH_TOLERANCE)
+        auto mismatch_percentage = fabs(1.0 - a(I, J)/b(0, 0));
+        if (mismatch_percentage > ALPHA_BETA_MISMATCH_TOLERANCE)
         {
             LDEBUG << "Could not mate alpha, beta.  Read: " << e.ReadName() << " Tpl: " << e.Template().tpl;
             throw AlphaBetaMismatchException();
