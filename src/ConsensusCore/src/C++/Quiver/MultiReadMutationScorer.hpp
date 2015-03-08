@@ -51,6 +51,8 @@
 
 namespace ConsensusCore {
 
+    enum AddReadResult {SUCCESS, ALPHABETAMISMATCH, MEM_FAIL, OTHER};
+    
     class AbstractMultiReadMutationScorer
     {
     protected:
@@ -72,8 +74,8 @@ namespace ConsensusCore {
         // Reads provided must be clipped to the reference/scaffold window implied by the
         // template, however they need not span the window entirely---nonspanning reads
         // must be provided with (0-based) template start/end coordinates.
-        virtual bool AddRead(const MappedRead& mappedRead, double threshold) = 0;
-        virtual bool AddRead(const MappedRead& mappedRead) = 0;
+        virtual AddReadResult AddRead(const MappedRead& mappedRead, double threshold) = 0;
+        virtual AddReadResult AddRead(const MappedRead& mappedRead) = 0;
 
         virtual double Score(const Mutation& m) const = 0;
         virtual double FastScore(const Mutation& m) const = 0;
@@ -167,8 +169,8 @@ namespace ConsensusCore {
         // Reads provided must be clipped to the reference/scaffold window implied by the
         // template, however they need not span the window entirely---nonspanning reads
         // must be provided with (0-based) template start/end coordinates.
-        bool AddRead(const MappedRead& mappedRead, double threshold);
-        bool AddRead(const MappedRead& mappedRead);
+        AddReadResult AddRead(const MappedRead& mappedRead, double threshold);
+        AddReadResult AddRead(const MappedRead& mappedRead);
 
         double Score(const Mutation& m) const;
         double FastScore(const Mutation& m) const;
@@ -230,6 +232,13 @@ namespace ConsensusCore {
         std::vector<ReadStateType> reads_;
     };
 
+    
+    typedef MultiReadMutationScorer<SimpleQvRecursor> \
+    SimpleQvMultiReadMutationScorer;
+    
+    typedef MultiReadMutationScorer<SimpleQvSumProductRecursor> \
+    SimpleQvSumProductMultiReadMutationScorer;
+    
     typedef MultiReadMutationScorer<SparseSimpleQvRecursor> \
       SparseSimpleQvMultiReadMutationScorer;
     

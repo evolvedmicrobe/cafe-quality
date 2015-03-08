@@ -49,6 +49,10 @@
 #include "Interval.hpp"
 #include "Utils.hpp"
 
+
+#include <fstream>
+#include <iostream>
+
 using std::min;
 using std::max;
 
@@ -63,7 +67,7 @@ namespace ConsensusCore {
      
      The alpha matrix is the "Forward" matrix used in the forward/backward algorithm.
      The i,j position of the matrix represents the probability of all paths up 
-     to the point where theith read position and jth template have been "emitted."
+     to the point where the ith read position and jth template have been "emitted."
      The matrix is calculated recursively by examining all possible transitions 
      into (i,j), and calculating the probability we were in the previous state, 
      times the probability of a transition into (i,j) times the probability of 
@@ -84,6 +88,7 @@ namespace ConsensusCore {
     void
     SimpleRecursor<M, E, C>::FillAlpha(const E& e, const M& guide, M& alpha) const
     {
+        // We are pinning, so should never go all the way to the end of the read/template
         int I = e.ReadLength();
         int J = e.TemplateLength();
         
@@ -92,12 +97,13 @@ namespace ConsensusCore {
                (guide.Rows() == alpha.Rows() && guide.Columns() == alpha.Columns()));
 
         int hintBeginRow = 0, hintEndRow = 0;
-
-        for (int j = 0; j <= J; ++j)
+        
+        for (int j = 1; j < J; ++j)
         {
+            
             this->RangeGuide(j, guide, alpha, &hintBeginRow, &hintEndRow);
 
-            int requiredEndRow = min(I + 1, hintEndRow);
+            int requiredEndRow = min(I , hintEndRow);
 
             int i;
             double score = NEG_INF;
@@ -108,7 +114,7 @@ namespace ConsensusCore {
 
             int beginRow = hintBeginRow, endRow;
             for (i = beginRow;
-                 i < I + 1 && (score >= thresholdScore || i < requiredEndRow);
+                 i < I && (score >= thresholdScore || i < requiredEndRow);
                  ++i)
             {
                 double thisMoveScore;
@@ -133,39 +139,78 @@ namespace ConsensusCore {
                         score = C::Combine(score, thisMoveScore);
                     }
                     // Stick or Branch:
-                    if (i > 1 && i < I) // Due to pinning, can't "insert" first or last read bpbase
+                    if (i > 1) // Due to pinning, can't "insert" first or last read bpbase
                     {
                         thisMoveScore = alpha(i - 1, j) + e.Insertion(i - 1, j - 1);
                         score = C::Combine(score, thisMoveScore);
                     }
 
                     // Deletion:
-                    if (j > 1 && j < J) // Due to pinning, can't "delete" first or last template bp
+                    if (j > 1) // Due to pinning, can't "delete" first or last template bp
                     {
                         thisMoveScore = alpha(i, j - 1) + e.Deletion(j - 1);
                         score = C::Combine(score, thisMoveScore);
                     }
-                    
-                    //  Save score
-                    alpha.Set(i, j, score);
-
-                    if (score > maxScore)
-                    {
-                        maxScore = score;
-                        thresholdScore = maxScore - this->bandingOptions_.ScoreDiff;
-                    }
                 }
-            }
+                //  Save score
+                alpha.Set(i, j, score);                
+                if (score > maxScore)
+                {
+                    maxScore = score;
+                    thresholdScore = maxScore - this->bandingOptions_.ScoreDiff;
+                }
 
+            }
+            
             endRow = i;
             alpha.FinishEditingColumn(j, beginRow, endRow);
-
+            
             // Now, revise the hints to tell the caller where the mass of the
             // distribution really lived in this column.
             hintEndRow = endRow;
             for (i = beginRow; i < endRow && alpha(i, j) < thresholdScore; ++i);
             hintBeginRow = i;
         }
+        DumpAlphaMatrix(alpha);
+        // Now fill out the probability in the last pinned position.
+        // We require that we end in a match.
+        auto lastLik = alpha(I-2, J-2);
+        auto match = e.Match(I-2, J-2);
+        auto likelihood = alpha(I - 2, J - 2) + e.Match(I - 2, J - 2);
+        alpha.StartEditingColumn(J, I, I + 1);
+        alpha.Set(I, J, likelihood);
+        alpha.FinishEditingColumn(J, I, I + 1);
+    }
+    
+    template<typename M>
+    void DumpAlphaMatrix(M& mat)
+    {
+        std::ofstream myfile;
+        myfile.open("/Users/nigel/git/cafe-quality/src/ConsensusCore/build/Matrix.csv");
+        for(int i=0; i< mat.Rows(); i++)
+        {
+            for(int j=0; j<mat.Columns(); j++)
+            {
+                myfile << mat(i,j) << ",";
+            }
+            myfile << "\n";
+        }
+        myfile.close();
+    }
+    template<typename M>
+    void DumpBetaMatrix(M& mat)
+    {
+        std::ofstream myfile;
+        myfile.open("/Users/nigel/git/cafe-quality/src/ConsensusCore/build/Beta.csv");
+        for(int i=0; i< mat.Rows(); i++)
+        {
+            for(int j=0; j<mat.Columns(); j++)
+            {
+                myfile << mat(i,j) << ",";
+            }
+            myfile << "\n";
+        }
+        myfile.close();
     }
 
     /**
@@ -194,9 +239,14 @@ namespace ConsensusCore {
         assert(guide.IsNull() ||
                (guide.Rows() == beta.Rows() && guide.Columns() == beta.Columns()));
 
-        int hintBeginRow = I + 1, hintEndRow = I + 1;
+        //Setup initial condition
+        beta.StartEditingColumn(J, I, I+1);
+        beta.Set(I, J, 0.0);
+        beta.FinishEditingColumn(J, I, I + 1);
+    
+        int hintBeginRow = I, hintEndRow = I;
 
-        for (int j = J; j >= 0; --j)
+        for (int j = (J-1); j > 0; --j)
         {
             this->RangeGuide(j, guide, beta, &hintBeginRow, &hintEndRow);
 
@@ -208,7 +258,7 @@ namespace ConsensusCore {
             double score = NEG_INF;
             double thresholdScore = NEG_INF;
             double maxScore = NEG_INF;
-
+            
             int beginRow, endRow = hintEndRow;
             for (i = endRow - 1;
                  i >= 0 && (score >= thresholdScore || i >= requiredBeginRow);
@@ -216,29 +266,26 @@ namespace ConsensusCore {
             {
                 double thisMoveScore;
                 score = NEG_INF;
-
-                // Start:
-                if (i == I && j == J)
-                {
-                    score = 0.0;
-                }
+              
 
                 // Match:
-                if (i < I && j < J)
+                // TODO: Right now it assumes the probability of a match transition is 1.
+                // Which might introduce problems in homopolymers on boundaries.
+                if (i < I && j < J) // Always true??
                 {
                     thisMoveScore = beta(i + 1, j + 1) + e.Match(i, j);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Stick or Branch:
-                if (i < (I-1)) // Can only transition to an insertion for the 2nd to last read base
+                if (i < (I-1) && i > 1) // Can only transition to an insertion for the 2nd to last read base
                 {
                     thisMoveScore = beta(i + 1, j) + e.Insertion(i, j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Deletion:
-                if (j < J)
+                if (j < (J-1) && j > 0)
                 {
                     thisMoveScore = beta(i, j + 1) + e.Deletion(j);
                     score = C::Combine(score, thisMoveScore);
@@ -257,7 +304,7 @@ namespace ConsensusCore {
 
             beginRow = i + 1;
             beta.FinishEditingColumn(j, beginRow, endRow);
-
+            DumpBetaMatrix(beta);
             // Now, revise the hints to tell the caller where the mass of the
             // distribution really lived in this column.
             hintBeginRow = beginRow;
@@ -266,6 +313,11 @@ namespace ConsensusCore {
                  --i);
             hintEndRow = i;
         }
+        
+        beta.StartEditingColumn(0, 0, 1);
+        // Now to fill the top row which must be a match
+        beta.Set(0, 0, e.Match(0,0) + beta(1,1));
+        beta.FinishEditingColumn(0, 0, 1);
     }
 
     /// Calculate the recursion score by "stitching" together partial

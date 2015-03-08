@@ -19,8 +19,9 @@ namespace ConsensusCore {
                                                Match(match), Stick(stick),
                                                Branch(branch),Deletion(deletion) {}
     
+    
     TransitionParameters::TransitionParameters() :
-    Match(0) ,Stick(0), Branch(0), Deletion(0) {}
+    Match(0.0) ,Stick(0.0), Branch(0.0), Deletion(0.0) {}
     
     TransitionParameters::TransitionParameters(const ConsensusCore::TransitionParameters &other) :
     Match(other.Match), Stick(other.Stick), Branch(other.Branch), Deletion(other.Deletion) {}

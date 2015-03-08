@@ -50,6 +50,7 @@
 
 namespace ConsensusCore
 {
+   
     template<typename R>
     class MutationScorer
     {
@@ -91,6 +92,7 @@ namespace ConsensusCore
     };
 
     typedef MutationScorer<SimpleQvRecursor>       SimpleQvMutationScorer;
+    typedef MutationScorer<SimpleQvSumProductRecursor> SimpleQvSumProductMutationScorer;
     typedef MutationScorer<SparseSimpleQvRecursor> SparseSimpleQvMutationScorer;
     typedef MutationScorer<SparseSimpleQvSumProductRecursor> SparseSimpleQvSumProductMutationScorer;
     

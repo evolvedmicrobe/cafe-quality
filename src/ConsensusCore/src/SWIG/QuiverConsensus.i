@@ -6,14 +6,16 @@
 #include "ContextParameterProvider.hpp"
 #include "ContextParameters.hpp"
 #include "TemplateParameterPair.hpp"
+#include "TransitionParameters.hpp"
+#include "Quiver/QuiverConfig.hpp"
+#include "Quiver/QvEvaluator.hpp"
 #include "Quiver/MultiReadMutationScorer.hpp"
 #include "Quiver/MutationScorer.hpp"
-#include "Quiver/QuiverConfig.hpp"
 #include "Quiver/SimpleRecursor.hpp"
 #include "Quiver/ReadScorer.hpp"
 #include "Quiver/Diploid.hpp"
 #include "Quiver/QuiverConsensus.hpp"
-#include "TransitionParameters.hpp"
+
 
 using namespace ConsensusCore;
 using namespace std;
@@ -48,9 +50,10 @@ using namespace std;
 %include "TemplateParameterPair.hpp"
 %include "Quiver/detail/Combiner.hpp"
 %include "Quiver/detail/RecursorBase.hpp"
+%include "Quiver/QuiverConfig.hpp"
+%include "Quiver/QvEvaluator.hpp"
 %include "Quiver/MultiReadMutationScorer.hpp"
 %include "Quiver/MutationScorer.hpp"
-%include "Quiver/QuiverConfig.hpp"
 %include "Quiver/SimpleRecursor.hpp"
 %include "Quiver/ReadScorer.hpp"
 %include "Quiver/Diploid.hpp"
@@ -68,6 +71,10 @@ namespace ConsensusCore {
     %template(SimpleQvRecursor)         SimpleRecursor<DenseMatrix, QvEvaluator, detail::ViterbiCombiner>;
     %template(SimpleQvMutationScorer)   MutationScorer<SimpleQvRecursor>;
     
+    %template(QvRecursorSumProductBase)           detail::RecursorBase<DenseMatrix, QvEvaluator, detail::SumProductCombiner>;
+    %template(SimpleQvSumProductRecursor)         SimpleRecursor<DenseMatrix, QvEvaluator, detail::SumProductCombiner>;
+    %template(SimpleQvSumProductMutationScorer)   MutationScorer<SimpleQvSumProductRecursor>;
+
     //
     // Sparse matrix support
     //

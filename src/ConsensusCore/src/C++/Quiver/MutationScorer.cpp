@@ -244,6 +244,7 @@ namespace ConsensusCore
     }
 
     template class MutationScorer<SimpleQvRecursor>;
+    template class MutationScorer<SimpleQvSumProductRecursor>;
     template class MutationScorer<SparseSimpleQvRecursor>;
     template class MutationScorer<SparseSimpleQvSumProductRecursor>;
 

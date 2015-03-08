@@ -261,8 +261,9 @@ namespace ConsensusCore
      @exception <#throws#>
      */
     template<typename R>
-    bool MultiReadMutationScorer<R>::AddRead(const MappedRead& mr, double threshold)
+    AddReadResult MultiReadMutationScorer<R>::AddRead(const MappedRead& mr, double threshold)
     {
+        AddReadResult res = SUCCESS;
         DEBUG_ONLY(CheckInvariants());
         EvaluatorType ev(mr,
                          Template(mr.Strand, mr.TemplateStart, mr.TemplateEnd),
@@ -277,6 +278,7 @@ namespace ConsensusCore
         catch (AlphaBetaMismatchException& e)
         {
             scorer = NULL;
+            res = ALPHABETAMISMATCH;
         }
 
         if (scorer != NULL && threshold < 1.0f)
@@ -288,6 +290,7 @@ namespace ConsensusCore
             if (scorer->Alpha()->AllocatedEntries() >= maxSize ||
                 scorer->Beta()->AllocatedEntries() >= maxSize)
             {
+                res = AddReadResult::MEM_FAIL;
                 delete scorer;
                 scorer = NULL;
             }
@@ -296,7 +299,7 @@ namespace ConsensusCore
         bool isActive = scorer != NULL;
         reads_.push_back(ReadStateType(new MappedRead(mr), scorer, isActive));
         DEBUG_ONLY(CheckInvariants());
-        return isActive;
+        return res;
     }
     /**
      Add a read to the scorer using the default memory threshold.
@@ -304,7 +307,7 @@ namespace ConsensusCore
      @returns If the read was included
      */
     template<typename R>
-    bool MultiReadMutationScorer<R>::AddRead(const MappedRead& mr)
+    AddReadResult MultiReadMutationScorer<R>::AddRead(const MappedRead& mr)
     {
         DEBUG_ONLY(CheckInvariants());
         return AddRead(mr, quiv_config.AddThreshold);
@@ -572,7 +575,7 @@ namespace ConsensusCore
             if (IsActive)
             {
                 assert(Read != NULL && Scorer != NULL);
-                assert((int)Scorer->Template().length() ==
+                assert((int)Scorer->Template().tpl.length() ==
                        Read->TemplateEnd - Read->TemplateStart);
             }
 #endif  // !NDEBUG
@@ -595,7 +598,8 @@ namespace ConsensusCore
         }
     }
 
-
+    template class MultiReadMutationScorer<SimpleQvRecursor>;
+    template class MultiReadMutationScorer<SimpleQvSumProductRecursor>;
     template class MultiReadMutationScorer<SparseSimpleQvRecursor>;
     template class MultiReadMutationScorer<SparseSimpleQvSumProductRecursor>;
 }

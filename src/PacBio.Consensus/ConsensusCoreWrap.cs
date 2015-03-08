@@ -195,7 +195,7 @@ namespace PacBio.Consensus
                 using (var mappedRead = new MappedRead(read, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd,
                                                        r.AdapterHitBefore, r.AdapterHitAfter))
                 {
-                    if (!scorer.AddRead(mappedRead, AddThreshold))
+                    if (!(scorer.AddRead(mappedRead, AddThreshold)!=AddReadResult.SUCCESS))
                     {
                         #if DIAGNOSTIC
                         scorer.AddRead(mappedRead, 1.0f);
@@ -248,7 +248,7 @@ namespace PacBio.Consensus
                 using (var mappedRead = new MappedRead(read, (StrandEnum)r.Strand, r.TemplateStart, r.TemplateEnd,
                                             r.AdapterHitBefore, r.AdapterHitAfter))
                 {
-                    if (!scorer.AddRead(mappedRead, AddThreshold))
+                    if (!(scorer.AddRead(mappedRead, AddThreshold) != AddReadResult.SUCCESS))
                     {
                         #if DIAGNOSTIC
                         scorer.AddRead(mappedRead, 1.0f);
