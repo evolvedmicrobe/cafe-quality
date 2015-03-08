@@ -81,7 +81,7 @@ namespace ConsensusCore {
      @param e An Evaluator type instance, such as QvEvaluator.  This type must be able to 
      calculate Match, Insertion and Deletion values at given parameters.  Used to populate the matrix.
      @param guide An object that helps inform how to select the size of "bands" for the 
-     banded algorithm used.
+     banded algorithm used.  This is typically the beta matrix if we are "repopulating" the matrix.
      @param alpha The matrix to be filled.
      */
     template<typename M, typename E, typename C>
@@ -96,20 +96,25 @@ namespace ConsensusCore {
         assert(guide.IsNull() ||
                (guide.Rows() == alpha.Rows() && guide.Columns() == alpha.Columns()));
 
-        int hintBeginRow = 0, hintEndRow = 0;
+        
+        // Initial condition, we always start with a match
+        alpha.StartEditingColumn(0, 0, 1);
+        alpha.Set(0, 0, 0.0);
+        alpha.FinishEditingColumn(0, 0, 1);
+        // End initial conditions
+        
+        //
+        int hintBeginRow = 1, hintEndRow = I - 1;
         
         for (int j = 1; j < J; ++j)
-        {
-            
+        {            
             this->RangeGuide(j, guide, alpha, &hintBeginRow, &hintEndRow);
 
             int requiredEndRow = min(I , hintEndRow);
-
             int i;
-            double score = NEG_INF;
             double thresholdScore = NEG_INF;
             double maxScore = NEG_INF;
-
+            double score = NEG_INF;
             alpha.StartEditingColumn(j, hintBeginRow, hintEndRow);
 
             int beginRow = hintBeginRow, endRow;
@@ -120,22 +125,33 @@ namespace ConsensusCore {
                 double thisMoveScore;
                 score = NEG_INF;
 
-                // Start:
-                if (i == 0 && j == 0)
-                {
-                    score = 0.0;
-                }
-                else if(j==0 || i ==0) {
+                 if(j==0 || i ==0) {
+                     assert (j !=0 && i!=0);
                     /* The first move must be a match so all others are NEG_INF
                        along first column/row */
-                    score = NEG_INF;
+                    //score = NEG_INF;
                 }
+                
                 else {
                     
                     // Match:
-                    if (i > 0 && j > 0) // This condition is always true, left for clarity
+                    if (i > 0 && j > 0) // Always true, left for clarity.
                     {
-                        thisMoveScore = alpha(i - 1, j - 1) + e.Match(i - 1, j - 1);
+                        /* Important!  Note that because we require the initial state to be a match,
+                           when i = 1 and j = 1 the match transition probability must be 1, since no other options
+                           are allowed.  Similarly, the probability for the match probability to the end base should be 1.
+                         
+                           Note that for the first "match" between a read and template, we have no choice but to
+                           hard code it to 1, as there is no defined transition probability for a dinucleotide context.
+                            
+                          ***********  EDGE_CONDITION ************
+                         */
+                        if (i == 1 && j == 1) { //TODO: Remove this branch bottleneck...
+                            thisMoveScore = alpha(i-1, j-1) + e.Match_Just_Emission(0,0);
+                        }
+                        else {
+                            thisMoveScore = alpha(i - 1, j - 1) + e.Match(i - 1, j - 1);
+                        }
                         score = C::Combine(score, thisMoveScore);
                     }
                     // Stick or Branch:
@@ -171,15 +187,15 @@ namespace ConsensusCore {
             for (i = beginRow; i < endRow && alpha(i, j) < thresholdScore; ++i);
             hintBeginRow = i;
         }
-        DumpAlphaMatrix(alpha);
-        // Now fill out the probability in the last pinned position.
-        // We require that we end in a match.
-        auto lastLik = alpha(I-2, J-2);
-        auto match = e.Match(I-2, J-2);
-        auto likelihood = alpha(I - 2, J - 2) + e.Match(I - 2, J - 2);
+        /* Now fill out the probability in the last pinned position.
+         * We require that we end in a match. 
+         * search for the term EDGE_CONDITION to find a comment with more information */
+        auto likelihood = alpha(I - 1, J - 1) + e.Match_Just_Emission(I - 1, J - 1);
         alpha.StartEditingColumn(J, I, I + 1);
         alpha.Set(I, J, likelihood);
         alpha.FinishEditingColumn(J, I, I + 1);
+        DumpAlphaMatrix(alpha);
+        
     }
     
     template<typename M>
@@ -239,12 +255,13 @@ namespace ConsensusCore {
         assert(guide.IsNull() ||
                (guide.Rows() == beta.Rows() && guide.Columns() == beta.Columns()));
 
-        //Setup initial condition
+        //Setup initial condition, at the end we are one
         beta.StartEditingColumn(J, I, I+1);
         beta.Set(I, J, 0.0);
         beta.FinishEditingColumn(J, I, I + 1);
-    
-        int hintBeginRow = I, hintEndRow = I;
+        
+        // Totally arbitray decision here...
+        int hintBeginRow = std::min(I - 45, 0), hintEndRow = I;
 
         for (int j = (J-1); j > 0; --j)
         {
@@ -261,7 +278,7 @@ namespace ConsensusCore {
             
             int beginRow, endRow = hintEndRow;
             for (i = endRow - 1;
-                 i >= 0 && (score >= thresholdScore || i >= requiredBeginRow);
+                 i > 0 && (score >= thresholdScore || i >= requiredBeginRow);
                  --i)
             {
                 double thisMoveScore;
@@ -271,7 +288,13 @@ namespace ConsensusCore {
                 // Match:
                 // TODO: Right now it assumes the probability of a match transition is 1.
                 // Which might introduce problems in homopolymers on boundaries.
-                if (i < I && j < J) // Always true??
+                
+                if (i == (I-1) && (j == (J-1)))
+                {
+                    thisMoveScore = beta(i+1, j+1) + e.Match_Just_Emission(i,j);
+                    score = C::Combine(score, thisMoveScore); // TODO: Redundant on first pass?
+                }
+                else if (i < I) // Always true??
                 {
                     thisMoveScore = beta(i + 1, j + 1) + e.Match(i, j);
                     score = C::Combine(score, thisMoveScore);
@@ -315,8 +338,9 @@ namespace ConsensusCore {
         }
         
         beta.StartEditingColumn(0, 0, 1);
-        // Now to fill the top row which must be a match
-        beta.Set(0, 0, e.Match(0,0) + beta(1,1));
+        /* Now to fill the top row which must be a match
+         * search for the term EDGE_CONDITION to find a comment with more information */
+        beta.Set(0, 0, e.Match_Just_Emission(0,0) + beta(1, 1));
         beta.FinishEditingColumn(0, 0, 1);
     }
 

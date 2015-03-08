@@ -176,6 +176,21 @@ namespace ConsensusCore
                 params_.log_miscall_probability_times_one_third;
             return tpl_.trans_probs[j-1].Match + emission_prob;
         }
+        /**
+         This is a special edge case match score, for the first position, which
+         does not have a dinucleotide context to
+         @param <#parameter#>
+         @returns <#retval#>
+         @exception <#throws#>
+         */
+        double Match_Just_Emission(int i, int j) const
+        {
+            assert( (j==0 && i==0) || (j == (TemplateLength()-1) && i == (ReadLength()-1)) ); // The arguments are just for readability.
+            auto emission_prob = (IsMatch(i, j)) ?
+            params_.log_one_minus_miscallprobability :
+            params_.log_miscall_probability_times_one_third;
+            return emission_prob;
+        }
         
         
         /**
@@ -206,7 +221,7 @@ namespace ConsensusCore
          */
         double Insertion(int i, int j) const
         {
-            assert(1 <= j && j < (TemplateLength()-1) &&
+            assert(0 <= j && j < (TemplateLength()-1) &&
                    0 <= i && i < (ReadLength() -1) );
             
             return IsMatch(i, j+1) ? tpl_.trans_probs[j].Branch : tpl_.trans_probs[j].Stick + log_one_third;

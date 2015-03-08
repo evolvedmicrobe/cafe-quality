@@ -26,6 +26,7 @@ namespace ConsensusCore {
         myfile.close();
         SimpleQvSumProductMutationScorer t(qv, bo);
         double score = t.Score();
+        // C# wants this to be -4.94222030733063
         return score;
     }
 }
