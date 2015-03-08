@@ -18,18 +18,18 @@ namespace ConsensusCore {
     {
         for(string ctx : contexts) {
            auto p = arg.param_map.at(ctx);
-           param_map.insert({ ctx, p });
+           param_map[ctx] = p ;
         }
     }
     ContextParameters::ContextParameters(SNR snr)
     {
         for(string ctx : contexts) {
             auto p = ContextParameterProvider::GetTransitionParameters(ctx, snr);
-            param_map.insert({ctx, p});
+            param_map[ctx] = p;
         }
     }
     
-    TransitionParameters&
+    TransitionParameters
     ContextParameters::GetParametersForContext(char bp1, char bp2) const {
         string s;
         if( bp1 == bp2)

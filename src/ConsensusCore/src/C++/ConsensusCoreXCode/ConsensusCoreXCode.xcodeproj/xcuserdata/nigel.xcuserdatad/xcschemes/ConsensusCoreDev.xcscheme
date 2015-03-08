@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A6FB7BE11A2429E90054F5D7"
-               BuildableName = "testConsensusCoreDev.a"
+               BuildableName = "libConsensusCoreDev.a"
                BlueprintName = "ConsensusCoreDev"
                ReferencedContainer = "container:ConsensusCoreXCode.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A6FB7BE11A2429E90054F5D7"
-            BuildableName = "testConsensusCoreDev.a"
+            BuildableName = "libConsensusCoreDev.a"
             BlueprintName = "ConsensusCoreDev"
             ReferencedContainer = "container:ConsensusCoreXCode.xcodeproj">
          </BuildableReference>
@@ -61,7 +61,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A6FB7BE11A2429E90054F5D7"
-            BuildableName = "testConsensusCoreDev.a"
+            BuildableName = "libConsensusCoreDev.a"
             BlueprintName = "ConsensusCoreDev"
             ReferencedContainer = "container:ConsensusCoreXCode.xcodeproj">
          </BuildableReference>

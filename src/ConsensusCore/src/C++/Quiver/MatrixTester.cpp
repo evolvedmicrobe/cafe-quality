@@ -21,7 +21,7 @@ namespace ConsensusCore {
         ContextParameters ctx_params(snr);
         TemplateParameterPair tpp("ACGTCGT", ctx_params);
         QvEvaluator qv(r, tpp, mp);
-        SimpleQvSumProductRecursor bo(BandingOptions(4, -12.5));
+        SimpleQvSumProductRecursor bo(BandingOptions(4, 12.5));
         myfile << "Made bits";
         myfile.close();
         SimpleQvSumProductMutationScorer t(qv, bo);

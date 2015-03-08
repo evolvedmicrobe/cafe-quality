@@ -41,7 +41,8 @@ namespace ConsensusCore {
             // Initialize the dinucleotide context values.
             for(int i = 0; i < (tpl.size() -1); i ++)
             {
-                trans_probs[i] = ctx.GetParametersForContext(tpl.at(i), tpl.at(i+1));
+                auto ps = ctx.GetParametersForContext(tpl.at(i), tpl.at(i+1));
+                trans_probs[i] = ps;
             }
         }
         
