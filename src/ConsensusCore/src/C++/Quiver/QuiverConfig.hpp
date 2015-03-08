@@ -61,12 +61,20 @@ namespace ConsensusCore
 
         BandingOptions(int diagonalCross, double scoreDiff)
             : ScoreDiff(scoreDiff)
-        {}
+        {
+            if(scoreDiff < 0) {
+                throw InvalidInputError("ScoreDiff must be positive!");
+            }
+        }
 
         BandingOptions(int diagonalCross, double scoreDiff,
                        double dynamicAdjustFactor, double dynamicAdjustOffset)
             : ScoreDiff(scoreDiff)
-        {}
+        {
+            if(scoreDiff < 0 ) {
+                throw InvalidInputError("ScoreDiff must be positive!");
+            }
+        }
     };
 
 
