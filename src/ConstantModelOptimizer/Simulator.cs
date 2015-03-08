@@ -7,6 +7,7 @@ using MathNet.Numerics.Random;
 
 namespace ConstantModelOptimizer
 {
+
     public class Simulator
     {
         static Random rand = new Random();
@@ -28,6 +29,23 @@ namespace ConstantModelOptimizer
                 pairs.Add (new Tuple<string, string> (tpl, read));
             }
             sw.Close ();
+            return pairs;
+        }
+        /// <summary>
+        /// Simulates the templates and reads.
+        /// </summary>
+        /// <returns>Tuple of <Template, Read> </returns>
+        /// <param name="numToSimulate">Number to simulate.</param>
+        /// <param name="pars">Pars.</param>
+        public static List<Tuple<string, string>> SimulateTemplatesAndReads(int numToSimulate, ParameterSet pars)
+        {
+            List<Tuple<string, string>> pairs = new List<Tuple<string, string>> ();
+            for(int i=0; i < numToSimulate; i++)
+            {
+                string tpl;
+                string read = SimulateRead (60, pars, out tpl);
+                pairs.Add (new Tuple<string, string> (tpl, read));
+            }
             return pairs;
         }
 

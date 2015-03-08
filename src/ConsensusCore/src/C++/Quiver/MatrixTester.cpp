@@ -25,8 +25,16 @@ namespace ConsensusCore {
         myfile << "Made bits";
         myfile.close();
         SimpleQvSumProductMutationScorer t(qv, bo);
-        double score = t.Score();
         // C# wants this to be -4.94222030733063
+        double score = t.Score();
+        
+        // C# Wants this to be -0.584415070238446
+        Mutation m(MutationType::INSERTION, 4, 4, "A");
+        //auto new_score = t.ScoreMutation(m,ctx_params);
+        
+        Mutation m2(MutationType::SUBSTITUTION, 2, 3,"C");
+        auto new_score2 = t.ScoreMutation(m2, ctx_params);
+        
         return score;
     }
 }

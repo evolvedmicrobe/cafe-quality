@@ -131,10 +131,10 @@ namespace ConstantModelOptimizer
             return CurrentLikelihood;
         }
 
-        private void DumpMatrices()
+        public void DumpMatrices()
         {
             Func<double, string> format = delegate(double x) {
-                if(Double.IsNegativeInfinity(x)) {return "0";} else {return Math.Exp(x).ToString();}
+                if(Double.IsNegativeInfinity(x)) {return "0";} else {return x.ToString();}
                     };
 
             
@@ -185,7 +185,7 @@ namespace ConstantModelOptimizer
 
             // Special end case - required match 
             if ((i == Read.Length - 1) && j == (Template.Length - 1)) {
-                // We are required to start in a match, so previous probability is 1
+                // We are required to end in a match, so previous probability is 1
                 newState.Match = forward[i-1][j-1].Total + matchEmissionProb;
                 newState.SetTotal ();
                 forward [i] [j] = newState;

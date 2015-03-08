@@ -33,8 +33,24 @@ namespace Tests
 
             ReadTemplatePair rtp = new ReadTemplatePair (read, template);
             rtp.FillMatrices (ps);
+            rtp.DumpMatrices ();
             var res = rtp.CurrentLikelihood;
             Console.WriteLine (res);
+
+            template = read;
+            rtp = new ReadTemplatePair (read, template);
+            rtp.FillMatrices (ps);
+            // C# wants this to be -0.584415070238446
+            res = rtp.CurrentLikelihood;
+            Console.WriteLine (res);
+
+            template = "ACCTCGT";
+            rtp = new ReadTemplatePair (read, template);
+            rtp.FillMatrices (ps);
+            // C# wants this to be -0.584415070238446
+            res = rtp.CurrentLikelihood;
+            Console.WriteLine (res);
+
         }
 
         [Test ()]
