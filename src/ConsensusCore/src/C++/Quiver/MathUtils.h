@@ -32,7 +32,7 @@ inline double logadd(double lna, double lnb)
         max_val = lnb;
         min_val = lna;
     }
-    if (max_val == NEG_INF) {
+    if (min_val == NEG_INF) {
         return  max_val;
     }
     min_val -= max_val;
