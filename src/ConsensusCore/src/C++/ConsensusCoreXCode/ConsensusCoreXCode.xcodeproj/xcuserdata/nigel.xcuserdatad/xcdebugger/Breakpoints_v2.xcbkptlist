@@ -1,0 +1,769 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../main.cpp"
+            timestampString = "447465937.444274"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "18"
+            endingLineNumber = "18"
+            landmarkName = "main()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../main.cpp"
+            timestampString = "447465937.444274"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "17"
+            endingLineNumber = "17"
+            landmarkName = "main()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/MatrixTester.cpp"
+            timestampString = "447468606.877023"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "29"
+            endingLineNumber = "29"
+            landmarkName = "MatrixTester::TestMutationScorer()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/MatrixTester.cpp"
+            timestampString = "447468617.108977"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "27"
+            endingLineNumber = "27"
+            landmarkName = "MatrixTester::TestMutationScorer()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/MatrixTester.cpp"
+            timestampString = "447468618.166665"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "16"
+            endingLineNumber = "16"
+            landmarkName = "MatrixTester::TestMutationScorer()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/SimpleRecursor.cpp"
+            timestampString = "447477636.787823"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "178"
+            endingLineNumber = "178"
+            landmarkName = "FillAlpha(const E&amp; e, const M&amp; guide, M&amp; alpha)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447477947.684865"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "178"
+                  endingLineNumber = "178"
+                  offsetFromSymbolStart = "1903">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447477947.68498"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "178"
+                  endingLineNumber = "178"
+                  offsetFromSymbolStart = "1903">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447477947.685077"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "178"
+                  endingLineNumber = "178"
+                  offsetFromSymbolStart = "1903">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447477947.68517"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "178"
+                  endingLineNumber = "178"
+                  offsetFromSymbolStart = "1903">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/SimpleRecursor.cpp"
+            timestampString = "447477636.787823"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "171"
+            endingLineNumber = "171"
+            landmarkName = "FillAlpha(const E&amp; e, const M&amp; guide, M&amp; alpha)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476959.130832"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "167"
+                  endingLineNumber = "167"
+                  offsetFromSymbolStart = "1784">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476959.130938"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "167"
+                  endingLineNumber = "167"
+                  offsetFromSymbolStart = "1784">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476959.131028"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "167"
+                  endingLineNumber = "167"
+                  offsetFromSymbolStart = "1784">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476959.131115"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "167"
+                  endingLineNumber = "167"
+                  offsetFromSymbolStart = "1784">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/SimpleRecursor.cpp"
+            timestampString = "447477636.787823"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "119"
+            endingLineNumber = "119"
+            landmarkName = "FillAlpha(const E&amp; e, const M&amp; guide, M&amp; alpha)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476959.132063"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "116"
+                  endingLineNumber = "116"
+                  offsetFromSymbolStart = "921">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476959.132171"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "116"
+                  endingLineNumber = "116"
+                  offsetFromSymbolStart = "921">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476959.132255"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "116"
+                  endingLineNumber = "116"
+                  offsetFromSymbolStart = "921">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476959.132339"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "116"
+                  endingLineNumber = "116"
+                  offsetFromSymbolStart = "921">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/SimpleRecursor.cpp"
+            timestampString = "447477636.787823"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "120"
+            endingLineNumber = "120"
+            landmarkName = "FillAlpha(const E&amp; e, const M&amp; guide, M&amp; alpha)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476979.044793"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "116"
+                  endingLineNumber = "116"
+                  offsetFromSymbolStart = "921">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476979.045227"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "116"
+                  endingLineNumber = "116"
+                  offsetFromSymbolStart = "921">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476979.045389"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "116"
+                  endingLineNumber = "116"
+                  offsetFromSymbolStart = "921">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447476979.045519"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "116"
+                  endingLineNumber = "116"
+                  offsetFromSymbolStart = "921">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/SimpleRecursor.cpp"
+            timestampString = "447478652.752496"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "261"
+            endingLineNumber = "261"
+            landmarkName = "FillBeta(const E&amp; e, const M&amp; guide, M&amp; beta)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillBeta(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447478152.668005"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "256"
+                  endingLineNumber = "256"
+                  offsetFromSymbolStart = "798">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillBeta(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447478152.668163"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "256"
+                  endingLineNumber = "256"
+                  offsetFromSymbolStart = "798">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillBeta(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447478152.66826"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "256"
+                  endingLineNumber = "256"
+                  offsetFromSymbolStart = "798">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillBeta(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447478152.66835"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "256"
+                  endingLineNumber = "256"
+                  offsetFromSymbolStart = "798">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/SimpleRecursor.cpp"
+            timestampString = "447480294.14815"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "250"
+            endingLineNumber = "250"
+            landmarkName = "FillBeta(const E&amp; e, const M&amp; guide, M&amp; beta)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillBeta(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.19704"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "250"
+                  endingLineNumber = "250"
+                  offsetFromSymbolStart = "582">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillBeta(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.197187"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "250"
+                  endingLineNumber = "250"
+                  offsetFromSymbolStart = "582">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillBeta(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.197284"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "250"
+                  endingLineNumber = "250"
+                  offsetFromSymbolStart = "582">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillBeta(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.197386"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "250"
+                  endingLineNumber = "250"
+                  offsetFromSymbolStart = "582">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/SimpleRecursor.cpp"
+            timestampString = "447480974.056493"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "92"
+            endingLineNumber = "92"
+            landmarkName = "FillAlpha(const E&amp; e, const M&amp; guide, M&amp; alpha)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.239915"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "92"
+                  endingLineNumber = "92"
+                  offsetFromSymbolStart = "32">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.240085"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "92"
+                  endingLineNumber = "92"
+                  offsetFromSymbolStart = "32">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.240219"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "92"
+                  endingLineNumber = "92"
+                  offsetFromSymbolStart = "32">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.24035"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "92"
+                  endingLineNumber = "92"
+                  offsetFromSymbolStart = "32">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/QvEvaluator.hpp"
+            timestampString = "447481372.88744"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "177"
+            endingLineNumber = "177"
+            landmarkName = "Match(int i, int j)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/SimpleRecursor.cpp"
+            timestampString = "447481553.193903"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "103"
+            endingLineNumber = "103"
+            landmarkName = "FillAlpha(const E&amp; e, const M&amp; guide, M&amp; alpha)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.241969"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "103"
+                  endingLineNumber = "103"
+                  offsetFromSymbolStart = "508">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.242122"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "103"
+                  endingLineNumber = "103"
+                  offsetFromSymbolStart = "508">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.242302"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "103"
+                  endingLineNumber = "103"
+                  offsetFromSymbolStart = "508">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::SimpleRecursor&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::FillAlpha(ConsensusCore::QvEvaluator const&amp;, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix&amp;) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/SimpleRecursor.cpp"
+                  timestampString = "447481623.242436"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "103"
+                  endingLineNumber = "103"
+                  offsetFromSymbolStart = "508">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Quiver/detail/RecursorBase-inl.hpp"
+            timestampString = "447481619.922329"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "90"
+            endingLineNumber = "90"
+            landmarkName = "RangeGuide(int j, const M&amp; guide, const M&amp; matrix, int* beginRow, int* endRow)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::detail::RecursorBase&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::RangeGuide(int, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix const&amp;, int*, int*) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/detail/RecursorBase-inl.hpp"
+                  timestampString = "447481623.243487"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "90"
+                  endingLineNumber = "90"
+                  offsetFromSymbolStart = "38">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::detail::RecursorBase&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::ViterbiCombiner&gt;::RangeGuide(int, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix const&amp;, int*, int*) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/detail/RecursorBase-inl.hpp"
+                  timestampString = "447481623.243638"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "90"
+                  endingLineNumber = "90"
+                  offsetFromSymbolStart = "38">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::detail::RecursorBase&lt;ConsensusCore::SparseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::RangeGuide(int, ConsensusCore::SparseMatrix const&amp;, ConsensusCore::SparseMatrix const&amp;, int*, int*) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/detail/RecursorBase-inl.hpp"
+                  timestampString = "447481623.24375"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "90"
+                  endingLineNumber = "90"
+                  offsetFromSymbolStart = "38">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ConsensusCore::detail::RecursorBase&lt;ConsensusCore::DenseMatrix, ConsensusCore::QvEvaluator, ConsensusCore::detail::SumProductCombiner&gt;::RangeGuide(int, ConsensusCore::DenseMatrix const&amp;, ConsensusCore::DenseMatrix const&amp;, int*, int*) const"
+                  moduleName = "TestingExecutable"
+                  urlString = "file:///Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++/Quiver/detail/RecursorBase-inl.hpp"
+                  timestampString = "447481623.24385"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "90"
+                  endingLineNumber = "90"
+                  offsetFromSymbolStart = "38">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

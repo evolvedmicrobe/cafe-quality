@@ -10,6 +10,10 @@
 		A600C2671AA1664D00DB6D55 /* ContextParameterProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A600C2651AA1664C00DB6D55 /* ContextParameterProvider.cpp */; };
 		A600C2681AA1664D00DB6D55 /* ContextParameterProvider.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A600C2661AA1664D00DB6D55 /* ContextParameterProvider.hpp */; };
 		A62ECDA91AA68192004D4833 /* TemplateParameterPair.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A62ECDA71AA68192004D4833 /* TemplateParameterPair.hpp */; };
+		A63EA1D41AABACCC00826D31 /* MatrixTester.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A63EA1D21AABACCC00826D31 /* MatrixTester.cpp */; };
+		A63EA1D51AABACCC00826D31 /* MatrixTester.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A63EA1D31AABACCC00826D31 /* MatrixTester.hpp */; };
+		A683E9001AABC91D00A5B4E8 /* libConsensusCoreDev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A6FB7BE21A2429E90054F5D7 /* libConsensusCoreDev.a */; };
+		A683E9031AABCA0200A5B4E8 /* MatrixTester.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A63EA1D21AABACCC00826D31 /* MatrixTester.cpp */; };
 		A6C56DE21A9BDF4700FAEC11 /* TransitionParameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6C56DE01A9BDF4700FAEC11 /* TransitionParameters.cpp */; };
 		A6C56DE31A9BDF4700FAEC11 /* TransitionParameters.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6C56DE11A9BDF4700FAEC11 /* TransitionParameters.hpp */; };
 		A6D56A791AA415F900784E21 /* ContextParameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6D56A771AA415F900784E21 /* ContextParameters.cpp */; };
@@ -100,10 +104,35 @@
 		A6FB7CB41A242A010054F5D7 /* Version.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A6FB7C531A242A000054F5D7 /* Version.hpp */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		A683E9041AABCEE100A5B4E8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A6FB7BD41A2429A00054F5D7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A6FB7BE11A2429E90054F5D7;
+			remoteInfo = ConsensusCoreDev;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A683E8F71AABC8C200A5B4E8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		A600C2651AA1664C00DB6D55 /* ContextParameterProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContextParameterProvider.cpp; path = ../ContextParameterProvider.cpp; sourceTree = "<group>"; };
 		A600C2661AA1664D00DB6D55 /* ContextParameterProvider.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ContextParameterProvider.hpp; path = ../ContextParameterProvider.hpp; sourceTree = "<group>"; };
 		A62ECDA71AA68192004D4833 /* TemplateParameterPair.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TemplateParameterPair.hpp; path = ../TemplateParameterPair.hpp; sourceTree = "<group>"; };
+		A63EA1D21AABACCC00826D31 /* MatrixTester.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatrixTester.cpp; sourceTree = "<group>"; };
+		A63EA1D31AABACCC00826D31 /* MatrixTester.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MatrixTester.hpp; sourceTree = "<group>"; };
+		A683E8F91AABC8C200A5B4E8 /* TestingExecutable */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestingExecutable; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6C56DDF1A9BCAFE00FAEC11 /* MathUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MathUtils.h; sourceTree = "<group>"; };
 		A6C56DE01A9BDF4700FAEC11 /* TransitionParameters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TransitionParameters.cpp; path = ../TransitionParameters.cpp; sourceTree = "<group>"; };
 		A6C56DE11A9BDF4700FAEC11 /* TransitionParameters.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransitionParameters.hpp; path = ../TransitionParameters.hpp; sourceTree = "<group>"; };
@@ -201,6 +230,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A683E8F61AABC8C200A5B4E8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A683E9001AABC91D00A5B4E8 /* libConsensusCoreDev.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A6FB7BDF1A2429E90054F5D7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -270,6 +307,7 @@
 			isa = PBXGroup;
 			children = (
 				A6FB7BE21A2429E90054F5D7 /* libConsensusCoreDev.a */,
+				A683E8F91AABC8C200A5B4E8 /* TestingExecutable */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -354,6 +392,8 @@
 				A6FB7C3F1A242A000054F5D7 /* SimpleRecursor.cpp */,
 				A6FB7C401A242A000054F5D7 /* SimpleRecursor.hpp */,
 				A6C56DDF1A9BCAFE00FAEC11 /* MathUtils.h */,
+				A63EA1D21AABACCC00826D31 /* MatrixTester.cpp */,
+				A63EA1D31AABACCC00826D31 /* MatrixTester.hpp */,
 			);
 			name = Quiver;
 			path = ../Quiver;
@@ -447,6 +487,7 @@
 				A6FB7C9A1A242A010054F5D7 /* MutationScorer.hpp in Headers */,
 				A6FB7C6F1A242A000054F5D7 /* AbstractMatrix.hpp in Headers */,
 				A6FB7C6C1A242A000054F5D7 /* scribestream.hpp in Headers */,
+				A63EA1D51AABACCC00826D31 /* MatrixTester.hpp in Headers */,
 				A6FB7C781A242A010054F5D7 /* AbstractMatrix.hpp in Headers */,
 				A6FB7C7B1A242A010054F5D7 /* DenseMatrix.hpp in Headers */,
 				A6FB7C871A242A010054F5D7 /* PoaConfig.hpp in Headers */,
@@ -464,7 +505,7 @@
 /* Begin PBXLegacyTarget section */
 		A6FB7BD81A2429A00054F5D7 /* ConsensusCoreXcode */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "";
+			buildArgumentsString = console;
 			buildConfigurationList = A6FB7BDB1A2429A00054F5D7 /* Build configuration list for PBXLegacyTarget "ConsensusCoreXcode" */;
 			buildPhases = (
 			);
@@ -473,12 +514,30 @@
 			dependencies = (
 			);
 			name = ConsensusCoreXcode;
-			passBuildSettingsInEnvironment = 1;
+			passBuildSettingsInEnvironment = 0;
 			productName = ConsensusCoreXcode;
 		};
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
+		A683E8F81AABC8C200A5B4E8 /* TestingExecutable */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A683E8FD1AABC8C200A5B4E8 /* Build configuration list for PBXNativeTarget "TestingExecutable" */;
+			buildPhases = (
+				A683E8F51AABC8C200A5B4E8 /* Sources */,
+				A683E8F61AABC8C200A5B4E8 /* Frameworks */,
+				A683E8F71AABC8C200A5B4E8 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A683E9051AABCEE100A5B4E8 /* PBXTargetDependency */,
+			);
+			name = TestingExecutable;
+			productName = TestingExecutable;
+			productReference = A683E8F91AABC8C200A5B4E8 /* TestingExecutable */;
+			productType = "com.apple.product-type.tool";
+		};
 		A6FB7BE11A2429E90054F5D7 /* ConsensusCoreDev */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = A6FB7BE41A2429E90054F5D7 /* Build configuration list for PBXNativeTarget "ConsensusCoreDev" */;
@@ -505,6 +564,9 @@
 				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = "Pacific Biosciences";
 				TargetAttributes = {
+					A683E8F81AABC8C200A5B4E8 = {
+						CreatedOnToolsVersion = 6.1.1;
+					};
 					A6FB7BD81A2429A00054F5D7 = {
 						CreatedOnToolsVersion = 6.1;
 					};
@@ -527,11 +589,20 @@
 			targets = (
 				A6FB7BD81A2429A00054F5D7 /* ConsensusCoreXcode */,
 				A6FB7BE11A2429E90054F5D7 /* ConsensusCoreDev */,
+				A683E8F81AABC8C200A5B4E8 /* TestingExecutable */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A683E8F51AABC8C200A5B4E8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A683E9031AABCA0200A5B4E8 /* MatrixTester.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A6FB7BDE1A2429E90054F5D7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -565,6 +636,7 @@
 				A6FB7C7A1A242A010054F5D7 /* DenseMatrix.cpp in Sources */,
 				A6FB7C841A242A010054F5D7 /* PairwiseAlignment.cpp in Sources */,
 				A6FB7C821A242A010054F5D7 /* Mutation.cpp in Sources */,
+				A63EA1D41AABACCC00826D31 /* MatrixTester.cpp in Sources */,
 				A6FB7C9B1A242A010054F5D7 /* QuiverConfig.cpp in Sources */,
 				A6FB7C6D1A242A000054F5D7 /* Logging.cpp in Sources */,
 				A6FB7C7D1A242A010054F5D7 /* SparseMatrix.cpp in Sources */,
@@ -575,12 +647,42 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		A683E9051AABCEE100A5B4E8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A6FB7BE11A2429E90054F5D7 /* ConsensusCoreDev */;
+			targetProxy = A683E9041AABCEE100A5B4E8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		A683E8FE1AABC8C200A5B4E8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		A683E8FF1AABC8C200A5B4E8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		A6FB7BD91A2429A00054F5D7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -595,7 +697,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -609,6 +711,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"/Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++",
+					"/Users/nigel/git/cafe-quality/lib/boost_1_55_0",
+				);
+				LIBRARY_SEARCH_PATHS = "/Users/nigel/git/cafe-quality/lib/boost_1_55_0";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -620,7 +729,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -637,13 +746,20 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"/Users/nigel/git/cafe-quality/src/ConsensusCore/src/C++",
+					"/Users/nigel/git/cafe-quality/lib/boost_1_55_0",
+				);
+				LIBRARY_SEARCH_PATHS = "/Users/nigel/git/cafe-quality/lib/boost_1_55_0";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
@@ -708,6 +824,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		A683E8FD1AABC8C200A5B4E8 /* Build configuration list for PBXNativeTarget "TestingExecutable" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A683E8FE1AABC8C200A5B4E8 /* Debug */,
+				A683E8FF1AABC8C200A5B4E8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		A6FB7BD71A2429A00054F5D7 /* Build configuration list for PBXProject "ConsensusCoreXCode" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
