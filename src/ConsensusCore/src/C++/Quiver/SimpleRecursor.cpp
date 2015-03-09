@@ -148,11 +148,12 @@ namespace ConsensusCore {
                          */
                         if (i == 1 && j == 1) { //TODO: Remove this branch bottleneck...
                             thisMoveScore = alpha(i-1, j-1) + e.Match_Just_Emission(0,0);
+                            score = C::Combine(score, thisMoveScore);
                         }
-                        else {
+                        else if (i != 1 && j != 1) {
                             thisMoveScore = alpha(i - 1, j - 1) + e.Match(i - 1, j - 1);
-                        }
-                        score = C::Combine(score, thisMoveScore);
+                            score = C::Combine(score, thisMoveScore);
+                        }                        
                     }
                     // Stick or Branch:
                     if (i > 1) // Due to pinning, can't "insert" first or last read bpbase
@@ -164,7 +165,7 @@ namespace ConsensusCore {
                     // Deletion:
                     if (j > 1) // Due to pinning, can't "delete" first or last template bp
                     {
-                        thisMoveScore = alpha(i, j - 1) + e.Deletion(j - 1);
+                        thisMoveScore = alpha(i, j - 1) + e.Deletion(j - 2);
                         score = C::Combine(score, thisMoveScore);
                     }
                 }
@@ -283,7 +284,6 @@ namespace ConsensusCore {
             {
                 double thisMoveScore;
                 score = NEG_INF;
-              
 
                 // Match:
                 // TODO: Right now it assumes the probability of a match transition is 1.
@@ -310,7 +310,7 @@ namespace ConsensusCore {
                 // Deletion:
                 if (j < (J-1) && j > 0)
                 {
-                    thisMoveScore = beta(i, j + 1) + e.Deletion(j);
+                    thisMoveScore = beta(i, j + 1) + e.Deletion(j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
@@ -387,7 +387,7 @@ namespace ConsensusCore {
 
             // Delete:
             thisMoveScore = alpha(i, alphaColumn - 1) +
-                            e.Deletion(absoluteColumn - 1) +
+                            e.Deletion(absoluteColumn - 2) +
                             beta(i, betaColumn);
             v = C::Combine(v, thisMoveScore);
         }
@@ -453,23 +453,29 @@ namespace ConsensusCore {
                             alpha(i - 1, j - 1) :
                             ext(i - 1, extCol - 1);
                     thisMoveScore = prev + e.Match(i - 1, j - 1);
+                    if (i == 1 && j == 1) { //TODO: Remove this branch bottleneck...
+                        thisMoveScore = prev + e.Match_Just_Emission(0,0);
+                    }
+                    else {
+                        thisMoveScore = prev + e.Match(i - 1, j - 1);
+                    }
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Stick or Branch:
-                if (i > 0)
+                if (i > 1)
                 {
                     thisMoveScore = ext(i - 1, extCol) + e.Insertion(i - 1, j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Delete:
-                if (j > 0)
+                if (j > 1)
                 {
                     double prev = extCol == 0 ?
                             alpha(i, j - 1) :
                             ext(i, extCol - 1);
-                    thisMoveScore = prev + e.Deletion(j - 1);
+                    thisMoveScore = prev + e.Deletion(j - 2);
                     score = C::Combine(score, thisMoveScore);
                 }
               
@@ -545,24 +551,29 @@ namespace ConsensusCore {
                     double prev = (extCol == lastExtColumn) ?
                         beta(i + 1, j + 1) :
                         ext(i + 1, extCol + 1);
-                    thisMoveScore = prev + e.Match(i, jp);
+                    if (i == (I-1) && j == (J-1)) {
+                        thisMoveScore = prev + e.Match_Just_Emission(i, j);
+                    }
+                    else {
+                        thisMoveScore = prev + e.Match(i, jp);
+                    }
                     score = C::Combine(score, thisMoveScore);
                 }
 
-                // Extra:
-                if (i < I)
+                // Stick or branch
+                if (i < (I-1) && i > 1)
                 {
                     thisMoveScore = ext(i + 1, extCol) + e.Insertion(i, jp - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
-                // Delete:
-                if (j < J)
+                // Deletion
+                if (j < (J-1) && j > 0)
                 {
                     double prev = (extCol == lastExtColumn) ?
                         beta(i, j + 1) :
                         ext(i, extCol + 1);
-                    thisMoveScore = prev + e.Deletion(jp);
+                    thisMoveScore = prev + e.Deletion(jp - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
