@@ -195,7 +195,7 @@ namespace ConsensusCore {
         alpha.StartEditingColumn(J, I, I + 1);
         alpha.Set(I, J, likelihood);
         alpha.FinishEditingColumn(J, I, I + 1);
-        DumpAlphaMatrix(alpha);
+        //DumpAlphaMatrix(alpha);
         
     }
     
@@ -327,7 +327,7 @@ namespace ConsensusCore {
 
             beginRow = i + 1;
             beta.FinishEditingColumn(j, beginRow, endRow);
-            DumpBetaMatrix(beta);
+            //DumpBetaMatrix(beta);
             // Now, revise the hints to tell the caller where the mass of the
             // distribution really lived in this column.
             hintBeginRow = beginRow;
@@ -396,18 +396,25 @@ namespace ConsensusCore {
     }
 
 
-    //
-    // Reads: alpha(:, (beginColumn-2)..)
-    //
+    /**
+     This method extends that Alpha matrix into a temporary matrix given by 
+     ext.  It extends the region [beginColumn, beginColumn + numExtColumns)
+     
+     All new data is placed in the extension matrix.  The guesses for start/end
+     rows in the banding are determined by evaluating neighbors of each position.
+     @param <#parameter#>
+     @returns <#retval#>
+     @exception <#throws#>
+     */
     template<typename M, typename E, typename C>
     void
     SimpleRecursor<M, E, C>::ExtendAlpha(const E& e,
                                          const M& alpha, int beginColumn,
                                          M& ext, int numExtColumns) const
     {
-        assert(numExtColumns >= 2);
+        assert(numExtColumns >= 2); // We have to fill at least one
         assert(alpha.Rows() == e.ReadLength() + 1 &&
-               ext.Rows() == e.ReadLength() + 1);
+               ext.Rows() == e.ReadLength() + 1); // The read never mutates
 
         // The new template may not be the same length as the old template.
         // Just make sure that we have anough room to fill out the extend buffer
@@ -426,25 +433,46 @@ namespace ConsensusCore {
             // previously determined.  Otherwise start at alpha's last
             // UsedRow beginRow and go to the end.
             //
-            if (j < alpha.Columns())
+            // BULLSHIT! If there was a deletion or insertion, the row range for the previous
+            // column, not the column of interest will be used.
+            // TODO: ERROR! Fix this. Temporary hack is to merge the columns in front and behind.
+            // Still totally broken.
+            if (j < e.TemplateLength())
             {
                 boost::tie(beginRow, endRow) = alpha.UsedRowRange(j);
+                int pBegin, pEnd, nBegin, nEnd;
+                if ( (j-1) >= 0) {
+                    boost::tie(pBegin, pEnd) = alpha.UsedRowRange(j-1);
+                    beginRow = std::min(beginRow, pBegin);
+                    endRow = std::max(endRow, pEnd);
+                }
+                if ( (j+1) < e.TemplateLength() )  {
+                    boost::tie(nBegin, nEnd) = alpha.UsedRowRange(j+1);
+                    beginRow = std::min(beginRow, nBegin);
+                    endRow = std::max(endRow, nEnd);
+                }
             }
             else
             {
                 beginRow = alpha.UsedRowRange(alpha.Columns() - 1).Begin;
                 endRow = alpha.Rows();
             }
+            
+       
 
             ext.StartEditingColumn(extCol, beginRow, endRow);
 
             int i;
             double score;
+            // Due to pinning at the end, moves are only possible if less than these positions.
+            int maxLeftMovePossible = e.TemplateLength();
+            int maxDownMovePossible = e.ReadLength();
 
             for (i = beginRow; i < endRow; i++)
             {
-                double thisMoveScore;
+                double thisMoveScore = NEG_INF;
                 score = NEG_INF;
+                
 
                 // Match:
                 if (i > 0 && j > 0)
@@ -452,25 +480,27 @@ namespace ConsensusCore {
                     double prev = extCol == 0 ?
                             alpha(i - 1, j - 1) :
                             ext(i - 1, extCol - 1);
-                    thisMoveScore = prev + e.Match(i - 1, j - 1);
                     if (i == 1 && j == 1) { //TODO: Remove this branch bottleneck...
-                        thisMoveScore = prev + e.Match_Just_Emission(0,0);
+                        thisMoveScore = e.Match_Just_Emission(0,0); // prev should be zero, so no need for explicit prev + e.Match_Just_Emission
                     }
-                    else {
+                    else if (i == maxDownMovePossible && j == maxLeftMovePossible) {
+                        thisMoveScore = prev + e.Match_Just_Emission(i -1 ,j - 1);
+                    }
+                    else if (i < maxDownMovePossible && j < maxLeftMovePossible) {
                         thisMoveScore = prev + e.Match(i - 1, j - 1);
                     }
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Stick or Branch:
-                if (i > 1)
+                if (i > 1 && i < maxDownMovePossible && j != maxLeftMovePossible)
                 {
                     thisMoveScore = ext(i - 1, extCol) + e.Insertion(i - 1, j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Delete:
-                if (j > 1)
+                if (j > 1 && j < maxLeftMovePossible && i != maxDownMovePossible)
                 {
                     double prev = extCol == 0 ?
                             alpha(i, j - 1) :
@@ -503,23 +533,23 @@ namespace ConsensusCore {
                                         M& ext, int numExtColumns,
                                         int lengthDiff) const
     {
-        int I = beta.Rows() - 1;
-        int J = beta.Columns() - 1;
-
+        int I = e.ReadLength();
+        int J = e.TemplateLength();
+        
+        int firstColumn = 0 - lengthDiff;
         int lastExtColumn = numExtColumns - 1;
 
-        assert(beta.Rows() == I + 1 &&
-               ext.Rows() == I + 1);
+        assert(beta.Rows() == I + 1 && ext.Rows() == I + 1);
 
         // The new template may not be the same length as the old template.
-        // Just make sure that we have anough room to fill out the extend buffer
+        // Just make sure that we have enough room to fill out the extend buffer
         assert(lastColumn + 2 <= J);
         assert(lastColumn >= 0);
         assert(ext.Columns() >= numExtColumns);
 
         for (int j = lastColumn; j > lastColumn - numExtColumns; j--)
         {
-            int jp = j + lengthDiff;
+            int jp = j + lengthDiff; // Convert from old template to new template coordinates.
             int extCol = lastExtColumn - (lastColumn - j);
             int beginRow, endRow;
 
@@ -531,6 +561,17 @@ namespace ConsensusCore {
             else
             {
                 boost::tie(beginRow, endRow) = beta.UsedRowRange(j);
+                int pBegin, pEnd, nBegin, nEnd;
+                if ( (j-1) >= 0) {
+                    boost::tie(pBegin, pEnd) = beta.UsedRowRange(j-1);
+                    beginRow = std::min(beginRow, pBegin);
+                    endRow = std::max(endRow, pEnd);
+                }
+                if ( (j+1) < e.TemplateLength() ) {
+                    boost::tie(nBegin, nEnd) = beta.UsedRowRange(j+1);
+                    beginRow = std::min(beginRow, nBegin);
+                    endRow = std::max(endRow, nEnd);
+                }
             }
 
             ext.StartEditingColumn(extCol, beginRow, endRow);
@@ -542,7 +583,7 @@ namespace ConsensusCore {
                  i >= beginRow;
                  i--)
             {
-                double thisMoveScore;
+                double thisMoveScore = NEG_INF;
                 score = NEG_INF;
 
                 // Incorporation:
@@ -551,24 +592,24 @@ namespace ConsensusCore {
                     double prev = (extCol == lastExtColumn) ?
                         beta(i + 1, j + 1) :
                         ext(i + 1, extCol + 1);
-                    if ((i == (I-1) && j == (J-1)) || (i==0 && j==0)) {
-                        thisMoveScore = prev + e.Match_Just_Emission(i, j);
+                    if ((i == (I-1) && jp == (J-1)) || (i==0 && j == firstColumn)) {
+                        thisMoveScore = prev + e.Match_Just_Emission(i, jp);
                     }
-                    else {
+                    else if ( j > firstColumn && i > 0) {
                         thisMoveScore = prev + e.Match(i, jp);
                     }
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Stick or branch
-                if (i < (I-1) && i > 0)
+                if (i < (I-1) && i > 0 && j > firstColumn)
                 {
                     thisMoveScore = ext(i + 1, extCol) + e.Insertion(i, jp - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Deletion
-                if (j < (J-1) && j > 0)
+                if (j < (J-1) && j > firstColumn && i > 0)
                 {
                     double prev = (extCol == lastExtColumn) ?
                         beta(i, j + 1) :

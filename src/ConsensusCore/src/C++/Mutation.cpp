@@ -92,10 +92,13 @@ namespace ConsensusCore
         else if (mut.IsDeletion())
         {
             tpl.tpl.erase(start, mut.End() - mut.Start());
-            tpl.trans_probs.erase(tpl.trans_probs.begin() + start, tpl.trans_probs.begin() + start + ( mut.End()- mut.Start()));
+            auto maxEnd = tpl.tpl.length() - 1; // Only the second to last base can have an update
             // Only update if not first base though
-            if(start > 0) {
+            if(start > 0 && start < maxEnd) {
                 tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
+            }
+            if (start < maxEnd ) {
+                tpl.trans_probs.erase(tpl.trans_probs.begin() + start, tpl.trans_probs.begin() + start + ( mut.End()- mut.Start()));                
             }
         }
         else if (mut.IsInsertion())
@@ -104,7 +107,7 @@ namespace ConsensusCore
             if (start > 0) {
                 tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
             }
-            if(start < tpl.tpl.length())
+            if(start < (tpl.tpl.length()-1))
             {
                 auto new_params = ctx_params.GetParametersForContext(tpl.tpl.at(start), tpl.tpl.at(start+1));
                 tpl.trans_probs.insert(tpl.trans_probs.begin() + start, new_params);

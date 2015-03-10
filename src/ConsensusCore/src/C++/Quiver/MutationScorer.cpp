@@ -135,17 +135,19 @@ namespace ConsensusCore
     double
     MutationScorer<R>::ScoreMutation(const Mutation& m, const ContextParameters& ctx_params) const
     {
+        
+        if(fabs(m.LengthDiff()) > 1) {
+            throw new InvalidInputError("Only mutations of size 1 allowed");
+        }
+        
         int betaLinkCol = 1 + m.End();
         int absoluteLinkColumn = 1 + m.End() + m.LengthDiff();
         TemplateParameterPair old_Tpl = evaluator_->Template();
         TemplateParameterPair new_tpl = ApplyMutation(m, old_Tpl, ctx_params);
      
-        
-        //TODO: Add logic here to update the parameters for all reads....
-        
         double score;
 
-        bool atBegin = (m.Start() < 3); 
+        bool atBegin = (m.Start() < 2);
         bool atEnd   = (m.End() > (int)old_Tpl.tpl.length() - 2);
 
         if (!atBegin && !atEnd)
@@ -166,7 +168,7 @@ namespace ConsensusCore
             else
             {
                 extendStartCol = m.Start();
-                extendLength   = 1 + m.NewBases().length();
+                extendLength   = 1 + (int)m.NewBases().length();
                 assert(extendLength <= EXTEND_BUFFER_COLUMNS);
             }
 
@@ -185,7 +187,7 @@ namespace ConsensusCore
             evaluator_->Template(new_tpl);
 
             int extendStartCol = m.Start() - 1;
-            int extendLength = new_tpl.tpl.length() - extendStartCol + 1;
+            int extendLength = (int)new_tpl.tpl.length() - extendStartCol + 1;
 
             recursor_->ExtendAlpha(*evaluator_, *alpha_,
                                    extendStartCol, *extendBuffer_, extendLength);
@@ -211,6 +213,8 @@ namespace ConsensusCore
         else
         {
             assert(atBegin && atEnd);
+            // This should basically never happen...
+            
             //
             // Just do the whole fill
             //
