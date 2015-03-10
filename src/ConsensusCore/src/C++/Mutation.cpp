@@ -82,13 +82,18 @@ namespace ConsensusCore
         if (mut.IsSubstitution())
         {
             tpl.tpl.replace(start, mut.End() - mut.Start(), mut.NewBases());
-            tpl.trans_probs[start] = ctx_params.GetParametersForContext(tpl.tpl.at(start), tpl.tpl.at(start+1));
+            if ((start + 1) < tpl.tpl.length()) {
+                tpl.trans_probs[start] = ctx_params.GetParametersForContext(tpl.tpl.at(start), tpl.tpl.at(start+1));
+            }
+            if (start > 0) {
+                tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start -1), tpl.tpl.at(start));
+            }
         }
         else if (mut.IsDeletion())
         {
             tpl.tpl.erase(start, mut.End() - mut.Start());
-            //TODO: Check the end is exclusive
             tpl.trans_probs.erase(tpl.trans_probs.begin() + start, tpl.trans_probs.begin() + start + ( mut.End()- mut.Start()));
+            // Only update if not first base though
             if(start > 0) {
                 tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
             }
@@ -96,9 +101,14 @@ namespace ConsensusCore
         else if (mut.IsInsertion())
         {
             tpl.tpl.insert(start, mut.NewBases());
-            auto new_params = ctx_params.GetParametersForContext(tpl.tpl.at(start), tpl.tpl.at(start+1));
-            tpl.trans_probs.insert(tpl.trans_probs.begin() + start, new_params);
-            tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
+            if (start > 0) {
+                tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
+            }
+            if(start < tpl.tpl.length())
+            {
+                auto new_params = ctx_params.GetParametersForContext(tpl.tpl.at(start), tpl.tpl.at(start+1));
+                tpl.trans_probs.insert(tpl.trans_probs.begin() + start, new_params);
+            }
         }
     }
 
