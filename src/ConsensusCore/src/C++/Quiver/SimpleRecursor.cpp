@@ -294,21 +294,21 @@ namespace ConsensusCore {
                     thisMoveScore = beta(i+1, j+1) + e.Match_Just_Emission(i,j);
                     score = C::Combine(score, thisMoveScore); // TODO: Redundant on first pass?
                 }
-                else if (i < I) // Always true??
+                else if (i < (I - 1))
                 {
                     thisMoveScore = beta(i + 1, j + 1) + e.Match(i, j);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Stick or Branch:
-                if (i < (I-1) && i > 1) // Can only transition to an insertion for the 2nd to last read base
+                if (i < (I - 1) && i > 0) // Can only transition to an insertion for the 2nd to last read base
                 {
                     thisMoveScore = beta(i + 1, j) + e.Insertion(i, j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Deletion:
-                if (j < (J-1) && j > 0)
+                if (j < (J - 1) && j > 0)
                 {
                     thisMoveScore = beta(i, j + 1) + e.Deletion(j - 1);
                     score = C::Combine(score, thisMoveScore);
@@ -551,7 +551,7 @@ namespace ConsensusCore {
                     double prev = (extCol == lastExtColumn) ?
                         beta(i + 1, j + 1) :
                         ext(i + 1, extCol + 1);
-                    if (i == (I-1) && j == (J-1)) {
+                    if ((i == (I-1) && j == (J-1)) || (i==0 && j==0)) {
                         thisMoveScore = prev + e.Match_Just_Emission(i, j);
                     }
                     else {
@@ -561,7 +561,7 @@ namespace ConsensusCore {
                 }
 
                 // Stick or branch
-                if (i < (I-1) && i > 1)
+                if (i < (I-1) && i > 0)
                 {
                     thisMoveScore = ext(i + 1, extCol) + e.Insertion(i, jp - 1);
                     score = C::Combine(score, thisMoveScore);

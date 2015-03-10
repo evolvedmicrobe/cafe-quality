@@ -145,7 +145,7 @@ namespace ConsensusCore
         
         double score;
 
-        bool atBegin = (m.Start() < 3);
+        bool atBegin = (m.Start() < 3); 
         bool atEnd   = (m.End() > (int)old_Tpl.tpl.length() - 2);
 
         if (!atBegin && !atEnd)
@@ -191,10 +191,7 @@ namespace ConsensusCore
                                    extendStartCol, *extendBuffer_, extendLength);
             score = (*extendBuffer_)(evaluator_->ReadLength(), extendLength - 1);
 
-            // if (fabs(score - Score()) > 50) {
-            //     // FIXME!  This happens on fluidigm amplicons, figure out why
-            //     Breakpoint();
-            // }
+
         }
         else if (atBegin && !atEnd)
         {

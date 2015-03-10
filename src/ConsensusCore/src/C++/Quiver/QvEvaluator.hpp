@@ -224,7 +224,7 @@ namespace ConsensusCore
             assert(0 <= j && j < (TemplateLength()-1) &&
                    0 <= i && i < (ReadLength() -1) );
             
-            return IsMatch(i, j+1) ? tpl_.trans_probs[j].Branch : tpl_.trans_probs[j].Stick + log_one_third;
+            return IsMatch(i, j + 1) ? tpl_.trans_probs[j].Branch : tpl_.trans_probs[j].Stick + log_one_third;
         }
     
 
