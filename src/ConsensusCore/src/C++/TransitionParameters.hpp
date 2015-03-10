@@ -25,6 +25,13 @@ namespace ConsensusCore {
         // Define copy and default constructors for SWIG
         TransitionParameters();
         TransitionParameters(const TransitionParameters& other );
+        
+        TransitionParameters(TransitionParameters&& src) = default;
+        TransitionParameters&  operator=(TransitionParameters&& rhs) = default;
+        TransitionParameters& operator=(const TransitionParameters& rhs) = default;
+        ~TransitionParameters() = default;
+        
+        
     };
 }
 #endif /* defined(__ConsensusCoreXCode__TransitionParameters__) */

@@ -19,40 +19,38 @@
 
 namespace ConsensusCore {
     
-    struct TemplateParameterPair {
+    class TemplateParameterPair {
     public:
         std::string tpl;
         std::vector<TransitionParameters> trans_probs;
         
         TemplateParameterPair(const std::string& tpl_,
-                              const std::vector<TransitionParameters>& trans_probs_)
-        : tpl(tpl_)
-        , trans_probs(trans_probs_)
-        {}
+                              const std::vector<TransitionParameters>& trans_probs_);
         
-        TemplateParameterPair()
-        : tpl()
-        , trans_probs()
-        {}
+        TemplateParameterPair();
         
-        TemplateParameterPair(const std::string& tpl_,
-                              const ContextParameters& ctx) : tpl(tpl_), trans_probs (tpl.size()-1)
-        {
-            // Initialize the dinucleotide context values.
-            for(int i = 0; i < (tpl.size() -1); i ++)
-            {
-                auto ps = ctx.GetParametersForContext(tpl.at(i), tpl.at(i+1));
-                trans_probs[i] = ps;
-            }
-        }
+        // Copy constructor
+        TemplateParameterPair(const TemplateParameterPair& other);
+        
+        TemplateParameterPair(const std::string& tpl_, const ContextParameters& ctx);
         
         /* Get a subsection of this template parameter pair
          TODO: This is a brutal copy operation */
-        TemplateParameterPair GetSubSection(int start, int end) const {
-            auto starti = trans_probs.begin() + start;
-            auto endi = trans_probs.begin() + end;
-            return TemplateParameterPair(tpl.substr(start, end), std::vector<TransitionParameters>(starti, endi));
-        }
+        TemplateParameterPair GetSubSection(int start, int end) const;
+        
+        // Move assignment operator
+        TemplateParameterPair& operator=(TemplateParameterPair&& rhs) = default;
+        
+        // Destructor
+        ~TemplateParameterPair() = default;
+        
+        // Copy assignment
+        TemplateParameterPair& operator=(const TemplateParameterPair& rhs) = default;
+        
+        //Move Constructor
+        TemplateParameterPair(TemplateParameterPair&& src) = default;
+        
+        
         
     };
 }

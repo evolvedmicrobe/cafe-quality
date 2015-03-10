@@ -103,14 +103,27 @@ namespace ConsensusCore
         }
         else if (mut.IsInsertion())
         {
+            assert(start >= 0);
+            // Add template base
             tpl.tpl.insert(start, mut.NewBases());
-            if (start > 0) {
-                tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
-            }
-            if(start < (tpl.tpl.length()-1))
+            if (start > tpl.trans_probs.size())
             {
+                tpl.trans_probs.push_back(TransitionParameters());
+            }
+            else
+            {
+                tpl.trans_probs.insert(tpl.trans_probs.begin() + start, TransitionParameters());
+            }
+            
+            // Need to update two parameters, the ones for this base and the one
+            // before this base.  If inserted at the start, there is no base before
+            if (start > 0) {
+                tpl.trans_probs[start - 1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
+            }
+            // If inserted at the end, there is no "current" probabilities to update
+            if (start < tpl.trans_probs.size()) {
                 auto new_params = ctx_params.GetParametersForContext(tpl.tpl.at(start), tpl.tpl.at(start+1));
-                tpl.trans_probs.insert(tpl.trans_probs.begin() + start, new_params);
+                tpl.trans_probs[start] = new_params;
             }
         }
     }
@@ -118,11 +131,7 @@ namespace ConsensusCore
     TemplateParameterPair
     ApplyMutation(const Mutation& mut, const TemplateParameterPair& tpl, const ContextParameters& ctx_params)
     {
-        auto tplCopy = string(tpl.tpl);
-        auto new_probs = vector<TransitionParameters>(tpl.trans_probs);
-        TemplateParameterPair new_tpl;
-        new_tpl.tpl = tplCopy;
-        new_tpl.trans_probs = new_probs;
+        TemplateParameterPair new_tpl(tpl);
         _ApplyMutationInPlace(mut, mut.Start(), new_tpl, ctx_params);
         return new_tpl;
     }

@@ -17,7 +17,7 @@
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>x86</PlatformTarget>
-    <Commandlineparameters> CircularConsensus -n 8 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  -csv.
+    <Commandlineparameters> CircularConsensus -n 1 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  --csv
 </Commandlineparameters>
     <ConsolePause>false</ConsolePause>
     <EnvironmentVariables>
@@ -60,9 +60,6 @@
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Core">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -103,6 +100,9 @@
       <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
       <Name>PacBio.HDF</Name>
     </ProjectReference>
+    <Reference Include="FSharp.Core">
+      <HintPath>..\..\..\..\..\..\Library\Frameworks\Mono.framework\Libraries\mono\4.5\FSharp.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <PropertyGroup>
   </PropertyGroup>
