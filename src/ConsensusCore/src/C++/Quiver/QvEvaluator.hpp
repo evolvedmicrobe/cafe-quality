@@ -169,8 +169,9 @@ namespace ConsensusCore
         */
         double Match(int i, int j) const
         {
-            assert(0 <= j && j < TemplateLength() &&
-                   0 <= i && i < ReadLength() );
+            assert(0 <= j && j < TemplateLength());
+            assert(0 <= i && i < ReadLength() );
+            assert( (j-1) >= 0 && (j-1) < tpl_.trans_probs.size());
             auto emission_prob = (IsMatch(i, j)) ?
                 params_.log_one_minus_miscallprobability :
                 params_.log_miscall_probability_times_one_third;
