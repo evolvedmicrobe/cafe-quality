@@ -15,7 +15,9 @@ namespace ConsensusCore {
     TemplateParameterPair::TemplateParameterPair(const std::string& tpl_,
                           const std::vector<TransitionParameters>& trans_probs_)
     : tpl(tpl_), trans_probs(trans_probs_)
-    {}
+    {
+        assert(tpl.size() == (trans_probs.size() + 1));
+    }
     
     TemplateParameterPair::TemplateParameterPair()
     : tpl()
@@ -25,7 +27,7 @@ namespace ConsensusCore {
     TemplateParameterPair::TemplateParameterPair(const TemplateParameterPair& other) :
     tpl(other.tpl), trans_probs(other.trans_probs)
     {
-        
+        assert(tpl.size() == (trans_probs.size() + 1));
     }
     
     TemplateParameterPair::TemplateParameterPair(const std::string& tpl_,
@@ -37,16 +39,18 @@ namespace ConsensusCore {
             auto ps = ctx.GetParametersForContext(tpl.at(i), tpl.at(i+1));
             trans_probs[i] = ps;
         }
+        assert(tpl.size() == (trans_probs.size() + 1));
     }
     
     
     
     
     TemplateParameterPair
-    TemplateParameterPair::GetSubSection(int start, int end) const {
+    TemplateParameterPair::GetSubSection(int start, int len) const {
         auto starti = trans_probs.begin() + start;
-        auto endi = trans_probs.begin() + end;
-        return TemplateParameterPair(tpl.substr(start, end), std::vector<TransitionParameters>(starti, endi));
+        auto endi = trans_probs.begin() + start + len;
+        // Remove one as the transition parameters need to be one smaller.
+        return TemplateParameterPair(tpl.substr(start, len), std::vector<TransitionParameters>(starti, endi - 1 ));
     }
     
     

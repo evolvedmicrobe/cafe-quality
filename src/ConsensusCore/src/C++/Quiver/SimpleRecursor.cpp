@@ -262,7 +262,7 @@ namespace ConsensusCore {
         beta.FinishEditingColumn(J, I, I + 1);
         
         // Totally arbitray decision here...
-        int hintBeginRow = std::min(I - 45, 0), hintEndRow = I;
+        int hintBeginRow = std::max(I - 45, 0), hintEndRow = I;
 
         for (int j = (J-1); j > 0; --j)
         {

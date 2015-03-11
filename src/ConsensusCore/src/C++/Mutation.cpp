@@ -105,6 +105,7 @@ namespace ConsensusCore
         {
             assert(start >= 0);
             // Add template base
+            assert( tpl.tpl.size() == (tpl.trans_probs.size() + 1));
             tpl.tpl.insert(start, mut.NewBases());
             if (start > tpl.trans_probs.size())
             {
@@ -114,7 +115,7 @@ namespace ConsensusCore
             {
                 tpl.trans_probs.insert(tpl.trans_probs.begin() + start, TransitionParameters());
             }
-            
+            assert( tpl.tpl.size() == (tpl.trans_probs.size() + 1));
             // Need to update two parameters, the ones for this base and the one
             // before this base.  If inserted at the start, there is no base before
             if (start > 0) {

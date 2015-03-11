@@ -793,9 +793,10 @@ namespace PacBio.Consensus
                         var fastScoreThreshold = -12.5;
                         var bo = new BandingOptions (diag_cross, scoreDiff);
                         var qc = new QuiverConfig(ctx_params, bo, fastScoreThreshold);
-
+                        config.Qconfig = qc;
                        //perf.Time(zmw.HoleNumber, "CCSMutationTesting");
-                        using (var scorer = new MultiReadMutationScorer (regions, bases, initialTpl, config)) {
+                        using (var scorer = new MultiReadMutationScorer (regions, bases, initialTpl, config))//, snr))
+                        {
                             result = FindConsensus.MultiReadConsensusAndQv (scorer, regions, bases.Zmw,
                                 maxIterations, out iterationsTaken);
                         }
