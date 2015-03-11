@@ -81,6 +81,8 @@ namespace ConsensusCore {
                 case 'T':
                     snr = snrs.T;
                     break;
+            default:
+                throw;
         }
         double snr2 = snr * snr;
         double snr3 = snr2 * snr;
