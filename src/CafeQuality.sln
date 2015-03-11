@@ -11,8 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsensusCore", "ConsensusC
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsensusCoreCpp", "ConsensusCore\ConsensusCoreCpp.vcxproj", "{8281431D-465F-41CC-95D3-0253690B8098}"
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "scripts", "scripts\scripts.fsproj", "{9D8AE536-244A-4C9A-9A49-933776909902}"
-EndProject
+
 Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "PacBio.ConsensusTools", "PacBio.ConsensusTools\PacBio.ConsensusTools.fsproj", "{4DDC858E-1EA7-4A48-9348-51B7D932C684}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PacBio.Consensus", "PacBio.Consensus\PacBio.Consensus.csproj", "{D3A49F4E-1139-4782-A72A-599CCE57D715}"
@@ -25,11 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PacBio.HDF", "PacBio.HDF\Pa
 EndProject
 Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "ErrorReporter", "ErrorReporter\ErrorReporter.fsproj", "{F28305DF-92B6-4820-A5AF-957075A4BF52}"
 EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Edna", "Edna\src\Edna\Edna.fsproj", "{AAF18B3B-EE2B-4ACB-924B-B84E54C6BE43}"
-EndProject
+
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConstantModelOptimizer", "ConstantModelOptimizer\ConstantModelOptimizer.csproj", "{280EFB2B-3722-4147-974E-44E6D5517115}"
-EndProject
-Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "PacBio.Hmm", "Edna\src\PacBio.Hmm\PacBio.Hmm.fsproj", "{3BF5AE50-52EC-4313-AB5A-CE940F8D8305}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
