@@ -147,7 +147,7 @@ namespace ConsensusCore
      
         double score;
 
-        bool atBegin = (m.Start() < 2);
+        bool atBegin = (m.Start() < 3);
         bool atEnd   = (m.End() > (int)old_Tpl.tpl.length() - 2);
 
         if (!atBegin && !atEnd)
