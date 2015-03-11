@@ -138,7 +138,7 @@ namespace ConstantModelOptimizer
                     };
 
             
-                        System.IO.StreamWriter sw = new System.IO.StreamWriter ("matrix.csv");
+                        System.IO.StreamWriter sw = new System.IO.StreamWriter ("matrix2.csv");
                         List<Func<LatentStates, double>> grabbers = new List<Func<LatentStates, double>> () { 
                             z => z.Match,
                             z => z.Stick,
@@ -257,7 +257,7 @@ namespace ConstantModelOptimizer
 
             // state -> stick or state -> branch
             if (i < endi) {
-                var isBranch = Template [j + 1] == Read [i + 1];
+                var isBranch = Template[j+1] == Read [i + 1];
                 var next_insert = reverse [i + 1] [j].Total;
                 if (isBranch) {
                     probsAfterMove.Branch = next_insert + transProbs.log_Branch; // Emission probability is 1 for the same base

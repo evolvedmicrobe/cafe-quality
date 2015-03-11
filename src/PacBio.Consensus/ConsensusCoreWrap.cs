@@ -166,7 +166,7 @@ namespace PacBio.Consensus
         /// Construct a mutation evalutor for the pulse observations in encapsulated by read, on template TrialTemplate.
         /// </summary>
         public MultiReadMutationScorer(IEnumerable<AlignedSequenceReg> regions, IZmwBases bases,
-                                       TrialTemplate trialTemplate, ScorerConfig config)
+            TrialTemplate trialTemplate, ScorerConfig config)//, SNR snr)
         {
             StartAdapterBases = trialTemplate.StartAdapterBases;
             EndAdapterBases = trialTemplate.EndAdapterBases;
@@ -175,6 +175,7 @@ namespace PacBio.Consensus
 
             if (config.Algorithm == RecursionAlgo.Viterbi)
             {
+                throw new Exception ("Integrate don't optimize");
                 scorer = new SparseQvViterbiMultiReadMutationScorer(config.Qconfig, strandTpl);
             }
             else if (config.Algorithm == RecursionAlgo.Prob)
@@ -186,16 +187,26 @@ namespace PacBio.Consensus
                 throw new ApplicationException("unrecognized recursion algorthim");
             }
 
+//            StreamWriter sw = new StreamWriter ("Output.cpp");
+//            sw.WriteLine("std::string temp = \"" + strandTpl + "\";" );
+//            sw.WriteLine ("SNR snr(" + snr.A.ToString () + "," + snr.C + "," + snr.G + "," + snr.T + ");");
+//            sw.WriteLine ("ContextParameters ctx_params(snr);");
+//            sw.WriteLine ("QuiverConfig qc(ctx_params, bo, fast_sçore_threshold);\nSparseSimpleSumProductMultiReadMutationScorer scorer(qc, temp);");
+//
             foreach (var r in regions)
             {
                 var name = TraceReference.CreateSpringfieldSubread(bases, r.Start, r.End);
                 var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
                 //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
+
+
                 using (var read = new Read( name, seq))
                 using (var mappedRead = new MappedRead(read, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd,
                                                        r.AdapterHitBefore, r.AdapterHitAfter))
                 {
-                    if (!(scorer.AddRead(mappedRead, AddThreshold)!=AddReadResult.SUCCESS))
+                    // DumpData (read, mappedRead, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd, r.AdapterHitBefore, r.AdapterHitAfter, sw);
+                    var result = scorer.AddRead (mappedRead, AddThreshold);
+                    if (result != AddReadResult.SUCCESS)
                     {
                         #if DIAGNOSTIC
                         scorer.AddRead(mappedRead, 1.0f);
@@ -210,6 +221,27 @@ namespace PacBio.Consensus
                 }
             }
         }
+
+        int ReadCounter =0;
+        void DumpData(Read rd, MappedRead mr, StrandEnum se, int ts, int tend, bool hitbefore, bool hitafter, StreamWriter sw)
+        {
+            ReadCounter++;
+            var rname = "r" + ReadCounter;
+            var rl = "Read "+rname + "(\"" + rd.Name + "\",\"" + rd.Sequence + "\");";
+            sw.WriteLine (rl);
+            var mrname = "mr" + ReadCounter;
+            var strand = "StrandEnum::" + (se == StrandEnum.REVERSE_STRAND ? "REVERSE_STRAND" : "FORWARD_STRAND");
+            var mrl = "MappedRead " + mrname + "(r" + ReadCounter + ", " +
+                strand + ", " + ts + ", " + tend + ", " + hitbefore.ToString().ToLower() + ", " + hitafter.ToString().ToLower() + " );";
+            sw.WriteLine (mrl);
+
+            var next = "auto result" + ReadCounter + " = scorer.AddRead(" + mrname + ", 1.0);";
+            sw.WriteLine (next);
+            sw.Flush ();
+
+
+        }
+
 
 
         /// <summary>
