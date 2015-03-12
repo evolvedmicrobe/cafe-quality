@@ -23,8 +23,7 @@ lib:
 
 csharp: lib
 	make -f make/CSharp.mk
-	cp build/CSharp/libConsensusCore.so ../Tests/bin/Release/
-	cp build/CSharp/libConsensusCore.so ../Tests/bin/Debug/
+
 	
 before-xbuild: csharp
 	-cp build/CSharp/libConsensusCore.so ../../lib/libConsensusCore.so
