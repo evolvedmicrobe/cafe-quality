@@ -251,7 +251,7 @@ namespace ConstantModelOptimizer
                         Branch = 0.05,
                         Dark = 0.05,
                         Stick = 0.05,
-                        Merge = 0.1
+                        Merge = 0.0
                     };
                     TransitionProbabilities [s].Normalize ();
                 }

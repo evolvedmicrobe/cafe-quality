@@ -13,33 +13,45 @@
             <summary>
             Given a root node and a path, creat any needed groups and return the modified path
             </summary>
-            <param name="root"></param>
-            <param name="path"></param>
-            <returns></returns>
+            <param name="root">
+            </param>
+            <param name="path">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.ChunkUtils.Create(PacBio.HDF.IGroup,System.String)">
             <summary>
             Create or open a group as needed
             </summary>
-            <param name="parent"></param>
-            <param name="path"></param>
-            <returns></returns>
+            <param name="parent">
+            </param>
+            <param name="path">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.ChunkUtils.CreateDataspace(PacBio.HDF.IGroup,System.Object)">
             <summary>
             Create a dataspace with the correct dimensions to hold the specified type
             </summary>
-            <param name="parent"></param>
-            <param name="obj"></param>
-            <returns></returns>
+            <param name="parent">
+            </param>
+            <param name="obj">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.ChunkUtils.Create(PacBio.HDF.IGroup,System.String,System.Object)">
             <summary>
             Simply write an object to a chunk file - creating datasets etc... as needed
             </summary>
-            <param name="parent"></param>
-            <param name="path"></param>
-            <param name="data"></param>
+            <param name="parent">
+            </param>
+            <param name="path">
+            </param>
+            <param name="data">
+            </param>
         </member>
         <member name="M:PacBio.HDF.ChunkUtils.InsertAttribute(PacBio.HDF.IAttributeTarget,System.String,System.Object)">
             <summary>
@@ -61,71 +73,78 @@
             <summary>
             Deal with singletons that may have either been stored as a single value or in a 1 element array
             </summary>
-            <typeparam name="T"></typeparam>
-            <param name="data"></param>
-            <returns></returns>
+            <typeparam name="T">
+            </typeparam>
+            <param name="data">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="T:PacBio.HDF.CRuntime">
             <summary>
             DLL imports for low level c runtime calls
             </summary>
-            When using C libraries sometimes we need to call things like 'free' to keep from leaking memory in the C heap
-        </member>
-        <member name="M:PacBio.HDF.CRuntime.free_Linux(System.IntPtr)">
+            When using C libraries sometimes we need to call things like 'free' to keep from leaking memory in the C heap</member>
+        <member name="M:PacBio.HDF.CRuntime.H5free_memory(System.IntPtr)">
             <summary>
-            C library free() routine
+            Call to free HDF5 memory
+            H5_DLL herr_t H5free_memory(void *mem);
             </summary>
-            <param name="addr"></param>
-            <returns></returns>
+            <param name="addr">
+            </param>
+            <returns>
+            </returns>
         </member>
-        <member name="M:PacBio.HDF.CRuntime.free_Windows(System.IntPtr)">
+        <member name="M:PacBio.HDF.CRuntime.free(System.IntPtr)">
             <summary>
-            C library free() routine. Same heap as the one used by hdf5
+            Frees memory by calling the H5 free function.
             </summary>
-            <param name="addr"></param>
-            <returns></returns>
+            <param name="addr">Address.</param>
         </member>
         <member name="M:PacBio.HDF.CRuntime.GetModuleHandle(System.String)">
             <summary>
             dlopen in linux
             </summary>
-            <param name="dllToLoad"></param>
-            <returns></returns>
+            <param name="dllToLoad">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.CRuntime.GetProcAddress(System.IntPtr,System.String)">
             <summary>
             dlsym in linux
             </summary>
-            <param name="hModule"></param>
-            <param name="procedureName"></param>
-            <returns></returns>
+            <param name="hModule">
+            </param>
+            <param name="procedureName">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.CRuntime.FreeLibrary(System.IntPtr)">
             <summary>
             dlclose in linux
             </summary>
-            <param name="hModule"></param>
-            <returns></returns>
-        </member>
-        <member name="P:PacBio.HDF.IChunkElement.File">
-            <summary>
-            Get the file that this element is part of
-            </summary>
+            <param name="hModule">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.HDFChunkElement.HDFFree(System.IntPtr)">
             <summary>
             Free a block of memory alloced by the HDF library
             </summary>
-            <param name="ptr"></param>
-        </member>
-        <member name="M:PacBio.HDF.HDFChunkElement.CheckValid">
-            <summary>
-            Sometimes we might not have a valid Id yet, in that case throw an exception
-            </summary>
+            <param name="ptr">
+            </param>
         </member>
         <member name="P:PacBio.HDF.HDFChunkElement.Id">
             <summary>
             Our HDF5 identifier
+            </summary>
+        </member>
+        <member name="M:PacBio.HDF.HDFChunkElement.CheckValid">
+            <summary>
+            Sometimes we might not have a valid Id yet, in that case throw an exception
             </summary>
         </member>
         <member name="T:PacBio.HDF.HDFIntraFile">
@@ -133,107 +152,33 @@
             Any HDF object that is inside of a file (i.e. not including HDFFile itself)
             </summary>
         </member>
-        <member name="T:PacBio.HDF.IAttributeTarget">
-            <summary>
-            Any object that can be tagged with attributes
-            </summary>
-        </member>
-        <member name="M:PacBio.HDF.IAttributeTarget.CreateAttribute(System.String,PacBio.HDF.IDatatype,PacBio.HDF.IDataspace)">
-            <summary>
-            Create an attribute
-            </summary>
-            <param name="name"></param>
-            <param name="datatype"></param>
-            <param name="dataspace"></param>
-            <returns></returns>
-            
-        </member>
-        <member name="M:PacBio.HDF.IAttributeTarget.GetAttribute(System.String)">
-            <summary>
-            Read a named attribute
-            </summary>
-            <param name="name"></param>
-            <returns>null for not found</returns>
-        </member>
-        <member name="M:PacBio.HDF.IAttributeTarget.GetAttributes">
-            <summary>
-            Read all of the attributes attached to this object
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:PacBio.HDF.IAttributeTarget.DeleteAttribute(System.String)">
-            <summary>
-            Deletes an attribute attached to this object
-            </summary>
-            <param name="name">Name of the attribute to delete</param>
-            <returns>True if an attribute was found and deleted, false if not</returns>
-        </member>
         <member name="T:PacBio.HDF.HDFGroup">
             <summary>
             Encapsulate an H5G HDF group, and provides access to its children
             </summary>
         </member>
-        <member name="T:PacBio.HDF.IGroup">
-            <summary>
-            Any object that can contain groups or datasets
-            </summary>
-        </member>
-        <member name="M:PacBio.HDF.IGroup.CreateGroup(System.String)">
-            <summary>
-            Create (or reopen an existing) group
-            </summary>
-            <param name="groupName"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PacBio.HDF.IGroup.CreateDataset(System.String,PacBio.HDF.IDatatype,PacBio.HDF.IDataspace)">
-            <summary>
-            Create a dataset with a more flexible representation
-            </summary>
-            <param name="datasetName"></param>
-            <param name="dataspace"></param>
-            <param name="datatype"></param>
-        </member>
-        <member name="M:PacBio.HDF.IGroup.GetChild(System.String)">
-            <summary>
-            Open an existing dataset
-            </summary>
-            <param name="datasetName"></param>
-            <returns>null for not found</returns>
-        </member>
-        <member name="M:PacBio.HDF.IGroup.RemoveChild(System.String)">
-            <summary>
-            Remove a child dataset or group from a group
-            </summary>
-            <param name="datasetName"></param>
-            <returns>false if no child was deleted</returns>
-        </member>
-        <member name="M:PacBio.HDF.IGroup.GetChildren">
-            <summary>
-            Return the children of this node
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:PacBio.HDF.HDFGroup.#ctor(PacBio.HDF.IChunkFile,System.Int32)">
             <summary>
-            Open an existing group 
+            Open an existing group
             </summary>
-            <param name="file"></param>
-            <param name="id"></param>
-            assuming the caller has already opened the specified id, and we are now responsible for closing it
-        </member>
+            <param name="file">
+            </param>
+            <param name="id">
+            </param>
+            assuming the caller has already opened the specified id, and we are now responsible for closing it</member>
         <member name="T:PacBio.HDF.HDFDatatype">
             <summary>
             Encapsulates the H5T datatype system, and provide mappings between .NET types and HDF5 types.
             </summary>
         </member>
-        <member name="P:PacBio.HDF.IDatatype.NativeType">
-            <summary>
-            The .net type that is appropriate for storing this datatype
-            </summary>
-        </member>
         <member name="F:PacBio.HDF.HDFDatatype.RefDtype">
             <summary>
             We special case the type lookups for this type, because it is busted in the standard HDF library
+            </summary>
+        </member>
+        <member name="P:PacBio.HDF.HDFDatatype.HDFTypestring">
+            <summary>
+            The human readable cononical encoding for this datatype
             </summary>
         </member>
         <member name="F:PacBio.HDF.HDFDatatype.typeToHDF">
@@ -245,16 +190,16 @@
             <summary>
             Type mappings for standard types
             </summary>
-            Converts from an HDF native type to our .net types
-        </member>
+            Converts from an HDF native type to our .net types</member>
         <member name="M:PacBio.HDF.HDFDatatype.TypeToID(System.Type)">
             <summary>
             Convert a .net type to a HDF type code
             </summary>
-            <param name="t"></param>
-            <returns></returns>
-            Creates a _new_ datatype object, the caller is responsible for freeing it
-        </member>
+            <param name="t">
+            </param>
+            <returns>
+            </returns>
+            Creates a _new_ datatype object, the caller is responsible for freeing it</member>
         <member name="M:PacBio.HDF.HDFDatatype.MapToNativeType">
             <summary>
             The HDF type ID that is most efficient when storing this data type in RAM
@@ -265,18 +210,12 @@
             A regex to find the length of a string
             </summary>
         </member>
-        <member name="P:PacBio.HDF.HDFDatatype.HDFTypestring">
-            <summary>
-            The human readable cononical encoding for this datatype
-            </summary>
-        </member>
         <member name="P:PacBio.HDF.HDFDatatype.ValueSize">
             <summary>
             If this is a value type, how many bytes are needed to store an element?
             </summary>
             If this is a reference type, return 0.
-            Strings are funny because HDF strings are passed by value if we know the length in advance, by ref otherwise
-        </member>
+            Strings are funny because HDF strings are passed by value if we know the length in advance, by ref otherwise</member>
         <member name="P:PacBio.HDF.HDFDatatype.NativeType">
             <summary>
             The .net type that is appropriate for storing this datatype
@@ -287,23 +226,6 @@
             How many bytes are needed to hold this type?
             </summary>
         </member>
-        <member name="T:PacBio.HDF.IReference">
-            <summary>
-            Provides links into HDF5 "Region Reference" - particular hyperslab sections of datasets
-            </summary>  
-        </member>
-        <member name="M:PacBio.HDF.IReference.Dereference">
-            <summary>
-            Get the dataset that this reference is pointing to
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:PacBio.HDF.IReference.GetRegion">
-            <summary>
-            Get the selected region in the target dataset 
-            </summary>
-            <returns></returns>
-        </member>
         <member name="F:PacBio.HDF.HDFReference.refptr">
             <summary>
             Our actual reference bytes
@@ -313,79 +235,58 @@
             <summary>
             Private constructor for upconverting from raw RegRefs
             </summary>
-            <param name="file"></param>
-            <param name="refptr"></param>
+            <param name="file">
+            </param>
+            <param name="refptr">
+            </param>
         </member>
         <member name="P:PacBio.HDF.HDFReference.RefPtr">
             <summary>
             Our actual reference bytes
             </summary>
         </member>
-        <member name="M:PacBio.HDF.IDataspace.SelectHyperslab(System.Int64[],System.Int64[],System.Int64[],System.Int64[])">
-            <summary>
-            Select a subportion of this dataspace
-            </summary>
-            <param name="start">the initial coordinates to use for the top corner of the hyperslab</param>
-            <param name="stride">how much to increment each dim by as we move between blocks, or null for a stride of all 1s</param>
-            <param name="count">the number of blocks in each direction</param>
-            <param name="block">the dimensions of each block we are selecting, or null for blocks of size 1</param>
-            If you call this method, the dataset it is attached to will use 'partial' IO for reads and writes.  Useful for
-            stuff like movie frames.
-        </member>
-        <member name="M:PacBio.HDF.IDataspace.SelectAll">
-            <summary>
-            Undo the effects of SelectHyperslab - go back to reading/writing the whole space
-            </summary>
-        </member>
-        <member name="P:PacBio.HDF.IDataspace.Dimensions">
-            <summary>
-            return the # of elements in each dimension
-            </summary>
-            <returns>An array of length equal to the rank of this dataset, each element shows the size in that dimension</returns>
-        </member>
-        <member name="P:PacBio.HDF.IDataspace.MaxDimensions">
-            <summary>
-            The maximum amount a specified dimension may ever reach
-            </summary>
-            Or -1 for no limit
-        </member>
-        <member name="P:PacBio.HDF.IDataspace.HyperBlock">
-            <summary>
-            The # of dimensions for each block written to a hyperslab (or Dimensions if not using hyperslabs)
-            </summary>
-        </member>
-        <member name="P:PacBio.HDF.IDataspace.NumElements">
-            <summary>
-            How many elements in this dataset?
-            </summary>
-            Takes into account any hyperslabbing going on
-        </member>
         <member name="M:PacBio.HDF.HDFDataspace.#ctor(PacBio.HDF.IChunkFile,System.Int64[],System.Int64[])">
             <summary>
             Create an array dataspace
             </summary>
-            <param name="parent"></param>
+            <param name="parent">
+            </param>
             <param name="curDimensions">the size in each dimension</param>
             <param name="maxDimensions">the size in each dimension (or -1 for no maximum or null for same as dimensions)</param>
-            <returns></returns>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.HDFDataspace.#ctor(PacBio.HDF.IChunkFile)">
             <summary>
             Create a simple non array dataspace
             </summary>
-            <param name="parent"></param>
-            <returns></returns>
+            <param name="parent">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.HDFDataspace.#ctor(PacBio.HDF.IChunkFile,System.Int32)">
             <summary>
             Create a dspace object given a dspace id
             </summary>
-            <param name="id"></param>
-            <param name="parent"></param>
+            <param name="id">
+            </param>
+            <param name="parent">
+            </param>
+        </member>
+        <member name="P:PacBio.HDF.HDFDataspace.HyperBlock">
+            <summary>
+            The # of dimensions for each block written to a hyperslab (or Dimensions if not using hyperslabs)
+            </summary>
         </member>
         <member name="F:PacBio.HDF.HDFDataspace.extent">
             <summary>
             The total size needed by the hyperslab (used to grow dimensions in dataset write.
+            </summary>
+        </member>
+        <member name="P:PacBio.HDF.HDFDataspace.Extent">
+            <summary>
+            The total size needed by the hyperslab (used to grow dimensions in dataset write)
             </summary>
         </member>
         <member name="M:PacBio.HDF.HDFDataspace.SelectHyperslab(System.Int64[],System.Int64[],System.Int64[],System.Int64[])">
@@ -402,71 +303,26 @@
             Undo the effects of SelectHyperslab - go back to reading/writing the whole space
             </summary>
         </member>
-        <member name="P:PacBio.HDF.HDFDataspace.HyperBlock">
-            <summary>
-            The # of dimensions for each block written to a hyperslab (or Dimensions if not using hyperslabs)
-            </summary>
-        </member>
-        <member name="P:PacBio.HDF.HDFDataspace.Extent">
-            <summary>
-            The total size needed by the hyperslab (used to grow dimensions in dataset write)
-            </summary>
-        </member>
         <member name="P:PacBio.HDF.HDFDataspace.NumElements">
             <summary>
             How many elements in this dataset?
             </summary>
-            Takes into account any hyperslabbing going on
-        </member>
-        <member name="T:PacBio.HDF.IDataContainer">
-            <summary>
-            Behavior common to anything that can actually contain real data 
-            </summary>
-            In the case of HDF that means Attribute or Datasets.
-        </member>
-        <member name="M:PacBio.HDF.IDataContainer.Read">
-            <summary>
-            Read the entire contents of this data chunk
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:PacBio.HDF.IDataContainer.Read(System.Array@,PacBio.HDF.IDataspace)">
-            <summary>
-            Read a subsection of this chunk by using hyperslabs
-            </summary>
-            <param name="target">The array to fill with data from the chunk.  Read() may or may not replace the target object you pass in</param>
-            <param name="dataspace">a dataspace defining what hyperslab we want to read, or null to read the whole hyperslab from the file</param>
-        </member>
-        <member name="M:PacBio.HDF.IDataContainer.Write(System.Object)">
-            <summary>
-            Write the entire contents of this chunk
-            </summary>
-            <param name="o"></param>
-        </member>
-        <member name="M:PacBio.HDF.IDataContainer.Write(System.Object,PacBio.HDF.IDataspace)">
-            <summary>
-            Write a subsection of this chunk
-            </summary>
-            <param name="o"></param>
-            <param name="dataspace"></param>
-            Use when you've created a dataspace with a restricted hyperslab
-        </member>
+            Takes into account any hyperslabbing going on</member>
         <member name="M:PacBio.HDF.HDFDataContainer.CreateArray(System.Boolean)">
             <summary>
             Create an array with the correct # of dimensions and datatype to read our data into
             </summary>
-            <returns></returns>
+            <returns>
+            </returns>
             <param name="hdfRaw">If true, we want an array suitable for the HDF low level read/writes, if false we want an array suitable for C# users</param>
-            Different hdfRaw settings will change this from expecting raw arrays of bytes or pointers to bytes
-        </member>
+            Different hdfRaw settings will change this from expecting raw arrays of bytes or pointers to bytes</member>
         <member name="M:PacBio.HDF.HDFDataContainer.ReadRowMajor(System.Array@,PacBio.HDF.IDataspace)">
             <summary>
             Read a subsection of this chunk by using hyperslabs
             </summary>
             <param name="target">The array to fill with data from the chunk</param>
             <param name="filedataspace">a dataspace defining what data we want to read</param>
-            Like Read but we assume that any array dimension swapping has already been done
-        </member>
+            Like Read but we assume that any array dimension swapping has already been done</member>
         <member name="M:PacBio.HDF.HDFDataContainer.Read(System.Array@,PacBio.HDF.IDataspace)">
             <summary>
             Read a subsection of this chunk by using hyperslabs
@@ -478,46 +334,32 @@
             <summary>
             The low level read operation
             </summary>
-            <param name="memtype"></param>
-            <param name="memdspace"></param>
-            <param name="filedspace"></param>
+            <param name="memtype">
+            </param>
+            <param name="memdspace">
+            </param>
+            <param name="filedspace">
+            </param>
             <param name="rawBytes">This object must already be allocated with enough empty bytes to contain the expected read</param>
         </member>
         <member name="M:PacBio.HDF.HDFDataContainer.WriteLow(PacBio.HDF.HDFDatatype,PacBio.HDF.HDFDataspace,PacBio.HDF.HDFDataspace,System.IntPtr)">
             <summary>
             The low level write operation (slightly different glue for the dataset/attribute cases
             </summary>
-            <param name="memtype"></param>
-            <param name="memdspace"></param>
-            <param name="filedspace"></param>
-            <param name="buf"></param>
-        </member>
-        <member name="M:PacBio.HDF.HDFDataContainer.MarshalObject(System.Object)">
-            <summary>
-            Copy an object to memory that matches the HDF writer's expectations
-            </summary>
-            <param name="o"></param>
-            <returns></returns>
-            The caller must free the handle with FreeHGlobal!!!
-        </member>
-        <member name="M:PacBio.HDF.HDFDataContainer.GetElementType(System.Object,PacBio.HDF.IDataspace)">
-            <summary>
-            Return the type of elements in the given array (or if not an array just return the object).
-            This allows us to treat single elements like arrays of one element.
-            </summary>
-        </member>
-        <member name="M:PacBio.HDF.HDFDataContainer.CompoundTypeRead(PacBio.HDF.HDFDatatype,System.Object@,PacBio.HDF.IDataspace)">
-            <summary>
-            The target will be filled with the data from filedataspace
-            </summary>
-            <returns></returns>
+            <param name="memtype">
+            </param>
+            <param name="memdspace">
+            </param>
+            <param name="filedspace">
+            </param>
+            <param name="buf">
+            </param>
         </member>
         <member name="T:PacBio.HDF.HDFDataContainer.MemRef">
             <summary>
             The MarshalObject call may need to allocate different types of memory, we group that data through this MemRef
             </summary>
-            You must dispose this mem ref to ensure memory is released/unpinned
-        </member>
+            You must dispose this mem ref to ensure memory is released/unpinned</member>
         <member name="F:PacBio.HDF.HDFDataContainer.MemRef.primaryPtr">
             <summary>
             A low level ptr passed to the HDF lib
@@ -543,110 +385,145 @@
             The actual ptr needed by the HDF libraries
             </summary>
         </member>
+        <member name="M:PacBio.HDF.HDFDataContainer.MarshalObject(System.Object)">
+            <summary>
+            Copy an object to memory that matches the HDF writer's expectations
+            </summary>
+            <param name="o">
+            </param>
+            <returns>
+            </returns>
+            The caller must free the handle with FreeHGlobal!!!</member>
+        <member name="M:PacBio.HDF.HDFDataContainer.GetElementType(System.Object,PacBio.HDF.IDataspace)">
+            <summary>
+            Return the type of elements in the given array (or if not an array just return the object).
+            This allows us to treat single elements like arrays of one element.
+            </summary>
+        </member>
+        <member name="M:PacBio.HDF.HDFDataContainer.CompoundTypeRead(PacBio.HDF.HDFDatatype,System.Object@,PacBio.HDF.IDataspace)">
+            <summary>
+            The target will be filled with the data from filedataspace
+            </summary>
+            <returns>
+            </returns>
+        </member>
         <member name="M:PacBio.HDF.HDFAttribute.#ctor(PacBio.HDF.IAttributeTarget,System.String,PacBio.HDF.IDatatype,PacBio.HDF.IDataspace)">
             <summary>
             Create a new attribute
             </summary>
-            <param name="parent"></param>
-            <param name="_name"></param>
-            <param name="datatype"></param>
-            <param name="dataspace"></param>
+            <param name="parent">
+            </param>
+            <param name="_name">
+            </param>
+            <param name="datatype">
+            </param>
+            <param name="dataspace">
+            </param>
         </member>
         <member name="M:PacBio.HDF.HDFAttribute.#ctor(PacBio.HDF.IAttributeTarget,System.String)">
             <summary>
             Open an existing attribute
             </summary>
-            <param name="parent"></param>
-            <param name="_name"></param>
+            <param name="parent">
+            </param>
+            <param name="_name">
+            </param>
         </member>
         <member name="M:PacBio.HDF.HDFAttribute.#ctor(PacBio.HDF.IAttributeTarget,System.UInt32)">
             <summary>
             Look up a child attribute by 0 based index
             </summary>
-            <param name="parent"></param>
-            <param name="index"></param>
+            <param name="parent">
+            </param>
+            <param name="index">
+            </param>
         </member>
         <member name="M:PacBio.HDF.HDFAttribute.Exists(PacBio.HDF.IAttributeTarget,System.String)">
             <summary>
             Does the named attribute exist?
             </summary>
-            <param name="parent"></param>
-            <param name="_name"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PacBio.HDF.HDFDatasetCreateProperty.SetDeflate(System.UInt32)">
-            <summary>
-            Turn on GZip compression for this dataset.  
-            </summary>
-            <param name="level">The gzip compression level, The level must be between 0-9 inclusive.  A lower level is
-            faster, but gives less compression.</param>
+            <param name="parent">
+            </param>
+            <param name="_name">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="P:PacBio.HDF.HDFDatasetCreateProperty.Chunking">
             <summary>
             The HDF chunking for datasets that can grow later
             </summary>
         </member>
-        <member name="M:PacBio.HDF.IDataset.Extend(System.Int64[])">
+        <member name="M:PacBio.HDF.HDFDatasetCreateProperty.SetDeflate(System.UInt32)">
             <summary>
-            Expand a resizable dataset
+            Turn on GZip compression for this dataset.
             </summary>
-            <param name="newDims"></param>
-        </member>
-        <member name="M:PacBio.HDF.IDataset.CreateReference(PacBio.HDF.IDataspace)">
-            <summary>
-            Create a 'region reference' that points inside this particular dataset
-            </summary>
-            <param name="dataspace"></param>
-            <returns></returns>
-            It is the callers responsiblity to write this to the file via a dataset
+            <param name="level">The gzip compression level, The level must be between 0-9 inclusive.  A lower level is
+            faster, but gives less compression.</param>
         </member>
         <member name="M:PacBio.HDF.HDFDataset.#ctor(PacBio.HDF.HDFGroupContainer,System.String,PacBio.HDF.IDatatype,PacBio.HDF.IDataspace)">
             <summary>
             Create a new dataset
             </summary>
-            <param name="parent"></param>
-            <param name="datasetName"></param>
-            <param name="dataspace"></param>
-            <param name="datatype"></param>
+            <param name="parent">
+            </param>
+            <param name="datasetName">
+            </param>
+            <param name="dataspace">
+            </param>
+            <param name="datatype">
+            </param>
         </member>
         <member name="M:PacBio.HDF.HDFDataset.#ctor(PacBio.HDF.HDFGroupContainer,System.String,PacBio.HDF.IDatatype,PacBio.HDF.IDataspace,PacBio.HDF.HDFDatasetCreateProperty)">
             <summary>
             Create a new dataset, and allow the caller to specify properties
             </summary>
-            <param name="parent"></param>
-            <param name="datasetName"></param>
-            <param name="datatype"></param>
-            <param name="dataspace"></param>
-            <param name="prop"></param>
+            <param name="parent">
+            </param>
+            <param name="datasetName">
+            </param>
+            <param name="datatype">
+            </param>
+            <param name="dataspace">
+            </param>
+            <param name="prop">
+            </param>
         </member>
         <member name="M:PacBio.HDF.HDFDataset.#ctor(PacBio.HDF.HDFGroupContainer,System.String)">
             <summary>
             Open an existing dataset
             </summary>
-            <param name="parent"></param>
-            <param name="datasetName"></param>
+            <param name="parent">
+            </param>
+            <param name="datasetName">
+            </param>
         </member>
         <member name="M:PacBio.HDF.HDFDataset.#ctor(PacBio.HDF.HDFGroupContainer,System.String,PacBio.HDF.HDFDatasetAccessProperty)">
             <summary>
             Open an existing dataset
             </summary>
-            <param name="parent"></param>
-            <param name="datasetName"></param>
-            <param name="plist"></param>
+            <param name="parent">
+            </param>
+            <param name="datasetName">
+            </param>
+            <param name="plist">
+            </param>
         </member>
         <member name="M:PacBio.HDF.HDFDataset.#ctor(PacBio.HDF.IChunkFile,System.Int32)">
             <summary>
             Open an existing dataset
             </summary>
-            <param name="file"></param>
-            <param name="id"></param>
-            Note: we assume the ID has already been opened some other place and we are now responsible for closing it.
-        </member>
+            <param name="file">
+            </param>
+            <param name="id">
+            </param>
+            Note: we assume the ID has already been opened some other place and we are now responsible for closing it.</member>
         <member name="M:PacBio.HDF.HDFDataset.Extend(System.Int64[])">
             <summary>
             Expand a resizable dataset
             </summary>
-            <param name="newDims"></param>
+            <param name="newDims">
+            </param>
         </member>
         <member name="P:PacBio.HDF.HDFDataset.Datatype">
             <summary>
@@ -663,56 +540,29 @@
             Top level container for an HDF file
             </summary>
         </member>
-        <member name="T:PacBio.HDF.IChunkFile">
-            <summary>
-            Represent an HDF5 file.
-            </summary>
-        </member>
-        <member name="M:PacBio.HDF.IChunkFile.CreateDatatype(System.Type)">
-            <summary>
-            A factory to get a data type description given a native .net type
-            </summary>
-            <param name="t"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PacBio.HDF.IChunkFile.CreateDataspace(System.Int64[],System.Int64[])">
-            <summary>
-            Create an array dataspace
-            </summary>
-            <param name="curDimensions">the size in each dimension</param>
-            <param name="maxDimensions">the size in each dimension (or -1 for no maximum)</param>
-            <returns></returns>
-        </member>
-        <member name="M:PacBio.HDF.IChunkFile.CreateDataspace">
-            <summary>
-            Create a simple non array dataspace
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:PacBio.HDF.IChunkFile.FileName">
-            <summary>
-            Uri of the HDF5 file
-            </summary>
-        </member>
         <member name="M:PacBio.HDF.HDFFile.GetAttributes">
             <summary>
             files can't have attributes - just return an empty array
             </summary>
-            <returns></returns>
-        </member>
-        <member name="M:PacBio.HDF.HDFFile.DisposeChildren">
-            <summary>
-            Currently we are wreckless with leaking IDs, this cleans up our mess
-            </summary>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.HDFGlue.GetHDFGlobal(System.String)">
             <summary>
             HDF hides nasty ints in _g globals - this is how we find em
             </summary>
-            <param name="globalname"></param>
-            <returns></returns>
+            <param name="globalname">
+            </param>
+            <returns>
+            </returns>
         </member>
-        <member name="M:PacBio.HDF.HDFGlue.#cctor">
+        <member name="P:PacBio.HDF.HDFGlue.Available">
+            <summary>
+            A flag for checking that HDF5 is initialized properly.  Set to true after a successful call to H5open()
+            In the constructor of HDFGlue.
+            </summary>
+        </member>
+        <member name="M:PacBio.HDF.HDFGlue.#ctor">
             <summary>
             Static constructor to ensure HDF library is loaded
             </summary>
@@ -721,26 +571,20 @@
             <summary>
             Check for an HDF error and assume the user is trying to open an item
             </summary>
-            May throw NotFoundException
-        </member>
+            May throw NotFoundException</member>
         <member name="M:PacBio.HDF.HDFGlue.CheckOpenNoThrow(PacBio.HDF.HDFGlue.HDFCall)">
             <summary>
             Check for an HDF error and assume the user is trying to open an item
             </summary>
-            May throw NotFoundException
-        </member>
+            May throw NotFoundException</member>
         <member name="M:PacBio.HDF.HDFGlue.CheckError(System.Int32)">
             <summary>
             Check for an HDF error and throw an exception if a problem is encountered
             </summary>
-            <param name="errcode"></param>
-            <returns></returns>
-        </member>
-        <member name="P:PacBio.HDF.HDFGlue.Available">
-            <summary>
-            A flag for checking that HDF5 is initialized properly.  Set to true after a successful call to H5open()
-            In the constructor of HDFGlue.
-            </summary>
+            <param name="errcode">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="T:PacBio.HDF.H5A">
             <summary>
@@ -751,9 +595,12 @@
             <summary>
             true if the named property exists on the specified object
             </summary>
-            <param name="fileId"></param>
-            <param name="name"></param>
-            <returns></returns>
+            <param name="fileId">
+            </param>
+            <param name="name">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="F:PacBio.HDF.H5D.COMPACT">
             <summary>
@@ -764,13 +611,20 @@
             <summary>
             HDF data write
             </summary>
-            <param name="id"></param>
-            <param name="memtypeid"></param>
-            <param name="memspaceid"></param>
-            <param name="filespaceid"></param>
-            <param name="xferplist"></param>
-            <param name="buf"></param>
-            <returns></returns>
+            <param name="id">
+            </param>
+            <param name="memtypeid">
+            </param>
+            <param name="memspaceid">
+            </param>
+            <param name="filespaceid">
+            </param>
+            <param name="xferplist">
+            </param>
+            <param name="buf">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="T:PacBio.HDF.H5I">
             <summary>
@@ -781,9 +635,12 @@
             <summary>
             Used to iterate over object tables
             </summary>
-            <param name="objptr"></param>
-            <param name="id"></param>
-            <param name="userData"></param>
+            <param name="objptr">
+            </param>
+            <param name="id">
+            </param>
+            <param name="userData">
+            </param>
             <returns>zero to keep searching</returns>
         </member>
         <member name="F:PacBio.HDF.H5P.DEFAULT">
@@ -795,10 +652,11 @@
             <summary>
             Get the name of this property
             </summary>
-            <param name="pcid"></param>
-            <returns></returns>
-            This method _will_ cause a memory leak, but should only be calling it a few times at startup
-        </member>
+            <param name="pcid">
+            </param>
+            <returns>
+            </returns>
+            This method _will_ cause a memory leak, but should only be calling it a few times at startup</member>
         <member name="T:PacBio.HDF.HDFException">
             <summary>
             HDF library exceptions wrapper
@@ -809,19 +667,22 @@
             HDF Error printing/parsing
             </summary>
         </member>
-        <member name="M:PacBio.HDF.H5E.walk(System.Int32)">
-            <summary>
-            Walk the error stack and print it
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:PacBio.HDF.H5E.PrintCallback">
             <summary>
             A hook for printing HDF errors
             </summary>
-            <param name="whichstack"></param>
+            <param name="whichstack">
+            </param>
             <param name="cstream">A c style FILE * (useless to us)</param>
-            <returns></returns>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:PacBio.HDF.H5E.walk(System.Int32)">
+            <summary>
+            Walk the error stack and print it
+            </summary>
+            <returns>
+            </returns>
         </member>
         <member name="T:PacBio.HDF.H5S">
             <summary>
@@ -845,18 +706,21 @@
         </member>
         <member name="M:PacBio.HDF.H5L.H5LTtext_to_dtype(System.String,System.Int32)">
             <summary>
-            
             </summary>
-            <param name="datatypename"></param>
+            <param name="datatypename">
+            </param>
             <param name="langtype">Only langtype 0 is supprted at present</param>
-            <returns></returns>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.H5L.text_to_dtype(System.String)">
             <summary>
             Given a string containing a datatype name, return the integer data type ID
             </summary>
-            <param name="datatypename"></param>
-            <returns></returns>
+            <param name="datatypename">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="T:PacBio.HDF.H5R">
             <summary>
@@ -867,17 +731,22 @@
             <summary>
             Dereference a reference
             </summary>
-            <param name="fileid"></param>
-            <param name="refptr"></param>
+            <param name="fileid">
+            </param>
+            <param name="refptr">
+            </param>
             <returns>The dataset id pointed to by the reference</returns>
         </member>
         <member name="M:PacBio.HDF.H5R.get_region(System.Int32,PacBio.HDF.H5R.RegRef)">
             <summary>
             Get the dataspace associated with a reference
             </summary>
-            <param name="fileid"></param>
-            <param name="refptr"></param>
-            <returns></returns>
+            <param name="fileid">
+            </param>
+            <param name="refptr">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="F:PacBio.HDF.H5T.NATIVE_INT">
             <summary>
@@ -898,8 +767,7 @@
             <summary>
             Check for leaks in HDF (by creating a snapshot with a count of open object IDs)
             </summary>
-            When we get disposed we will check for leaks (useful with the using construct)
-        </member>
+            When we get disposed we will check for leaks (useful with the using construct)</member>
         <member name="F:PacBio.HDF.HDFLeakChecker.Enabled">
             <summary>
             We are not multithread safe yet
@@ -943,80 +811,24 @@
             <summary>
             Add a byte count offset to an IntPtr
             </summary>
-            <param name="src"></param>
-            <param name="offset"></param>
-            <returns></returns>
+            <param name="src">
+            </param>
+            <param name="offset">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.HDFUtils.FindAllElements(PacBio.HDF.IGroup,System.Type)">
             <summary>
             From a group node, find all elements of type desired,
-            return a list of elements. 
+            return a list of elements.
             </summary>
-            <param name="root"></param>
-            <param name="type"></param>
-            <returns></returns>
-        </member>
-        <member name="T:PacBio.HDF.IHighLevelChunks">
-            <summary>
-            A high level API for reading and writing from any chunk provider (HDF, XML, AVI, ChunkPath etc...)
-            </summary>
-            The regular IChunkElement tree is designed to be a very small API to make it easy to implement new providers.
-            This interface (and its associated implementation HighLevelChunks) provides an easier API for USERS of the chunk
-            framework.  It makes it easy to insert/extract data without having to worry about datatypes, datasets etc...
-            I recommend this as your primary gateway for opening chunk files
-        </member>
-        <member name="M:PacBio.HDF.IHighLevelChunks.WriteAttribute(System.String,System.String,System.Object)">
-            <summary>
-            Create an attribute on a specified node
-            </summary>
-            <param name="nodePath">The HDF path to the node (which must already exist)</param>
-            <param name="attrName">The name of the attribute</param>
-            <param name="attrValue">The value of the attribute - attribute type will be detected automatically</param>
-        </member>
-        <member name="M:PacBio.HDF.IHighLevelChunks.ReadAttribute(System.String,System.String)">
-            <summary>
-            Read an attribute on a specified node
-            </summary>
-            <param name="nodePath">the path to the node</param>
-            <param name="attrName">the name of the attribute</param>
-            <returns>null if not found</returns>
-        </member>
-        <member name="M:PacBio.HDF.IHighLevelChunks.CreateGroup(System.String)">
-            <summary>
-            Create a group (or open an existing group)
-            </summary>
-            <param name="path"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PacBio.HDF.IHighLevelChunks.WriteDataset(System.String,System.Object)">
-            <summary>
-            store a chunk in the file - if the named dataset does not exist it will be created
-            </summary>
-            <param name="datasetName">A four character type code</param>
-            <param name="value"></param>
-            Note: for legacy purposes we currently map some four character 'avi style' dataset names to new 
-            HDF style names internally.  kevinh will add more details on this process eventually.
-            This simple method assumes a simple 1 element dataset of either string, numeric or array type
-        </member>
-        <member name="M:PacBio.HDF.IHighLevelChunks.ReadDataset(System.String)">
-            <summary>
-            Read the entire named dataset - returning data in a natural format
-            </summary>
-            <param name="datasetName">The dataset name used to fetch the specified dataset</param>
-            <returns>the data type depends on how the data was defined at creation, or null if not found</returns>
-            Note: for legacy purposes we currently map some four character 'avi style' dataset names to new 
-            HDF style names internally.  kevinh will add more details on this process eventually.
-        </member>
-        <member name="P:PacBio.HDF.IHighLevelChunks.File">
-            <summary>
-            Return the low level file for advanced users
-            </summary>
-            May not be necessary
-        </member>
-        <member name="P:PacBio.HDF.IHighLevelChunks.FileName">
-            <summary>
-            Return the Uri used to open the IHighLevelChunks object.
-            </summary>
+            <param name="root">
+            </param>
+            <param name="type">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.HighLevelChunks.Open(System.String,System.Boolean)">
             <summary>
@@ -1028,16 +840,21 @@
             Work with a specified (already open) IChunkFile
             Used when this is contained within another writer
             </summary>
-            <param name="iChunkFile"></param>
+            <param name="iChunkFile">
+            </param>
         </member>
         <member name="M:PacBio.HDF.HighLevelChunks.Open(System.String,System.IO.FileMode,System.IO.FileAccess)">
             <summary>
             Open a chunk file based on parsing its URI
             </summary>
-            <param name="filename"></param>
-            <param name="forWrite"></param>
-            <param name="access"></param>
-            <returns></returns>
+            <param name="filename">
+            </param>
+            <param name="forWrite">
+            </param>
+            <param name="access">
+            </param>
+            <returns>
+            </returns>
         </member>
         <member name="M:PacBio.HDF.HighLevelChunks.WriteAttribute(System.String,System.String,System.Object)">
             <summary>
@@ -1067,8 +884,249 @@
             <summary>
             Create a group (or open an existing group)
             </summary>
-            <param name="path"></param>
-            <returns></returns>
+            <param name="path">
+            </param>
+            <returns>
+            </returns>
+        </member>
+        <member name="T:PacBio.HDF.IChunkFile">
+            <summary>
+            Represent an HDF5 file.
+            </summary>
+        </member>
+        <member name="M:PacBio.HDF.IChunkFile.CreateDatatype(System.Type)">
+            <summary>
+            A factory to get a data type description given a native .net type
+            </summary>
+            <param name="t">
+            </param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:PacBio.HDF.IChunkFile.CreateDataspace(System.Int64[],System.Int64[])">
+            <summary>
+            Create an array dataspace
+            </summary>
+            <param name="curDimensions">the size in each dimension</param>
+            <param name="maxDimensions">the size in each dimension (or -1 for no maximum)</param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:PacBio.HDF.IChunkFile.CreateDataspace">
+            <summary>
+            Create a simple non array dataspace
+            </summary>
+            <returns>
+            </returns>
+        </member>
+        <member name="P:PacBio.HDF.IChunkFile.FileName">
+            <summary>
+            Uri of the HDF5 file
+            </summary>
+        </member>
+        <member name="P:PacBio.HDF.IChunkElement.File">
+            <summary>
+            Get the file that this element is part of
+            </summary>
+        </member>
+        <member name="T:PacBio.HDF.IAttributeTarget">
+            <summary>
+            Any object that can be tagged with attributes
+            </summary>
+        </member>
+        <member name="M:PacBio.HDF.IAttributeTarget.CreateAttribute(System.String,PacBio.HDF.IDatatype,PacBio.HDF.IDataspace)">
+            <summary>
+            Create an attribute
+            </summary>
+            <param name="name">
+            </param>
+            <param name="datatype">
+            </param>
+            <param name="dataspace">
+            </param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:PacBio.HDF.IAttributeTarget.GetAttribute(System.String)">
+            <summary>
+            Read a named attribute
+            </summary>
+            <param name="name">
+            </param>
+            <returns>null for not found</returns>
+        </member>
+        <member name="M:PacBio.HDF.IAttributeTarget.GetAttributes">
+            <summary>
+            Read all of the attributes attached to this object
+            </summary>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:PacBio.HDF.IAttributeTarget.DeleteAttribute(System.String)">
+            <summary>
+            Deletes an attribute attached to this object
+            </summary>
+            <param name="name">Name of the attribute to delete</param>
+            <returns>True if an attribute was found and deleted, false if not</returns>
+        </member>
+        <member name="T:PacBio.HDF.IDataContainer">
+            <summary>
+            Behavior common to anything that can actually contain real data
+            </summary>
+            In the case of HDF that means Attribute or Datasets.</member>
+        <member name="M:PacBio.HDF.IDataContainer.Read">
+            <summary>
+            Read the entire contents of this data chunk
+            </summary>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:PacBio.HDF.IDataContainer.Read(System.Array@,PacBio.HDF.IDataspace)">
+            <summary>
+            Read a subsection of this chunk by using hyperslabs
+            </summary>
+            <param name="target">The array to fill with data from the chunk.  Read() may or may not replace the target object you pass in</param>
+            <param name="dataspace">a dataspace defining what hyperslab we want to read, or null to read the whole hyperslab from the file</param>
+        </member>
+        <member name="M:PacBio.HDF.IDataContainer.Write(System.Object)">
+            <summary>
+            Write the entire contents of this chunk
+            </summary>
+            <param name="o">
+            </param>
+        </member>
+        <member name="M:PacBio.HDF.IDataContainer.Write(System.Object,PacBio.HDF.IDataspace)">
+            <summary>
+            Write a subsection of this chunk
+            </summary>
+            <param name="o">
+            </param>
+            <param name="dataspace">
+            </param>
+            Use when you've created a dataspace with a restricted hyperslab</member>
+        <member name="P:PacBio.HDF.IDatatype.NativeType">
+            <summary>
+            The .net type that is appropriate for storing this datatype
+            </summary>
+        </member>
+        <member name="T:PacBio.HDF.IReference">
+            <summary>
+            Provides links into HDF5 "Region Reference" - particular hyperslab sections of datasets
+            </summary>
+        </member>
+        <member name="M:PacBio.HDF.IReference.Dereference">
+            <summary>
+            Get the dataset that this reference is pointing to
+            </summary>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:PacBio.HDF.IReference.GetRegion">
+            <summary>
+            Get the selected region in the target dataset
+            </summary>
+            <returns>
+            </returns>
+        </member>
+        <member name="P:PacBio.HDF.IDataspace.Dimensions">
+            <summary>
+            return the # of elements in each dimension
+            </summary>
+            <returns>An array of length equal to the rank of this dataset, each element shows the size in that dimension</returns>
+        </member>
+        <member name="P:PacBio.HDF.IDataspace.MaxDimensions">
+            <summary>
+            The maximum amount a specified dimension may ever reach
+            </summary>
+            Or -1 for no limit</member>
+        <member name="M:PacBio.HDF.IDataspace.SelectHyperslab(System.Int64[],System.Int64[],System.Int64[],System.Int64[])">
+            <summary>
+            Select a subportion of this dataspace
+            </summary>
+            <param name="start">the initial coordinates to use for the top corner of the hyperslab</param>
+            <param name="stride">how much to increment each dim by as we move between blocks, or null for a stride of all 1s</param>
+            <param name="count">the number of blocks in each direction</param>
+            <param name="block">the dimensions of each block we are selecting, or null for blocks of size 1</param>
+            If you call this method, the dataset it is attached to will use 'partial' IO for reads and writes.  Useful for
+            stuff like movie frames.</member>
+        <member name="M:PacBio.HDF.IDataspace.SelectAll">
+            <summary>
+            Undo the effects of SelectHyperslab - go back to reading/writing the whole space
+            </summary>
+        </member>
+        <member name="P:PacBio.HDF.IDataspace.HyperBlock">
+            <summary>
+            The # of dimensions for each block written to a hyperslab (or Dimensions if not using hyperslabs)
+            </summary>
+        </member>
+        <member name="P:PacBio.HDF.IDataspace.NumElements">
+            <summary>
+            How many elements in this dataset?
+            </summary>
+            Takes into account any hyperslabbing going on</member>
+        <member name="M:PacBio.HDF.IDataset.Extend(System.Int64[])">
+            <summary>
+            Expand a resizable dataset
+            </summary>
+            <param name="newDims">
+            </param>
+        </member>
+        <member name="M:PacBio.HDF.IDataset.CreateReference(PacBio.HDF.IDataspace)">
+            <summary>
+            Create a 'region reference' that points inside this particular dataset
+            </summary>
+            <param name="dataspace">
+            </param>
+            <returns>
+            </returns>
+            It is the callers responsiblity to write this to the file via a dataset</member>
+        <member name="T:PacBio.HDF.IGroup">
+            <summary>
+            Any object that can contain groups or datasets
+            </summary>
+        </member>
+        <member name="M:PacBio.HDF.IGroup.CreateGroup(System.String)">
+            <summary>
+            Create (or reopen an existing) group
+            </summary>
+            <param name="groupName">
+            </param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:PacBio.HDF.IGroup.CreateDataset(System.String,PacBio.HDF.IDatatype,PacBio.HDF.IDataspace)">
+            <summary>
+            Create a dataset with a more flexible representation
+            </summary>
+            <param name="datasetName">
+            </param>
+            <param name="dataspace">
+            </param>
+            <param name="datatype">
+            </param>
+        </member>
+        <member name="M:PacBio.HDF.IGroup.GetChild(System.String)">
+            <summary>
+            Open an existing dataset
+            </summary>
+            <param name="datasetName">
+            </param>
+            <returns>null for not found</returns>
+        </member>
+        <member name="M:PacBio.HDF.IGroup.RemoveChild(System.String)">
+            <summary>
+            Remove a child dataset or group from a group
+            </summary>
+            <param name="datasetName">
+            </param>
+            <returns>false if no child was deleted</returns>
+        </member>
+        <member name="M:PacBio.HDF.IGroup.GetChildren">
+            <summary>
+            Return the children of this node
+            </summary>
+            <returns>
+            </returns>
         </member>
         <member name="T:PacBio.HDF.IChunkReader">
             <summary>
@@ -1081,9 +1139,8 @@
             </summary>
             <param name="datasetName">The dataset name used to fetch the specified dataset</param>
             <returns>the data type depends on how the data was defined at creation, or null if not found</returns>
-            Note: for legacy purposes we currently map some four character 'avi style' dataset names to new 
-            HDF style names internally.  kevinh will add more details on this process eventually.
-        </member>
+            Note: for legacy purposes we currently map some four character 'avi style' dataset names to new
+            HDF style names internally.  kevinh will add more details on this process eventually.</member>
         <member name="T:PacBio.HDF.IChunkWriter">
             <summary>
             Operations for writing chunks
@@ -1094,11 +1151,72 @@
             store a chunk in the file - if the named dataset does not exist it will be created
             </summary>
             <param name="datasetName">A four character type code</param>
-            <param name="value"></param>
-            Note: for legacy purposes we currently map some four character 'avi style' dataset names to new 
+            <param name="value">
+            </param>
+            Note: for legacy purposes we currently map some four character 'avi style' dataset names to new
             HDF style names internally.  kevinh will add more details on this process eventually.
-            This simple method assumes a simple 1 element dataset of either string, numeric or array type
+            This simple method assumes a simple 1 element dataset of either string, numeric or array type</member>
+        <member name="T:PacBio.HDF.IHighLevelChunks">
+            <summary>
+            A high level API for reading and writing from any chunk provider (HDF, XML, AVI, ChunkPath etc...)
+            </summary>
+            The regular IChunkElement tree is designed to be a very small API to make it easy to implement new providers.
+            This interface (and its associated implementation HighLevelChunks) provides an easier API for USERS of the chunk
+            framework.  It makes it easy to insert/extract data without having to worry about datatypes, datasets etc...
+            I recommend this as your primary gateway for opening chunk files</member>
+        <member name="P:PacBio.HDF.IHighLevelChunks.File">
+            <summary>
+            Return the low level file for advanced users
+            </summary>
+            May not be necessary</member>
+        <member name="P:PacBio.HDF.IHighLevelChunks.FileName">
+            <summary>
+            Return the Uri used to open the IHighLevelChunks object.
+            </summary>
         </member>
+        <member name="M:PacBio.HDF.IHighLevelChunks.WriteAttribute(System.String,System.String,System.Object)">
+            <summary>
+            Create an attribute on a specified node
+            </summary>
+            <param name="nodePath">The HDF path to the node (which must already exist)</param>
+            <param name="attrName">The name of the attribute</param>
+            <param name="attrValue">The value of the attribute - attribute type will be detected automatically</param>
+        </member>
+        <member name="M:PacBio.HDF.IHighLevelChunks.ReadAttribute(System.String,System.String)">
+            <summary>
+            Read an attribute on a specified node
+            </summary>
+            <param name="nodePath">the path to the node</param>
+            <param name="attrName">the name of the attribute</param>
+            <returns>null if not found</returns>
+        </member>
+        <member name="M:PacBio.HDF.IHighLevelChunks.CreateGroup(System.String)">
+            <summary>
+            Create a group (or open an existing group)
+            </summary>
+            <param name="path">
+            </param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:PacBio.HDF.IHighLevelChunks.WriteDataset(System.String,System.Object)">
+            <summary>
+            store a chunk in the file - if the named dataset does not exist it will be created
+            </summary>
+            <param name="datasetName">A four character type code</param>
+            <param name="value">
+            </param>
+            Note: for legacy purposes we currently map some four character 'avi style' dataset names to new
+            HDF style names internally.  kevinh will add more details on this process eventually.
+            This simple method assumes a simple 1 element dataset of either string, numeric or array type</member>
+        <member name="M:PacBio.HDF.IHighLevelChunks.ReadDataset(System.String)">
+            <summary>
+            Read the entire named dataset - returning data in a natural format
+            </summary>
+            <param name="datasetName">The dataset name used to fetch the specified dataset</param>
+            <returns>the data type depends on how the data was defined at creation, or null if not found</returns>
+            Note: for legacy purposes we currently map some four character 'avi style' dataset names to new
+            HDF style names internally.  kevinh will add more details on this process eventually.</member>
         <member name="T:PacBio.HDF.SimpleRecordStore">
             <summary>
             A class for storing simple C# types to parallel HDF5 arrays.
@@ -1107,22 +1225,22 @@
         <member name="T:PacBio.HDF.ArrayRecordStore`1">
             <summary>
             Infrastructure for storing an array data classes to HDF5.  The user configures mappings
-            from the storage type T to simple variables or array of simple variable that get written to 
-            HDF5. 
+            from the storage type T to simple variables or array of simple variable that get written to
+            HDF5.
             </summary>
             <typeparam name="T">The type to be stored in HDF5</typeparam>
         </member>
         <member name="T:PacBio.HDF.ArrayRecordStore`1.Writer">
             <summary>
-            The writer class for persisting arrays of data with user-defined type T to HDF5.  You should 
-            subclass this ArrayRecordStore&lt;T&gt;.Writer for the data type you are writing and call 
-            the WriteSetupSingleton and WriteSetupArray methods to define 
+            The writer class for persisting arrays of data with user-defined type T to HDF5.  You should
+            subclass this ArrayRecordStore&lt;T&gt;.Writer for the data type you are writing and call
+            the WriteSetupSingleton and WriteSetupArray methods to define
             how the writer should pull data out of your datatype and store it in HDF5.
             </summary>
         </member>
         <member name="M:PacBio.HDF.ArrayRecordStore`1.Writer.WriteSetupSingleton``1(System.String,System.Func{`0,``0},PacBio.HDF.IGroup,System.String,System.Object)">
             <summary>
-            The subclassing writer should call this method once for each simple field that needs to 
+            The subclassing writer should call this method once for each simple field that needs to
             be extracted from the data and stored in HDF5.
             </summary>
             <typeparam name="TR">The type of the field to be stored</typeparam>
@@ -1130,11 +1248,12 @@
             <param name="getter">A function that pulls out the relevant field from the data item being stored</param>
             <param name="outGroup">The group to store the dataset. Pass null to use the main Writer group</param>
             <param name="description">Optional descriptive text for the field</param>
-            <param name="units"></param>
+            <param name="units">
+            </param>
         </member>
         <member name="M:PacBio.HDF.ArrayRecordStore`1.Writer.WriteSetupFixedWidth``1(System.String,System.Func{`0,``0[]},PacBio.HDF.IGroup,System.String,System.Object)">
             <summary>
-            The subclassing writer should call this method once for each simple field that needs to 
+            The subclassing writer should call this method once for each simple field that needs to
             be extracted from the data and stored in HDF5.
             </summary>
             <typeparam name="TR">The type of the field to be stored</typeparam>
@@ -1142,11 +1261,19 @@
             <param name="getter">A function that pulls out the relevant field from the data item being stored</param>
             <param name="outGroup">The group to store the dataset. Pass null to use the main Writer group</param>
             <param name="description">Optional descriptive text for the field</param>
-            <param name="units"></param>
+            <param name="units">
+            </param>
+        </member>
+        <member name="M:PacBio.HDF.ArrayRecordStore`1.Writer.ArrayGroup.SafeStack``1(System.Collections.Generic.IList{``0}[])">
+            <summary>
+            Concatenate a series of arrays into a single array
+            </summary>
+            <param name="arrays">The input arrays</param>
+            <returns>The concatenated arrays</returns>
         </member>
         <member name="M:PacBio.HDF.ArrayRecordStore`1.Writer.WriteSetupArray``1(System.String,System.Func{`0,System.Collections.Generic.IList{``0}})">
             <summary>
-            The subclassing writer should call this method for members of the storage datatype that 
+            The subclassing writer should call this method for members of the storage datatype that
             is a list of a primitive datatype.
             </summary>
             <typeparam name="TR">The primitive datatype to be stored for this field.</typeparam>
@@ -1165,13 +1292,6 @@
             </summary>
             <param name="data">The data to be written</param>
             <param name="chunkSize">The number of objects to write simultaneously in a single block</param>
-        </member>
-        <member name="M:PacBio.HDF.ArrayRecordStore`1.Writer.ArrayGroup.SafeStack``1(System.Collections.Generic.IList{``0}[])">
-            <summary>
-            Concatenate a series of arrays into a single array
-            </summary>
-            <param name="arrays">The input arrays</param>
-            <returns>The concatenated arrays</returns>
         </member>
         <member name="T:PacBio.HDF.Table`1">
             <summary>
@@ -1199,7 +1319,7 @@
         </member>
         <member name="M:PacBio.HDF.Table`1.WriteRecords(System.Collections.Generic.IEnumerable{`0},PacBio.HDF.IGroup)">
             <summary>
-            Write data records in the given HDF5 group 
+            Write data records in the given HDF5 group
             </summary>
         </member>
         <member name="M:PacBio.HDF.Table`1.ReadRecords(PacBio.HDF.IGroup)">
@@ -1221,13 +1341,15 @@
             <summary>
             Test the hyperslab high level API
             </summary>
-            <param name="high"></param>
+            <param name="high">
+            </param>
         </member>
         <member name="M:PacBio.HDF.Test.HDFTest.ReadFrames(PacBio.HDF.IGroup)">
             <summary>
             Read frame subchunks from the file
             </summary>
-            <param name="movie"></param>
+            <param name="movie">
+            </param>
         </member>
         <member name="M:PacBio.HDF.Test.HDFTest.CreateFrames(PacBio.HDF.IGroup)">
             <summary>
@@ -1235,7 +1357,6 @@
             </summary>
             This test has shown that writing frames is about 50 frames/sec for astro sized frames (I don't remember what RIFF
             files were for comparison) when chunking/dynamic growing is on.
-            When chunking is _off_ things are muck faster - about 200 frames/sec.
-        </member>
+            When chunking is _off_ things are muck faster - about 200 frames/sec.</member>
     </members>
 </doc>

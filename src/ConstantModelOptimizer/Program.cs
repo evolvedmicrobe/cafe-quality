@@ -12,6 +12,8 @@ namespace ConstantModelOptimizer
     {
         public static void Main (string[] args)
         {
+            SimulateAndInfer (Int32.Parse(args[0]), Int32.Parse(args[1]));
+            return;
             char bp = args [0] [0];
             double snr = Convert.ToDouble(args[1]);
             TrainSNRBin (bp, snr);
@@ -106,21 +108,65 @@ namespace ConstantModelOptimizer
             sw.Close ();
         }
 
-        public static void SimulateAndInfer() {
+        public static void SimulateAndInfer(int l, int n) {
             Console.WriteLine ("Hello World!");
             ParameterSet trueParameters;
-            var data = Simulator.SimulateTemplatesAndReads (out trueParameters);
+            var data = Simulator.SimulateTemplatesAndReads (out trueParameters, l);
             var scorers = data.Select( p=> new ReadTemplatePair(p.Item2,p.Item1)).ToList();
+			var ll = scorers.Sum (z => z.FillMatrices (trueParameters));
             System.IO.StreamWriter sw = new System.IO.StreamWriter ("TrueParameters2.csv");
-            sw.WriteLine (trueParameters.GetCSVHeaderLine ());
-            sw.WriteLine (trueParameters.GetCSVDataLine ());
+            sw.WriteLine ("Likelihood," + trueParameters.GetCSVHeaderLine ());
+            sw.WriteLine (ll.ToString() + "," + trueParameters.GetCSVDataLine ());
             sw.Close ();
             //scorers = Enumerable.Range (0, 40).Select (x => new ReadTemplatePair ("AGGT", "AGT")).ToList();
             var optim = new Optimizer (scorers);
             optim.Optimize ();
 
-            var ll = scorers.Sum (z => z.FillMatrices (trueParameters));
+            ll = scorers.Sum (z => z.FillMatrices (trueParameters));
             Console.WriteLine ("Real LL = " +  ll);
+            System.IO.StreamWriter dw = new System.IO.StreamWriter ("SimData.cpp");
+            dw.WriteLine ();
+            dw.WriteLine ("#include <iostream>");
+            dw.WriteLine ("#include <vector>");
+            dw.WriteLine ();
+            dw.WriteLine ("#include <boost/lexical_cast.hpp>");
+            dw.WriteLine ();
+            dw.WriteLine ("#include <unitem/Fit.hpp>");
+            dw.WriteLine ("#include <unitem/Types.hpp>");
+            dw.WriteLine ();
+            dw.WriteLine ();
+            dw.WriteLine ("int main(int argc, char **argv)");
+            dw.WriteLine ("{");
+            dw.WriteLine ("    using namespace std;");
+            dw.WriteLine ();
+            dw.WriteLine ("    const size_t trunc = (argc > 1) ? boost::lexical_cast<size_t>(argv[1]) : 1;");
+            dw.WriteLine ("    const double substitution = {0};", trueParameters.Epsilon);
+            dw.WriteLine ();
+            int m = 1;
+            foreach (var p in scorers.TakeAtMost(n)) {
+                double pll = p.FillMatrices(trueParameters);
+                p.DumpMatrices (String.Format("matrices{0}.csv", m));
+                dw.WriteLine ("    {");
+                dw.WriteLine ("        const Outcome o{0}(\"{1}\");", m, p.Read);
+                dw.WriteLine ("        vector<PrTransD> m{0};", m);
+                for (int i = 0; i < p.CurrentTransitionParameters.Length; i++) {
+                    var tp = p.CurrentTransitionParameters [i];
+                    dw.WriteLine ("        m{0}.push_back(PrTransD({1}, {2}, {3}, {4}, {5}));", m, p.Template [i], tp.Match, tp.Branch, tp.Stick, tp.Dark);
+                }
+                dw.WriteLine ("        m{0}.push_back(PrTransD({1}, 0.25, 0.25, 0.25, 0.25));", m, p.Template[p.CurrentTransitionParameters.Length]);
+                dw.WriteLine ("        const double csll{0} = {1};", m, pll);
+                dw.WriteLine ("        cerr << \"fitting model {0} ..\" << endl;", m);
+                dw.WriteLine ("        auto r{0} = FitOutcomeToModel(o{0}, ModelD(m{0}), substitution, trunc);", m);
+                //dw.WriteLine ("    cout << \"csLL = \" << csll{0} << \", cppLL = \" << r{0}.LgLikelihood << endl;", m);
+                dw.WriteLine ("        if (trunc == 1 && fabs(csll{0} - r{0}.LgLikelihood) > ConstantsD::Eps)", m);
+                dw.WriteLine ("            cerr << \"ll mismatch! csLL = \" << csll{0} << \", cppLL = \" << r{0}.LgLikelihood << endl;", m);
+                dw.WriteLine ("    }");
+                dw.WriteLine ();
+                m++;
+            }
+            dw.WriteLine ("    return 0;");
+            dw.WriteLine ("}");
+            dw.Close ();
         }
         public class SmallRTP
         {
