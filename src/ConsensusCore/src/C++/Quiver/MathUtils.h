@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <math.h>
 #include <cmath>
-
+#include "Transcendentals.h"
 #define NEG_INF - INFINITY
 
 
@@ -36,7 +36,8 @@ inline double logadd(double lna, double lnb)
         return  max_val;
     }
     min_val -= max_val;
-    auto sum = std::exp(min_val) + 1.0;
+    auto sum = yepBuiltin_Exp_64f_64f(min_val) + 1.0;
+    //auto sum = std::exp(min_val) + 1.0;
     sum = std::log(sum) + max_val;
     return sum;
 }
