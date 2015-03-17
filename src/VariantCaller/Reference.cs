@@ -23,7 +23,7 @@ namespace VariantCaller
             nucmer= new NucmerQueryable(RefSeq, 12);
         }
 
-		public List<PairwiseAlignedSequence> AlignSequence(Sequence toAlign)
+		public List<PairwiseAlignedSequence> AlignSequence(ISequence toAlign)
 		{
             var toR = nucmer.GetAlignments(toAlign);
             toR.Sort ((x, y) => -x.Score.CompareTo (y.Score));

@@ -55,7 +55,7 @@ namespace VariantCaller
             return null;
         }
 
-		public List<PairwiseAlignedSequence> GetAlignments(Sequence toAlign)
+		public List<PairwiseAlignedSequence> GetAlignments(ISequence toAlign)
 		{
             if (Math.Min (toAlign.Count, ReferenceSequence.Count) < nucmer.MinimumScore) {
                 var msg = "Bad parameter settings for NucmerPairwiseAligner. " +

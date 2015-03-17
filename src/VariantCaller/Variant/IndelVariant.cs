@@ -63,7 +63,7 @@ namespace VariantCaller
             }
         }
 
-        public IndelVariant(int position, int length, Sequence reference, string bases, IndelType insertionOrDeletion, bool atAlignmentEnd = false) 
+        public IndelVariant(int position, int length, ISequence reference, string bases, IndelType insertionOrDeletion, bool atAlignmentEnd = false) 
             : base (position, reference, atAlignmentEnd)
         {
             Type = VariantType.INDEL;

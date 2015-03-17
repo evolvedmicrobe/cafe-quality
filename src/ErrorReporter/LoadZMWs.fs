@@ -9,7 +9,7 @@ open Bio.Util
 
 let ccs_data d_direct = 
     let ccsFiles = (new DirectoryInfo(d_direct)).GetFiles() |> 
-                    Seq.where (fun h -> h.Name.EndsWith(".ccs.fasta")) |> 
+                    Seq.where (fun h -> h.Name.EndsWith(".ccs.fastq")) |> 
                     Seq.map (fun u-> u.FullName) |>
                     Seq.toList
 

@@ -22,8 +22,11 @@ namespace VariantCaller
         /// .NET Bio used a PairwiseSequenceAlignment class but that seemed too heavy weight, 
         /// alternatively, the  name for these sequences in the shortend sequence meta data
         /// matches the original, so maybe I could use that?  
-        public static List<Variant> CallVariants(PairwiseAlignedSequence alignment, Sequence refSeq)
+        public static List<Variant> CallVariants(PairwiseAlignedSequence alignment, ISequence refSeq, ISequence querySequence)
         {
+
+            var qualSeq = querySequence as QualitativeSequence;
+
            if (alignment==null) {throw new ArgumentNullException("alignment");}
         	List<Variant> variants = new List<Variant>();
             // Convert to byte arrays, note we copy as we manipulate them below when
@@ -45,6 +48,7 @@ namespace VariantCaller
             
             int refPos = (int) alignment.FirstSequenceStart.Value;
             int i =0;
+            int queryPos = (int)alignment.SecondSequenceStart.Value;
             while( i < reference.Length)
             {
                 if (reference[i]==gap)
@@ -52,14 +56,22 @@ namespace VariantCaller
                     int len = getGapLength(i, reference);
                     var bases = getBases(query, i, len);
                     var newVariant = new IndelVariant(refPos - 1, len, refSeq, bases, IndelType.Insertion, (i == 0 || (i + len) >= reference.Length));
+                    if (qualSeq != null) {
+                        newVariant.QV = qualSeq.GetPhredQualityScore (queryPos);
+                    }
                     variants.Add(newVariant);
                     i += len;
+                    queryPos += len;
                 }
                 else if (query[i] == gap)
                 {
                     int len = getGapLength(i, query);
                     var bases = getBases(reference, i, len);
                     var newVariant = new IndelVariant(refPos - 1, len, refSeq, bases, IndelType.Deletion, (i == 0 || (i + len) >= reference.Length));
+                    if (qualSeq != null &&  (queryPos + 1) < qualSeq.Count ) {
+                        //TODO: Check this is where the mutation would occur....
+                        newVariant.QV = qualSeq.GetPhredQualityScore (queryPos+1);
+                    }
                     variants.Add(newVariant);
                     i += len;
                     refPos += len;
@@ -69,14 +81,19 @@ namespace VariantCaller
                     if (query[i] != reference[i])
                     {
                         var newVariant = new SNPVariant(refPos, (char) query[i], refSeq);
+                        if (qualSeq != null) {
+                            newVariant.QV = qualSeq.GetPhredQualityScore (queryPos);
+                        }
                         variants.Add(newVariant);
                     }
-                    i++; refPos++;
+                    i++; refPos++; queryPos++;
                 }
             }
             return variants;
         }
-              
+
+
+                
         /// <summary>
         /// Given two byte arrays representing a pairwise alignment, shift them so 
         /// that all deletions start as early as possible.  For example:
