@@ -11,6 +11,68 @@ namespace Tests
     public class SnrTests
     {
        
+
+        [Test()]
+        public void TestMultiReadMutationScorer()
+        {
+            //First let's get some parameters
+            SNR snr = new SNR (10.0, 7.0, 5.0, 11.0);
+            ParameterSet ps = new ParameterSet ();
+            ps.Epsilon = 0.002671256; //HARD CODED IN C++
+            foreach (var ctx in ParameterSet.DiNucleotideContexts) {
+                var pars = ContextParameterProvider.GetTransitionParameters(ctx, snr);
+                var n_params = new ConstantModelOptimizer.TransitionParameters ();
+                n_params.Match = Math.Exp (pars.Match);
+                n_params.Dark = Math.Exp (pars.Deletion);
+                n_params.Branch = Math.Exp (pars.Branch);
+                n_params.Stick = Math.Exp (pars.Stick);
+                n_params.Merge = 0;
+                ps.TransitionProbabilities [ctx] = n_params;
+            }
+
+            var read = "ACGTACGT";
+            var template = "ACGTCGT";
+
+            ReadTemplatePair rtp = new ReadTemplatePair (read, template);
+            rtp.FillMatrices (ps);
+            //rtp.DumpMatrices ();
+            var res = rtp.CurrentLikelihood;
+            Console.WriteLine (res);
+
+            template = read;
+            rtp = new ReadTemplatePair (read, template);
+            rtp.FillMatrices (ps);
+            // C# wants this to be -0.584415070238446
+            res = rtp.CurrentLikelihood;
+            Console.WriteLine (res);
+            //
+            template = "ACCTCGT";
+            rtp = new ReadTemplatePair (read, template);
+            rtp.FillMatrices (ps);
+            rtp.DumpMatrices ();
+            // C# wants this to be -8.49879694901693
+            var res2 = rtp.CurrentLikelihood;
+
+
+            template = "ACGTGT";
+            rtp = new ReadTemplatePair (read, template);
+            rtp.FillMatrices (ps);
+            var res4 = rtp.CurrentLikelihood;
+
+
+
+            template = "AACGTCGT";
+            rtp = new ReadTemplatePair (read, template);
+            rtp.FillMatrices (ps);
+            var res5 = rtp.CurrentLikelihood;
+
+
+
+            rtp.DumpMatrices ();
+            Console.WriteLine (res2);
+
+        }
+
         [Test()]
         public void CompareToCPlusPlus()
         {
@@ -34,7 +96,7 @@ namespace Tests
 
             ReadTemplatePair rtp = new ReadTemplatePair (read, template);
             rtp.FillMatrices (ps);
-            rtp.DumpMatrices ();
+            //rtp.DumpMatrices ();
             var res = rtp.CurrentLikelihood;
             Console.WriteLine (res);
 
@@ -48,6 +110,7 @@ namespace Tests
             template = "ACCTCGT";
             rtp = new ReadTemplatePair (read, template);
             rtp.FillMatrices (ps);
+            rtp.DumpMatrices ();
             // C# wants this to be -8.49879694901693
             var res2 = rtp.CurrentLikelihood;
 
@@ -55,8 +118,15 @@ namespace Tests
             template = "ACGTGT";
             rtp = new ReadTemplatePair (read, template);
             rtp.FillMatrices (ps);
-
             var res4 = rtp.CurrentLikelihood;
+
+
+
+            template = "AACGTCGT";
+            rtp = new ReadTemplatePair (read, template);
+            rtp.FillMatrices (ps);
+            var res5 = rtp.CurrentLikelihood;
+
 
 
             rtp.DumpMatrices ();
