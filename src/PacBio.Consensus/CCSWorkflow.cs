@@ -697,7 +697,7 @@ namespace PacBio.Consensus
         {
             // Don't even bother if this is not a productive ZMW. 
             // This will filter out low SNR or otherwise crappy, which take a lot of time
-            if (bases.Metrics.Productivity != ProductivityClass.Productive)
+            if (bases.Metrics.Productivity != ProductivityClass.Productive) // || bases.Zmw.HoleNumber != 80745)
                 return new Tuple<CCSResultType, IZmwConsensusBases> (CCSResultType.NotProductive, ZmwConsensusBases.Null(bases.Zmw));
 
 
@@ -800,6 +800,7 @@ namespace PacBio.Consensus
                             result = FindConsensus.MultiReadConsensusAndQv (scorer, regions, bases.Zmw,
                                 maxIterations, out iterationsTaken);
                         }
+
                     }
                 }
             }
