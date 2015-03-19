@@ -42,7 +42,6 @@
 #include <string>
 #include <vector>
 
-//#include "LDouble.hpp"
 #include "Logging/Logging.hpp"
 #include "Matrix/DenseMatrix.hpp"
 #include "Matrix/SparseMatrix.hpp"

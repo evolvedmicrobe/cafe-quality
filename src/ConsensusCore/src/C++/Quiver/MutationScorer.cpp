@@ -36,6 +36,8 @@
 
 #include "Quiver/MutationScorer.hpp"
 
+#include <fstream>
+#include <iostream>
 #include <string>
 
 #include "Matrix/DenseMatrix.hpp"
@@ -84,7 +86,37 @@ namespace ConsensusCore
     double
     MutationScorer<R>::Score() const
     {
-        return (*beta_)(0, 0);
+        return std::log((*beta_)(0, 0));
+    }
+
+    template<typename R>
+    void MutationScorer<R>::DumpMatrix(const MatrixType& mat, const std::string& fname) const
+    {
+        if (mat.Rows() == 0 || mat.Columns() == 0) return;
+        std::ofstream myfile;
+        myfile.open(fname);
+        for(int i=0; i< mat.Rows(); i++)
+        {
+            myfile << mat(i,0);
+            for(int j=0; j<mat.Columns(); j++)
+            {
+                myfile << "," << mat(i,j);
+            }
+            myfile << "\n";
+        }
+        myfile.close();
+    }
+
+    template<typename R>
+    void MutationScorer<R>::DumpAlphaMatrix() const
+    {
+        DumpMatrix(*alpha_, "Alpha.csv");
+    }
+
+    template<typename R>
+    void MutationScorer<R>::DumpBetaMatrix() const
+    {
+        DumpMatrix(*beta_, "Beta.csv");
     }
 
     template<typename R> TemplateParameterPair
@@ -230,7 +262,7 @@ namespace ConsensusCore
 
         // if (fabs(score - Score()) > 50) { Breakpoint(); }
 
-        return score;
+        return std::log(score);
     }
 
 

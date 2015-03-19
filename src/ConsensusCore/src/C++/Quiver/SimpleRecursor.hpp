@@ -65,7 +65,6 @@ namespace ConsensusCore {
                         M& ext, int numExtColumns = 2,
                         int lengthDiff = 0) const;
 
-
     public:
         //
         // Constructors

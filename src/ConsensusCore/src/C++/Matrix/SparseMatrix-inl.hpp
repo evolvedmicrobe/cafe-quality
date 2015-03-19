@@ -43,7 +43,6 @@
 
 #include "Interval.hpp"
 #include "Matrix/SparseMatrix.hpp"
-#include "LDouble.hpp"
 
 using std::min;
 using std::max;
@@ -101,6 +100,10 @@ namespace ConsensusCore {
     {
         assert(columnBeingEdited_ == j);
         usedRanges_[j] = Interval(usedRowsBegin, usedRowsEnd);
+        double s = columns_[j]->Max();
+        if (s == 0.0) s = 1.0;
+        columns_[j]->Normalize(s);
+        scalars_[j] = s;
         DEBUG_ONLY(CheckInvariants(columnBeingEdited_));
         columnBeingEdited_ = -1;
     }
@@ -122,17 +125,17 @@ namespace ConsensusCore {
     //
     // Accessors
     //
-    inline const double&
+    inline double
     SparseMatrix::operator() (int i, int j) const
     {
-        static const double emptyCell = Zero<ldouble>();
+        static const double emptyCell = 0.0;
         if (columns_[j] == NULL)
         {
             return emptyCell;
         }
         else
         {
-            return (*columns_[j])(i);
+            return (*columns_[j])(i) * scalars_[j];
         }
     }
 
@@ -160,6 +163,7 @@ namespace ConsensusCore {
     {
         usedRanges_[j] = Interval(0, 0);
         columns_[j]->Clear();
+        scalars_[j] = 1.0;
         DEBUG_ONLY(CheckInvariants(j);)
     }
 

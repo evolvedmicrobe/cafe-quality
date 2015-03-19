@@ -72,7 +72,7 @@ namespace ConsensusCore {
         int AllocatedEntries() const;  // an entry may be allocated but not used
 
     public:  // Accessors
-        const double& operator()(int i, int j) const;
+        double operator()(int i, int j) const;
         bool IsAllocated(int i, int j) const;
         double Get(int i, int j) const;
         void Set(int i, int j, double v);
@@ -89,6 +89,7 @@ namespace ConsensusCore {
 
     private:
         std::vector<SparseVector*> columns_;
+        std::vector<double> scalars_;
         int nCols_;
         int nRows_;
         int columnBeingEdited_;

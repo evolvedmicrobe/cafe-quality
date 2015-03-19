@@ -16,7 +16,7 @@
 namespace ConsensusCore {
     class MatrixTester {
     public:
-        double TestMutationScorer();
+        int TestMutationScorer();
     };
 }
 #endif /* defined(__ConsensusCoreXCode__MatrixTester__) */

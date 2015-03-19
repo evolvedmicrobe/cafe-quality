@@ -69,7 +69,7 @@ namespace ConsensusCore
         SparseMatrix alpha(I+1, J+1), beta(I+1, J+1);
         r.FillAlphaBeta(e, alpha, beta);
 
-        return beta(0, 0);
+        return std::log(beta(0, 0));
     }
 
 //    template<typename R>

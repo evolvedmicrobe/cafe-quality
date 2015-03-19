@@ -43,7 +43,6 @@
 #include <vector>
 
 #include "Interval.hpp"
-#include "LDouble.hpp"
 #include "Matrix/AbstractMatrix.hpp"
 #include "Types.hpp"
 #include "Utils.hpp"
@@ -56,7 +55,7 @@ namespace ConsensusCore {
     using boost::numeric::ublas::column_major;
 #endif  // SWIG
 
-    typedef matrix<ldouble, column_major> boost_dense_matrix;
+    typedef matrix<double, column_major> boost_dense_matrix;
 
     class DenseMatrix
         : public AbstractMatrix

@@ -195,7 +195,22 @@ namespace ConsensusCore
     inline void
     SparseVector::Clear()
     {
-        std::fill(storage_->begin(), storage_->end(), NEG_INF);
+        std::fill(storage_->begin(), storage_->end(), 0.0); //NEG_INF);
+    }
+
+    inline double
+    SparseVector::Max() const
+    {
+        return *std::max_element(storage_->begin(), storage_->end());
+    }
+
+    inline void
+    SparseVector::Normalize(double c)
+    {
+        for (size_t i = 0; i < storage_->size(); ++i)
+        {
+            (*storage_)[i] /= c;
+        }
     }
 
     inline int
