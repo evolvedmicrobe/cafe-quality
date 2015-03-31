@@ -7,10 +7,41 @@ using System.Linq;
 
 namespace Tests
 {
+    using TransitionParameters = ConstantModelOptimizer.TransitionParameters;
+
     [TestFixture ()]
     public class SnrTests
     {
        
+        [Test()]
+        public void TestWeirdRead() {
+            var read = "CTGGGGGAT";
+            var tpl =  "CTGGGGAT";
+            var StateProbabilities = new DynamicProgrammingMatrixPair(read,tpl);
+            TransitionParameters[] tps = new TransitionParameters[]{ 
+                new TransitionParameters(0.9661447, 0.006205411, 0.019176495, 0.008473387),
+                new TransitionParameters(0.8382683, 0.045386146, 0.009378846, 0.106966725),
+                new TransitionParameters(0.7079446, 0.010019695, 0.014392839, 0.267642900),
+                new TransitionParameters(0.7023541, 0.008000416, 0.014005718, 0.275639804),
+                new TransitionParameters(0.8072699, 0.021285437, 0.016855127, 0.154589508),
+                new TransitionParameters(0.8733340, 0.010229981, 0.014839555, 0.101596418),
+                new TransitionParameters(0.9580190, 0.012116631, 0.022381979, 0.007482362),
+                new TransitionParameters(0.9657584, 0.008621670, 0.021174486, 0.004445403),
+                new TransitionParameters(0.9445740, 0.009206869, 0.038266323, 0.007952813)
+            };
+            ReadTemplatePair rtp = new ReadTemplatePair (read, tpl);
+            ParameterSet ps = new ParameterSet ();
+            ps.Epsilon = 0.002552835;
+            rtp.FillMatrices (tps, ps);
+            var ll1 = rtp.CurrentLikelihood;
+            Console.WriteLine (rtp.CurrentLikelihood);
+            rtp = new ReadTemplatePair (read, "CTGGGGGAT");
+            rtp.FillMatrices (tps, ps);
+            var ll2 = rtp.CurrentLikelihood;
+            Console.WriteLine (ll1 - ll2);
+
+
+        }
 
         [Test()]
         public void TestMultiReadMutationScorer()

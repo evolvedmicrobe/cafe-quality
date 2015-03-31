@@ -81,8 +81,7 @@ namespace ConstantModelOptimizer
             }
             
         }
-        public double FillMatrices(ParameterSet pars)
-        {
+        public double FillMatrices(ParameterSet pars)  {
             // Fill transition probabilites appropriate for each matrix position
             FillTransitionParameters (pars);
             // clean house to be safe
@@ -99,6 +98,61 @@ namespace ConstantModelOptimizer
            
             fillForwardMatrixPosition (Read.Length - 1, Template.Length - 1, pars);
                   
+
+
+            // FILL REVERSE MATRIX
+            var endi = Read.Length - 2;
+            var endj = Template.Length - 2;
+            for (int i = endi; i >= 0; i--) {
+                for (int j = endj; j >= 0; j--) {
+                    if (i == 2 && j == 1) {
+                        //    Console.WriteLine("doh!");
+                    }
+                    fillReverseMatrixPosition (i, j, pars);    
+                }
+            }
+            //DumpMatrices ();
+
+
+            // I don't ever save the last match value so need to add it here
+
+            // Set the likelihood
+            var likelihood = StateProbabilities.Forward.Last ().Last ().Total;
+            CurrentLikelihood = likelihood;
+            //Console.WriteLine (likelihood);
+            // Now check for alpha beta mismatch error
+            var misMatchEps = 1e-6;
+            var lastMatch = Read [0] == Template [0] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
+            var beta_likelihood = (StateProbabilities.Reverse [0] [0].Total + lastMatch);
+            if (Math.Abs (CurrentLikelihood - beta_likelihood) > misMatchEps) {
+                throw new Exception ("Alpha-Beta mismatch error");
+            }
+            return CurrentLikelihood;
+        }
+
+        /// <summary>
+        ///  Temporary method to check calculation.
+        /// </summary>
+        /// <returns>The matrices.</returns>
+        /// <param name="trans">Trans.</param>
+        /// <param name="pars">Pars.</param>
+        public double FillMatrices(TransitionParameters[] trans, ParameterSet pars)
+        {
+            CurrentTransitionParameters = trans;
+            // clean house to be safe
+            StateProbabilities.Clear();
+
+            //We force ourselves to start and end in a match here
+
+            // FILL THE FORWARD MATRICES
+            for (int i = 0; i < (Read.Length-1); i++) {
+                for (int j = 0; j < (Template.Length-1); j++) {
+                    fillForwardMatrixPosition(i,j, pars);    
+                }
+            }
+
+            fillForwardMatrixPosition (Read.Length - 1, Template.Length - 1, pars);
+
 
 
             // FILL REVERSE MATRIX
