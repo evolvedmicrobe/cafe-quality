@@ -67,6 +67,7 @@ namespace ConsensusCore {
 
         // these help with scaling
         double Max() const;
+        double Sum() const;
         void Normalize(double v);
 
     public:

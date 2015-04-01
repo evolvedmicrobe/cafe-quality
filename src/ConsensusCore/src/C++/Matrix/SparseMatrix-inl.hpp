@@ -100,11 +100,8 @@ namespace ConsensusCore {
     {
         assert(columnBeingEdited_ == j);
         usedRanges_[j] = Interval(usedRowsBegin, usedRowsEnd);
-        double s = columns_[j]->Max();
-        if (s == 0.0) s = 1.0;
-        columns_[j]->Normalize(s);
-        scalars_[j] = s;
         DEBUG_ONLY(CheckInvariants(columnBeingEdited_));
+        Normalize(j);
         columnBeingEdited_ = -1;
     }
 
@@ -135,7 +132,7 @@ namespace ConsensusCore {
         }
         else
         {
-            return (*columns_[j])(i) * scalars_[j];
+            return (*columns_[j])(i);
         }
     }
 
@@ -167,4 +164,48 @@ namespace ConsensusCore {
         DEBUG_ONLY(CheckInvariants(j);)
     }
 
+    inline double
+    SparseMatrix::GetScale(int j) const
+    {
+        return scalars_[j];
+    }
+
+    inline double
+    SparseMatrix::GetLogProdScales(int s, int e) const
+    {
+        double r = 0.0;
+
+        for (int j = s; j < e; ++j)
+        {
+            r += std::log(GetScale(j));
+        }
+
+        return r;
+    }
+
+    inline double
+    SparseMatrix::GetLogProdScales() const
+    {
+        return GetLogProdScales(0, Columns());
+    }
+
+    inline void
+    SparseMatrix::Normalize(int j, double c)
+    {
+        if (c != 0.0 && c != 1.0)
+        {
+            columns_[j]->Normalize(c);
+        }
+        else
+        {
+            c = 1.0;
+        }
+        scalars_[j] = c;
+    }
+
+    inline void
+    SparseMatrix::Normalize(int j)
+    {
+        Normalize(j, columns_[j]->Max());
+    }
 }

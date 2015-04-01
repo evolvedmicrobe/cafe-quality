@@ -24,6 +24,9 @@ $(CXX_OBJS): $(OBJDIR)/%.o: %.cpp
 
 -include $(CXX_OBJS:.o=.d)
 
+mattest: $(CXX_LIB)
+	$(CXX_STRICT) -Wno-unused-variable $(COVERAGE) $< -o $@ -L$(dir $(CXX_LIB)) -lConsensusCore
+
 tests: $(CXX_LIB)
 	make -f make/Tests.mk run-tests
 

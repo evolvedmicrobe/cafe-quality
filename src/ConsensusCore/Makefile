@@ -53,10 +53,11 @@ test-csharp:
 test: lib
 	@make -f make/Tests.mk
 
+mattest: lib
+	@make -f make/Cpp.mk mattest
+
 check: test
 tests: test
-
-
 
 
 #

@@ -17,7 +17,12 @@ namespace ConsensusCore {
     { \
         if (!(fabs(1 - o/e) < 1e-5)) \
             std::cerr << "failed assert at " __FILE__ ":" << __LINE__ << "! o = " << o << ", e = " << e << std::endl; \
+        else \
+            std::cerr << "passed test at " __FILE__ ":" << __LINE__ << std::endl; \
     }
+
+    typedef SparseSimpleQvSumProductMutationScorer ScorerType;
+    typedef typename ScorerType::RecursorType RecursorType;
 
     int  MatrixTester::TestMutationScorer()
     {
@@ -30,12 +35,9 @@ namespace ConsensusCore {
         // Create a mutation scorer to test values
         TemplateParameterPair tpp("ACGTCGT", ctx_params);
         QvEvaluator qv(r, tpp, mp);
-        SimpleQvSumProductRecursor bo(BandingOptions(4, 12.5));
-        SimpleQvSumProductMutationScorer t(qv, bo);
+        RecursorType bo(BandingOptions(4, 12.5));
+        ScorerType t(qv, bo);
         double score = t.Score();
-
-        t.DumpAlphaMatrix();
-        t.DumpBetaMatrix();
 
         ASSERT(score, -4.94222030733063);
         
@@ -44,12 +46,11 @@ namespace ConsensusCore {
         auto new_score = t.ScoreMutation(m,ctx_params);
         ASSERT(new_score, -0.584415070238446);
         
-        
         // Check the CC Context
         TemplateParameterPair tpp2("ACCTCGT", ctx_params);
         QvEvaluator qv2(r, tpp2, mp);
-        SimpleQvSumProductRecursor bo2(BandingOptions(4, 12.5));
-        SimpleQvSumProductMutationScorer t2(qv2, bo2);
+        RecursorType bo2(BandingOptions(4, 12.5));
+        ScorerType t2(qv2, bo2);
         double score2 = t2.Score();
         ASSERT(score2, -10.4362503093273);
         
@@ -276,13 +277,13 @@ namespace ConsensusCore {
         Mutation m(MutationType::INSERTION, 202, 'C');
         auto ress = scorer.Score(m);
 
-        std::cout<<result3;
+        std::cout << ress;
         return 0;
     }
 }
 
 int main() {
     ConsensusCore::MatrixTester mt;
-    std::cout << mt.TestMutationScorer();
-    std::cout << mt.TestMultiReadScorer();
+    return mt.TestMutationScorer();
+    // std::cout << mt.TestMultiReadScorer();
 }

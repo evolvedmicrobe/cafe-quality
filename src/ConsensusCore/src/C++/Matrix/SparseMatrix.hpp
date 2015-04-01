@@ -78,6 +78,14 @@ namespace ConsensusCore {
         void Set(int i, int j, double v);
         void ClearColumn(int j);
 
+    public: // Scaling and normalization
+        double GetScale(int j) const;
+        double GetLogProdScales(int s, int e) const;
+        double GetLogProdScales() const;
+
+    private:
+        void Normalize(int j, double c);
+        void Normalize(int j);
 
     public:
         // Method SWIG clients can use to get a native matrix (e.g. Numpy)

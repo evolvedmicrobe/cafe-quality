@@ -359,7 +359,9 @@ namespace ConsensusCore {
             v = C::Combine(v, thisMoveScore);
         }
 
-        return v;
+        return ( std::log(v)
+               + alpha.GetLogProdScales(0, alphaColumn)
+               + beta.GetLogProdScales(betaColumn, beta.Columns()) );
     }
 
 

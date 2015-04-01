@@ -86,7 +86,7 @@ namespace ConsensusCore
     double
     MutationScorer<R>::Score() const
     {
-        return std::log((*beta_)(0, 0));
+        return std::log((*beta_)(0, 0)) + beta_->GetLogProdScales();
     }
 
     template<typename R>
@@ -98,12 +98,18 @@ namespace ConsensusCore
         for(int i=0; i< mat.Rows(); i++)
         {
             myfile << mat(i,0);
-            for(int j=0; j<mat.Columns(); j++)
+            for(int j=1; j<mat.Columns(); j++)
             {
                 myfile << "," << mat(i,j);
             }
-            myfile << "\n";
+            myfile << std::endl;
         }
+        myfile << mat.GetScale(0);
+        for (int j=1; j < mat.Columns(); j++)
+        {
+            myfile << "," << mat.GetScale(j);
+        }
+        myfile << std::endl;
         myfile.close();
     }
 
@@ -167,16 +173,16 @@ namespace ConsensusCore
     double
     MutationScorer<R>::ScoreMutation(const Mutation& m, const ContextParameters& ctx_params) const
     {
-        
+
         if(fabs(m.LengthDiff()) > 1) {
             throw new InvalidInputError("Only mutations of size 1 allowed");
         }
-        
+
         int betaLinkCol = 1 + m.End();
         int absoluteLinkColumn = 1 + m.End() + m.LengthDiff();
         TemplateParameterPair old_Tpl = evaluator_->Template();
         TemplateParameterPair new_tpl = ApplyMutation(m, old_Tpl, ctx_params);
-     
+
         double score;
 
         bool atBegin = (m.Start() < 3);
@@ -210,6 +216,7 @@ namespace ConsensusCore
                                              *extendBuffer_, extendLength,
                                              *beta_, betaLinkCol,
                                              absoluteLinkColumn);
+            score += alpha_->GetLogProdScales(0, extendStartCol);
         }
         else if (!atBegin && atEnd)
         {
@@ -223,9 +230,9 @@ namespace ConsensusCore
 
             recursor_->ExtendAlpha(*evaluator_, *alpha_,
                                    extendStartCol, *extendBuffer_, extendLength);
-            score = (*extendBuffer_)(evaluator_->ReadLength(), extendLength - 1);
-
-
+            score = ( std::log((*extendBuffer_)(evaluator_->ReadLength(), extendLength - 1))
+                    + alpha_->GetLogProdScales(0, extendStartCol)
+                    + extendBuffer_->GetLogProdScales(0, extendLength) );
         }
         else if (atBegin && !atEnd)
         {
@@ -240,13 +247,15 @@ namespace ConsensusCore
             recursor_->ExtendBeta(*evaluator_, *beta_,
                                   extendLastCol, *extendBuffer_, extendLength,
                                   m.LengthDiff());
-            score = (*extendBuffer_)(0, 0);
+            score = ( std::log((*extendBuffer_)(0, 0))
+                    + beta_->GetLogProdScales(extendLastCol + 1, evaluator_->TemplateLength())
+                    + extendBuffer_->GetLogProdScales(0, extendLength) );
         }
         else
         {
             assert(atBegin && atEnd);
             // This should basically never happen...
-            
+
             //
             // Just do the whole fill
             //
@@ -254,7 +263,8 @@ namespace ConsensusCore
                               new_tpl.tpl.length() + 1);
             evaluator_->Template(new_tpl);
             recursor_->FillAlpha(*evaluator_, MatrixType::Null(), alphaP);
-            score = alphaP(evaluator_->ReadLength(), new_tpl.tpl.length());
+            score = ( std::log(alphaP(evaluator_->ReadLength(), new_tpl.tpl.length()))
+                    + alphaP.GetLogProdScales() );
         }
 
         // Restore the original template.
@@ -262,7 +272,7 @@ namespace ConsensusCore
 
         // if (fabs(score - Score()) > 50) { Breakpoint(); }
 
-        return std::log(score);
+        return score;
     }
 
 

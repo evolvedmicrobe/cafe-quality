@@ -98,6 +98,7 @@ namespace ConsensusCore {
         assert(columnBeingEdited_ == j);
         usedRanges_[j] = Interval(usedRowsBegin, usedRowsEnd);
         DEBUG_ONLY(CheckInvariants(columnBeingEdited_));
+        Normalize(j);
         columnBeingEdited_ = -1;
     }
 
@@ -159,4 +160,29 @@ namespace ConsensusCore {
         DEBUG_ONLY(CheckInvariants(j);)
     }
 
+    inline double
+    DenseMatrix::GetScale(int j) const
+    {
+        return 1.0;
+    }
+
+    inline double
+    DenseMatrix::GetLogProdScales() const
+    {
+        return 0.0;
+    }
+
+    inline double
+    DenseMatrix::GetLogProdScales(int s, int e) const
+    {
+        return 0.0;
+    }
+
+    inline void
+    DenseMatrix::Normalize(int j, double c)
+    {}
+
+    inline void
+    DenseMatrix::Normalize(int j)
+    {}
   }
