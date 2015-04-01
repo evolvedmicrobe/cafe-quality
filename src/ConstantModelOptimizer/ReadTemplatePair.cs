@@ -81,10 +81,24 @@ namespace ConstantModelOptimizer
             }
             
         }
+
+
         public double FillMatrices(ParameterSet pars)
         {
+            return FillMatrices (null, pars);
+        }
+
+        public double FillMatrices(TransitionParameters[] trans, ParameterSet pars)
+        {
             // Fill transition probabilites appropriate for each matrix position
-            FillTransitionParameters (pars);
+            if (trans == null)
+                FillTransitionParameters (pars);
+            else
+                CurrentTransitionParameters = trans;
+
+            if (CurrentTransitionParameters.Length != Template.Length - 1)
+                throw new ArgumentException ("invalid transition parameters for template!");
+
             // clean house to be safe
             StateProbabilities.Clear();
 
@@ -139,11 +153,17 @@ namespace ConstantModelOptimizer
 
         public void DumpMatrices(string filename)
         {
+            System.IO.StreamWriter sw = new System.IO.StreamWriter (filename);
+            DumpMatrices (sw);
+            sw.Close ();
+        }
+
+        public void DumpMatrices(System.IO.TextWriter sw)
+        {
             Func<double, string> format = delegate(double x) {
                 return Double.IsNegativeInfinity(x) ? "     -inf" : String.Format ("{0,9:0.0000}", x);
             };
 
-            System.IO.StreamWriter sw = new System.IO.StreamWriter (filename);
             List<Func<LatentStates, double>> grabbers = new List<Func<LatentStates, double>> () { 
                 //z => z.Match,
                 //z => z.Stick,
@@ -157,20 +177,18 @@ namespace ConstantModelOptimizer
                 sw.WriteLine ("alpha:");
                 var mat = StateProbabilities.Forward;
                 for (int i = 0; i < mat.Length; i++) {
-                var cur = String.Join (" ", mat [i].Select (x => format(v(x))).ToArray ());
+                    var cur = String.Join (" ", mat [i].Select (x => format(v(x))).ToArray ());
                     sw.WriteLine (cur);
                 }
                 sw.WriteLine ();
                 sw.WriteLine ("beta:");
                 mat = StateProbabilities.Reverse;
                 for (int i = 0; i < mat.Length; i++) {
-                var cur = String.Join (" ", mat [i].Select (x => format(v(x))).ToArray ());
+                    var cur = String.Join (" ", mat [i].Select (x => format(v(x))).ToArray ());
                     sw.WriteLine (cur);
                 }
                 sw.WriteLine ();
             }
-
-             sw.Close();
         }
 
         private static TransitionParameters JustMatch = new TransitionParameters() {

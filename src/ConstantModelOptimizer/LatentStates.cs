@@ -63,6 +63,11 @@ namespace ConstantModelOptimizer
             Dark -= val;
             Total = Double.NegativeInfinity;
         }
+
+		public override string ToString ()
+		{
+			return String.Format ("LatentStates({0}, {1}, {2}, {3})", Math.Exp(Match), Math.Exp(Branch), Math.Exp(Stick), Math.Exp(Dark));
+		}
     }
 }
 
