@@ -6,8 +6,7 @@
 //  Copyright (c) 2015 Pacific Biosciences. All rights reserved.
 //
 
-#ifndef __ConsensusCoreXCode__MatrixTester__
-#define __ConsensusCoreXCode__MatrixTester__
+#pragma once
 
 #include <stdio.h>
 #include "Quiver/QuiverConfig.hpp"
@@ -17,6 +16,6 @@ namespace ConsensusCore {
     class MatrixTester {
     public:
         int TestMutationScorer();
+        int TestMultiReadScorer();
     };
 }
-#endif /* defined(__ConsensusCoreXCode__MatrixTester__) */

@@ -122,6 +122,23 @@ namespace ConstantModelOptimizer
         private double log_match, log_branch, log_stick, log_dark, log_merge;
         private double match, branch, stick, dark, merge;
 
+        /// <summary>
+        /// Special constructor to match the one used in libunitem.
+        /// </summary>
+        /// <param name="match">Match.</param>
+        /// <param name="branch">Branch.</param>
+        /// <param name="stick">Stick.</param>
+        /// <param name="deletion">Deletion.</param>
+        public TransitionParameters(double match, double branch, double stick, double deletion) {
+            this.Match = match;
+            this.Branch = branch;
+            this.Stick = stick;
+            this.Dark = deletion;
+            this.Merge = 0;
+        }
+
+        public TransitionParameters() {}
+
         public TransitionParameters MakeCopy()
         {
             var ntp = new TransitionParameters ();

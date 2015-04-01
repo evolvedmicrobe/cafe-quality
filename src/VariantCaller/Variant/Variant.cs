@@ -16,7 +16,7 @@ namespace VariantCaller
         /// <summary>
         /// What reference genome is this connected to?
         /// </summary>
-        public Sequence RefSeq { get; protected set; }
+        public ISequence RefSeq { get; protected set; }
 
         /// <summary>
         /// SNP, indel, etc.
@@ -60,6 +60,11 @@ namespace VariantCaller
         /// </summary>
         public bool AtEndOfAlignment { get; protected set; }
 
+        /// <summary>
+        /// The QV value for this call, if it exists.
+        /// </summary>
+        /// <value>The Q.</value>
+        public int QV {get; set;}
 
         /// <summary>
         /// Gets the reference bases at variant position.
@@ -72,7 +77,7 @@ namespace VariantCaller
             }
         }
 
-        public Variant(int position, Sequence reference, bool atAlignmentEnd = false)
+        public Variant(int position, ISequence reference, bool atAlignmentEnd = false)
         {
             StartPosition = position;
             RefSeq = reference;

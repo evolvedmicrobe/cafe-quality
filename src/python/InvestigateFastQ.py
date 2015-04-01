@@ -1,3 +1,4 @@
+# Script to examine HP errors in the HP template
 from Bio import SeqIO
 import glob
 fs = glob.glob("/Users/nigel/git/cafe-quality/src/PacBio.ConsensusTools/bin/Release/Test/m141008*.ccs.fastq")
@@ -36,7 +37,7 @@ reverses  = [["A", 36, 5],
 
 results = []
 for fname in fs:
-    data = list(SeqIO.parse("/Users/nigel/git/cafe-quality/NotTracked/AssessQuality/Phase1.fastq", "fastq"))
+    data = list(SeqIO.parse(fname, "fastq"))
     hp = [x for x in data if abs(len(x) - 137) < 5]
     for x in hp:
         seq = str(x.seq)

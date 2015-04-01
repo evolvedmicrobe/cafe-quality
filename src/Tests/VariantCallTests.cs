@@ -37,7 +37,7 @@ CACCCTCATGTTCATACACCTATCCCCCATTCTCCTCCTATCCCTCAACCCCGACATCAT".Replace("\n","").R
 
             var r = new Reference(seq1);
             var aln = r.AlignSequence(seq2);
-            var variants = VariantCaller.VariantCaller.CallVariants(aln[0], seq1);
+            var variants = VariantCaller.VariantCaller.CallVariants(aln[0], seq1, seq2);
             Assert.AreEqual(variants.Count, 4); // Last SNP isn't called.
 
             var firstIndel = variants[0] as IndelVariant;

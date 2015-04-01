@@ -26,7 +26,7 @@ namespace VariantCaller
         /// <param name="position">0-based position on reference.</param>
         /// <param name="altAllele">The variant present (A, C, G, T)</param>
         /// <param name="reference">The Reference seqeunce.</param>
-        public SNPVariant(int position, char altAllele, Sequence reference) :
+        public SNPVariant(int position, char altAllele, ISequence reference) :
             base (position, reference)
         {
             AltBP = altAllele;

@@ -42,7 +42,7 @@ type VariantWriter (fname:string) =
 
     let sw = new StreamWriter(fname)        
 
-    do sw.WriteLine("Ref,Pos,zmw,type,length,homopolymerLength,homopolymerChar,indelSize,indeltype")
+    do sw.WriteLine("Ref,Pos,zmw,type,length,homopolymerLength,homopolymerChar,indelSize,indeltype,QV")
         
     member this.Write (read : CCSRead) (variant : Variant )= 
 
@@ -72,7 +72,7 @@ type VariantWriter (fname:string) =
                         | :? SNPVariant as snp -> "N"
                         | _ -> failwith "type miss"
 
-        let toWrite : Object[] = [| variant.RefSeq.ID; variant.StartPosition; read.ZMWnumber; vtype; read.Seq.Count; homopolymerLength; homoChar; indelLength; indeltype|]
+        let toWrite : Object[] = [| variant.RefSeq.ID; variant.StartPosition; read.ZMWnumber; vtype; read.Seq.Count; homopolymerLength; homoChar; indelLength; indeltype; variant.QV|]
 
         let toOut = join toWrite
         sw.WriteLine(toOut)
@@ -92,7 +92,7 @@ let outputRead (vwriter:VariantWriter) (cwriter:CCSWriter) (read:CCSRead) =
         if alns.Length  = 0 then
             cwriter.Output read vempty else
             let best = alns |> Seq.maxBy (fun z -> z.Score)        
-            let variants = VariantCaller.CallVariants (best, read.AssignedReference.RefSeq)
+            let variants = VariantCaller.CallVariants (best, read.AssignedReference.RefSeq, read.Seq)
             cwriter.Output read variants
             variants |> Seq.iter (fun v -> vwriter.Write read v)
 

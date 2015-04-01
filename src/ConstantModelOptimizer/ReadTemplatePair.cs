@@ -82,7 +82,6 @@ namespace ConstantModelOptimizer
             
         }
 
-
         public double FillMatrices(ParameterSet pars)
         {
             return FillMatrices (null, pars);

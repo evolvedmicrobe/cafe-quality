@@ -37,7 +37,7 @@ namespace VariantCaller
         public readonly int ZMWnumber;
         public readonly string Movie;
         public List<CCSSubRead> SubReads;
-        public Sequence Seq;
+        public ISequence Seq;
         public Zmw ZMW;
         public string OriginallyRevComped;
         
@@ -50,7 +50,7 @@ namespace VariantCaller
         /// "m141008_060349_42194_c100704972550000001823137703241586_s1_p0/43/ccs"
         /// </summary>
         /// <param name="read">Read.</param>
-        public CCSRead(Sequence read)
+        public CCSRead(ISequence read)
         {
             //m141008_060349_42194_c100704972550000001823137703241586_s1_p0/43/ccs
             string[] sp = new string[3];

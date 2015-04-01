@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using Bio;
 using Bio.IO.FastA;
+using Bio.IO.FastQ;
 using PacBio.Data;
 
 namespace VariantCaller
@@ -74,9 +75,9 @@ namespace VariantCaller
 
             var ccs_reads_maker = Task<List<CCSRead>>.Factory.StartNew( () =>
                 {
-                    return ccsReads.SelectMany(p => (p.EndsWith(".gz") ? (new FastAZippedParser(p)) : (new FastAParser(p)))
+                    return ccsReads.SelectMany(p => (p.EndsWith(".gz") ? (new FastQZippedParser(p)) : (new FastQParser(p)))
                                                 .Parse()
-                                                .Select(x => new CCSRead((Sequence)x)))
+                                                .Select(x => new CCSRead(x)))
                             .ToList();
                 });
             // Start loading the subreads

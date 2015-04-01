@@ -512,8 +512,19 @@ namespace PacBio.Consensus
                     scorer.ApplyMutations(muts);
                 i++;
             }
-
-            iterationsTaken = i;
+            //var lastScore = scorer.BaselineScore ();
+            /* var mutations = new List<Mutation> { new Mutation () {
+                    TemplatePosition = 42,
+                    Type = MutationType.DELETION,
+                    Base = '-'
+                },
+                new Mutation () { TemplatePosition = 38, Type = MutationType.INSERTION, Base = 'G' }
+            };
+            scorer.ApplyMutations (mutations);
+            var newScore = scorer.BaselineScore ();
+            Console.WriteLine (lastScore - newScore);
+*/
+iterationsTaken = i;
             return new Tuple<TrialTemplate, List<MutationScore>>(tpl, allScores);
         }
 
@@ -715,6 +726,10 @@ namespace PacBio.Consensus
             var deleteScores = new MutationScore[insert.Length];
             var insertScores = new MutationScore[insert.Length,4];
             var substitutionScores = new MutationScore[insert.Length,4];
+
+            //var icare = score.Where (x => x.Mutation.TemplatePosition > 37 && x.Mutation.TemplatePosition < 42).ToList();
+            //score.Sort ((x, y) => -x.Score.CompareTo (y.Score));
+            //Console.WriteLine (icare);
 
             // Distribute the Mutation scores by mutation type and base, aligned with the insert sequence
             foreach (var msc in score)

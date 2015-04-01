@@ -436,6 +436,9 @@ namespace Bio.Algorithms.SuffixTree
             {
                 throw new ArgumentOutOfRangeException(Properties.Resource.MinLengthMustBeGreaterThanZero);
             }
+            if (searchSequence is QualitativeSequence) {
+                searchSequence = new Bio.Sequence (searchSequence);
+            }
 
             if (!(searchSequence is Sequence))
             {

@@ -17,6 +17,9 @@
 
 #define NEG_INF - INFINITY
 
+#if YEPP
+#include "Transcendentals.h"
+#endif
 
 const double log_one_third = -1.098612289;
 
@@ -36,7 +39,12 @@ inline double logadd(double lna, double lnb)
         return  max_val;
     }
     min_val -= max_val;
+    #if YEPP
+    auto sum = yepBuiltin_Exp_64f_64f(min_val) + 1.0;
+    #else
     auto sum = std::exp(min_val) + 1.0;
+    #endif
+    
     sum = std::log(sum) + max_val;
     return sum;
 }
