@@ -248,7 +248,7 @@ namespace ConsensusCore
                                   extendLastCol, *extendBuffer_, extendLength,
                                   m.LengthDiff());
             score = ( std::log((*extendBuffer_)(0, 0))
-                    + beta_->GetLogProdScales(extendLastCol + 1, evaluator_->TemplateLength())
+                    + beta_->GetLogProdScales(extendLastCol + 1, beta_->Columns())
                     + extendBuffer_->GetLogProdScales(0, extendLength) );
         }
         else
