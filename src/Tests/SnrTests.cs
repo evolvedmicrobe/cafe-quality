@@ -15,8 +15,8 @@ namespace Tests
        
         [Test()]
         public void TestWeirdRead() {
-            var read = "CTGGGGGAT";
-            var tpl =  "CTGGGGAT";
+            var read = "CTGGGGAT";
+            var tpl =  "CTGGGGGAT";
             var StateProbabilities = new DynamicProgrammingMatrixPair(read,tpl);
             TransitionParameters[] tps = new TransitionParameters[]{ 
                 new TransitionParameters(0.9661447, 0.006205411, 0.019176495, 0.008473387),
@@ -29,16 +29,16 @@ namespace Tests
                 new TransitionParameters(0.9657584, 0.008621670, 0.021174486, 0.004445403),
                 new TransitionParameters(0.9445740, 0.009206869, 0.038266323, 0.007952813)
             };
-            ReadTemplatePair rtp = new ReadTemplatePair (read, tpl);
+            ReadTemplatePair rtp = new ReadTemplatePair ( read, tpl);
             ParameterSet ps = new ParameterSet ();
             ps.Epsilon = 0.002552835;
             rtp.FillMatrices (tps, ps);
-            var ll1 = rtp.CurrentLikelihood;
+            var incorrect = rtp.CurrentLikelihood;
             Console.WriteLine (rtp.CurrentLikelihood);
-            rtp = new ReadTemplatePair (read, "CTGGGGGAT");
+            rtp = new ReadTemplatePair (tpl, tpl);
             rtp.FillMatrices (tps, ps);
-            var ll2 = rtp.CurrentLikelihood;
-            Console.WriteLine (ll1 - ll2);
+            var correct = rtp.CurrentLikelihood;
+            Console.WriteLine (incorrect - correct);
 
 
         }
