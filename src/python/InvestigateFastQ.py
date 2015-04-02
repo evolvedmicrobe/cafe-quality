@@ -1,8 +1,9 @@
 # Script to examine HP errors in the HP template
 from Bio import SeqIO
+from Bio import pairwise2
 import glob
 fs = glob.glob("/Users/nigel/git/cafe-quality/src/PacBio.ConsensusTools/bin/Release/Test/m141008*.ccs.fastq")
-
+fs = glob.glob("/Users/nigel/git/cafe-quality/NotTracked/fastq/m141008*.ccs.fastq")
 
 
 def FindAcc(seqFull, bp, start, length):
@@ -42,14 +43,14 @@ for fname in fs:
     for x in hp:
         seq = str(x.seq)
         toUse = reverses
-        if seq.count("TTTTTTTT") > 0:
+        if seq.count("TTTTTTT") > 0:
             toUse = forwards
         for f in toUse:        
             res = FindAcc(x, f[0], f[1], f[2])
             if res:
                 results.append(res)
 
-of = open("/Users/nigel/git/cafe-quality/NotTracked/qv_compare.csv", 'w')
+of = open("/Users/nigel/git/cafe-quality/NotTracked/qv_compare_master.csv", 'w')
 of.write("BP,Size,QV,Correct,ZMW\n")
 for r in results:
     of.write(",".join([str(x) for x in r]) + "\n")
