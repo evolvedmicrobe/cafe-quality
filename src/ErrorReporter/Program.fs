@@ -9,9 +9,9 @@ open System.Linq
 
 type CCSWriter (fname:string) = 
     let sw = new StreamWriter(fname)
-    do sw.WriteLine("Movie,ZMW,Reference,NumSubReads,NumErrors,Length,NumIndelErrors,NumSNPErrors")
+    do sw.WriteLine("Movie,ZMW,Reference,NumErrors,Length,NumIndelErrors,NumSNPErrors")
     member this.Output (read : CCSRead) ( vars: List<Variant>) = 
-        if read.AssignedReference <> null && read.SubReads <> null then 
+        if read.AssignedReference <> null then 
             let indel_cnt = vars |>  Seq.where (fun u  -> u.Type = VariantType.INDEL) |> Seq.length
             let snp_cnt = vars |> Seq.where (fun u -> u.Type = VariantType.SNP) |> Seq.length
 
@@ -22,7 +22,6 @@ type CCSWriter (fname:string) =
             let toOut = [| read.Movie;
                            read.ZMWnumber.ToString();
                            read.AssignedReference.RefSeq.ID;
-                           read.SubReads.Count.ToString();
                            vars.Count.ToString();
                            read.Seq.Count.ToString();
                            indel_cnt.ToString();
@@ -84,17 +83,22 @@ let mutable totWithVariants = 0;
 
 let vempty = new List<Variant>()
 let mutable outCnt = 0
+let mutable skipCnt = 0
 let outputRead (vwriter:VariantWriter) (cwriter:CCSWriter) (read:CCSRead) =
     if read.AssignedReference <> null then
         outCnt <- outCnt + 1
         if outCnt % 50 = 0 then Console.WriteLine ("Outputting read number: " + outCnt.ToString())
         let alns = read.AssignedReference.AlignSequence (read.Seq) |> Seq.toArray
         if alns.Length  = 0 then
-            cwriter.Output read vempty else
-            let best = alns |> Seq.maxBy (fun z -> z.Score)        
-            let variants = VariantCaller.CallVariants (best, read.AssignedReference.RefSeq)
-            cwriter.Output read variants
-            variants |> Seq.iter (fun v -> vwriter.Write read v)
+            /// I used to output a "no variant" report if the read did not align. 
+            /// This was to make reporting available for all reads, but is now deeply problematic if 
+            // not accounted for (it looks like the read was perfect, but it didn't even align....)
+            // cwriter.Output read vempty else 
+            skipCnt <- skipCnt + 1 else
+                let best = alns |> Seq.maxBy (fun z -> z.Score)        
+                let variants = VariantCaller.CallVariants (best, read.AssignedReference.RefSeq)
+                cwriter.Output read variants
+                variants |> Seq.iter (fun v -> vwriter.Write read v) 
 
 
 [<EntryPoint>]
@@ -110,6 +114,7 @@ let main args =
     data.CCSReads  |> Seq.iter outputter
     sw.Stop()
     printfn "%f" sw.Elapsed.TotalMilliseconds
+    printfn "Number of reads assigned but not aligned: %d" skipCnt
     cwriter.Close
     vwriter.Close
     Console.WriteLine("Success");
