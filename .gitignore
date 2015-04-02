@@ -33,6 +33,7 @@ Bio.csproj.FilesWrittenAbsolute.txt
 */bin/*
 src/ConsensusCore/Debug/*
 */Debug/*
+src/Tests/bin/*
 
 # Git's list
 # Compiled Object files
