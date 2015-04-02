@@ -24,7 +24,6 @@
     <EnvironmentVariables>
       <EnvironmentVariables>
         <Variable name="DYLD_LIBRARY_PATH" value="/Users/nigel/analysisPrograms/hdf5/" />
-        <Variable name="MONO_LOG_LEVEL" value="debug" />
       </EnvironmentVariables>
     </EnvironmentVariables>
   </PropertyGroup>

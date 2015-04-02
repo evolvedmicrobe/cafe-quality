@@ -1,4 +1,6 @@
 ﻿module HPLooker
+(*
+
 (* Script to deep dive on the 5 homopolymer error seen so frequently here, and to output covariates related to those with and without errors. *)
 open System
 open System.IO
@@ -84,17 +86,17 @@ let cntHPEvents (read: ReadFromZMW)  =
                                 i := !i + 1
                             yield (start, !cnt) else i := !i + 1 } |> Seq.toList
     if groups.Length = 0 then
-        {Length = -99; MergeSpikes = -999; DeletionTags = -999} else
+        {Length = -99; MergeSpikes = -999; DeletionTags = -999; ErrorProb = -99.0} else
         let (startHP, Length) = groups |> Seq.maxBy snd
         // Now to find where the homopolymer is inside sequence
         let hpRange = seq {startHP .. (startHP + Length - 1) } 
-        if (Seq.max hpRange) > read.BaseCalls.Length then failwith "Mother fucker"
+        if (Seq.max hpRange) > read.BaseCalls.Length then failwith "difficulty"
         let spikeCount =    hpRange |> 
                                 Seq.map (fun i -> read.BaseCalls.[i] = bp && read.MergeQV.[i] > (byte 70)) |> 
                                 Seq.where id |> Seq.length
         let delTagCount = hpRange |> Seq.where (fun j -> (j+1) < read.BaseCalls.Length && read.DeletionTag.[j+1] = (byte)bp) |> Seq.length
-        let expectedErrors = hpRange |> Seq.map (fun x -> convertToProb(read.MergeQV[x]) + convertToProb(read.DeletionQV[x]) 
-        {Length = Length; MergeSpikes = spikeCount; DeletionTags = delTagCount}
+        //let expectedErrors = hpRange |> Seq.map (fun x -> convertToProb(read.MergeQV.[x]) + convertToProb(read.DeletionQV[x])) 
+        {Length = Length; MergeSpikes = spikeCount; DeletionTags = delTagCount; ErrorProb = -99.0}
 
 
 (* Take a subread and only extract out the bit that matches the 5 bp homopolymer plus a window around the sides *)
@@ -243,3 +245,4 @@ let main args =
    // Now to ouptu
    Console.WriteLine("Success");
    0
+   *)
