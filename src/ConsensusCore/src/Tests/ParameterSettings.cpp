@@ -42,27 +42,16 @@ using namespace ConsensusCore;  // NOLINT
 
 
 template<>
-QvModelParams TestingParams<QvModelParams>()
+ContextParameters TestingParams<ContextParameters>()
 {
-    return QvModelParams(0.f,     // Match,
-                         -10.f,   // Mismatch,
-                         -0.1f,   // MismatchS,
-                         -5.f,    // Branch,
-                         -0.1f,   // BranchS,
-                         -6.f,    // DeletionN,
-                         -7.f,    // DeletionWithTag,
-                         -0.1f,   // DeletionWithTagS,
-                         -8.f,    // Nce,
-                         -0.1f,   // NceS,
-                         -2.f,    // Merge,
-                         0.f);    // MergeS
+
+    return ContextParameters(SNR(7.0, 10.0, 11.0, 9.0));
 }
 
 template<>
 QuiverConfig TestingConfig<QuiverConfig>()
 {
-    return QuiverConfig(TestingParams<QvModelParams>(),
-                        ALL_MOVES,
+    return QuiverConfig(TestingParams<ContextParameters>(),
                         BandingOptions(4, 200),
                         -12.5);
 }

@@ -292,6 +292,57 @@ namespace ConstantModelOptimizer
             }
         }
 
+        public void SetSingleSetDefaults()
+        {
+            Epsilon = Simulator.SampleMisCallRate ();
+            if (USE_DINUCLEOTIDE_MODEL) {
+                TransitionProbabilities = new Dictionary<string, TransitionParameters> ();
+                // Random guesses that are roughly in line with what I think
+                var np = Simulator.SampleNoMergeRates ();
+                // I think merges happen roughly ~10% of the time based on Edna
+                foreach (char c in "ACGT") {
+                    var s = "N" + c.ToString ();
+                    s = String.Intern (s);
+
+                    TransitionProbabilities [s] = new TransitionParameters () {
+                        Match = np[0],
+                        Branch = np[1],
+                        Dark = np[2],
+                        Stick = np[3]
+                    };
+                    TransitionProbabilities [s].Normalize ();
+                    s = c.ToString () + c.ToString ();
+                    s = String.Intern (s);
+                    TransitionProbabilities [s] = new TransitionParameters () {
+                        Match = np[0],
+                        Branch = np[1],
+                        Dark = np[2],
+                        Stick = np[3],
+                        Merge = 0.0//np[4]
+                    };
+                    TransitionProbabilities [s].Normalize ();
+                }
+            } else {
+                var np = Simulator.SampleNoMergeRates ();
+                GlobalParametersNoMerge = new TransitionParameters () {
+                    Match = np[0],
+                    Branch = np[1],
+                    Dark = np[2],
+                    Stick = np[3]
+                };
+                GlobalParametersNoMerge.Normalize ();
+                np = Simulator.SampleMergeRates ();
+                GlobalParametersMerge = new TransitionParameters () {
+                    Match = np[0],
+                    Branch = np[1],
+                    Dark = np[2],
+                    Stick = np[3],
+                    Merge = np[4]
+                };
+                GlobalParametersMerge.Normalize ();
+            }
+        }
+
         public void SetRandomDefaults()
         {
             Epsilon = Simulator.SampleMisCallRate ();
@@ -304,7 +355,6 @@ namespace ConstantModelOptimizer
                     var s = "N" + c.ToString ();
                     s = String.Intern (s);
                     var np = Simulator.SampleNoMergeRates ();
-
                     TransitionProbabilities [s] = new TransitionParameters () {
                         Match = np[0],
                         Branch = np[1],

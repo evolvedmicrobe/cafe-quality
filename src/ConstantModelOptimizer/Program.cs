@@ -12,9 +12,10 @@ namespace ConstantModelOptimizer
     {
         public static void Main (string[] args)
         {
-            char bp = args [0] [0];
-            double snr = Convert.ToDouble(args[1]);
-            TrainSNRBin (bp, snr);
+            SimulateAndInfer ();
+            //char bp = args [0] [0];
+            //double snr = Convert.ToDouble(args[1]);
+            //TrainSNRBin (bp, snr);
         }
 
 
@@ -110,14 +111,24 @@ namespace ConstantModelOptimizer
             Console.WriteLine ("Hello World!");
             ParameterSet trueParameters;
             var data = Simulator.SimulateTemplatesAndReads (out trueParameters);
-            var scorers = data.Select( p=> new ReadTemplatePair(p.Item2,p.Item1)).ToList();
-            System.IO.StreamWriter sw = new System.IO.StreamWriter ("TrueParameters2.csv");
+            System.IO.StreamWriter sw = new System.IO.StreamWriter ("TrueParametersForwardConstant.csv");
             sw.WriteLine (trueParameters.GetCSVHeaderLine ());
             sw.WriteLine (trueParameters.GetCSVDataLine ());
-            sw.Close ();
-            //scorers = Enumerable.Range (0, 40).Select (x => new ReadTemplatePair ("AGGT", "AGT")).ToList();
+
+            //var scorers = data.Select( p=> new ReadTemplatePair(p.Item2,p.Item1)).ToList();
+            // Invert the model so it's P(T|R)
+            var scorers = data.Select( p=> new ReadTemplatePair(p.Item1,p.Item2)).ToList();
+                  //scorers = Enumerable.Range (0, 40).Select (x => new ReadTemplatePair ("AGGT", "AGT")).ToList();
             var optim = new Optimizer (scorers);
-            optim.Optimize ();
+            var fit = optim.Optimize ();
+            sw.WriteLine (fit.GetCSVDataLine());
+
+            // Now try it the other way, P(R|T)
+            scorers = data.Select( p=> new ReadTemplatePair(p.Item2,p.Item1)).ToList();
+            optim = new Optimizer (scorers);
+            fit = optim.Optimize ();
+            sw.WriteLine (fit.GetCSVDataLine());
+            sw.Close ();
 
             var ll = scorers.Sum (z => z.FillMatrices (trueParameters));
             Console.WriteLine ("Real LL = " +  ll);

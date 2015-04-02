@@ -20,7 +20,7 @@ namespace ConstantModelOptimizer
             System.IO.StreamWriter sw = new System.IO.StreamWriter("Simulations.txt");
             sw.WriteLine("Template\tRead");
             pars = new ParameterSet ();
-            pars.SetRandomDefaults ();
+            pars.SetSingleSetDefaults ();
             for(int i=0; i < 5000; i++)
             {
                 string tpl;
