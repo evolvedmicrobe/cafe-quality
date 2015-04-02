@@ -23,13 +23,16 @@ getld <-function(fname) {
   #d = d[d$PredictedRawAccuracy > .85,]
   e = nrow(d)
   print(e/s)
-  #d=d[d$Reference!="lambda_NEB3011",]
-  d=d[d$Reference=="HP.V1.02",]
+  d=d[d$Reference!="lambda_NEB3011",]
+  #d=d[d$Reference=="HP.V1.02",]
   #d = d[d$Reference=="ALL4MER.V2.01",]
   return(d)
 }
 
+#nd = getld("round1_read_combined_reads.csv")
 nd = getld("master_5ba5286_combined_reads.csv")
+
+
 d = read.csv("qv_compare.csv")
 
 d$Size= factor(d$Size)
@@ -38,7 +41,7 @@ d$Type = d$BP:d$Size
 aggregate(ZMW~BP+Size+Correct, d, FUN=length)
 
 ld = merge(d, nd, by="ZMW")
-lds = ld[ld$NumPasses>20,]
+lds = ld[ld$NumPasses>60,]
 
 head(lds)
 #ggplot(ld, aes(x=Correct, y= QV, color=Size, shape=BP))+geom_point() +geom_jitter()
@@ -51,9 +54,11 @@ dev.off()
 hist(d$QV,500)
 max(d$QV)
 
-te = d[d$Type=="G:10" & d$QV==42,]
+te = ld[ld$Type=="T:10" & ld$QV==42 & ld$NumPasses>60 & ld$NumPasses<65 & ld$MeanSNR > 10,]
 aggregate(ZMW~Correct, te, FUN=length)
-aggregate(ZMW~Correct+Type, d, FUN=length)
+aggregate(ZMW~Correct+Type, te, FUN=length)
+
+
 
 
 

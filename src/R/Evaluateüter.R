@@ -21,9 +21,9 @@ getld <-function(fname) {
   #d = d[d$PredictedRawAccuracy > .85,]
   e = nrow(d)
   print(e/s)
-  d=d[d$Reference!="lambda_NEB3011",]
+  #d=d[d$Reference!="lambda_NEB3011",]
   #d=d[d$Reference=="HP.V1.02",]
-  #d = d[d$Reference=="ALL4MER.V2.01",]
+  d = d[d$Reference=="ALL4MER.V2.01",]
   #d = d[d$Referend=="NOHP.V1.01"]
   d$Reference=factor(d$Reference)
   return(d)
@@ -59,12 +59,14 @@ cd$PredQV = sapply((1-cd$PredictedCCSAccuracy),ph)
 cd$ActualQV = sapply(cd$ErrorRate,ph)
 
 ## Make a quick graphic
-pdf("errorsWithCoverage.pdf", width=8, height=6)
-nd = d[d$Reference=="HP.V1.02",]
-res = aggregate(ErrorRate~NumPasses, nd, FUN=mean)
+pdf("errorsWithCoverage.pdf", width=4, height=3)
+#nd = d[d$Reference=="HP.V1.02",]
+toUse = cd$ZMW[cd$PredictedCCSAccuracy > .99 & cd$Analysis =="Phase 1" & cd$PredictedRawAccuracy > 0.85]
+nd = cd[cd$ZMW%in%toUse,]
+res = aggregate(ErrorRate~NumPasses+Analysis, nd, FUN=mean)
 res$QV = sapply(res$ErrorRate, ph)
-ggplot(res[res$NumPasses>3,], aes(x=NumPasses, y=QV))+geom_line()+
-  theme_bw(base_size=12)+labs(x="Number of Passes", y ="Empirical Error Rate (Phred Scaled)", title="Quality by Coverage in HP.V1.02") 
+ggplot(res[res$NumPasses>3,], aes(x=NumPasses, y=QV, color=Analysis))+geom_line()+
+  theme_bw(base_size=8)+labs(x="Number of Passes", y ="Empirical Error Rate (Phred Scaled)", title="Quality by Coverage in ALL4MERS\n(Raw > 0.85, CCS > .99)") 
 head(nd)
 dev.off()
 
@@ -193,8 +195,9 @@ median(lb$ErrorRate)
 ## Variant analysis
 ct = "ALL4MER.V2.01"
 ct = "HP.V1.02"
-ct = "NOHP.V1.01"
+#ct = "NOHP.V1.01"
 dv = read.csv("master_5ba5286_all_variants.csv")
+dv  = read.csv("master_variants_all_variants.csv")
 ldv = dv[dv$Ref==ct,]
 ldv2 = read.csv("round1b_all_variants.csv" )
 ldv2 = ldv2[ldv2$Ref==ct,]
@@ -206,14 +209,13 @@ cut2 = quantile(d2$PredictedCCSAccuracy, .2)
 
 cdv = rbind(ldv,ldv2)
 cdv$Analysis = c(rep("Original",nrow(ldv)),rep("Phase 1",nrow(ldv2)))
-valid = cd$ZMW[cd$NumPasses > 10 & cd$PredictedRawAccuracy > 0.85]
+valid = cd$ZMW[cd$NumPasses > 20 & cd$PredictedRawAccuracy > 0.85 ]
 cdv = cdv[cdv$zmw%in%valid,]
 cdv$homopolymerChar[cdv$homopolymerChar=="T"]="A"
 cdv$homopolymerChar[cdv$homopolymerChar=="G"]="C"
 
-ldv2 = ldv2[ldv2$zmw%in%valid,]
-aggregate(Ref~QV+type, data = ldv2, FUN=length)
-aggregate(Ref~type, data = ldv2, FUN=length)
+aggregate(Ref~QV+Analysis, data = cdv, FUN=length)
+aggregate(Ref~type+Analysis, data = cdv, FUN=length)
 
 
 errors = aggregate(Ref~Analysis+type, data =cdv, FUN=length)
@@ -244,6 +246,7 @@ ggplot(bp, aes(x=Pos, y=indelSize, fill=Analysis)) + geom_bar(stat="identity", p
 
 #Now do that for over 120X
 toUse = cd$ZMW[cd$NumPasses >=20 & cd$PredictedRawAccuracy > 0.85 & cd$PredictedCCSAccuracy > .999 & cd$Analysis=="Phase 1"]
+aggregate(indelSize~Analysis+QV, data = cdv[cdv$zmw%in%toUse,], FUN=length)
 bp2= aggregate(indelSize~Pos+Analysis, data = cdv[cdv$zmw%in%toUse,], FUN=length)
 bp2= bp2[bp2$Pos%in%c(29,44,75,95),]
 bp2$BP = factor(rep(c("G", "G", "A", "A"),2))

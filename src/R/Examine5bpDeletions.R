@@ -32,8 +32,6 @@ percMissing
 cb = function (x) sum(x == "NULL")/ length(x)
 
 
-
-
 # Create a set of only good data
 gd = d[!bad,]
 gd$ConsensusIndelSize = factor(gd$ConsensusIndelSize)
@@ -72,6 +70,7 @@ aggregate(NumC~Correct, gd, mean)
 
 #Get mean C count for SNR
 cntD = aggregate(NumC~Correct+Zmw+ReverseComplementedOriginally, gd, mean)
+cntD[cntD$Zmw%in%c(27258, 57113, 80745),]
 
 md = merge(cntD, snrD, by ="Zmw")
 nrow(cntD)
