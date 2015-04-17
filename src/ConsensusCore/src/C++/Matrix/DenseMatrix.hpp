@@ -43,7 +43,6 @@
 #include <vector>
 
 #include "Interval.hpp"
-#include "LDouble.hpp"
 #include "Matrix/AbstractMatrix.hpp"
 #include "Types.hpp"
 #include "Utils.hpp"
@@ -56,7 +55,7 @@ namespace ConsensusCore {
     using boost::numeric::ublas::column_major;
 #endif  // SWIG
 
-    typedef matrix<ldouble, column_major> boost_dense_matrix;
+    typedef matrix<double, column_major> boost_dense_matrix;
 
     class DenseMatrix
         : public AbstractMatrix
@@ -99,6 +98,14 @@ namespace ConsensusCore {
         void Set(int i, int j, double v);
         void ClearColumn(int j);
 
+    public: // Scaling and normalization
+        double GetScale(int j) const;
+        double GetLogProdScales(int s, int e) const;
+        double GetLogProdScales() const;
+
+    private:
+        void Normalize(int j, double c);
+        void Normalize(int j);
 
     public:
         // Method SWIG clients can use to get a native matrix (e.g. Numpy)

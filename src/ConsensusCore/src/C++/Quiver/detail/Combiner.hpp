@@ -66,7 +66,7 @@ namespace detail {
     public:
         static double Combine(double x, double y)
         {
-            return logadd(x, y);
+            return x + y;
         }
 
     };

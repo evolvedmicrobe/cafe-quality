@@ -50,9 +50,6 @@
 #include "Utils.hpp"
 
 
-#include <fstream>
-#include <iostream>
-
 using std::min;
 using std::max;
 
@@ -99,7 +96,7 @@ namespace ConsensusCore {
         
         // Initial condition, we always start with a match
         alpha.StartEditingColumn(0, 0, 1);
-        alpha.Set(0, 0, 0.0);
+        alpha.Set(0, 0, 1.0);
         alpha.FinishEditingColumn(0, 0, 1);
         // End initial conditions
         
@@ -112,9 +109,9 @@ namespace ConsensusCore {
 
             int requiredEndRow = min(I , hintEndRow);
             int i;
-            double thresholdScore = NEG_INF;
-            double maxScore = NEG_INF;
-            double score = NEG_INF;
+            double thresholdScore = 0.0;
+            double maxScore = 0.0;
+            double score = 0.0;
             alpha.StartEditingColumn(j, hintBeginRow, hintEndRow);
 
             int beginRow = hintBeginRow, endRow;
@@ -123,13 +120,13 @@ namespace ConsensusCore {
                  ++i)
             {
                 double thisMoveScore;
-                score = NEG_INF;
+                score = 0.0;
 
                  if(j==0 || i ==0) {
                      assert (j !=0 && i!=0);
-                    /* The first move must be a match so all others are NEG_INF
+                    /* The first move must be a match so all others are 0.0
                        along first column/row */
-                    //score = NEG_INF;
+                    //score = 0.0;
                 }
                 
                 else {
@@ -147,34 +144,34 @@ namespace ConsensusCore {
                           ***********  EDGE_CONDITION ************
                          */
                         if (i == 1 && j == 1) { //TODO: Remove this branch bottleneck...
-                            thisMoveScore = alpha(i-1, j-1) + e.Match_Just_Emission(0,0);
+                            thisMoveScore = alpha(i-1, j-1) * e.Match_Just_Emission(0,0);
                             score = C::Combine(score, thisMoveScore);
                         }
                         else if (i != 1 && j != 1) {
-                            thisMoveScore = alpha(i - 1, j - 1) + e.Match(i - 1, j - 1);
+                            thisMoveScore = alpha(i - 1, j - 1) * e.Match(i - 1, j - 1);
                             score = C::Combine(score, thisMoveScore);
                         }                        
                     }
                     // Stick or Branch:
                     if (i > 1) // Due to pinning, can't "insert" first or last read bpbase
                     {
-                        thisMoveScore = alpha(i - 1, j) + e.Insertion(i - 1, j - 1);
+                        thisMoveScore = alpha(i - 1, j) * e.Insertion(i - 1, j - 1);
                         score = C::Combine(score, thisMoveScore);
                     }
 
                     // Deletion:
                     if (j > 1) // Due to pinning, can't "delete" first or last template bp
                     {
-                        thisMoveScore = alpha(i, j - 1) + e.Deletion(j - 2);
+                        thisMoveScore = alpha(i, j - 1) * e.Deletion(j - 2);
                         score = C::Combine(score, thisMoveScore);
                     }
                 }
                 //  Save score
-                alpha.Set(i, j, score);                
+                alpha.Set(i, j, score);
                 if (score > maxScore)
                 {
                     maxScore = score;
-                    thresholdScore = maxScore - this->bandingOptions_.ScoreDiff;
+                    thresholdScore = maxScore / std::exp(this->bandingOptions_.ScoreDiff);
                 }
 
             }
@@ -191,44 +188,14 @@ namespace ConsensusCore {
         /* Now fill out the probability in the last pinned position.
          * We require that we end in a match. 
          * search for the term EDGE_CONDITION to find a comment with more information */
-        auto likelihood = alpha(I - 1, J - 1) + e.Match_Just_Emission(I - 1, J - 1);
+        auto likelihood = alpha(I - 1, J - 1) * e.Match_Just_Emission(I - 1, J - 1);
         alpha.StartEditingColumn(J, I, I + 1);
         alpha.Set(I, J, likelihood);
         alpha.FinishEditingColumn(J, I, I + 1);
         //DumpAlphaMatrix(alpha);
         
     }
-    
-    template<typename M>
-    void DumpAlphaMatrix(M& mat)
-    {
-        std::ofstream myfile;
-        myfile.open("/Users/nigel/git/cafe-quality/src/ConsensusCore/build/Matrix.csv");
-        for(int i=0; i< mat.Rows(); i++)
-        {
-            for(int j=0; j<mat.Columns(); j++)
-            {
-                myfile << mat(i,j) << ",";
-            }
-            myfile << "\n";
-        }
-        myfile.close();
-    }
-    template<typename M>
-    void DumpBetaMatrix(M& mat)
-    {
-        std::ofstream myfile;
-        myfile.open("/Users/nigel/git/cafe-quality/src/ConsensusCore/build/Beta.csv");
-        for(int i=0; i< mat.Rows(); i++)
-        {
-            for(int j=0; j<mat.Columns(); j++)
-            {
-                myfile << mat(i,j) << ",";
-            }
-            myfile << "\n";
-        }
-        myfile.close();
-    }
+
 
     /**
      Fill the Beta matrix, the backwards half of the forward-backward algorithm.  
@@ -258,7 +225,7 @@ namespace ConsensusCore {
 
         //Setup initial condition, at the end we are one
         beta.StartEditingColumn(J, I, I+1);
-        beta.Set(I, J, 0.0);
+        beta.Set(I, J, 1.0);
         beta.FinishEditingColumn(J, I, I + 1);
         
         // Totally arbitray decision here...
@@ -273,9 +240,9 @@ namespace ConsensusCore {
             beta.StartEditingColumn(j, hintBeginRow, hintEndRow);
 
             int i;
-            double score = NEG_INF;
-            double thresholdScore = NEG_INF;
-            double maxScore = NEG_INF;
+            double score = 0.0;
+            double thresholdScore = 0.0;
+            double maxScore = 0.0;
             
             int beginRow, endRow = hintEndRow;
             for (i = endRow - 1;
@@ -283,7 +250,7 @@ namespace ConsensusCore {
                  --i)
             {
                 double thisMoveScore;
-                score = NEG_INF;
+                score = 0.0;
 
                 // Match:
                 // TODO: Right now it assumes the probability of a match transition is 1.
@@ -291,26 +258,26 @@ namespace ConsensusCore {
                 
                 if (i == (I-1) && (j == (J-1)))
                 {
-                    thisMoveScore = beta(i+1, j+1) + e.Match_Just_Emission(i,j);
+                    thisMoveScore = beta(i+1, j+1) * e.Match_Just_Emission(i,j);
                     score = C::Combine(score, thisMoveScore); // TODO: Redundant on first pass?
                 }
                 else if (i < (I - 1))
                 {
-                    thisMoveScore = beta(i + 1, j + 1) + e.Match(i, j);
+                    thisMoveScore = beta(i + 1, j + 1) * e.Match(i, j);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Stick or Branch:
                 if (i < (I - 1) && i > 0) // Can only transition to an insertion for the 2nd to last read base
                 {
-                    thisMoveScore = beta(i + 1, j) + e.Insertion(i, j - 1);
+                    thisMoveScore = beta(i + 1, j) * e.Insertion(i, j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
                 // Deletion:
                 if (j < (J - 1) && j > 0)
                 {
-                    thisMoveScore = beta(i, j + 1) + e.Deletion(j - 1);
+                    thisMoveScore = beta(i, j + 1) * e.Deletion(j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
@@ -321,7 +288,7 @@ namespace ConsensusCore {
                 if (score > maxScore)
                 {
                     maxScore = score;
-                    thresholdScore = maxScore - this->bandingOptions_.ScoreDiff;
+                    thresholdScore = maxScore / std::exp(this->bandingOptions_.ScoreDiff);
                 }
             }
 
@@ -340,7 +307,7 @@ namespace ConsensusCore {
         beta.StartEditingColumn(0, 0, 1);
         /* Now to fill the top row which must be a match
          * search for the term EDGE_CONDITION to find a comment with more information */
-        beta.Set(0, 0, e.Match_Just_Emission(0,0) + beta(1, 1));
+        beta.Set(0, 0, e.Match_Just_Emission(0,0) * beta(1, 1));
         beta.FinishEditingColumn(0, 0, 1);
     }
 
@@ -371,28 +338,30 @@ namespace ConsensusCore {
                        beta.UsedRowRange(betaColumn),
                        beta.UsedRowRange(betaColumn + 1));
 
-        double v = NEG_INF, thisMoveScore;
+        double v = 0.0, thisMoveScore;
 
         for (int i = usedBegin; i < usedEnd; i++)
         {
             if (i < I)
             {
                 // Incorporate
-                thisMoveScore = alpha(i, alphaColumn - 1) +
-                                e.Match(i, absoluteColumn - 1) +
+                thisMoveScore = alpha(i, alphaColumn - 1) *
+                                e.Match(i, absoluteColumn - 1) *
                                 beta(i + 1, betaColumn);
                 v = C::Combine(v, thisMoveScore);
 
                 }
 
             // Delete:
-            thisMoveScore = alpha(i, alphaColumn - 1) +
-                            e.Deletion(absoluteColumn - 2) +
+            thisMoveScore = alpha(i, alphaColumn - 1) *
+                            e.Deletion(absoluteColumn - 2) *
                             beta(i, betaColumn);
             v = C::Combine(v, thisMoveScore);
         }
 
-        return v;
+        return ( std::log(v)
+               + alpha.GetLogProdScales(0, alphaColumn)
+               + beta.GetLogProdScales(betaColumn, beta.Columns()) );
     }
 
 
@@ -470,8 +439,8 @@ namespace ConsensusCore {
 
             for (i = beginRow; i < endRow; i++)
             {
-                double thisMoveScore = NEG_INF;
-                score = NEG_INF;
+                double thisMoveScore = 0.0;
+                score = 0.0;
                 
 
                 // Match:
@@ -484,10 +453,10 @@ namespace ConsensusCore {
                         thisMoveScore = e.Match_Just_Emission(0,0); // prev should be zero, so no need for explicit prev + e.Match_Just_Emission
                     }
                     else if (i == maxDownMovePossible && j == maxLeftMovePossible) {
-                        thisMoveScore = prev + e.Match_Just_Emission(i -1 ,j - 1);
+                        thisMoveScore = prev * e.Match_Just_Emission(i -1 ,j - 1);
                     }
                     else if (i < maxDownMovePossible && j < maxLeftMovePossible) {
-                        thisMoveScore = prev + e.Match(i - 1, j - 1);
+                        thisMoveScore = prev * e.Match(i - 1, j - 1);
                     }
                     score = C::Combine(score, thisMoveScore);
                 }
@@ -495,7 +464,7 @@ namespace ConsensusCore {
                 // Stick or Branch:
                 if (i > 1 && i < maxDownMovePossible && j != maxLeftMovePossible)
                 {
-                    thisMoveScore = ext(i - 1, extCol) + e.Insertion(i - 1, j - 1);
+                    thisMoveScore = ext(i - 1, extCol) * e.Insertion(i - 1, j - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
@@ -505,7 +474,7 @@ namespace ConsensusCore {
                     double prev = extCol == 0 ?
                             alpha(i, j - 1) :
                             ext(i, extCol - 1);
-                    thisMoveScore = prev + e.Deletion(j - 2);
+                    thisMoveScore = prev * e.Deletion(j - 2);
                     score = C::Combine(score, thisMoveScore);
                 }
               
@@ -583,8 +552,8 @@ namespace ConsensusCore {
                  i >= beginRow;
                  i--)
             {
-                double thisMoveScore = NEG_INF;
-                score = NEG_INF;
+                double thisMoveScore = 0.0;
+                score = 0.0;
 
                 // Incorporation:
                 if (i < I && j < J)
@@ -593,10 +562,10 @@ namespace ConsensusCore {
                         beta(i + 1, j + 1) :
                         ext(i + 1, extCol + 1);
                     if ((i == (I-1) && jp == (J-1)) || (i==0 && j == firstColumn)) {
-                        thisMoveScore = prev + e.Match_Just_Emission(i, jp);
+                        thisMoveScore = prev * e.Match_Just_Emission(i, jp);
                     }
                     else if ( j > firstColumn && i > 0) {
-                        thisMoveScore = prev + e.Match(i, jp);
+                        thisMoveScore = prev * e.Match(i, jp);
                     }
                     score = C::Combine(score, thisMoveScore);
                 }
@@ -604,7 +573,7 @@ namespace ConsensusCore {
                 // Stick or branch
                 if (i < (I-1) && i > 0 && j > firstColumn)
                 {
-                    thisMoveScore = ext(i + 1, extCol) + e.Insertion(i, jp - 1);
+                    thisMoveScore = ext(i + 1, extCol) * e.Insertion(i, jp - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 
@@ -614,7 +583,7 @@ namespace ConsensusCore {
                     double prev = (extCol == lastExtColumn) ?
                         beta(i, j + 1) :
                         ext(i, extCol + 1);
-                    thisMoveScore = prev + e.Deletion(jp - 1);
+                    thisMoveScore = prev * e.Deletion(jp - 1);
                     score = C::Combine(score, thisMoveScore);
                 }
 

@@ -36,6 +36,8 @@
 
 #include "Quiver/MutationScorer.hpp"
 
+#include <fstream>
+#include <iostream>
 #include <string>
 
 #include "Matrix/DenseMatrix.hpp"
@@ -84,7 +86,43 @@ namespace ConsensusCore
     double
     MutationScorer<R>::Score() const
     {
-        return (*beta_)(0, 0);
+        return std::log((*beta_)(0, 0)) + beta_->GetLogProdScales();
+    }
+
+    template<typename R>
+    void MutationScorer<R>::DumpMatrix(const MatrixType& mat, const std::string& fname) const
+    {
+        if (mat.Rows() == 0 || mat.Columns() == 0) return;
+        std::ofstream myfile;
+        myfile.open(fname);
+        for(int i=0; i< mat.Rows(); i++)
+        {
+            myfile << mat(i,0);
+            for(int j=1; j<mat.Columns(); j++)
+            {
+                myfile << "," << mat(i,j);
+            }
+            myfile << std::endl;
+        }
+        myfile << mat.GetScale(0);
+        for (int j=1; j < mat.Columns(); j++)
+        {
+            myfile << "," << mat.GetScale(j);
+        }
+        myfile << std::endl;
+        myfile.close();
+    }
+
+    template<typename R>
+    void MutationScorer<R>::DumpAlphaMatrix() const
+    {
+        DumpMatrix(*alpha_, "Alpha.csv");
+    }
+
+    template<typename R>
+    void MutationScorer<R>::DumpBetaMatrix() const
+    {
+        DumpMatrix(*beta_, "Beta.csv");
     }
 
     template<typename R> TemplateParameterPair
@@ -135,16 +173,16 @@ namespace ConsensusCore
     double
     MutationScorer<R>::ScoreMutation(const Mutation& m, const ContextParameters& ctx_params) const
     {
-        
+
         if(fabs(m.LengthDiff()) > 1) {
             throw new InvalidInputError("Only mutations of size 1 allowed");
         }
-        
+
         int betaLinkCol = 1 + m.End();
         int absoluteLinkColumn = 1 + m.End() + m.LengthDiff();
         TemplateParameterPair old_Tpl = evaluator_->Template();
         TemplateParameterPair new_tpl = ApplyMutation(m, old_Tpl, ctx_params);
-     
+
         double score;
 
         bool atBegin = (m.Start() < 3);
@@ -178,6 +216,7 @@ namespace ConsensusCore
                                              *extendBuffer_, extendLength,
                                              *beta_, betaLinkCol,
                                              absoluteLinkColumn);
+            score += alpha_->GetLogProdScales(0, extendStartCol);
         }
         else if (!atBegin && atEnd)
         {
@@ -191,9 +230,9 @@ namespace ConsensusCore
 
             recursor_->ExtendAlpha(*evaluator_, *alpha_,
                                    extendStartCol, *extendBuffer_, extendLength);
-            score = (*extendBuffer_)(evaluator_->ReadLength(), extendLength - 1);
-
-
+            score = ( std::log((*extendBuffer_)(evaluator_->ReadLength(), extendLength - 1))
+                    + alpha_->GetLogProdScales(0, extendStartCol)
+                    + extendBuffer_->GetLogProdScales(0, extendLength) );
         }
         else if (atBegin && !atEnd)
         {
@@ -208,13 +247,15 @@ namespace ConsensusCore
             recursor_->ExtendBeta(*evaluator_, *beta_,
                                   extendLastCol, *extendBuffer_, extendLength,
                                   m.LengthDiff());
-            score = (*extendBuffer_)(0, 0);
+            score = ( std::log((*extendBuffer_)(0, 0))
+                    + beta_->GetLogProdScales(extendLastCol + 1, beta_->Columns())
+                    + extendBuffer_->GetLogProdScales(0, extendLength) );
         }
         else
         {
             assert(atBegin && atEnd);
             // This should basically never happen...
-            
+
             //
             // Just do the whole fill
             //
@@ -222,7 +263,8 @@ namespace ConsensusCore
                               new_tpl.tpl.length() + 1);
             evaluator_->Template(new_tpl);
             recursor_->FillAlpha(*evaluator_, MatrixType::Null(), alphaP);
-            score = alphaP(evaluator_->ReadLength(), new_tpl.tpl.length());
+            score = ( std::log(alphaP(evaluator_->ReadLength(), new_tpl.tpl.length()))
+                    + alphaP.GetLogProdScales() );
         }
 
         // Restore the original template.

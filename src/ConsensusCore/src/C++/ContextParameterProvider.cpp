@@ -97,13 +97,13 @@ namespace ConsensusCore {
             sum += xb;
         }
         // Move to log space
-        sum = log(sum);
+        //sum = log(sum);
         
-        double branch = -sum; // Branch probability is the reference, or 1 / sum
+        double branch = 1.0 / sum; // Branch probability is the reference, or 1 / sum
         
         // Now get the probabilities
         for(int i=0; i< 3; i++) {
-            predicts[i] = log(predicts[i]) - sum;
+            predicts[i] = predicts[i] / sum;
         }
         TransitionParameters tp(predicts[1], predicts[2], branch, predicts[0]);
         return tp;

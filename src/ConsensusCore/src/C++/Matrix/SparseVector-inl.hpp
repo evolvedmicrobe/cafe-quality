@@ -37,6 +37,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <numeric>
 #include <vector>
 
 #include "Matrix/SparseVector.hpp"
@@ -59,7 +60,7 @@ namespace ConsensusCore
         logicalLength_     =  logicalLength;
         allocatedBeginRow_ =  max(beginRow - PADDING, 0);
         allocatedEndRow_   =  min(endRow   + PADDING, logicalLength_);
-        storage_           =  new vector<double>(allocatedEndRow_ - allocatedBeginRow_, NEG_INF);
+        storage_           =  new vector<double>(allocatedEndRow_ - allocatedBeginRow_, 0.0);
         nReallocs_         =  0;
         DEBUG_ONLY(CheckInvariants());
     }
@@ -103,7 +104,7 @@ namespace ConsensusCore
         {
             // use swap trick to free allocated but unused memory,
             // see: http://stackoverflow.com/questions/253157/how-to-downsize-stdvector
-            std::vector<double>(newAllocatedEnd - newAllocatedBegin, NEG_INF).swap(*storage_);
+            std::vector<double>(newAllocatedEnd - newAllocatedBegin, 0.0).swap(*storage_);
             nReallocs_++;
         }
         else
@@ -138,10 +139,10 @@ namespace ConsensusCore
         // "Zero"-fill the allocated but unused space.
         std::fill(storage_->begin(),
                   storage_->begin() + (allocatedBeginRow_ - newAllocatedBegin),
-                  NEG_INF);
+                  0.0);
         std::fill(storage_->begin() + (allocatedEndRow_- newAllocatedBegin),
                   storage_->end(),
-                  NEG_INF);
+                  0.0);
         // Update pointers.
         allocatedBeginRow_ = newAllocatedBegin;
         allocatedEndRow_   = newAllocatedEnd;
@@ -165,7 +166,7 @@ namespace ConsensusCore
         }
         else
         {
-            static const double emptyCell_ = NEG_INF;
+            static const double emptyCell_ = 0.0;
             return emptyCell_;
         }
     }
@@ -195,7 +196,28 @@ namespace ConsensusCore
     inline void
     SparseVector::Clear()
     {
-        std::fill(storage_->begin(), storage_->end(), NEG_INF);
+        std::fill(storage_->begin(), storage_->end(), 0.0);
+    }
+
+    inline double
+    SparseVector::Max() const
+    {
+        return *std::max_element(storage_->begin(), storage_->end());
+    }
+
+    inline double
+    SparseVector::Sum() const
+    {
+        return std::accumulate(storage_->begin(), storage_->end(), 0.0);
+    }
+
+    inline void
+    SparseVector::Normalize(double c)
+    {
+        for (size_t i = 0; i < storage_->size(); ++i)
+        {
+            (*storage_)[i] /= c;
+        }
     }
 
     inline int

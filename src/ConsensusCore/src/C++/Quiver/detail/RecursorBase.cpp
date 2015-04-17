@@ -42,7 +42,6 @@
 #include <string>
 #include <vector>
 
-//#include "LDouble.hpp"
 #include "Logging/Logging.hpp"
 #include "Matrix/DenseMatrix.hpp"
 #include "Matrix/SparseMatrix.hpp"
@@ -103,7 +102,9 @@ namespace detail {
             }
             flipflops++;
         }
-        auto mismatch_percentage = fabs(1.0 - a(I, J)/b(0, 0));
+        double alphaV = std::log(a(I, J)) + a.GetLogProdScales();
+        double betaV  = std::log(b(0, 0)) + b.GetLogProdScales();
+        auto mismatch_percentage = fabs(1.0 - alphaV/betaV);
         if (mismatch_percentage > ALPHA_BETA_MISMATCH_TOLERANCE)
         {
             LDEBUG << "Could not mate alpha, beta.  Read: " << e.ReadName() << " Tpl: " << e.Template().tpl;

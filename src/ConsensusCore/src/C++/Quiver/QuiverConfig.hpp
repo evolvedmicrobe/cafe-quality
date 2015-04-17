@@ -49,7 +49,7 @@
 
 /* Hard coded mismatch probability for now.
    This is derived as the mean in PlotBinnedTraining.R */
-#define MISMATH_PROBABILITY 0.002671256
+#define MISMATCH_PROBABILITY 0.002671256
 
 namespace ConsensusCore
 {
@@ -81,18 +81,17 @@ namespace ConsensusCore
     /// \brief A parameter vector for analysis using the QV model
     struct ModelParams
     {
-        double log_miscallprobability;
-        double log_one_minus_miscallprobability;
-        double log_miscall_probability_times_one_third;
+        double PrMiscall;
+        double PrNotMiscall;
+        double PrThirdOfMiscall;
         //
         // Constructor for single merge rate and merge rate slope
         //
-        ModelParams()
-        : log_miscallprobability(log(MISMATH_PROBABILITY))
-        {
-            log_one_minus_miscallprobability = log(1 - MISMATH_PROBABILITY);
-            log_miscall_probability_times_one_third = log_one_third + log_miscallprobability;
-        }
+        ModelParams(double mismatch = MISMATCH_PROBABILITY)
+            : PrMiscall(mismatch)
+            , PrNotMiscall(1.0 - mismatch)
+            , PrThirdOfMiscall(mismatch / 3.0)
+        {}
     };
 
 
