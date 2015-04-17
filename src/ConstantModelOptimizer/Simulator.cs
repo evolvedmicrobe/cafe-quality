@@ -14,7 +14,7 @@ namespace ConstantModelOptimizer
         static char[] bases = new char[] {'A', 'G', 'C', 'T'};
 
 
-        public static List<Tuple<string, string>> SimulateTemplatesAndReads(out ParameterSet pars)
+        public static List<Tuple<string, string>> SimulateTemplatesAndReads(out ParameterSet pars, int length = 60)
         {
             List<Tuple<string, string>> pairs = new List<Tuple<string, string>> ();
             System.IO.StreamWriter sw = new System.IO.StreamWriter("Simulations.txt");
@@ -24,7 +24,7 @@ namespace ConstantModelOptimizer
             for(int i=0; i < 5000; i++)
             {
                 string tpl;
-                string read = SimulateRead (60, pars, out tpl);
+                string read = SimulateRead (length, pars, out tpl);
                 sw.WriteLine (tpl + "\t" + read);
                 pairs.Add (new Tuple<string, string> (tpl, read));
             }
@@ -52,7 +52,7 @@ namespace ConstantModelOptimizer
 
         static Beta miscallRateGenerator = new Beta (1, 19);
         static Dirichlet noMergeRateGenerator = new Dirichlet(new double[] {8.0,1.0,1.0,1.0});
-        static Dirichlet mergeRateGenerator = new Dirichlet(new double[] {8.0,1.0,1.0,1.0, 3.0});
+        static Dirichlet mergeRateGenerator = new Dirichlet (new double[] { 8.0, 1.0, 1.0, 1.0, 0.0 });// 3.0});
 
         public static double SampleMisCallRate()
         {

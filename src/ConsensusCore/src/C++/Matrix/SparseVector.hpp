@@ -41,7 +41,6 @@
 #include <utility>
 #include <vector>
 
-#include "LDouble.hpp"
 #include "Types.hpp"
 #include "Utils.hpp"
 
@@ -65,6 +64,11 @@ namespace ConsensusCore {
         double Get(int i) const;
         void Set(int i, double v);
         void Clear();
+
+        // these help with scaling
+        double Max() const;
+        double Sum() const;
+        void Normalize(double v);
 
     public:
         int AllocatedEntries() const;

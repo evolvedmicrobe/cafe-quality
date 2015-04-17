@@ -46,8 +46,8 @@ namespace ConsensusCore {
     // Performance insensitive routines are not inlined
 
     SparseMatrix::SparseMatrix(int rows, int cols)
-        : columns_(cols),  nCols_(cols), nRows_(rows), columnBeingEdited_(-1),
-          usedRanges_(cols, Interval(0, 0))
+        : columns_(cols), scalars_(cols, 1.0), nCols_(cols), nRows_(rows),
+          columnBeingEdited_(-1), usedRanges_(cols, Interval(0, 0))
     {
         for (int j = 0; j < nCols_; j++)
         {
@@ -57,6 +57,7 @@ namespace ConsensusCore {
 
     SparseMatrix::SparseMatrix(const SparseMatrix& other)
         : columns_(other.nCols_),
+          scalars_(other.scalars_),
           nCols_(other.nCols_),
           nRows_(other.nRows_),
           columnBeingEdited_(other.columnBeingEdited_),

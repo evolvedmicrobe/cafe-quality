@@ -173,9 +173,8 @@ namespace ConsensusCore
             assert(0 <= i && i < ReadLength() );
             assert( (j-1) >= 0 && (j-1) < tpl_.trans_probs.size());
             auto emission_prob = (IsMatch(i, j)) ?
-                params_.log_one_minus_miscallprobability :
-                params_.log_miscall_probability_times_one_third;
-            return tpl_.trans_probs[j-1].Match + emission_prob;
+                params_.PrNotMiscall : params_.PrThirdOfMiscall;
+            return tpl_.trans_probs[j-1].Match * emission_prob;
         }
         /**
          This is a special edge case match score, for the first position, which
@@ -188,8 +187,7 @@ namespace ConsensusCore
         {
             assert( (j==0 && i==0) || (j == (TemplateLength()-1) && i == (ReadLength()-1)) ); // The arguments are just for readability.
             auto emission_prob = (IsMatch(i, j)) ?
-            params_.log_one_minus_miscallprobability :
-            params_.log_miscall_probability_times_one_third;
+                params_.PrNotMiscall : params_.PrThirdOfMiscall;
             return emission_prob;
         }
         
@@ -225,7 +223,8 @@ namespace ConsensusCore
             assert(0 <= j && j < (TemplateLength()-1) &&
                    0 <= i && i < (ReadLength() -1) );
             
-            return IsMatch(i, j + 1) ? tpl_.trans_probs[j].Branch : tpl_.trans_probs[j].Stick + log_one_third;
+            return (IsMatch(i, j + 1)) ?
+                tpl_.trans_probs[j].Branch : (tpl_.trans_probs[j].Stick / 3.0);
         }
     
 

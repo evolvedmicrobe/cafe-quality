@@ -38,6 +38,13 @@ namespace ConsensusCore
         double Score() const;
         double ScoreMutation(const Mutation& m, const ContextParameters& params) const;
 
+    private:
+        void DumpMatrix(const MatrixType& mat, const std::string& fname) const;
+
+    public:
+        void DumpBetaMatrix() const;
+        void DumpAlphaMatrix() const;
+
     public:
         // Accessors that are handy for debugging.
         const MatrixType* Alpha() const;

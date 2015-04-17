@@ -15,6 +15,19 @@ namespace ConstantModelOptimizer
         public const int DARK_POS = 3;
         public const int MERGE_POS = 4;
 
+        public TransitionParameters()
+        {
+        }
+
+        public TransitionParameters(double match, double branch, double stick, double deletion)
+        {
+            this.Match = match;
+            this.Branch = branch;
+            this.Stick = stick;
+            this.Dark = deletion;
+            this.Merge = 0;
+        }
+
         public double this[int i] {
             get{
                 switch (i) {
@@ -268,7 +281,7 @@ namespace ConstantModelOptimizer
                         Branch = 0.05,
                         Dark = 0.05,
                         Stick = 0.05,
-                        Merge = 0.1
+                        Merge = 0.0
                     };
                     TransitionProbabilities [s].Normalize ();
                 }
@@ -394,6 +407,39 @@ namespace ConstantModelOptimizer
                 GlobalParametersMerge.Normalize ();
             }
         }
+
+		public void SetUniform(double eps = 0.05)
+		{
+			if (USE_DINUCLEOTIDE_MODEL) {
+				TransitionProbabilities = new Dictionary<string, TransitionParameters> ();
+				// Random guesses that are roughly in line with what I think
+				Epsilon = eps;
+				// I think merges happen roughly ~10% of the time based on Edna
+				foreach (char c in "ACGT") {
+					var s = "N" + c.ToString ();
+					s = String.Intern (s);
+					TransitionProbabilities [s] = new TransitionParameters () {
+						Match = 0.25,
+						Branch = 0.25,
+						Dark = 0.25,
+						Stick = 0.25
+					};
+					TransitionProbabilities [s].Normalize ();
+					s = c.ToString () + c.ToString ();
+					s = String.Intern (s);
+					TransitionProbabilities [s] = new TransitionParameters () {
+						Match = .25,
+						Branch = 0.25,
+						Dark = 0.25,
+						Stick = 0.25,
+						Merge = 0.0
+					};
+					TransitionProbabilities [s].Normalize ();
+				}
+			} else {
+				throw new ApplicationException ("BAD");
+			}
+		}
 
         public string GetCSVHeaderLine()
         {

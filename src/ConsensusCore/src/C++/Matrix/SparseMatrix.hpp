@@ -72,12 +72,20 @@ namespace ConsensusCore {
         int AllocatedEntries() const;  // an entry may be allocated but not used
 
     public:  // Accessors
-        const double& operator()(int i, int j) const;
+        double operator()(int i, int j) const;
         bool IsAllocated(int i, int j) const;
         double Get(int i, int j) const;
         void Set(int i, int j, double v);
         void ClearColumn(int j);
 
+    public: // Scaling and normalization
+        double GetScale(int j) const;
+        double GetLogProdScales(int s, int e) const;
+        double GetLogProdScales() const;
+
+    private:
+        void Normalize(int j, double c);
+        void Normalize(int j);
 
     public:
         // Method SWIG clients can use to get a native matrix (e.g. Numpy)
@@ -89,6 +97,7 @@ namespace ConsensusCore {
 
     private:
         std::vector<SparseVector*> columns_;
+        std::vector<double> scalars_;
         int nCols_;
         int nRows_;
         int columnBeingEdited_;

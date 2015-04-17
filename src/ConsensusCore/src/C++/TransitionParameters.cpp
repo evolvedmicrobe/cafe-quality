@@ -27,14 +27,14 @@ namespace ConsensusCore {
     Match(other.Match), Stick(other.Stick), Branch(other.Branch), Deletion(other.Deletion) {}
     
     double TransitionParameters::CalculateTotal() const {
-        return logsumlog(Match, Stick, Branch, Deletion);
+        return Match + Stick + Branch + Deletion; //logsumlog(Match, Stick, Branch, Deletion);
         
     }
     
     void TransitionParameters::RemoveConstant(double value) {
-        Match -= value;
-        Stick -= value;
-        Branch -= value;
-        Deletion -= value;
+        Match /= value;
+        Stick /= value;
+        Branch /= value;
+        Deletion /= value;
     }
 }
