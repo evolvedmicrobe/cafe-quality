@@ -17,7 +17,7 @@
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>x86</PlatformTarget>
-    <Commandlineparameters> CircularConsensus -n 1 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  --csv
+    <Commandlineparameters> CircularConsensus -n 6 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  --csv
 </Commandlineparameters>
     <ConsolePause>false</ConsolePause>
     <EnvironmentVariables>
@@ -36,7 +36,7 @@
     </PlatformTarget>
     <Tailcalls>true</Tailcalls>
     <ConsolePause>false</ConsolePause>
-    <Commandlineparameters>CircularConsensus -n 8 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  -csv
+    <Commandlineparameters> CircularConsensus -n 6 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  --csv
 </Commandlineparameters>
     <EnvironmentVariables>
       <EnvironmentVariables>
@@ -77,9 +77,6 @@
     <Reference Include="PacBio.FSharp.Utils">
       <HintPath>..\..\lib\PacBio.FSharp.Utils.dll</HintPath>
     </Reference>
-    <Reference Include="PacBio.IO">
-      <HintPath>..\..\lib\PacBio.IO.dll</HintPath>
-    </Reference>
     <ProjectReference Include="..\PacBio.Consensus\PacBio.Consensus.csproj">
       <Project>{D3A49F4E-1139-4782-A72A-599CCE57D715}</Project>
       <Name>PacBio.Consensus</Name>
@@ -103,6 +100,10 @@
     <Reference Include="FSharp.Core">
       <HintPath>..\..\..\..\..\..\Library\Frameworks\Mono.framework\Libraries\mono\4.5\FSharp.Core.dll</HintPath>
     </Reference>
+    <ProjectReference Include="..\PacBio.IO\PacBio.IO.csproj">
+      <Project>{0B3AC336-FCA6-488C-8C4C-07F43B51B17A}</Project>
+      <Name>PacBio.IO</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
   </PropertyGroup>

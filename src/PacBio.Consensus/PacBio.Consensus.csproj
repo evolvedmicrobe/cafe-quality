@@ -56,9 +56,6 @@
     <Reference Include="PacBio.Data">
       <HintPath>..\..\lib\PacBio.Data.dll</HintPath>
     </Reference>
-    <Reference Include="PacBio.IO">
-      <HintPath>..\..\lib\PacBio.IO.dll</HintPath>
-    </Reference>
     <Reference Include="PacBio.Utils">
       <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
     </Reference>
@@ -101,6 +98,10 @@
     <ProjectReference Include="..\PacBio.HDF\PacBio.HDF.csproj">
       <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
       <Name>PacBio.HDF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PacBio.IO\PacBio.IO.csproj">
+      <Project>{0B3AC336-FCA6-488C-8C4C-07F43B51B17A}</Project>
+      <Name>PacBio.IO</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

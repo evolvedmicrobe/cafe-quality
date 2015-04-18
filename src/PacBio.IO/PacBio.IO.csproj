@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Build">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0B3AC336-FCA6-488C-8C4C-07F43B51B17A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PacBio.IO</RootNamespace>
+    <AssemblyName>PacBio.IO</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <DocumentationFile>bin\Debug\PacBio.IO.XML</DocumentationFile>
+    <PlatformTarget>x86</PlatformTarget>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\PacBio.IO.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="PacBio.Align">
+      <HintPath>..\..\lib\PacBio.Align.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.Utils">
+      <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.Data">
+      <HintPath>..\..\lib\PacBio.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\lib\nunit.framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BasCollection.cs" />
+    <Compile Include="BaseReader.cs" />
+    <Compile Include="BaseWriters.cs" />
+    <Compile Include="DataRange.cs" />
+    <Compile Include="Fasta\FASTAEntry.cs" />
+    <Compile Include="Fasta\IFASTAWriter.cs" />
+    <Compile Include="Fasta\SimpleFASTAReader.cs" />
+    <Compile Include="Fasta\SimpleFASTAWriter.cs" />
+    <Compile Include="Fasta\SimpleFASTQWriter.cs" />
+    <Compile Include="HdfIcd.cs" />
+    <Compile Include="Helpers.cs" />
+    <Compile Include="MetadataReader.cs" />
+    <Compile Include="MovieInterfaces.cs" />
+    <Compile Include="ReaderBase.cs" />
+    <Compile Include="RegionAnnotations.cs" />
+    <Compile Include="Subreads.cs" />
+    <Compile Include="ZmwBases.cs" />
+    <Compile Include="ZmwIndexer.cs" />
+    <Compile Include="ZmwInterfaces.cs" />
+    <Compile Include="ZmwMetrics.cs" />
+    <Compile Include="BarcodeReader.cs" />
+    <Compile Include="VcfWriter.cs" />
+    <Compile Include="CsvWriter.cs" />
+    <Compile Include="SequelPocMetadataReader.cs" />
+    <Compile Include="OldCmpH5Reader.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">
+    xcopy /D /Y "$(ProjectDir)..\..\..\third-party\dotnet\HDF5\Windows_$(PlatformTarget)\*.dll" "$(TargetDir)"
+    </PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\PacBio.HDF\PacBio.HDF.csproj">
+      <Project>{C96CB46D-F722-4C6C-B2E3-5F356ADF4B7E}</Project>
+      <Name>PacBio.HDF</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
