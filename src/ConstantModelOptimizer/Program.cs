@@ -14,7 +14,7 @@ namespace ConstantModelOptimizer
         {
             
             // Simulate and infer
-            SimulateAndInfer ();
+            //SimulateAndInfer ();
             
             // TRAIN A SNR BIN
             //char bp = args [0] [0];

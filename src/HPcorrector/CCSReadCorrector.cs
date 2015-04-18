@@ -4,7 +4,7 @@ using Bio;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+#if FALSE
 namespace HPcorrector
 {
     [DebuggerDisplay("Length = {Length}, BP = {BP}")]
@@ -29,6 +29,8 @@ namespace HPcorrector
         public const double MIN_ACCEPTABLE_RATIO = .5;
         public static CCSRead CorrectRead(CCSRead read)
         {
+            throw new NotImplementedException ();
+            #if FALSE
             var hps = CallHomopolymers (read);
             if (hps.Count > 0) {
                 hps.Reverse ();
@@ -49,6 +51,7 @@ namespace HPcorrector
                 read.Seq.ID = orgID;
             }
             return read;
+            #endif
         }
 
         private static List<Homopolymer> CallHomopolymers(CCSRead read)
@@ -130,6 +133,8 @@ namespace HPcorrector
         }
         private static bool DecideIfHPNeedsFixByVoting(CCSRead read, Homopolymer hp)
         {
+            throw NotImplementedException ();
+            #if FALSE
             //var cutPoint = hp.BP == (byte)'A' || hp.BP == (byte)'T' ? .333 : .5;
             // First to align all subreads and make a decision
             var alner = new Reference (read.Seq);
@@ -166,6 +171,7 @@ namespace HPcorrector
             var totalCov = ((double)(insCount + delCount + normCount));
             rat = (double)insCount / totalCov;
             return rat > 0.5;
+            #endif
 
         }
 
@@ -194,4 +200,4 @@ namespace HPcorrector
         }
     }
 }
-
+#endif

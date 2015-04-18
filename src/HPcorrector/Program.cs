@@ -10,6 +10,14 @@ namespace HPcorrector
     {
         public static void Main (string[] args)
         {
+        }
+    }
+
+    #if FALSE
+    class MainClass
+    {
+        public static void Main (string[] args)
+        {
             var exp = GetExperiment ();
             var newOutFile = @"/Users/nigel/git/cafe-quality/data/corrected_ccs_ratioRef0.5.fa";
             var fastaOut = new Bio.IO.FastA.FastAFormatter (newOutFile);
@@ -63,4 +71,5 @@ namespace HPcorrector
             return qc_exp;    
         }
     }
+    #endif
 }

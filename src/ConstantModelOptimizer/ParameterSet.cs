@@ -15,18 +15,7 @@ namespace ConstantModelOptimizer
         public const int DARK_POS = 3;
         public const int MERGE_POS = 4;
 
-        public TransitionParameters()
-        {
-        }
 
-        public TransitionParameters(double match, double branch, double stick, double deletion)
-        {
-            this.Match = match;
-            this.Branch = branch;
-            this.Stick = stick;
-            this.Dark = deletion;
-            this.Merge = 0;
-        }
 
         public double this[int i] {
             get{

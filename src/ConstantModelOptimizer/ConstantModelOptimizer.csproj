@@ -39,14 +39,14 @@
     <Reference Include="PacBio.HDF">
       <HintPath>..\..\lib\PacBio.HDF.dll</HintPath>
     </Reference>
-    <Reference Include="PacBio.IO">
-      <HintPath>..\..\lib\PacBio.IO.dll</HintPath>
-    </Reference>
     <Reference Include="PacBio.Utils">
       <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics">
       <HintPath>..\..\lib\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="PacBio.IO">
+      <HintPath>..\..\lib\PacBio.IO.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
