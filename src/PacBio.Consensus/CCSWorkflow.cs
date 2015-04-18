@@ -196,6 +196,7 @@ namespace PacBio.Consensus
                 csvWriter.AddCol("CCSReadLength", ccsRead.NumBases);
                 csvWriter.AddCol("NumPasses", ccsRead.NumPasses);
                 csvWriter.AddCol("PredictedCCSAccuracy", ccsRead.PredictedAccuracy);
+                csvWriter.AddCol ("NumberAcceptedMutations", ccsRead.NumberOfMutations);
                 csvWriter.Row();
             }
         }

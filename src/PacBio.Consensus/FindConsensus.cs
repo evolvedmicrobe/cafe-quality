@@ -401,15 +401,18 @@ namespace PacBio.Consensus
             MultiReadMutationScorer scorer, List<AlignedSequenceReg> regions, 
             ISequencingZmw zmw, int iterations, out int iterationsTaken)
         {
+            int numberOfAcceptedMutations;
             // Run the quiver refinement step
-            var result = InnerMultiReadConsensus(scorer, iterations, out iterationsTaken);
+            var result = InnerMultiReadConsensus(scorer, iterations, out iterationsTaken, out numberOfAcceptedMutations);
 
             // Sort the regions that will get reported in the bas.h5
             var sortedRegions = regions.Map(v => (DelimitedSeqReg) v).OrderBy(v => v.Start).ToArray();
 
             // Compute the QVs from the mutation scores
             var qvData = ComputeConsensusQs(result.Item2, result.Item1);
-            return ComputeConsensusQVs(sortedRegions, zmw, qvData);
+            var res = ComputeConsensusQVs(sortedRegions, zmw, qvData);
+            res.NumberOfMutations = numberOfAcceptedMutations;
+            return res;
         }
 
         /// <summary>
@@ -417,9 +420,10 @@ namespace PacBio.Consensus
         /// </summary>
         public static Tuple<TrialTemplate, List<MutationScore>> InnerMultiReadConsensus(MultiReadMutationScorer scorer,
                                                                                         int iterations,
-                                                                                        out int iterationsTaken)
+                                                                                        out int iterationsTaken, 
+                                                                                        out int mutationsAccepted)
         {
-
+            mutationsAccepted = 0;
             Func<Mutation, MutationScore> scoreMutation = 
                 m => new MutationScore { Score = scorer.ScoreMutation(m), Mutation = m, Exists = true };
 
@@ -508,8 +512,10 @@ namespace PacBio.Consensus
 
                 // Apply the current set of mutations. If there are none, then we
                 // will save some time by avoid the creation of new F/B matrices.
-                if(muts.Count > 0)
-                    scorer.ApplyMutations(muts);
+                if (muts.Count > 0) {
+                    mutationsAccepted += muts.Count;
+                    scorer.ApplyMutations (muts);
+                }
                 i++;
             }
             //var lastScore = scorer.BaselineScore ();
@@ -524,7 +530,7 @@ namespace PacBio.Consensus
             var newScore = scorer.BaselineScore ();
             Console.WriteLine (lastScore - newScore);
 */
-iterationsTaken = i;
+            iterationsTaken = i;
             return new Tuple<TrialTemplate, List<MutationScore>>(tpl, allScores);
         }
 
@@ -701,7 +707,7 @@ iterationsTaken = i;
         public static ZmwConsensusBases ComputeConsensusQVs(IList<DelimitedSeqReg> regions,  ISequencingZmw zmw, ConsensusQVs qvData)
         {
 
-            var zmwBases = new ZmwConsensusBases(zmw, regions, qvData.PredictedAccuracy, qvData.Sequence.Length)
+            var zmwBases = new ZmwConsensusBases(zmw, regions, qvData.PredictedAccuracy, qvData.Sequence.Length, -999)
                                {
                                    Base = qvData.Sequence.ToCharArray(),
                                    InsertionQV = qvData.InsertionQV,

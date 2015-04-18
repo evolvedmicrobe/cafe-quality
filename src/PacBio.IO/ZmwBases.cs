@@ -324,7 +324,7 @@ namespace PacBio.IO
     /// </summary>
     public class ZmwConsensusBases : ZmwBases, IZmwConsensusBases
     {
-        public ZmwConsensusBases(ISequencingZmw zmw, IEnumerable<DelimitedSeqReg> regions, float predictedArracy, int estimatedLength)
+        public ZmwConsensusBases(ISequencingZmw zmw, IEnumerable<DelimitedSeqReg> regions, float predictedArracy, int estimatedLength, int numAcceptedMutations)
             : base(zmw)
         {
             InsertRegions = regions.ToArray();
@@ -346,6 +346,8 @@ namespace PacBio.IO
             metrics.ReadScore = predictedArracy;
             
             metrics.Regions.Add(hqReg);
+
+            NumberOfMutations = numAcceptedMutations;
             
             if(estimatedLength > 5)
                 metrics.Productivity = ProductivityClass.Productive;
@@ -358,6 +360,8 @@ namespace PacBio.IO
             get;
             private set;
         }
+
+        public int NumberOfMutations { get; set; }
 
         public int NumPasses
         {
@@ -389,7 +393,7 @@ namespace PacBio.IO
         /// <returns></returns>
         public static new ZmwConsensusBases Null(ISequencingZmw zmw)
         {
-            return new ZmwConsensusBases(zmw, Enumerable.Empty<DelimitedSeqReg>(), 0.0f, 0)
+            return new ZmwConsensusBases(zmw, Enumerable.Empty<DelimitedSeqReg>(), 0.0f, 0, -999)
             {
                 Base = new char[0],
                 PulseIndex = null,
@@ -404,7 +408,7 @@ namespace PacBio.IO
 
         public static ZmwConsensusBases MetricsNoSequence(ISequencingZmw zmw, float predictedAccuracy, int estimatedLength)
         {
-            return new ZmwConsensusBases(zmw, Enumerable.Empty<DelimitedSeqReg>(), predictedAccuracy, estimatedLength)
+            return new ZmwConsensusBases(zmw, Enumerable.Empty<DelimitedSeqReg>(), predictedAccuracy, estimatedLength, -999)
             {
                 Base = new char[0],
                 PulseIndex = null,
@@ -421,7 +425,7 @@ namespace PacBio.IO
         {
             var r = reg;
 
-            return new ZmwConsensusBases(zmw, new[] { reg }, predictedAccuracy, estimatedLength)
+            return new ZmwConsensusBases(zmw, new[] { reg }, predictedAccuracy, estimatedLength, -999)
             {
                 Base = bases.Base.Slice(r.Start, r.Length),
                 PulseIndex = null,

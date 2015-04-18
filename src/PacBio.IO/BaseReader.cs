@@ -345,6 +345,7 @@ namespace PacBio.IO
             index = idx;
         }
 
+        public int NumberOfMutations { get { return -999; } }
         public ISequencingZmw Zmw
         {
             get { return reader.ZmwSource[index]; }

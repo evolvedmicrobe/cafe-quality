@@ -841,6 +841,12 @@ namespace PacBio.IO
         /// </summary>
         float PredictedAccuracy { get; }
 
+        /// <summary>
+        /// How many mutations distinguish this template from the final template?
+        /// </summary>
+        /// <value>The number of mutations.</value>
+        int NumberOfMutations { get; }
+
         ///// <summary>
         ///// Length of the insert read
         ///// </summary>
