@@ -42,8 +42,7 @@ namespace PacBio.Consensus
         public static byte PhredQV(double pErr)
         {
             pErr = Math.Min(0.99, pErr);
-            // Cap QVs at 50 until we validate beyond that
-            return (byte)Math.Max(0, Math.Min(50, Math.Round(-10 * Math.Log10(pErr))));
+            return (byte)Math.Max(0,  Math.Round(-10 * Math.Log10(pErr)));
         }
 
         public static byte ProbToQV(double pErr)
