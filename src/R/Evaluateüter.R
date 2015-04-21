@@ -239,6 +239,10 @@ ggplot(errors2, aes(x=Pos, y=Ref, fill=Analysis))+geom_bar(stat="identity", posi
   theme_bw(base_size=14) + scale_fill_manual(values=c("blue", "red"))
 #dev.off()
 
+#Get positions
+b = errors2[errors2$Analysis=="Original",]
+b[order(b$Ref),]
+
 bp= aggregate(indelSize~Pos+Analysis, data = cdv, FUN=length)
 
 # compare original and current

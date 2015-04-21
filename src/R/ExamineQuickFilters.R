@@ -22,29 +22,22 @@ getld <-function(fname) {
   e = nrow(d)
   print(e/s)
   #d=d[d$Reference=="lambda_NEB3011",]
-  d=d[d$Reference=="HP.V1.02",]
+  #d=d[d$Reference=="HP.V1.02",]
   #d = d[d$Reference=="ALL4MER.V2.01",]
   return(d)
 }
 
 d = getld("master_5ba5286_combined_reads.csv")
-d2 = getld("C2_polymer_d067558_combined_reads.csv")
+#d2 = getld("C2_polymer_d067558_combined_reads.csv")
 #d2 = getld("del_tag_combined_reads.csv")
 #d3 = getld("no_del_combined_reads.csv")
 #d2 = getld("16s_go2_combined_reads.csv")
-d3 = getld("round1_read_combined_reads.csv")
-
-in1 = intersect(intersect(d$ZMW,d2$ZMW), d3$ZMWW)
-d2 = d2[d2$ZMW%in%in1,]
-d = d[d$ZMW%in%in1,]
-d3 = d3[d3$ZMW%in%in1,]
-
-cd = rbind(d,d2,d3)
-cd$Analysis =  factor(c(rep("Original",nrow(d)),rep("Polish",nrow(d2)),rep("New",nrow(d3))))
+#d3 = getld("round1_read_combined_reads.csv")
 
 
-# Get the total error difference.
-aggregate(NumErrors~Analysis, data=cd, FUN=sum)
+
+cd = d
+
 
 
 
@@ -54,7 +47,7 @@ ph = function(x) {
 }
 cd$PredQV = sapply((1-cd$PredictedCCSAccuracy),ph)
 cd$ActualQV = sapply(cd$ErrorRate,ph)
-ggplot(cd,aes(x=PredQV, y=ActualQV, colour=Analysis)) + geom_point() + geom_smooth()
+ggplot(cd,aes(x=PredQV, y=ActualQVs)) + geom_point() + geom_smooth()
 
 ggplot(cd, aes(x=PredictedCCSAccuracy, fill=Analysis))  + geom_density(alpha=.2) + scale_x_continuous(limits=c(0.99, 1.0))
 
@@ -321,5 +314,6 @@ e2=e1d+e1i
 e2/e1
 
 head(or)
+
 
 

@@ -21,26 +21,25 @@ getld <-function(fname) {
   #d = d[d$PredictedRawAccuracy > .85,]
   e = nrow(d)
   print(e/s)
-  #d=d[d$Reference=="lambda_NEB3011",]
-  d=d[d$Reference=="HP.V1.02",]
+  d=d[d$Reference=="lambda_NEB3011",]
+  #d=d[d$Reference=="HP.V1.02",]
   #d = d[d$Reference=="ALL4MER.V2.01",]
   return(d)
 }
 
 d = getld("master_5ba5286_combined_reads.csv")
-d2 = getld("C2_polymer_d067558_combined_reads.csv")
+d2 = getld("lambda_read_combined_reads.csv")
 #d2 = getld("del_tag_combined_reads.csv")
 #d3 = getld("no_del_combined_reads.csv")
 #d2 = getld("16s_go2_combined_reads.csv")
-d3 = getld("round1_read_combined_reads.csv")
+#d3 = getld("round1_read_combined_reads.csv")
 
-in1 = intersect(intersect(d$ZMW,d2$ZMW), d3$ZMWW)
+in1 = intersect(d$ZMW,d2$ZMW)
 d2 = d2[d2$ZMW%in%in1,]
 d = d[d$ZMW%in%in1,]
-d3 = d3[d3$ZMW%in%in1,]
 
-cd = rbind(d,d2,d3)
-cd$Analysis =  factor(c(rep("Original",nrow(d)),rep("Polish",nrow(d2)),rep("New",nrow(d3))))
+cd = rbind(d,d2)
+cd$Analysis =  factor(c(rep("Original",nrow(d)),rep("Phase 1",nrow(d2))))
 
 
 # Get the total error difference.
@@ -52,8 +51,24 @@ aggregate(NumErrors~Analysis, data=cd, FUN=sum)
 ph = function(x) { 
   if(x==1) {0} else if(x==0) {60} else { -10*log10(x) }
 }
+
+
+## Make a quick graphic
+pdf("LambdaerrorsWithCoverage.pdf", width=4, height=3)
+#nd = d[d$Reference=="HP.V1.02",]
+toUse = cd$ZMW[cd$PredictedCCSAccuracy > .99 & cd$Analysis =="Phase 1" & cd$PredictedRawAccuracy > 0.85]
+nd = cd[cd$ZMW%in%toUse,]
+res = aggregate(ErrorRate~NumPasses+Analysis, nd, FUN=mean)
+res$QV = sapply(res$ErrorRate, ph)
+ggplot(res[res$NumPasses>3,], aes(x=NumPasses, y=QV, color=Analysis))+geom_line()+
+  theme_bw(base_size=8)+labs(x="Number of Passes", y ="Empirical Error Rate (Phred Scaled)", title="Quality by Coverage in Lambda\n(Raw > 0.85, CCS > .99)") 
+head(nd)
+dev.off()
+
+
 cd$PredQV = sapply((1-cd$PredictedCCSAccuracy),ph)
 cd$ActualQV = sapply(cd$ErrorRate,ph)
+
 ggplot(cd,aes(x=PredQV, y=ActualQV, colour=Analysis)) + geom_point() + geom_smooth()
 
 ggplot(cd, aes(x=PredictedCCSAccuracy, fill=Analysis))  + geom_density(alpha=.2) + scale_x_continuous(limits=c(0.99, 1.0))
@@ -65,11 +80,13 @@ ggplot(d2[d2$NumPasses>8 & d2$ErrorRate>0.0,], aes(x=ErrorRate)) + geom_histogra
 #dev.off()
 
 
-toUse = cd$ZMW[cd$PredictedCCSAccuracy > .99 && cd$Analysis=="Original"]
-toUse = cd$ZMW[cd$PredictedRawAccuracy > 0.85]
+toUse = cd$ZMW[cd$PredictedCCSAccuracy > .99 & cd$Analysis=="Original"]
+toUse = cd$ZMW[cd$PredictedCCSAccuracy > .99 & cd$Analysis=="Phase 1"]
+
+toUse = cd$ZMW[cd$PredictedRawAccuracy > 0.85 cd$PredictedCCSAccuracy > .99 & cd$Analysis=="Phase 1"]
 
 
-res = aggregate(ErrorRate~Analysis, cd[cd$PredictedCCSAccuracy > .99,], FUN=length)
+res = aggregate(ErrorRate~Analysis, cd[cd$PredictedCCSAccuracy > .999,], FUN=length)
 res = aggregate(ErrorRate~NumPasses+Analysis, cd[cd$ZMW%in%toUse,], FUN=mean)
 res$QV = sapply(res$ErrorRate, ph)
 head(res)
@@ -158,13 +175,13 @@ median(lb$ErrorRate)
 
 
 ## Variant analysis
-dv = read.csv("master_5ba5286_all_variants.csv")
-ldv = dv[dv$Ref=="ALL4MER.V2.01",]
-ldv2 = read.csv("round1_all_variants.csv" )
-ldv2 = ldv2[ldv2$Ref=="ALL4MER.V2.01",]
+dv = read.csv("master_variants_all_variants.csv")
+ldv = dv[dv$Ref=="lambda_NEB3011",]
+ldv2 = read.csv("lambda_all_variants.csv" )
+ldv2 = ldv2[ldv2$Ref=="lambda_NEB3011",]
 
 cdv = rbind(ldv,ldv2)
-cdv$Analysis = c(rep("Original",nrow(ldv)),rep("New",nrow(ldv2)))
+cdv$Analysis = c(rep("Original",nrow(ldv)),rep("Phase 1",nrow(ldv2)))
 cdv = cdv[cdv$zmw%in%in1,]
 cdv$homopolymerChar[cdv$homopolymerChar=="T"]="A"
 cdv$homopolymerChar[cdv$homopolymerChar=="G"]="C"
@@ -174,7 +191,6 @@ aggregate(Ref~Analysis+type, data =cdv, FUN=length)
 aggregate(Ref~Analysis+type+indelSize, data=cdv, FUN=length)
 
 
-res()
 
 errorDrop <-function(minPasses) {
   ok = cd$ZMW[cd$NumPasses>=minPasses]
@@ -282,9 +298,9 @@ filled.contour(x,y,log10(z),color.palette=rainbow, xlab="Mean G+C SNR",
 dev.off()
 
 
-minPasses=20
+minPasses=15
 ok = cd$ZMW[cd$NumPasses>=minPasses]
-gd = cdv[cdv$zmw%in%ok,] 
+gd = cdv[cdv$zmw%in%ok & cdv$QV>40,] 
 res = aggregate(Pos~Analysis,gd,length)
 
 res = aggregate(Pos~Analysis+type+homopolymerLength+homopolymerChar+indeltype,gd,length)
@@ -294,11 +310,14 @@ res2 = res[res$homopolymerChar=="A",]
 res2= res
 head(res2)
 
-v = ggplot(res2,aes(x=homopolymerLength,y=Pos, colour=Analysis, shape=homopolymerChar))+facet_grid( .~indeltype)+geom_point(size=3)+theme_bw(base_size=9)
+pdf("LambdaByContext.pdf", width=7, height = 4)
+v = ggplot(res2,aes(x=homopolymerLength,y=Pos, colour=Analysis, shape=homopolymerChar))+facet_grid( .~indeltype)+geom_point(size=3)+theme_bw(base_size=8)
 v = v +labs(x="Homopolymer Length",y="Count of Total Errors", 
-            title=expression(paste(lambda, " G/C indel errors divided by genomic context for all Reads")))
+            title=expression(paste(lambda, " Indel errors divided by genomic context (Passes > 15, Only most confidently called variants)")))
 v = v + scale_colour_discrete(name="Method")#+geom_vline(xintercept=3.5,colour="red")
 v
+dev.off()
+ggplot(cdv, aes(x=QV, fill=Analysis)) + geom_density(alpha=.3)
 
 head(res)
 
