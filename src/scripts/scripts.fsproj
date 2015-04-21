@@ -49,9 +49,6 @@
     <Reference Include="PacBio.HDF">
       <HintPath>..\..\lib\PacBio.HDF.dll</HintPath>
     </Reference>
-    <Reference Include="PacBio.IO">
-      <HintPath>..\..\lib\PacBio.IO.dll</HintPath>
-    </Reference>
     <Reference Include="PacBio.Utils">
       <HintPath>..\..\lib\PacBio.Utils.dll</HintPath>
     </Reference>
@@ -94,6 +91,10 @@
     <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
       <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
       <Name>ConsensusCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PacBio.IO\PacBio.IO.csproj">
+      <Project>{0B3AC336-FCA6-488C-8C4C-07F43B51B17A}</Project>
+      <Name>PacBio.IO</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
