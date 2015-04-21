@@ -80,7 +80,7 @@ namespace Tests
             template = "ACCTCGT";
             rtp = new ReadTemplatePair (read, template);
             rtp.FillMatrices (ps);
-            rtp.DumpMatrices ();
+            //rtp.DumpMatrices ();
             // C# wants this to be -8.49879694901693
             var res2 = rtp.CurrentLikelihood;
 
@@ -99,7 +99,7 @@ namespace Tests
 
 
 
-            rtp.DumpMatrices ();
+            //rtp.DumpMatrices ();
             Console.WriteLine (res2);
 
         }
@@ -141,7 +141,7 @@ namespace Tests
             template = "ACCTCGT";
             rtp = new ReadTemplatePair (read, template);
             rtp.FillMatrices (ps);
-            rtp.DumpMatrices ();
+            //rtp.DumpMatrices ();
             // C# wants this to be -8.49879694901693
             var res2 = rtp.CurrentLikelihood;
 
@@ -160,7 +160,7 @@ namespace Tests
 
 
 
-            rtp.DumpMatrices ();
+            //rtp.DumpMatrices ();
             Console.WriteLine (res2);
 
         }
