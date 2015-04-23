@@ -847,6 +847,21 @@ namespace PacBio.IO
         /// <value>The number of mutations.</value>
         int NumberOfMutations { get; }
 
+        /// <summary>
+        /// How many mutations were attempted?
+        /// </summary>
+        /// <value>The number of tried mutations.</value>
+        int NumberOfTriedMutations { get; set; }
+
+
+        int IterationsTaken { get; set; }
+
+        /// <summary>
+        /// How much processing time did the consensus generation take in seconds
+        /// </summary>
+        /// <value>The processing time.</value>
+        double ProcessingTime { get; set; }
+
         ///// <summary>
         ///// Length of the insert read
         ///// </summary>
