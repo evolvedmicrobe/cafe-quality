@@ -706,13 +706,8 @@ namespace PacBio.Consensus
                 return new Tuple<CCSResultType, IZmwConsensusBases> (CCSResultType.NotProductive, ZmwConsensusBases.Null(bases.Zmw));
 
 
-            if (!Config.SnrCut.Contains(bases.Metrics.HQRegionSNR))
+            if (!Config.SnrCut.Contains(bases.Metrics.HQRegionSNR) || bases.Metrics.HQRegionSNR.Min () < 3f) // Second criteria moved up from somewhere else
                 return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.OutsideSNR, ZmwConsensusBases.Null(bases.Zmw));
-
-            // DELETE THIS LINE BELOW!!!!!
-            return new Tuple<CCSResultType, IZmwConsensusBases> (CCSResultType.NoInsertRegions, ZmwConsensusBases.Null(bases.Zmw));
-
-
 
             //perf.Time(zmw.HoleNumber, "CCSPartition");
 
@@ -854,11 +849,7 @@ namespace PacBio.Consensus
 
             if (ccsAccPred < Config.MinPredictedAccuracy)
                 result = CCSResultType.PostCCSAccuracy;
-
-            // Don't emit low SNR reads
-            if (bases.Metrics.HQRegionSNR.Min () < 3f)
-                result = CCSResultType.OutsideSNR;
-            
+                      
             // Don't emit palindromic CCS sequences
             var ccsSeq = consensusBases.Sequence;
             
