@@ -91,14 +91,21 @@ namespace ConsensusCore
         }
         else if (mut.IsDeletion())
         {
+            assert( (mut.End() - mut.Start()) == 1);
+            auto org_length = tpl.tpl.length() - 1;
+            assert(start >=0 && start <= org_length);
             tpl.tpl.erase(start, mut.End() - mut.Start());
-            auto maxEnd = tpl.tpl.length() - 1; // Only the second to last base can have an update
-            // Only update if not first base though
-            if(start > 0 && start < maxEnd) {
+            // Three cases, at start, at end, and in middle.
+            // If in middle, we update the prior position and delete the removed position
+            // If at the start, we only remove that position
+            // If at the end, we remove the prior position
+            if (start > 0 && start < org_length) {
                 tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
-            }
-            if (start < maxEnd ) {
-                tpl.trans_probs.erase(tpl.trans_probs.begin() + start, tpl.trans_probs.begin() + start + ( mut.End()- mut.Start()));                
+                tpl.trans_probs.erase(tpl.trans_probs.begin() + start, tpl.trans_probs.begin() + start + ( mut.End()- mut.Start()));
+            } else if (start == 0) { // At the start
+                tpl.trans_probs.erase(tpl.trans_probs.begin() + start, tpl.trans_probs.begin() + start + ( mut.End()- mut.Start()));
+            } else if (start == org_length ) { // At the end
+                tpl.trans_probs.erase(tpl.trans_probs.begin() + start - 1, tpl.trans_probs.begin() + start - 1  + ( mut.End()- mut.Start()));
             }
         }
         else if (mut.IsInsertion())
