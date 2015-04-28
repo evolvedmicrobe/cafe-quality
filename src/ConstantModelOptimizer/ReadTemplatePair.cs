@@ -138,7 +138,7 @@ namespace ConstantModelOptimizer
             // Set the likelihood
             var likelihood = StateProbabilities.Forward.Last ().Last ().Total;
             CurrentLikelihood = likelihood;
-            //Console.WriteLine (likelihood);
+            Console.WriteLine (likelihood);
             // Now check for alpha beta mismatch error
             var misMatchEps = 1e-6;
             var lastMatch = Read [0] == Template [0] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
@@ -204,12 +204,12 @@ namespace ConstantModelOptimizer
             var newState = new LatentStates ();
             var forward = StateProbabilities.Forward;
             var matchEmissionProb = Read [i] == Template [j] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
-            var leftTransProbs = j > 0 ? CurrentTransitionParameters [j - 1] : JustMatch;
+            var leftTransProbs = j > 0 && j < (Template.Length-1)? CurrentTransitionParameters [j - 1] : JustMatch;
             var curTransProbs = j < CurrentTransitionParameters.Length ? CurrentTransitionParameters[j] : JustMatch;
 
             // Match score first
             // if we're in the middle somewhere, use the right value, otherwise -Inf unless at (0, 0) then we can match in
-            var previous = (i > 0 && j > 0) ? forward[i - 1][j - 1].Total : (i == 0 && j == 0) ? 0.0 : Double.NegativeInfinity;
+            var previous = (i > 0 && j > 0 ) ? forward[i - 1][j - 1].Total : (i == 0 && j == 0) ? 0.0 : Double.NegativeInfinity;
             newState.Match = previous + leftTransProbs.log_Match + matchEmissionProb;
 
             // Now the insertion, which is either a stick or a branch
@@ -236,7 +236,6 @@ namespace ConstantModelOptimizer
             newState.SetTotal ();
             // And copy in
             forward [i] [j] = newState;
-
         }
 
         private void fillReverseMatrixPosition(int i, int j, ParameterSet pars) {
@@ -249,7 +248,7 @@ namespace ConstantModelOptimizer
             var matchEmissionProb = Read [i + 1] == Template [j + 1] ? pars.log_One_Minus_Epsilon : pars.log_Epsilon_Times_One_Third;
             var probsAfterMove = new LatentStates ();
             var reverse = StateProbabilities.Reverse;
-            var transProbs = CurrentTransitionParameters [j];
+            var transProbs = (j == Template.Length - 2 && i == Read.Length -2 ) ? JustMatch :CurrentTransitionParameters [j] ;
 
             // state -> match
             var next_match = reverse [i + 1] [j + 1].Total;
