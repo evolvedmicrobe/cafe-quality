@@ -450,15 +450,14 @@ namespace ConsensusCore {
                 nextTplBase = tpl_.GetVirtuallyMutatedTemplatePosition(j).first;
             }
             
+        
             for (i = beginRow; i < endRow; i++)
             {
                 auto curReadBase = read_.Sequence[i-1];
                 double thisMoveScore = 0.0;
-                score = 0.0;
-
+                
                 // Match:
-                if (i > 0 && j > 0)
-                {
+                assert(i>0 && j>0);
                     double prev = extCol == 0 ? alpha(i - 1, j - 1) : ext(i - 1, extCol - 1);
                     auto emission_prob = curReadBase == curTplBase ? params_.PrNotMiscall : params_.PrThirdOfMiscall;
                     if (i == 1 && j == 1) { //TODO: Remove this branch bottleneck...                        
@@ -470,8 +469,8 @@ namespace ConsensusCore {
                     else if (i == maxDownMovePossible && j == maxLeftMovePossible) {
                         thisMoveScore = prev * emission_prob;
                     }
-                    score = C::Combine(score, thisMoveScore);
-                }
+                    score = thisMoveScore;
+                
 
                 // Stick or Branch:
                 if (i > 1 && i < maxDownMovePossible && j != maxLeftMovePossible)
