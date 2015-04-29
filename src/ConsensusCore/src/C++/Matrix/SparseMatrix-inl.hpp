@@ -196,12 +196,14 @@ namespace ConsensusCore {
         if (c != 0.0 && c != 1.0)
         {
             columns_[j]->Normalize(c);
+            logged_scalars_[j] = std::log(c);
         }
         else
         {
-            c = 0.0;
+            // Not really clear that c = 0.0 should ever be acceptable.
+            logged_scalars_[j] = 0.0;
         }
-        logged_scalars_[j] = std::log(c);
+        
     }
 
     inline void
