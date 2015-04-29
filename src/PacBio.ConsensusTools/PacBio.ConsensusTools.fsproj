@@ -35,7 +35,7 @@
     </PlatformTarget>
     <Tailcalls>true</Tailcalls>
     <ConsolePause>false</ConsolePause>
-    <Commandlineparameters> CircularConsensus -n 6 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  --csv
+    <Commandlineparameters> CircularConsensus -n 1 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  --csv
 </Commandlineparameters>
     <EnvironmentVariables>
       <EnvironmentVariables>

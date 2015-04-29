@@ -457,6 +457,7 @@ namespace PacBio.Consensus
         /// <returns>The ratio of the mutated and original template likelihoods</returns>
         public double ScoreMutation(Mutation m)
         {
+            Console.WriteLine (this.Template.Length +"\t"+ m.TemplatePosition);
             return scorer.Score(m.Type, m.TemplatePosition, m.Base);
         }
 
@@ -611,7 +612,12 @@ namespace PacBio.Consensus
         /// </summary>
         public TrialTemplate Template
         {
-            get { throw new Exception();}// TrialTemplate(scorer.Template().tpl, StartAdapterBases, EndAdapterBases); }
+            get { 
+
+                return new TrialTemplate(scorer.Template (StrandEnum.FORWARD_STRAND).tpl, StartAdapterBases, EndAdapterBases); 
+                //throw new Exception();// 
+            }
+               
         }
 
 

@@ -56,11 +56,12 @@ namespace ConsensusCore {
         
 
         // Copy constructor
-        // I am deleting this as it is a very expensive operation that I never want to happen
-        TemplateParameterPair(const TemplateParameterPair& other) = delete;
+        // I want to delete this as it is a very expensive operation that I never want to happen
+        // Reinstated for SWIG
+        TemplateParameterPair(const TemplateParameterPair& other) = default;
         
         // Copy assignment - also deleting
-        TemplateParameterPair& operator=(const TemplateParameterPair& rhs) = delete;
+        TemplateParameterPair& operator=(const TemplateParameterPair& rhs) = default;
         
         
         // Move assignment operator
@@ -165,6 +166,11 @@ namespace ConsensusCore {
             return length;
         }
         
+        int Start() const {
+            return start;
+        }
+        
+        
         int VirtualLength() const {
             return base->VirtualLength(start, length);
         }
@@ -206,8 +212,6 @@ namespace ConsensusCore {
             int newIndex = index + start;
             return base->GetVirtuallyMutatedTemplatePosition(newIndex);
         }
-        
-    
         
     };
 
