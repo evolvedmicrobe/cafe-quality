@@ -175,7 +175,6 @@ namespace ConsensusCore {
 
         protected:
             QuiverConfig quiv_config;
-            double fastScoreThreshold_;
             TemplateParameterPair fwdTemplate_;
             TemplateParameterPair revTemplate_;
             std::vector<ReadStateType> reads_;

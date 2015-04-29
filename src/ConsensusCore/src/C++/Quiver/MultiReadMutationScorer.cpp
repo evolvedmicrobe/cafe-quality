@@ -148,7 +148,6 @@ namespace ConsensusCore
           reads_()
     {
         DEBUG_ONLY(CheckInvariants());
-        fastScoreThreshold_ = 0;
         QuiverConfigTable::const_iterator it;
 
     }
@@ -157,7 +156,6 @@ namespace ConsensusCore
     template<typename R>
     MultiReadMutationScorer<R>::MultiReadMutationScorer(const MultiReadMutationScorer<R>& other)
         : quiv_config(other.quiv_config),
-          fastScoreThreshold_(other.fastScoreThreshold_),
           fwdTemplate_(other.fwdTemplate_),
           revTemplate_(other.revTemplate_),
           reads_()
@@ -368,7 +366,7 @@ namespace ConsensusCore
     template<typename R>
     double MultiReadMutationScorer<R>::FastScore(const Mutation& m)
     {
-        return Score(m, fastScoreThreshold_);
+        return Score(m, quiv_config.FastScoreThreshold);
     }
 
     template<typename R>
@@ -411,7 +409,7 @@ namespace ConsensusCore
     template<typename R>
     bool MultiReadMutationScorer<R>::FastIsFavorable(const Mutation& m)
     {
-        double sum = Score(m, fastScoreThreshold_);
+        double sum = Score(m, quiv_config.FastScoreThreshold);
         return (sum > MIN_FAVORABLE_SCOREDIFF);
     }
 

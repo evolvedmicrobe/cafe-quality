@@ -794,7 +794,7 @@ namespace PacBio.Consensus
                         ScorerConfig config = new ScorerConfig ();
                         config.Algorithm = RecursionAlgo.Prob;
                         var scoreDiff = 12;
-                        var fastScoreThreshold = -12.5;
+                        var fastScoreThreshold = -30;
                         var bo = new BandingOptions (scoreDiff);
                         var qc = new QuiverConfig(ctx_params, bo, fastScoreThreshold);
                         config.Qconfig = qc;

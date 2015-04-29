@@ -430,7 +430,7 @@ namespace PacBio.Consensus
             mutationsAccepted = 0;
             mutationsTested = 0;
             Func<Mutation, MutationScore> scoreMutation = 
-                m => new MutationScore { Score = scorer.ScoreMutation(m), Mutation = m, Exists = true };
+                m => new MutationScore { Score = scorer.ScoreMutationFast(m), Mutation = m, Exists = true };
 
 
             // This will be used to derive QVs
