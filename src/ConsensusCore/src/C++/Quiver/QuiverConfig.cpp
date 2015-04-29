@@ -82,7 +82,7 @@ namespace ConsensusCore {
 
     int QuiverConfigTable::Size() const
     {
-        return table.size();
+        return (int)table.size();
     }
 
     const QuiverConfig& QuiverConfigTable::At(const std::string& name) const

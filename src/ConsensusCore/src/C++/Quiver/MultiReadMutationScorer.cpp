@@ -51,7 +51,7 @@
 #include "Utils.hpp"
 #include "ContextParameters.hpp"
 #include "TemplateParameterPair.hpp"
-
+#include "SimpleRecursor.hpp"
 
 #define MIN_FAVORABLE_SCOREDIFF 0.04  // Chosen such that 0.49 = 1 / (1 + exp(minScoreDiff))
 
@@ -67,17 +67,15 @@ namespace ConsensusCore
      */
     //
     //
-    bool ReadScoresMutation(const MappedRead& read, const Mutation& mut)
+    template<typename R>
+    bool MultiReadMutationScorer<R>::ReadScoresMutation(const MappedRead& read, const Mutation& mut) const
     {
         int ts = read.TemplateStart;
         int te = read.TemplateEnd;
         int ms = mut.Start();
         int me = mut.End();
-        if (mut.IsInsertion()) {
-            return (ts < ms && me <= te);   // Insertion starts within?
-        } else {
-            return (ts < me && ms < te);    // Intervals intersect?
-        }
+        return (ts < me && ms < te);    // Intervals intersect
+        
     }
 
 
@@ -91,7 +89,9 @@ namespace ConsensusCore
      @param <#parameter#>
      @returns <#retval#>
      */
-    Mutation OrientedMutation(const MappedRead& mr,
+    template<typename R>
+    Mutation
+    MultiReadMutationScorer<R>::OrientedMutation(const MappedRead& mr,
                               const Mutation& mut)
     {
         using std::min;
@@ -153,6 +153,7 @@ namespace ConsensusCore
 
     }
 
+#if FALSE
     template<typename R>
     MultiReadMutationScorer<R>::MultiReadMutationScorer(const MultiReadMutationScorer<R>& other)
         : quiv_config(other.quiv_config),
@@ -169,7 +170,7 @@ namespace ConsensusCore
 
         DEBUG_ONLY(CheckInvariants());
     }
-
+#endif
 
     template<typename R>
     MultiReadMutationScorer<R>::~MultiReadMutationScorer()
@@ -179,16 +180,28 @@ namespace ConsensusCore
     int
     MultiReadMutationScorer<R>::TemplateLength() const
     {
-        return fwdTemplate_.tpl.length();
+        return (int)fwdTemplate_.tpl.length();
     }
 
     template<typename R>
     int
     MultiReadMutationScorer<R>::NumReads() const
     {
-        return reads_.size();
+        return (int)reads_.size();
     }
-
+    
+    template<typename R>
+    void
+    MultiReadMutationScorer<R>::DumpAlpha()
+    {
+        throw NotYetImplementedException();
+        // Need to convert those variables from public to private to make work.
+        //std::cout << "test";
+        //auto scorer = reads_[0].Scorer;
+        //DumpMatrix(*((SparseMatrix*)scorer->extendBuffer_), "/Users/nigel/git/cafe-quality/src/Tests/bin/Release/extension.csv");
+      
+    }
+    
     template<typename R>
     const MappedRead*
     MultiReadMutationScorer<R>::Read(int readIdx) const
@@ -197,17 +210,17 @@ namespace ConsensusCore
     }
 
     template<typename R>
-    TemplateParameterPair
-    MultiReadMutationScorer<R>::Template(StrandEnum strand) const
+    TemplateParameterPair&
+    MultiReadMutationScorer<R>::Template(StrandEnum strand)
     {
         return (strand == FORWARD_STRAND ? fwdTemplate_ : revTemplate_);
     }
 
     template<typename R>
-    TemplateParameterPair
+    WrappedTemplateParameterPair
     MultiReadMutationScorer<R>::Template(StrandEnum strand,
                                          int templateStart,
-                                         int templateEnd) const
+                                         int templateEnd)
     {
         int len = templateEnd - templateStart;
         if (strand == FORWARD_STRAND)
@@ -226,7 +239,7 @@ namespace ConsensusCore
     {
         DEBUG_ONLY(CheckInvariants());
         std::vector<int> mtp = TargetToQueryPositions(mutations, fwdTemplate_.tpl);
-        fwdTemplate_ = ConsensusCore::ApplyMutations(mutations, fwdTemplate_, quiv_config.Ctx_params);
+        fwdTemplate_.ApplyRealMutations(mutations, quiv_config.Ctx_params);
         revTemplate_ = TemplateParameterPair(ReverseComplement(fwdTemplate_.tpl), quiv_config.Ctx_params);
 
         foreach (ReadStateType& rs, reads_)
@@ -265,15 +278,12 @@ namespace ConsensusCore
     {
         AddReadResult res = SUCCESS;
         DEBUG_ONLY(CheckInvariants());
-        EvaluatorType ev(mr,
-                         Template(mr.Strand, mr.TemplateStart, mr.TemplateEnd),
-                         quiv_config.QvParams);
-        RecursorType recursor(quiv_config.Banding);
+        RecursorType recursor(quiv_config.QvParams, mr, Template(mr.Strand, mr.TemplateStart, mr.TemplateEnd), quiv_config.Banding);
 
         ScorerType* scorer;
         try
         {
-            scorer = new MutationScorer<R>(ev, recursor);
+            scorer = new MutationScorer<R>(recursor);
         }
         catch (AlphaBetaMismatchException& e)
         {
@@ -283,8 +293,8 @@ namespace ConsensusCore
 
         if (scorer != NULL && threshold < 1.0f)
         {
-            int I = ev.ReadLength();
-            int J = ev.TemplateLength();
+            int I = recursor.read_.Length();
+            int J = recursor.tpl_.Length();
             int maxSize = static_cast<int>(0.5 + threshold * (I + 1) * (J + 1));
             
             if (scorer->Alpha()->AllocatedEntries() >= maxSize ||
@@ -314,52 +324,56 @@ namespace ConsensusCore
     }
 
     template<typename R>
-    double MultiReadMutationScorer<R>::Score(const Mutation& m) const
+    double MultiReadMutationScorer<R>::Score(const Mutation& m, double fastScoreThreshold )
     {
-        double sum = 0;
-        foreach (const ReadStateType& rs, reads_)
-        {
-            if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
+        // Apply virtual mutations
+            // First to virtually apply the mutation to the underlying type
+            fwdTemplate_.ApplyVirtualMutation(m, quiv_config.Ctx_params);
+            // Now create and apply the reverse complement mutation.
+            int end   = (int)fwdTemplate_.tpl.length() - m.Start(); //Used to be int end   = mr.TemplateEnd - cmut.Start();
+            int start = (int)fwdTemplate_.tpl.length() - m.End();
+            auto rc_m = Mutation(m.Type(), start, end, ReverseComplement(m.NewBases()));
+            revTemplate_.ApplyVirtualMutation(rc_m, quiv_config.Ctx_params);
+        
+        // Now score the mutation on each of them.
+            double sum = 0;
+            foreach (const ReadStateType& rs, reads_)
             {
-                Mutation orientedMut = OrientedMutation(*rs.Read, m);
-                sum += (rs.Scorer->ScoreMutation(orientedMut, quiv_config.Ctx_params) -
-                        rs.Scorer->Score());
+                if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
+                {
+                    Mutation orientedMut = OrientedMutation(*rs.Read, m);
+                    sum += (rs.Scorer->ScoreMutation(orientedMut) -
+                            rs.Scorer->Score());
+                }
+                if (sum < fastScoreThreshold)
+                {
+                    return sum;
+                }
+
             }
-        }
+        // Clear the virtual mutation
+        fwdTemplate_.ClearVirtualMutation();
+        revTemplate_.ClearVirtualMutation();
         return sum;
     }
 
     template<typename R>
     double MultiReadMutationScorer<R>::Score(MutationType mutationType,
-                                            int position, char base) const
+                                             int position, char base)
     {
         Mutation m(mutationType, position, base);
         return Score(m);
     }
 
     template<typename R>
-    double MultiReadMutationScorer<R>::FastScore(const Mutation& m) const
+    double MultiReadMutationScorer<R>::FastScore(const Mutation& m)
     {
-        double sum = 0;
-        foreach (const ReadStateType& rs, reads_)
-        {
-            if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
-            {
-                Mutation orientedMut = OrientedMutation(*rs.Read, m);
-                sum += (rs.Scorer->ScoreMutation(orientedMut, quiv_config.Ctx_params) -
-                        rs.Scorer->Score());
-                if (sum < fastScoreThreshold_)
-                {
-                    return sum;
-                }
-            }
-        }
-        return sum;
+        return Score(m, fastScoreThreshold_);
     }
 
     template<typename R>
     std::vector<double>
-    MultiReadMutationScorer<R>::Scores(const Mutation& m, double unscoredValue) const
+    MultiReadMutationScorer<R>::Scores(const Mutation& m, double unscoredValue)
     {
         std::vector<double> scoreByRead;
         foreach (const ReadStateType& rs, reads_)
@@ -367,7 +381,7 @@ namespace ConsensusCore
             if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
             {
                 Mutation orientedMut = OrientedMutation(*rs.Read, m);
-                scoreByRead.push_back(rs.Scorer->ScoreMutation(orientedMut, quiv_config.Ctx_params) -
+                scoreByRead.push_back(rs.Scorer->ScoreMutation(orientedMut) -
                                       rs.Scorer->Score());
             }
             else
@@ -381,45 +395,23 @@ namespace ConsensusCore
     template<typename R>
     std::vector<double> MultiReadMutationScorer<R>::Scores(MutationType mutationType,
                                                           int position, char base,
-                                                          double unscoredValue) const
+                                                          double unscoredValue)
     {
         Mutation m(mutationType, position, base);
         return Scores(m, unscoredValue);
     }
 
     template<typename R>
-    bool MultiReadMutationScorer<R>::IsFavorable(const Mutation& m) const
+    bool MultiReadMutationScorer<R>::IsFavorable(const Mutation& m)
     {
-        double sum = 0;
-        foreach (const ReadStateType& rs, reads_)
-        {
-            if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
-            {
-                Mutation orientedMut = OrientedMutation(*rs.Read, m);
-                sum += (rs.Scorer->ScoreMutation(orientedMut, quiv_config.Ctx_params) -
-                        rs.Scorer->Score());
-            }
-        }
+        double sum = Score(m);
         return (sum > MIN_FAVORABLE_SCOREDIFF);
     }
 
     template<typename R>
-    bool MultiReadMutationScorer<R>::FastIsFavorable(const Mutation& m) const
+    bool MultiReadMutationScorer<R>::FastIsFavorable(const Mutation& m)
     {
-        double sum = 0;
-        foreach (const ReadStateType& rs, reads_)
-        {
-            if (rs.IsActive && ReadScoresMutation(*rs.Read, m))
-            {
-                Mutation orientedMut = OrientedMutation(*rs.Read, m);
-                sum += (rs.Scorer->ScoreMutation(orientedMut, quiv_config.Ctx_params) -
-                        rs.Scorer->Score());
-                if (sum < fastScoreThreshold_)
-                {
-                    return false;
-                }
-            }
-        }
+        double sum = Score(m, fastScoreThreshold_);
         return (sum > MIN_FAVORABLE_SCOREDIFF);
     }
 
@@ -498,6 +490,31 @@ namespace ConsensusCore
         }
         return scoreByRead;
     }
+    
+    template<typename R>
+    void MultiReadMutationScorer<R>::DumpMatrix(const SparseMatrix& mat, const std::string& fname)
+    {
+        if (mat.Rows() == 0 || mat.Columns() == 0) return;
+        std::ofstream myfile;
+        myfile.open(fname);
+        for(int i=0; i< mat.Rows(); i++)
+        {
+            myfile << mat(i,0);
+            for(int j=1; j<mat.Columns(); j++)
+            {
+                myfile << "," << mat(i,j);
+            }
+            myfile << std::endl;
+        }
+        myfile << mat.GetLoggedScale(0);
+        for (int j=1; j < mat.Columns(); j++)
+        {
+            myfile << "," << mat.GetLoggedScale(j);
+        }
+        myfile << std::endl;
+        myfile.close();
+    }
+
 
     template<typename R>
     void MultiReadMutationScorer<R>::CheckInvariants() const
@@ -508,9 +525,9 @@ namespace ConsensusCore
         {
             rs.CheckInvariants();
             if (rs.IsActive) {
-                assert(rs.Scorer->Template().tpl == Template(rs.Read->Strand,
-                                                         rs.Read->TemplateStart,
-                                                         rs.Read->TemplateEnd).tpl);
+                //assert(rs.Scorer->Template().tpl == Template(rs.Read->Strand,
+                //                                         rs.Read->TemplateStart,
+                //                                         rs.Read->TemplateEnd).tpl);
                 assert(0 <= rs.Read->TemplateStart && rs.Read->TemplateStart <= fwdTemplate_.tpl.size());
                 assert(0 <= rs.Read->TemplateEnd && rs.Read->TemplateEnd <= fwdTemplate_.tpl.size());
                 assert(rs.Read->TemplateStart <= rs.Read->TemplateEnd);
@@ -525,7 +542,7 @@ namespace ConsensusCore
     {
         std::stringstream ss;
 
-        ss << "Template: " << Template().tpl << std::endl;
+        ss << "Template: " << fwdTemplate_.tpl << std::endl;
         ss << "Score: " << BaselineScore() << std::endl;
 
         ss << "Reads:" << std::endl;
@@ -575,7 +592,7 @@ namespace ConsensusCore
             if (IsActive)
             {
                 assert(Read != NULL && Scorer != NULL);
-                assert((int)Scorer->Template().tpl.length() ==
+                assert((int)Scorer->Template().Length() ==
                        Read->TemplateEnd - Read->TemplateStart);
             }
 #endif  // !NDEBUG
@@ -597,6 +614,8 @@ namespace ConsensusCore
 
         }
     }
+    
+   
 
     template class MultiReadMutationScorer<SimpleQvRecursor>;
     template class MultiReadMutationScorer<SimpleQvSumProductRecursor>;

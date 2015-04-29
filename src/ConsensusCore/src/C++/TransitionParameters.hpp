@@ -16,7 +16,7 @@ namespace ConsensusCore {
     
     class TransitionParameters {
     public:
-        // LOG SCALE transition parameters
+        // NATURAL (NOT LOGGED) SCALE transition parameters
         double Match, Stick, Branch, Deletion;
         TransitionParameters(double match, double stick, double branch, double deletion);
         double CalculateTotal() const;

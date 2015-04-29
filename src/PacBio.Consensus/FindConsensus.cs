@@ -402,8 +402,9 @@ namespace PacBio.Consensus
             ISequencingZmw zmw, int iterations, out int iterationsTaken)
         {
             int numberOfAcceptedMutations;
+            int numberOfTriedMutations;
             // Run the quiver refinement step
-            var result = InnerMultiReadConsensus(scorer, iterations, out iterationsTaken, out numberOfAcceptedMutations);
+            var result = InnerMultiReadConsensus(scorer, iterations, out iterationsTaken, out numberOfAcceptedMutations, out numberOfTriedMutations);
 
             // Sort the regions that will get reported in the bas.h5
             var sortedRegions = regions.Map(v => (DelimitedSeqReg) v).OrderBy(v => v.Start).ToArray();
@@ -412,6 +413,8 @@ namespace PacBio.Consensus
             var qvData = ComputeConsensusQs(result.Item2, result.Item1);
             var res = ComputeConsensusQVs(sortedRegions, zmw, qvData);
             res.NumberOfMutations = numberOfAcceptedMutations;
+            res.NumberOfTriedMutations = numberOfTriedMutations;
+
             return res;
         }
 
@@ -421,9 +424,11 @@ namespace PacBio.Consensus
         public static Tuple<TrialTemplate, List<MutationScore>> InnerMultiReadConsensus(MultiReadMutationScorer scorer,
                                                                                         int iterations,
                                                                                         out int iterationsTaken, 
-                                                                                        out int mutationsAccepted)
+                                                                                        out int mutationsAccepted,
+                                                                                        out int mutationsTested)
         {
             mutationsAccepted = 0;
+            mutationsTested = 0;
             Func<Mutation, MutationScore> scoreMutation = 
                 m => new MutationScore { Score = scorer.ScoreMutation(m), Mutation = m, Exists = true };
 
@@ -467,7 +472,8 @@ namespace PacBio.Consensus
 
                     case 0:
                         // Try all mutations - this phase only runs once, then we'll only test mutations close to the ones we found
-                        var mutationsToTry = GenerateMutations.GenerateUniqueMutations(tpl, false);
+                        var mutationsToTry = GenerateMutations.GenerateUniqueMutations (tpl, false).ToList();
+                        mutationsTested += mutationsToTry.Count;
                         setMuts(screenMutations(mutationsToTry));
                         phase = 1;
 
@@ -480,11 +486,12 @@ namespace PacBio.Consensus
                         break;
 
                         
-                    case 1:
+                case 1:
                         // Test mutations near previously applied batch, until no new ones are found.
                         // Only test for subs when we are getting toward the end.
-                        var testSubs = i > 4;
-                        mutationsToTry = GenerateMutations.PrevMutationFilter(GenerateMutations.GenerateUniqueMutations(tpl, testSubs), muts, prevMutationWindow);
+                    var testSubs = i > 4;
+                    mutationsToTry = GenerateMutations.PrevMutationFilter (GenerateMutations.GenerateUniqueMutations (tpl, testSubs), muts, prevMutationWindow).ToList ();
+                    mutationsTested += mutationsToTry.Count;
                         setMuts(screenMutations(mutationsToTry));
 
                         if (muts.Count == 0)

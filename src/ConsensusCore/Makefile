@@ -28,7 +28,8 @@ csharp: lib
 before-xbuild: csharp
 	-cp build/CSharp/libConsensusCore.so ../../lib/libConsensusCore.so
 
-
+perftest: lib
+	clang++ -O3 -DNDEBUG -g -msse3 $(INCLUDES) -fno-omit-frame-pointer -std=c++11  $(OBJDIR)/libConsensusCore.a src/C++/Quiver/MatrixTester.cpp -o $(OBJDIR)/perftest
 #
 # Clean targets
 #

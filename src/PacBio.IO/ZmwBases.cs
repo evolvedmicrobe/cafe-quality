@@ -361,13 +361,16 @@ namespace PacBio.IO
             private set;
         }
 
+        public int NumberOfTriedMutations { get; set; }
+        public double ProcessingTime { get; set; }
+
         public int NumberOfMutations { get; set; }
 
         public int NumPasses
         {
             get { return InsertRegions.Length; }
         }
-
+        public int IterationsTaken { get; set; }
         public float PredictedAccuracy
         {
             get { return Metrics.ReadScore; }

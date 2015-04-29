@@ -72,13 +72,13 @@ namespace ConsensusCore {
     inline const int
     DenseMatrix::Rows() const
     {
-        return size1();
+        return (int)size1();
     }
 
     inline const  int
     DenseMatrix::Columns() const
     {
-        return size2();
+        return (int)size2();
     }
 
     //
@@ -161,9 +161,9 @@ namespace ConsensusCore {
     }
 
     inline double
-    DenseMatrix::GetScale(int j) const
+    DenseMatrix::GetLoggedScale(int j) const
     {
-        return 1.0;
+        return 0.0;
     }
 
     inline double

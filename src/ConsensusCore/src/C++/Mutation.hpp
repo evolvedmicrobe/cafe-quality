@@ -112,9 +112,7 @@ namespace ConsensusCore
 
     std::ostream& operator<<(std::ostream& out, const Mutation& m);
 
-    TemplateParameterPair ApplyMutation(const Mutation& mut, const TemplateParameterPair& tpl, const ContextParameters& ctx_params);
-    TemplateParameterPair ApplyMutations(const std::vector<Mutation>& muts, const TemplateParameterPair& tpl, const ContextParameters& ctx_params);
-
+    
     std::string MutationsToTranscript(const std::vector<Mutation>& muts,
                                       const std::string& tpl);
 

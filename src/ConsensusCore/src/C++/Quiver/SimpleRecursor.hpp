@@ -38,53 +38,122 @@
 #pragma once
 
 #include "Matrix/DenseMatrix.hpp"
-#include "Quiver/QvEvaluator.hpp"
 #include "Quiver/detail/Combiner.hpp"
-#include "Quiver/detail/RecursorBase.hpp"
+#include "Quiver/QuiverConfig.hpp"
+#include "Logging/Logging.hpp"
+#include "Read.hpp"
+#include "TemplateParameterPair.hpp"
 
 namespace ConsensusCore {
 
-    template <typename M, typename E, typename C>
-    class SimpleRecursor : public detail::RecursorBase<M, E, C>
+    template <typename M, typename C>
+    class SimpleRecursor
     {
-    public:
-        void FillAlpha(const E& e, const M& guide, M& alpha) const;
-        void FillBeta(const E& e, const M& guide, M& beta) const;
 
-        double LinkAlphaBeta(const E& e,
-                            const M& alpha, int alphaColumn,
+    public:
+        
+        // Types
+        typedef M MatrixType;
+        typedef C CombinerType;
+        typedef ModelParams ParamsType;
+        
+        Read read_;
+        WrappedTemplateParameterPair tpl_;
+        ModelParams params_;
+        
+        
+        /// \brief Fill the alpha and beta matrices.
+        /// This routine will fill the alpha and beta matrices, ensuring
+        /// that the score computed from the alpha and beta recursions are
+        /// identical, refilling back-and-forth if necessary.
+        int
+        FillAlphaBeta( M& alpha, M& beta) const
+        throw(AlphaBetaMismatchException);
+        
+        /**
+         Fill in the alpha matrix.  This matrix has the read run along the rows, and the
+         template run along the columns.  The first row and column do not correspond to
+         a template position.  Therefore the match represented at position (i,j) corresponds
+         to a match between template positions (i+1, j+1).
+         
+         The alpha matrix is the "Forward" matrix used in the forward/backward algorithm.
+         The i,j position of the matrix represents the probability of all paths up
+         to the point where the ith read position and jth template have been "emitted."
+         The matrix is calculated recursively by examining all possible transitions
+         into (i,j), and calculating the probability we were in the previous state,
+         times the probability of a transition into (i,j) times the probability of
+         emitting the observation that corresponds to (i,j). All probabilities are
+         calculated and stored as LOG values.
+         
+         Note that in doing this calculation, in order to work with di-nucleotide contexts, we
+         require that the first and last transition be a match.  In other words the start and end of
+         the read and template are "pinned" to each other.
+         
+         //TODO: Verify memory is initialized to 0!
+         
+         @param guide An object that helps inform how to select the size of "bands" for the
+         banded algorithm used.  This is typically the beta matrix if we are "repopulating" the matrix.
+         @param alpha The matrix to be filled.
+         */
+
+        void FillAlpha(const M& guide, M& alpha) const;
+        
+        /**
+         Fill the Beta matrix, the backwards half of the forward-backward algorithm.
+         This represents the probability that starting from the (i,j) state, the combined
+         probability of transitioning out and following all paths through to the end.
+         That is, we need to calculate transition from state and emit from next state for each
+         
+         In combination with the Alpha matrix, this allows us to calculate all paths that
+         pass through the (i,j) element, as exp(Alpha(i,j) + Beta(i,j))
+         
+         All probabilities stored in the matrix are stored as NON-LOGGED probabilities.
+         
+         @param e The evaluator, such as QvEvaluator
+         @param M the guide matrix for banding (this needs more documentation)
+         @param beta The Beta matrix, stored as either a DenseMatrix or a SparseMatrix.
+         */
+
+        void FillBeta(const M& guide, M& beta) const;
+        
+        /// \brief Calculate the recursion score by "linking" partial alpha and/or
+        ///        beta matrices.
+        double LinkAlphaBeta(const M& alpha, int alphaColumn,
                             const M& beta, int betaColumn,
                             int absoluteColumn) const;
 
-        void ExtendAlpha(const E& e,
-                         const M& alpha, int beginColumn,
+        void ExtendAlpha(const M& alpha, int beginColumn,
                          M& ext, int numExtColumns = 2) const;
 
-        void ExtendBeta(const E& e,
-                        const M& beta, int endColumn,
-                        M& ext, int numExtColumns = 2,
-                        int lengthDiff = 0) const;
+        void ExtendBeta(const M& beta, int endColumn,
+                        M& ext, int lengthDiff = 0) const;
 
-    public:
+
         //
         // Constructors
         //
-        SimpleRecursor(const BandingOptions& banding);
+        SimpleRecursor(ModelParams params, Read read, WrappedTemplateParameterPair wtpp, const BandingOptions& banding);
+        
+#pragma mark Row guide functions for banding optimizations.
+    private:
+        Interval RowRange(int j, const M& matrix, double scoreDiff) const;
+        
+        /// \brief Reband alpha and beta matrices.
+        /// This routine will reband alpha and beta to the convex hull
+        /// of the maximum path through each and the inputs for column j.
+        bool RangeGuide(int j, const M& guide, const M& matrix, int* beginRow, int* endRow) const;
+        BandingOptions bandingOptions_;
     };
 
     typedef SimpleRecursor<DenseMatrix,
-                           QvEvaluator,
                            detail::ViterbiCombiner> SimpleQvRecursor;
 
     typedef SimpleRecursor<DenseMatrix,
-                           QvEvaluator,
                            detail::SumProductCombiner> SimpleQvSumProductRecursor;
 
     typedef SimpleRecursor<SparseMatrix,
-                           QvEvaluator,
                            detail::ViterbiCombiner> SparseSimpleQvRecursor;
 
     typedef SimpleRecursor<SparseMatrix,
-                           QvEvaluator,
                            detail::SumProductCombiner> SparseSimpleQvSumProductRecursor;
 }

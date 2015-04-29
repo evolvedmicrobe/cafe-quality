@@ -22,7 +22,7 @@ namespace boost {
 %numpy_typemaps(float, NPY_FLOAT, int)
 #endif // SWIGPYTHON
 
-%include "Evaluator.i"
+
 %include "Exceptions.i"
 %include "Features.i"
 %include "Matrix.i"

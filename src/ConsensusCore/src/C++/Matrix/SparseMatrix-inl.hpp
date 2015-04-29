@@ -160,14 +160,15 @@ namespace ConsensusCore {
     {
         usedRanges_[j] = Interval(0, 0);
         columns_[j]->Clear();
-        scalars_[j] = 1.0;
+        logged_scalars_[j] = 0.0;
+        
         DEBUG_ONLY(CheckInvariants(j);)
     }
 
     inline double
-    SparseMatrix::GetScale(int j) const
+    SparseMatrix::GetLoggedScale(int j) const
     {
-        return scalars_[j];
+        return logged_scalars_[j];
     }
 
     inline double
@@ -177,7 +178,7 @@ namespace ConsensusCore {
 
         for (int j = s; j < e; ++j)
         {
-            r += std::log(GetScale(j));
+            r += GetLoggedScale(j);
         }
 
         return r;
@@ -195,12 +196,14 @@ namespace ConsensusCore {
         if (c != 0.0 && c != 1.0)
         {
             columns_[j]->Normalize(c);
+            logged_scalars_[j] = std::log(c);
         }
         else
         {
-            c = 1.0;
+            // Not really clear that c = 0.0 should ever be acceptable.
+            logged_scalars_[j] = 0.0;
         }
-        scalars_[j] = c;
+        
     }
 
     inline void

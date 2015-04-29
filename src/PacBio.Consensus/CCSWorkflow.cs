@@ -197,6 +197,8 @@ namespace PacBio.Consensus
                 csvWriter.AddCol("NumPasses", ccsRead.NumPasses);
                 csvWriter.AddCol("PredictedCCSAccuracy", ccsRead.PredictedAccuracy);
                 csvWriter.AddCol ("NumberAcceptedMutations", ccsRead.NumberOfMutations);
+                csvWriter.AddCol ("NumberTriedMutations", ccsRead.NumberOfTriedMutations);
+                csvWriter.AddCol ("ProcessingTime", ccsRead.ProcessingTime);
                 csvWriter.Row();
             }
         }
@@ -593,7 +595,8 @@ namespace PacBio.Consensus
 
         public override Tuple<CCSResultType, IZmwConsensusBases> Map(IZmwBases bases)
         {
-            var zmw = bases.Zmw;
+            DateTime startTime = DateTime.Now;
+            var zmw = bases.Zmw;           
             Log(LogLevel.DEBUG, "CCS processing '{0}/{1}'", zmw.Movie.MovieName, zmw.HoleNumber);
             Tuple<CCSResultType, IZmwConsensusBases> toReturn;
             try
@@ -612,6 +615,7 @@ namespace PacBio.Consensus
                 toReturn = new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.Exception, ZmwConsensusBases.Null(zmw));
             }
             Log(LogLevel.DEBUG, "CCS Result: {0},  '{1}/{2}'", toReturn.Item1 , zmw.Movie.MovieName, zmw.HoleNumber);
+            toReturn.Item2.ProcessingTime = DateTime.Now.Subtract(startTime).TotalSeconds;
             return toReturn;
         }
 
@@ -702,7 +706,7 @@ namespace PacBio.Consensus
                 return new Tuple<CCSResultType, IZmwConsensusBases> (CCSResultType.NotProductive, ZmwConsensusBases.Null(bases.Zmw));
 
 
-            if (!Config.SnrCut.Contains(bases.Metrics.HQRegionSNR))
+            if (!Config.SnrCut.Contains(bases.Metrics.HQRegionSNR) || bases.Metrics.HQRegionSNR.Min () < 3f) // Second criteria moved up from somewhere else
                 return new Tuple<CCSResultType, IZmwConsensusBases>(CCSResultType.OutsideSNR, ZmwConsensusBases.Null(bases.Zmw));
 
             //perf.Time(zmw.HoleNumber, "CCSPartition");
@@ -789,10 +793,9 @@ namespace PacBio.Consensus
                         */
                         ScorerConfig config = new ScorerConfig ();
                         config.Algorithm = RecursionAlgo.Prob;
-                        var diag_cross = 4;
                         var scoreDiff = 12;
                         var fastScoreThreshold = -12.5;
-                        var bo = new BandingOptions (diag_cross, scoreDiff);
+                        var bo = new BandingOptions (scoreDiff);
                         var qc = new QuiverConfig(ctx_params, bo, fastScoreThreshold);
                         config.Qconfig = qc;
                        //perf.Time(zmw.HoleNumber, "CCSMutationTesting");
@@ -800,6 +803,7 @@ namespace PacBio.Consensus
                         {
                             result = FindConsensus.MultiReadConsensusAndQv (scorer, regions, bases.Zmw,
                                 maxIterations, out iterationsTaken);
+                            result.IterationsTaken = iterationsTaken;
                         }
 
                     }
@@ -844,11 +848,7 @@ namespace PacBio.Consensus
 
             if (ccsAccPred < Config.MinPredictedAccuracy)
                 result = CCSResultType.PostCCSAccuracy;
-
-            // Don't emit low SNR reads
-            if (bases.Metrics.HQRegionSNR.Min () < 3f)
-                result = CCSResultType.OutsideSNR;
-            
+                      
             // Don't emit palindromic CCS sequences
             var ccsSeq = consensusBases.Sequence;
             
@@ -860,7 +860,7 @@ namespace PacBio.Consensus
 
                 if (palindromeAl.Accuracy > 0.85) {
                     result = CCSResultType.PostCCSPalindrome;
-                    Console.WriteLine ("Palindrome at hole: " + bases.Zmw.HoleNumber);
+                    //Console.WriteLine ("Palindrome at hole: " + bases.Zmw.HoleNumber);
                 }
             }
 
