@@ -793,10 +793,9 @@ namespace PacBio.Consensus
                         */
                         ScorerConfig config = new ScorerConfig ();
                         config.Algorithm = RecursionAlgo.Prob;
-                        var diag_cross = 4;
                         var scoreDiff = 12;
                         var fastScoreThreshold = -12.5;
-                        var bo = new BandingOptions (diag_cross, scoreDiff);
+                        var bo = new BandingOptions (scoreDiff);
                         var qc = new QuiverConfig(ctx_params, bo, fastScoreThreshold);
                         config.Qconfig = qc;
                        //perf.Time(zmw.HoleNumber, "CCSMutationTesting");

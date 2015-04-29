@@ -74,95 +74,9 @@ namespace ConsensusCore
         return ScoredMutation(*this, score);
     }
 
-    // NOTE: Start is not just equal to Mut.Start() here because the location of a mutation can change
-    // as earlier mutations are applied.
-    static void
-    _ApplyMutationInPlace(const Mutation& mut, int start, TemplateParameterPair& tpl, const ContextParameters& ctx_params)
-    {
-        if (mut.IsSubstitution())
-        {
-            tpl.tpl.replace(start, mut.End() - mut.Start(), mut.NewBases());
-            if ((start + 1) < tpl.tpl.length()) {
-                tpl.trans_probs[start] = ctx_params.GetParametersForContext(tpl.tpl.at(start), tpl.tpl.at(start+1));
-            }
-            if (start > 0) {
-                tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start -1), tpl.tpl.at(start));
-            }
-        }
-        else if (mut.IsDeletion())
-        {
-            assert( (mut.End() - mut.Start()) == 1);
-            auto org_length = tpl.tpl.length() - 1;
-            assert(start >=0 && start <= org_length);
-            tpl.tpl.erase(start, mut.End() - mut.Start());
-            // Three cases, at start, at end, and in middle.
-            // If in middle, we update the prior position and delete the removed position
-            // If at the start, we only remove that position
-            // If at the end, we remove the prior position
-            if (start > 0 && start < org_length) {
-                tpl.trans_probs[start-1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
-                tpl.trans_probs.erase(tpl.trans_probs.begin() + start, tpl.trans_probs.begin() + start + ( mut.End()- mut.Start()));
-            } else if (start == 0) { // At the start
-                tpl.trans_probs.erase(tpl.trans_probs.begin() + start, tpl.trans_probs.begin() + start + ( mut.End()- mut.Start()));
-            } else if (start == org_length ) { // At the end
-                tpl.trans_probs.erase(tpl.trans_probs.begin() + start - 1, tpl.trans_probs.begin() + start - 1  + ( mut.End()- mut.Start()));
-            }
-        }
-        else if (mut.IsInsertion())
-        {
-            assert(start >= 0);
-            // Add template base
-            assert( tpl.tpl.size() == (tpl.trans_probs.size() + 1));
-            tpl.tpl.insert(start, mut.NewBases());
-            if (start > tpl.trans_probs.size())
-            {
-                tpl.trans_probs.push_back(TransitionParameters());
-            }
-            else
-            {
-                tpl.trans_probs.insert(tpl.trans_probs.begin() + start, TransitionParameters());
-            }
-            assert( tpl.tpl.size() == (tpl.trans_probs.size() + 1));
-            // Need to update two parameters, the ones for this base and the one
-            // before this base.  If inserted at the start, there is no base before
-            if (start > 0) {
-                tpl.trans_probs[start - 1] = ctx_params.GetParametersForContext(tpl.tpl.at(start-1), tpl.tpl.at(start));
-            }
-            // If inserted at the end, there is no "current" probabilities to update
-            if (start < tpl.trans_probs.size()) {
-                auto new_params = ctx_params.GetParametersForContext(tpl.tpl.at(start), tpl.tpl.at(start+1));
-                tpl.trans_probs[start] = new_params;
-            }
-        }
-    }
+    
 
-    TemplateParameterPair
-    ApplyMutation(const Mutation& mut, const TemplateParameterPair& tpl, const ContextParameters& ctx_params)
-    {
-        TemplateParameterPair new_tpl(tpl);
-        _ApplyMutationInPlace(mut, mut.Start(), new_tpl, ctx_params);
-        return new_tpl;
-    }
-
-    TemplateParameterPair
-    ApplyMutations(const std::vector<Mutation>& muts, const TemplateParameterPair& tpl,  const ContextParameters& ctx_params)
-    {
-        // Make a new copy
-        auto tplCopy = string(tpl.tpl);
-        auto new_probs = vector<TransitionParameters>(tpl.trans_probs);
-        TemplateParameterPair new_tpl (tplCopy, new_probs);
-        
-        // Apply mutations
-        std::vector<Mutation> sortedMuts(muts);
-        std::sort(sortedMuts.begin(), sortedMuts.end());
-        int runningLengthDiff = 0;
-        foreach (const Mutation& mut, sortedMuts)
-        {
-            _ApplyMutationInPlace(mut, mut.Start() + runningLengthDiff, new_tpl, ctx_params);
-            runningLengthDiff += mut.LengthDiff();
-        }
-        return new_tpl;
-    }
+   
 
     std::string MutationsToTranscript(const std::vector<Mutation>& mutations,
                                       const std::string& tpl)

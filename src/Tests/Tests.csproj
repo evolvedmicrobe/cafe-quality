@@ -48,10 +48,6 @@
       <Project>{B53E11DF-F9A9-4939-893E-78E59872089A}</Project>
       <Name>Bio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
-      <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
-      <Name>ConsensusCore</Name>
-    </ProjectReference>
     <ProjectReference Include="..\VariantCaller\VariantCaller.csproj">
       <Project>{C1EA5B21-991D-4455-BAA7-05CFD8C04B88}</Project>
       <Name>VariantCaller</Name>
@@ -60,9 +56,9 @@
       <Project>{280EFB2B-3722-4147-974E-44E6D5517115}</Project>
       <Name>ConstantModelOptimizer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PacBio.Consensus\PacBio.Consensus.csproj">
-      <Project>{D3A49F4E-1139-4782-A72A-599CCE57D715}</Project>
-      <Name>PacBio.Consensus</Name>
+    <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
+      <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>
+      <Name>ConsensusCore</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

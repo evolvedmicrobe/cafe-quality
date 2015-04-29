@@ -72,13 +72,13 @@ namespace ConsensusCore {
     inline const int
     DenseMatrix::Rows() const
     {
-        return size1();
+        return (int)size1();
     }
 
     inline const  int
     DenseMatrix::Columns() const
     {
-        return size2();
+        return (int)size2();
     }
 
     //

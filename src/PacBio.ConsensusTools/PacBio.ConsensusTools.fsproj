@@ -17,8 +17,7 @@
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>x86</PlatformTarget>
-    <Commandlineparameters> CircularConsensus -n 6 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  --csv
---zmwCount=50</Commandlineparameters>
+    <Commandlineparameters> CircularConsensus -n 6 -o test -fofn=/Users/nigel/CCS_P6_C4/input.fofn  --csv --zmwCount=50</Commandlineparameters>
     <ConsolePause>false</ConsolePause>
     <EnvironmentVariables>
       <EnvironmentVariables>
@@ -77,10 +76,6 @@
     <Reference Include="PacBio.FSharp.Utils">
       <HintPath>..\..\lib\PacBio.FSharp.Utils.dll</HintPath>
     </Reference>
-    <ProjectReference Include="..\PacBio.Consensus\PacBio.Consensus.csproj">
-      <Project>{D3A49F4E-1139-4782-A72A-599CCE57D715}</Project>
-      <Name>PacBio.Consensus</Name>
-    </ProjectReference>
     <Reference Include="QuickGraph">
       <HintPath>..\..\lib\QuickGraph.dll</HintPath>
     </Reference>
@@ -103,6 +98,10 @@
     <ProjectReference Include="..\PacBio.IO\PacBio.IO.csproj">
       <Project>{0B3AC336-FCA6-488C-8C4C-07F43B51B17A}</Project>
       <Name>PacBio.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PacBio.Consensus\PacBio.Consensus.csproj">
+      <Project>{D3A49F4E-1139-4782-A72A-599CCE57D715}</Project>
+      <Name>PacBio.Consensus</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

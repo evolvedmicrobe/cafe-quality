@@ -40,6 +40,8 @@
 #include <string>
 #include "Quiver/QuiverConfig.hpp"
 #include "Types.hpp"
+#include "TemplateParameterPair.hpp"
+#include "Read.hpp"
 
 namespace ConsensusCore
 {
@@ -53,19 +55,15 @@ namespace ConsensusCore
         explicit ReadScorer(const QuiverConfig& config);
 
         double Score
-        (const TemplateParameterPair& tpl, const Read& read) const
+        (const WrappedTemplateParameterPair& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
-//        const PairwiseAlignment* Align
-//        (const std::string& tpl, const Read& read) const
-//            throw(AlphaBetaMismatchException);
-
         const SparseMatrix* Alpha
-        (const TemplateParameterPair& tpl, const Read& read) const
+        (const WrappedTemplateParameterPair& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
         const SparseMatrix* Beta
-        (const TemplateParameterPair& tpl, const Read& read) const
+        (const WrappedTemplateParameterPair& tpl, const Read& read) const
             throw(AlphaBetaMismatchException);
 
 

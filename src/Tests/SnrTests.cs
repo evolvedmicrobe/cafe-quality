@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using ConsensusCore;
 using ConstantModelOptimizer;
-using PacBio.Consensus;
+//using PacBio.Consensus;
 using System.Linq;
 
 namespace Tests
@@ -66,9 +66,26 @@ namespace Tests
 
             ReadTemplatePair rtp = new ReadTemplatePair (read, template);
             rtp.FillMatrices (ps);
-            //rtp.DumpMatrices ();
+            //rtp.DumpMatrices ("test1.csv");
+            //4.9422203069979727
             var res = rtp.CurrentLikelihood;
             Console.WriteLine (res);
+
+            ReadTemplatePair rtpTemp = new ReadTemplatePair ("ACGTACGT", "ACGTACGT");
+            rtpTemp.FillMatrices (ps);
+            rtpTemp.DumpMatrices ("test1.csv");
+            //-0.584415070238446
+            var resTemp = rtpTemp.CurrentLikelihood;
+            Console.WriteLine (resTemp);
+
+            rtpTemp = new ReadTemplatePair ("ACGTACGT", "ACGTGCGT");
+            rtpTemp.FillMatrices (ps);
+            rtpTemp.DumpMatrices ("test1.csv");
+            resTemp = rtpTemp.CurrentLikelihood;
+            Console.WriteLine (resTemp);
+
+
+           
 
             template = read;
             rtp = new ReadTemplatePair (read, template);
@@ -127,7 +144,7 @@ namespace Tests
 
             ReadTemplatePair rtp = new ReadTemplatePair (read, template);
             rtp.FillMatrices (ps);
-            //rtp.DumpMatrices ();
+            //rtp.DumpMatrices ("testF.csv");
             var res = rtp.CurrentLikelihood;
             Console.WriteLine (res);
 
@@ -135,6 +152,13 @@ namespace Tests
             rtp = new ReadTemplatePair (read, template);
             rtp.FillMatrices (ps);
             // C# wants this to be -0.584415070238446
+            res = rtp.CurrentLikelihood;
+            Console.WriteLine (res);
+
+
+            rtp = new ReadTemplatePair ("ACCTCGT","ACGTCGT");
+            rtp.FillMatrices (ps);
+            //rtp.DumpMatrices ();
             res = rtp.CurrentLikelihood;
             Console.WriteLine (res);
 //
@@ -192,24 +216,24 @@ namespace Tests
         }
 
 
-        public void WriteAlphaBeta(SparseQvSumProductMultiReadMutationScorer scorer) {
-            var data = scorer.Read (0);
-            System.IO.StreamWriter writer = new System.IO.StreamWriter ("Matrices.csv");
-            foreach (var alpha in new bool[] {true, false}) {
-
-                var mat = alpha ? scorer.AlphaMatrix (0) : scorer.BetaMatrix (0);
-                var nrow = mat.Rows ();
-                var ncol = mat.Columns ();
-
-                for (int x = 0; x < nrow; x++) {
-                    var row = Enumerable.Range (0, ncol)
-                    .Select (y => mat.IsAllocated (x, y) ? mat.Get (x, y) : float.NaN);
-                    writer.WriteLine (row.Select (v => v.ToString ()));
-                }
-            }
-            writer.Close ();
-        }
-
+//        public void WriteAlphaBeta(SparseQvSumProductMultiReadMutationScorer scorer) {
+//            var data = scorer.Read (0);
+//            System.IO.StreamWriter writer = new System.IO.StreamWriter ("Matrices.csv");
+//            foreach (var alpha in new bool[] {true, false}) {
+//
+//                var mat = alpha ? scorer.AlphaMatrix (0) : scorer.BetaMatrix (0);
+//                var nrow = mat.Rows ();
+//                var ncol = mat.Columns ();
+//
+//                for (int x = 0; x < nrow; x++) {
+//                    var row = Enumerable.Range (0, ncol)
+//                    .Select (y => mat.IsAllocated (x, y) ? mat.Get (x, y) : float.NaN);
+//                    writer.WriteLine (row.Select (v => v.ToString ()));
+//                }
+//            }
+//            writer.Close ();
+//        }
+//
 
         [Test()]
         public void TestMutationScorer() {
@@ -242,10 +266,9 @@ namespace Tests
 
             // Now get the consensus core score 
             var ctx_params = new ContextParameters (snr);
-            var diag_cross = 4;
             var scoreDiff = 18;
             var fastScoreThreshold = -12.5;
-            var bo = new BandingOptions (diag_cross, scoreDiff);
+            var bo = new BandingOptions ( scoreDiff);
             var qc = new QuiverConfig(ctx_params, bo, fastScoreThreshold);
 
             double cplusplusScore = 1;
@@ -256,7 +279,7 @@ namespace Tests
                                         true, true)) { //TODO: Figure out about this add read suff
 
                     var active = scorer.AddRead (mappedRead);
-                    WriteAlphaBeta (scorer);
+                    //WriteAlphaBeta (scorer);
                     Assert.IsTrue (active == AddReadResult.SUCCESS);
                     cplusplusScore = scorer.BaselineScore();
                 }

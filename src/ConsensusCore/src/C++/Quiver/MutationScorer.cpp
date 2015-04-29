@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2013, Pacific Biosciences of California, Inc.
+    // Copyright (c) 2011-2013, Pacific Biosciences of California, Inc.
 //
 // All rights reserved.
 //
@@ -42,7 +42,6 @@
 
 #include "Matrix/DenseMatrix.hpp"
 #include "Matrix/SparseMatrix.hpp"
-#include "Quiver/QvEvaluator.hpp"
 #include "Quiver/SimpleRecursor.hpp"
 #include "Mutation.hpp"
 #include "TemplateParameterPair.hpp"
@@ -52,26 +51,24 @@
 namespace ConsensusCore
 {
     template<typename R>
-    MutationScorer<R>::MutationScorer(const EvaluatorType& evaluator, const R& recursor)
+    MutationScorer<R>::MutationScorer(const R& recursor)
         throw(AlphaBetaMismatchException)
-        : evaluator_(new EvaluatorType(evaluator)),
-          recursor_(new R(recursor))
+        : recursor_(new R(recursor))
     {
+        int I = (int)recursor_->read_.Sequence.length() + 1;
+        int J = recursor_->tpl_.Length() + 1;
         // Allocate alpha and beta
-        alpha_ = new MatrixType(evaluator.ReadLength() + 1,
-                                evaluator.TemplateLength() + 1);
-        beta_ = new MatrixType(evaluator.ReadLength() + 1,
-                               evaluator.TemplateLength() + 1);
+        alpha_ = new MatrixType(I, J);
+        beta_ = new MatrixType(I, J);
         // Buffer where we extend into
-        extendBuffer_ = new MatrixType(evaluator.ReadLength() + 1, EXTEND_BUFFER_COLUMNS);
+        extendBuffer_ = new MatrixType(I, EXTEND_BUFFER_COLUMNS);
         // Initial alpha and beta
-        numFlipFlops_ = recursor.FillAlphaBeta(*evaluator_, *alpha_, *beta_);
+        numFlipFlops_ = recursor.FillAlphaBeta(*alpha_, *beta_);
     }
 
     template<typename R>
     MutationScorer<R>::MutationScorer(const MutationScorer<R>& other)
     {
-        evaluator_ = new EvaluatorType(*other.evaluator_);
         recursor_ = new R(*other.recursor_);
 
         // Copy alpha and beta
@@ -89,6 +86,38 @@ namespace ConsensusCore
         return std::log((*beta_)(0, 0)) + beta_->GetLogProdScales();
     }
 
+   
+    template<typename R>
+    void MutationScorer<R>::DumpAlphaMatrix() const
+    {
+        DumpMatrix(*alpha_, "/Users/nigel/git/cafe-quality/src/Tests/bin/Release/Alpha.csv");
+    }
+    
+    template<typename R>
+    void MutationScorer<R>::DumpBetaMatrix() const
+    {
+        DumpMatrix(*beta_, "Beta.csv");
+    }
+
+    template<typename R> WrappedTemplateParameterPair
+    MutationScorer<R>::Template() const
+    {
+        return recursor_->tpl_;
+    }
+
+    template<typename R>
+    void MutationScorer<R>::Template(WrappedTemplateParameterPair tpl)
+        throw(AlphaBetaMismatchException)
+    {
+        delete alpha_;
+        delete beta_;
+        int I = (int)recursor_->read_.Sequence.length() + 1;
+        int J = recursor_->tpl_.Length() + 1;
+        alpha_ = new MatrixType(I, J);
+        beta_  = new MatrixType(I,J);
+        recursor_->FillAlphaBeta(*alpha_, *beta_);
+    }
+    
     template<typename R>
     void MutationScorer<R>::DumpMatrix(const MatrixType& mat, const std::string& fname) const
     {
@@ -114,38 +143,6 @@ namespace ConsensusCore
     }
 
     template<typename R>
-    void MutationScorer<R>::DumpAlphaMatrix() const
-    {
-        DumpMatrix(*alpha_, "Alpha.csv");
-    }
-
-    template<typename R>
-    void MutationScorer<R>::DumpBetaMatrix() const
-    {
-        DumpMatrix(*beta_, "Beta.csv");
-    }
-
-    template<typename R> TemplateParameterPair
-    MutationScorer<R>::Template() const
-    {
-        return evaluator_->Template();
-    }
-
-    template<typename R>
-    void MutationScorer<R>::Template(TemplateParameterPair tpl)
-        throw(AlphaBetaMismatchException)
-    {
-        delete alpha_;
-        delete beta_;
-        evaluator_->Template(tpl);
-        alpha_ = new MatrixType(evaluator_->ReadLength() + 1,
-                                evaluator_->TemplateLength() + 1);
-        beta_  = new MatrixType(evaluator_->ReadLength() + 1,
-                                evaluator_->TemplateLength() + 1);
-        recursor_->FillAlphaBeta(*evaluator_, *alpha_, *beta_);
-    }
-
-    template<typename R>
     const typename R::MatrixType* MutationScorer<R>::Alpha() const
     {
         return alpha_;
@@ -157,42 +154,35 @@ namespace ConsensusCore
         return beta_;
     }
 
-    template<typename R>
-    const typename R::EvaluatorType* MutationScorer<R>::Evaluator() const
-    {
-        return evaluator_;
-    }
-
-//    template<typename R>
-//    const PairwiseAlignment* MutationScorer<R>::Alignment() const
-//    {
-//        return recursor_->Alignment(*evaluator_, *alpha_);
-//    }
+    
 
     template<typename R>
     double
-    MutationScorer<R>::ScoreMutation(const Mutation& m, const ContextParameters& ctx_params) const
+    MutationScorer<R>::ScoreMutation(const Mutation& m) const
     {
+        /*  This is a very weak guard on someone trying to score a
+            mutation without first applying a virtual mutation to an underlying
+            template.  In the future, I should just ensure this method can only be
+            called from a MultiReadMutationScorer
+         */
+        if (!(recursor_->tpl_.VirtualMutationActive())) {
+            throw BadExecutionOrderException();
+        }
 
-        if(fabs(m.LengthDiff()) > 1) {
+        if(std::abs(m.LengthDiff()) > 1) {
             throw new InvalidInputError("Only mutations of size 1 allowed");
         }
 
         int betaLinkCol = 1 + m.End();
         int absoluteLinkColumn = 1 + m.End() + m.LengthDiff();
-        TemplateParameterPair old_Tpl = evaluator_->Template();
-        TemplateParameterPair new_tpl = ApplyMutation(m, old_Tpl, ctx_params);
-
+        
         double score;
 
         bool atBegin = (m.Start() < 3);
-        bool atEnd   = (m.End() > (int)old_Tpl.tpl.length() - 2);
+        bool atEnd   = (m.End() > (int)recursor_->tpl_.Length() - 2);
 
         if (!atBegin && !atEnd)
         {
-            // Install mutated template
-            evaluator_->Template(new_tpl);
-
             int extendStartCol, extendLength;
 
             if (m.Type() == DELETION)
@@ -209,11 +199,11 @@ namespace ConsensusCore
                 extendLength   = 1 + (int)m.NewBases().length();
                 assert(extendLength <= EXTEND_BUFFER_COLUMNS);
             }
-
-            recursor_->ExtendAlpha(*evaluator_, *alpha_,
+            
+            auto alphaFact = alpha_->GetLogProdScales(0, extendStartCol);
+            recursor_->ExtendAlpha(*alpha_,
                                    extendStartCol, *extendBuffer_, extendLength);
-            score = recursor_->LinkAlphaBeta(*evaluator_,
-                                             *extendBuffer_, extendLength,
+            score = recursor_->LinkAlphaBeta(*extendBuffer_, extendLength,
                                              *beta_, betaLinkCol,
                                              absoluteLinkColumn);
             score += alpha_->GetLogProdScales(0, extendStartCol);
@@ -223,30 +213,24 @@ namespace ConsensusCore
             //
             // Extend alpha to end
             //
-            evaluator_->Template(new_tpl);
-
             int extendStartCol = m.Start() - 1;
-            int extendLength = (int)new_tpl.tpl.length() - extendStartCol + 1;
+            int extendLength = (int)recursor_->tpl_.VirtualLength() - extendStartCol + 1;
 
-            recursor_->ExtendAlpha(*evaluator_, *alpha_,
+            recursor_->ExtendAlpha(*alpha_,
                                    extendStartCol, *extendBuffer_, extendLength);
-            score = ( std::log((*extendBuffer_)(evaluator_->ReadLength(), extendLength - 1))
+            score = (std::log((*extendBuffer_)((int)recursor_->read_.Sequence.length(), extendLength - 1))
                     + alpha_->GetLogProdScales(0, extendStartCol)
                     + extendBuffer_->GetLogProdScales(0, extendLength) );
         }
         else if (atBegin && !atEnd)
         {
-            //
-            // Extend beta back
-            //
-            evaluator_->Template(new_tpl);
-
+            // If the mutation occurs at positions 0 - 2
             int extendLastCol = m.End();
+            // We duplicate this math inside the function
             int extendLength = m.End() + m.LengthDiff() + 1;
-
-            recursor_->ExtendBeta(*evaluator_, *beta_,
-                                  extendLastCol, *extendBuffer_, extendLength,
-                                  m.LengthDiff());
+            
+            recursor_->ExtendBeta(*beta_, extendLastCol,
+                                  *extendBuffer_, m.LengthDiff());
             score = ( std::log((*extendBuffer_)(0, 0))
                     + beta_->GetLogProdScales(extendLastCol + 1, beta_->Columns())
                     + extendBuffer_->GetLogProdScales(0, extendLength) );
@@ -254,21 +238,26 @@ namespace ConsensusCore
         else
         {
             assert(atBegin && atEnd);
-            // This should basically never happen...
-
+            /* This should basically never happen...
+               and is a total disaster if it does.  The basic idea is that
+               FillAlpha and FillBeta use the real "template" while we test 
+               mutations using "virtual" template positions and the Extend/Link 
+               methods.  Trying to call FillAlpha to calculate the likelihood of a virtual
+               mutation is therefore going to fail, as it calculates using the
+               "real" template.
+             */
+            throw TooSmallTemplateException();
+            
             //
             // Just do the whole fill
             //
-            MatrixType alphaP(evaluator_->ReadLength() + 1,
-                              new_tpl.tpl.length() + 1);
-            evaluator_->Template(new_tpl);
-            recursor_->FillAlpha(*evaluator_, MatrixType::Null(), alphaP);
-            score = ( std::log(alphaP(evaluator_->ReadLength(), new_tpl.tpl.length()))
-                    + alphaP.GetLogProdScales() );
+//            MatrixType alphaP(recursor_->read_.Length() + 1,
+//                              new_tpl->tpl.length() + 1);
+//            evaluator_->Template(*new_tpl);
+//            recursor_->FillAlpha(*evaluator_, MatrixType::Null(), alphaP);
+//            score = ( std::log(alphaP(evaluator_->ReadLength(), new_tpl->tpl.length()))
+//                    + alphaP.GetLogProdScales() );
         }
-
-        // Restore the original template.
-        evaluator_->Template(old_Tpl);
 
         // if (fabs(score - Score()) > 50) { Breakpoint(); }
 
@@ -283,7 +272,6 @@ namespace ConsensusCore
         delete beta_;
         delete alpha_;
         delete recursor_;
-        delete evaluator_;
     }
 
     template class MutationScorer<SimpleQvRecursor>;

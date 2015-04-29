@@ -160,7 +160,7 @@ namespace PacBio.Consensus
         /// </summary>
         private int EndAdapterBases;
 
-        private AbstractMultiReadMutationScorer scorer;
+        private SparseQvSumProductMultiReadMutationScorer scorer;
 
         /// <summary>
         /// Construct a mutation evalutor for the pulse observations in encapsulated by read, on template TrialTemplate.
@@ -176,7 +176,7 @@ namespace PacBio.Consensus
             if (config.Algorithm == RecursionAlgo.Viterbi)
             {
                 throw new Exception ("Integrate don't optimize");
-                scorer = new SparseQvViterbiMultiReadMutationScorer(config.Qconfig, strandTpl);
+                //scorer = new SparseQvViterbiMultiReadMutationScorer(config.Qconfig, strandTpl);
             }
             else if (config.Algorithm == RecursionAlgo.Prob)
             {
@@ -257,7 +257,8 @@ namespace PacBio.Consensus
 
             if (config.Algorithm == RecursionAlgo.Viterbi)
             {
-                scorer = new SparseQvViterbiMultiReadMutationScorer(config.Qconfig, strandTpl);
+                throw new Exception ("Integrate, don't optimize");
+                //scorer = new SparseQvViterbiMultiReadMutationScorer(config.Qconfig, strandTpl);
             }
             else if (config.Algorithm == RecursionAlgo.Prob)
             {
@@ -610,7 +611,7 @@ namespace PacBio.Consensus
         /// </summary>
         public TrialTemplate Template
         {
-            get { return new TrialTemplate(scorer.Template().tpl, StartAdapterBases, EndAdapterBases); }
+            get { throw new Exception();}// TrialTemplate(scorer.Template().tpl, StartAdapterBases, EndAdapterBases); }
         }
 
 

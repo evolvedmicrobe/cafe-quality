@@ -9,127 +9,163 @@
 #include "MatrixTester.hpp"
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <memory>
 #include "MultiReadMutationScorer.hpp"
 #include "Read.hpp"
+#include "TemplateParameterPair.hpp"
+
+
+#define ASSERT(o, e) \
+{ \
+    auto dif = fabs(1- o /e); \
+    std::cout << dif <<std::endl; \
+    if (!(fabs(1 - o/e) < 1e-5)) \
+        std::cerr << "failed assert at " __FILE__ ":" << __LINE__ << "! o = " << o << ", e = " << e << std::endl; \
+    else \
+        std::cerr << "passed test at " __FILE__ ":" << __LINE__ << std::endl; \
+}
+
 
 namespace ConsensusCore {
-    #define ASSERT(o, e) \
-    { \
-        if (!(fabs(1 - o/e) < 1e-5)) \
-            std::cerr << "failed assert at " __FILE__ ":" << __LINE__ << "! o = " << o << ", e = " << e << std::endl; \
-    }
 
-    typedef SparseSimpleQvSumProductMutationScorer ScorerType;
+    
+    
+//    void assert(double o, double e) {
+//        double dif = fabs(1- o/e);
+//        if (!(dif < 1e-5))
+//            std::cerr << "failed assert at " __FILE__ ":" << __LINE__ << "! o = " << o << ", e = " << e << std::endl; \
+//        else
+//            std::cerr << "passed test at " __FILE__ ":" << __LINE__ << std::endl;
+//    }
+    
+
+
+    typedef SparseSimpleQvSumProductMultiReadMutationScorer ScorerType;
     typedef typename ScorerType::RecursorType RecursorType;
 
+    ScorerType createScorer(std::string tpl, SNR snr) {
+        ContextParameters ctx_params(snr);
+        BandingOptions bo = BandingOptions(12.5);
+        QuiverConfig qc(ctx_params, bo);
+        return ScorerType(qc, tpl);
+    }
+    
+    void AddReadToScorer(std::string read, ScorerType& scorer) {
+        Read r("null", read);
+        MappedRead mr(r, FORWARD_STRAND, 0, (int)scorer.Template().tpl.length());
+        scorer.AddRead(mr);
+    }
+    
+    
     int  MatrixTester::TestMutationScorer()
     {
         // A series of tests, all the correct values are derived from the C# code.
-        SNR snr(10.0,7.0,5.0,11.0);
-        ModelParams mp;
-        ContextParameters ctx_params(snr);
-        Read r("tester", "ACGTACGT");
-
+        SNR snr(10.0, 7.0, 5.0, 11.0);
+        
+        TransitionParameters tp = ContextParameterProvider::GetTransitionParameters("CC", snr);
+        // Now look at a small test case
+        std::string tpl = "ACGTCGT";
         // Create a mutation scorer to test values
-        TemplateParameterPair tpp("ACGTCGT", ctx_params);
-        QvEvaluator qv(r, tpp, mp);
-        RecursorType bo(BandingOptions(4, 12.5));
-        ScorerType t(qv, bo);
-        double score = t.Score();
-        ASSERT(score, -4.94222030733063);
+        auto t = createScorer(tpl, snr);
+        AddReadToScorer("ACGTACGT", t);
         
+        double score = t.BaselineScore();
+        //t.DumpAlpha();
+        double t_baseline = -4.94222030733063;
+        ASSERT(score, t_baseline); //-4.99600615471328
         
+       
         //Test a giant version
-        TemplateParameterPair tpGiant("GGGCGGCGACCTCGCGGGTTTTCGCTATTTATGAAAATTTTCCGGTTTAAGGCGTTTCCGTTCTTCTTCGTCATAACTTAATGTTTTTATTTAAAATACCCTCTGAAAAGAAAGGAAACGACAGGTGCTGAAAGCGAGCTTTTTGGCCTCTGTCGTTTCCTTTCTCTGTTTTTGTCCGTGGAATGAACAATGGAAGTCAACAAAAAGCAGCTGGCTGACATTTTCGGTGCGAGTATCCGTACCATTCAGAACTGGCAGGAACAGGGAATGCCCGTTCTGCGAGGCGGTGGCAAGGGTAATGAGGTGCTTTATGACTCTGCCGCCGTCATAAAATGGTATGCCGAAAGGGATGCTGAAATTGAGAACGAAAAGCTGCGCCGGGAGGTTGAAGAACTGCGGCAGGCCAGCGAGGCAGATCTCCAGCCAGGAACTATTGAGTACGAACGCCATCGACTTACGCGTGCGCAGGCCGACGCACAGGAACTGAAGAATGCCAGAGACTCCGCTGAAGTGGTGGAAACCGCATTCTGTACTTTCGTGCTGTCGCGGATCGCAGGTGAAATTGCCAGTATTCTCGACGGGCTCCCCCTGTCGGTGCAGCGGCGTTTTCCGGAACTGGAAAACCGACATGTTGATTTCCTGAAACGGGATATCATCAAAGCCATGAACAAAGCAGCCGCGCTGGATGAACTGATACCGGGGTTGCTGAGTGAATATATCGAACAGTCAGGTTAACAGGCTGCGGCATTTTGTCCGCGCCGGGCTTCGCTCACTGTTCAGGCCGGAGCCACAGACCGCCGTTGAATGGGCGGATGCTAATTACTATCTCCCGAAAGAATC", ctx_params);
-        Read rGiant("tester", "GGGCGGCGACCTCGCGGGTTTTCGCTATTTCTGAAAATTTTCCGGTTTAAGGCGTTTCCGTTCTTCTTCGTCATAACTTAATGTTTTTATTTAAAATACCCTCTGAAAAGAAAGGAAACGACAGGTGCTGAAAGCGAGCTTTTTGGCCTCTGTCGTTTCCTTTCTCTGTTTTTGTCCGTGGAATGAACAATGGAAGTCAACAAAAAGCAGCTGGCTGACATTTTCGGTGGAGTATCCGTACCATTCAGAACTGGCAGGACAGGGAATGCCCGTTCTGCGAGGCGGTGGCAAGGGTAATGAGGTGCTTTATGACTCTGCCGCCGTCATAAAATGGTATGCCGAAAGGGATGCTGAAATTGAGAACGAATAGCTGCGCCGGGAGGTTGAAGAACTGCGGCAGGCCAGCGAGGCAGATCTCCAGCCAGGAACTATTGAGTACGAACGCCATCGACTTACGCGTGCGCAGGCCGACGCACAGGAACTGAAGAATGCCAGAGACTCCGCTGAAGTGGTGGAAACCGCATTCCCCTGTACTTTCGTGCTGTCGCGGATCGCAGGTGAAATTGCCAGTATTCTCGACGGGCTCCCCCTGTCGGTGCAGCGGCGTTTTCCGGAACTGGAAAACCGACATGTTGATTTCCTGAAACGGGATATCATCAAAGCCATGAACAAAGCAGCCGCGCTGGATGAACTGATACCGGGGTTGCTGAGTGAATATATCGAACAGTCAGGTTAACAGGCTGCGGCATTTTGTCCGCGCCGGGCTTCGCTCACTGTTCAGGCCGGAGCCACAGACCGCCGTTGAACGGATGCTAATTACTATCTCCCGAAAGAATC");
-        QvEvaluator qvGiant(rGiant, tpGiant, mp);
-        RecursorType boGiant(BandingOptions(4, 12.5));
-        ScorerType tGiant(qvGiant, boGiant);
-        score = tGiant.Score();
+        std::string longTPL = "GGGCGGCGACCTCGCGGGTTTTCGCTATTTATGAAAATTTTCCGGTTTAAGGCGTTTCCGTTCTTCTTCGTCATAACTTAATGTTTTTATTTAAAATACCCTCTGAAAAGAAAGGAAACGACAGGTGCTGAAAGCGAGCTTTTTGGCCTCTGTCGTTTCCTTTCTCTGTTTTTGTCCGTGGAATGAACAATGGAAGTCAACAAAAAGCAGCTGGCTGACATTTTCGGTGCGAGTATCCGTACCATTCAGAACTGGCAGGAACAGGGAATGCCCGTTCTGCGAGGCGGTGGCAAGGGTAATGAGGTGCTTTATGACTCTGCCGCCGTCATAAAATGGTATGCCGAAAGGGATGCTGAAATTGAGAACGAAAAGCTGCGCCGGGAGGTTGAAGAACTGCGGCAGGCCAGCGAGGCAGATCTCCAGCCAGGAACTATTGAGTACGAACGCCATCGACTTACGCGTGCGCAGGCCGACGCACAGGAACTGAAGAATGCCAGAGACTCCGCTGAAGTGGTGGAAACCGCATTCTGTACTTTCGTGCTGTCGCGGATCGCAGGTGAAATTGCCAGTATTCTCGACGGGCTCCCCCTGTCGGTGCAGCGGCGTTTTCCGGAACTGGAAAACCGACATGTTGATTTCCTGAAACGGGATATCATCAAAGCCATGAACAAAGCAGCCGCGCTGGATGAACTGATACCGGGGTTGCTGAGTGAATATATCGAACAGTCAGGTTAACAGGCTGCGGCATTTTGTCCGCGCCGGGCTTCGCTCACTGTTCAGGCCGGAGCCACAGACCGCCGTTGAATGGGCGGATGCTAATTACTATCTCCCGAAAGAATC";
+        
+        ScorerType scorer = createScorer(longTPL, snr);
+        
+        std::string long_read = "GGGCGGCGACCTCGCGGGTTTTCGCTATTTCTGAAAATTTTCCGGTTTAAGGCGTTTCCGTTCTTCTTCGTCATAACTTAATGTTTTTATTTAAAATACCCTCTGAAAAGAAAGGAAACGACAGGTGCTGAAAGCGAGCTTTTTGGCCTCTGTCGTTTCCTTTCTCTGTTTTTGTCCGTGGAATGAACAATGGAAGTCAACAAAAAGCAGCTGGCTGACATTTTCGGTGGAGTATCCGTACCATTCAGAACTGGCAGGACAGGGAATGCCCGTTCTGCGAGGCGGTGGCAAGGGTAATGAGGTGCTTTATGACTCTGCCGCCGTCATAAAATGGTATGCCGAAAGGGATGCTGAAATTGAGAACGAATAGCTGCGCCGGGAGGTTGAAGAACTGCGGCAGGCCAGCGAGGCAGATCTCCAGCCAGGAACTATTGAGTACGAACGCCATCGACTTACGCGTGCGCAGGCCGACGCACAGGAACTGAAGAATGCCAGAGACTCCGCTGAAGTGGTGGAAACCGCATTCCCCTGTACTTTCGTGCTGTCGCGGATCGCAGGTGAAATTGCCAGTATTCTCGACGGGCTCCCCCTGTCGGTGCAGCGGCGTTTTCCGGAACTGGAAAACCGACATGTTGATTTCCTGAAACGGGATATCATCAAAGCCATGAACAAAGCAGCCGCGCTGGATGAACTGATACCGGGGTTGCTGAGTGAATATATCGAACAGTCAGGTTAACAGGCTGCGGCATTTTGTCCGCGCCGGGCTTCGCTCACTGTTCAGGCCGGAGCCACAGACCGCCGTTGAACGGATGCTAATTACTATCTCCCGAAAGAATC";
+        AddReadToScorer(long_read, scorer);
+        
+        score = scorer.BaselineScore();
         ASSERT(score, -131.73248120890264); // This one was not verified in C#
+        
         // Now let's check deletion times
         int i=0;
-        for(; i< 40000;i++) {
+        for(; i< 20000;i++) {
             Mutation mL(MutationType::DELETION, 755, '-');
-            score = tGiant.ScoreMutation(mL, ctx_params);
-            ASSERT(score, -135.77201961629177);
+            score = scorer.Score(mL);
+            ASSERT(score, -4.039538);
         }
         
-
+        // Check the CC Context
+        ScorerType t2 = createScorer(tpl, snr);
+        AddReadToScorer("ACCTCGT", t2);
+        double score2 = t2.BaselineScore();
+        ASSERT(score2, -6.17329812914413);
+        
+        
         i=0;
-        for(;i<20000;i++) {
+        for(;i<1;i++) {
         // Test an insertion mutation
         Mutation m(MutationType::INSERTION, 4, 'A');
-        auto new_score = t.ScoreMutation(m,ctx_params);
-        ASSERT(new_score, -0.584415070238446);
+        auto new_score = t.Score(m);
+        ASSERT(new_score, (-0.584415070238446 - t_baseline));
 
-        // Check the CC Context
-        TemplateParameterPair tpp2("ACCTCGT", ctx_params);
-        QvEvaluator qv2(r, tpp2, mp);
-        RecursorType bo2(BandingOptions(4, 12.5));
-        ScorerType t2(qv2, bo2);
-        double score2 = t2.Score();
-        ASSERT(score2, -10.4362503093273);
-
-
+       
         // Now get the same value by mutating the original template
         Mutation m2(MutationType::SUBSTITUTION, 2, 'C');
-        auto new_score2 = t.ScoreMutation(m2, ctx_params);
-        ASSERT(new_score2, -10.4362503093273);
+        auto new_score2 = t.Score(m2);
+        ASSERT(new_score2, (-10.4362503093273 - t_baseline));
 
         // Test deletion near the end (goes through link/alpha beta path).
         Mutation m3(MutationType::DELETION, 4,'-');
-        auto score3 = t.ScoreMutation(m3, ctx_params);
-        ASSERT(score3, -9.89216068954291);
+        auto score3 = t.Score(m3);
+        ASSERT(score3, (-9.89216068954291 - t_baseline));
 
         // Test a deletion of the very last base.
         Mutation m4(MutationType::DELETION, 6, '-');
-        auto score4 = t.ScoreMutation(m4, ctx_params);
-        ASSERT(score4, -15.6788158527151);
+        auto score4 = t.Score(m4);
+        ASSERT(score4, (-15.6788158527151 - t_baseline));
 
         // Test an insertion at the very last base
-        Mutation m5(MutationType::INSERTION, 7, 'T');
-        auto score5 = t.ScoreMutation(m5, ctx_params);
-        ASSERT(score5, -8.99810225167093);
+        // This is very poorly defined behavior so I am ditching this.
+        //Mutation m5(MutationType::INSERTION, 7, 'T');
+        //auto score5 = t.Score(m5);
+        //ASSERT(score5, -8.99810225167093 - t_baseline);
 
         // Test a deletion of the first base
         Mutation m6(MutationType::DELETION, 0, '-');
-        auto score6 = t.ScoreMutation(m6, ctx_params);
-        ASSERT(score6, -16.6208180854335);
+        auto score6 = t.Score(m6);
+        ASSERT(score6, (-16.6208180854335 - t_baseline));
 
         //return 0;
        // Test an insertion at the first base
-        Mutation m7(MutationType::INSERTION, 0, 'A');
-        auto score7 = t.ScoreMutation(m7, ctx_params);
-        ASSERT(score7, -7.51178602234865);
-
+        // Again bad vehavior wiht ends pinned, so going to tich this
+        //Mutation m7(MutationType::INSERTION, 0, 'A');
+        //auto score7 = t.Score(m7);
+        //ASSERT(score7, (-7.51178602234865 - t_baseline));
 
 
         // Substitution in middle mutations to test link alpha-beta
         Mutation m8(MutationType::SUBSTITUTION, 4, 'A');
-        auto score8 = t.ScoreMutation(m8, ctx_params);
-        ASSERT(score8, -5.23558996122357);
+        auto score8 = t.Score(m8);
+        ASSERT(score8, (-5.23558996122357 - t_baseline));
 
         // Insertion in middle to test link alpha-beta
         Mutation m9(MutationType::INSERTION, 4, 'G');
-        auto score9 = t.ScoreMutation(m9, ctx_params);
-        ASSERT(score9, -6.71553495654471);
+        auto score9 = t.Score(m9);
+        ASSERT(score9, (-6.71553495654471 - t_baseline));
         }
         std::cout << "Finished!" << i << std::endl;
         return 0;
     }
 
     int MatrixTester::TestMultiReadScorer() {
-        BandingOptions bo(3, 18);
+        BandingOptions bo(18);
         double fast_score_threshold = -12.5;
-
 
 
         std::string temp = "AGAGAGATAGCTACTAGTCCTCAGCAAGCTTGATCACACTATATGCGAGCGCGATAGATCGCTCTGCATCGTCACGATGTGTGTATATGACTGAGAGTCATACTATCTCTGCTACGCTCGACGTAGCGCTCATGTCGTCTAGTATGCGTGAGACGACGTAGCAGATACATGAGTGACAGACTCAGCAGTGCGCACAGTCACAGCTGTAGCATCGTACTCTACT";
         SNR snr(15.4944181442261,8.78859329223633,13.521107673645,14.9640893936157);
-        ContextParameters ctx_params(snr);
-        QuiverConfig qc(ctx_params, bo, fast_score_threshold);
-        SparseSimpleSumProductMultiReadMutationScorer scorer(qc, temp);
+        ScorerType scorer = createScorer(temp, snr);
         Read r1("m141008_060349_42194_c100704972550000001823137703241586_s1_p0/5/19492_19674 RQ=0.848","GAGATACGATGCTACAGGGCTGTGACTGTGCGCACTGGCATGAGATCTGTCACTCCTAATGGTGTATCTTGCTACGCTTCGTACTCTCAGCGCAATACTAGGAACGACAATTGAGCGCGTTACGTCGAGCGTAGCAAGAGGATAGTATGACTCTCAGTCAATAACGACGACAGTTCGGAACG");
         MappedRead mr1(r1, StrandEnum::REVERSE_STRAND, 68, 218, false, false );
         auto result1 = scorer.AddRead(mr1, 1.0);

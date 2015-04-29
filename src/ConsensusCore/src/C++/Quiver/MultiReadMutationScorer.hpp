@@ -40,6 +40,7 @@
 #include <utility>
 #include <vector>
 #include <map>
+#include "float.h"
 
 #include "Types.hpp"
 #include "Read.hpp"
@@ -47,84 +48,13 @@
 #include "Matrix/SparseMatrix.hpp"
 #include "Quiver/MutationScorer.hpp"
 #include "Quiver/QuiverConfig.hpp"
-
+#include "Quiver/detail/Combiner.hpp"
+#include "Matrix/SparseMatrix.hpp"
 
 namespace ConsensusCore {
 
     enum AddReadResult {SUCCESS, ALPHABETAMISMATCH, MEM_FAIL, OTHER};
     
-    class AbstractMultiReadMutationScorer
-    {
-    protected:
-        AbstractMultiReadMutationScorer() {}
-        virtual ~AbstractMultiReadMutationScorer() {}
-
-    public:
-        virtual int TemplateLength() const = 0;
-        virtual int NumReads() const = 0;
-        virtual const MappedRead* Read(int readIndex) const = 0;
-
-        virtual TemplateParameterPair Template(StrandEnum strand = FORWARD_STRAND) const = 0;
-        virtual TemplateParameterPair Template(StrandEnum strand,
-                                     int templateStart,
-                                     int templateEnd) const = 0;
-
-        virtual void ApplyMutations(const std::vector<Mutation>& mutations) = 0;
-
-        // Reads provided must be clipped to the reference/scaffold window implied by the
-        // template, however they need not span the window entirely---nonspanning reads
-        // must be provided with (0-based) template start/end coordinates.
-        virtual AddReadResult AddRead(const MappedRead& mappedRead, double threshold) = 0;
-        virtual AddReadResult AddRead(const MappedRead& mappedRead) = 0;
-
-        virtual double Score(const Mutation& m) const = 0;
-        virtual double FastScore(const Mutation& m) const = 0;
-
-        // Return a vector (of length NumReads) of the difference in
-        // the score of each read caused by the template mutation.  In
-        // the case where the mutation cannot be scored for a read
-        // (i.e., it is too close to the end of the template, or the
-        // read does not span the mutation site) that entry in the
-        // vector is 0
-        virtual std::vector<double> Scores(const Mutation& m, double unscoredValue) const = 0;
-        virtual std::vector<double> Scores(const Mutation& m) const = 0;
-
-        virtual bool IsFavorable(const Mutation& m) const = 0;
-        virtual bool FastIsFavorable(const Mutation& m) const = 0;
-
-        // Rough estimate of memory consumption of scoring machinery
-        virtual std::vector<int> AllocatedMatrixEntries() const = 0;
-        virtual std::vector<int> UsedMatrixEntries() const = 0;
-        virtual const AbstractMatrix* AlphaMatrix(int i) const = 0;
-        virtual const AbstractMatrix* BetaMatrix(int i) const = 0;
-        virtual std::vector<int> NumFlipFlops() const = 0;
-
-#if !defined(SWIG) || defined(SWIGCSHARP)
-        // Alternate entry points for C# code, not requiring zillions of object
-        // allocations.
-        virtual double Score(MutationType mutationType, int position, char base) const = 0;
-        virtual std::vector<double> Scores(MutationType mutationType,
-                                          int position, char base,
-                                          double unscoredValue) const = 0;
-        virtual std::vector<double> Scores(MutationType mutationType,
-                                          int position, char base) const = 0;
-#endif
-
-        // Return the actual sum of scores for the current template.
-        // TODO(dalexander): need to refactor to make the semantics of
-        // the various "Score" functions clearer.
-        virtual double BaselineScore() const = 0;
-        virtual std::vector<double> BaselineScores() const = 0;
-
-
-        virtual std::string ToString() const = 0;
-    };
-
-
-    bool ReadScoresMutation(const MappedRead& mr, const Mutation& mut);
-    Mutation OrientedMutation(const MappedRead& mr, const Mutation& mut);
-
-
     namespace detail {
         template<typename ScorerType>
         struct ReadState
@@ -132,11 +62,11 @@ namespace ConsensusCore {
             MappedRead* Read;
             ScorerType* Scorer;
             bool IsActive;
-
+            
             ReadState(MappedRead* read,
                       ScorerType* scorer,
                       bool isActive);
-
+            
             ReadState(const ReadState& other);
             ~ReadState();
             void CheckInvariants() const;
@@ -144,105 +74,125 @@ namespace ConsensusCore {
         };
     }
 
+   
     template<typename R>
-    class MultiReadMutationScorer : public AbstractMultiReadMutationScorer
+    class MultiReadMutationScorer
     {
-    public:
-        typedef R                                         RecursorType;
-        typedef typename R::EvaluatorType                 EvaluatorType;
-        typedef typename ConsensusCore::MutationScorer<R> ScorerType;
-        typedef typename detail::ReadState<ScorerType>    ReadStateType;
+        
+        public:
+            typedef R                                         RecursorType;
+            typedef typename ConsensusCore::MutationScorer<R> ScorerType;
+            typedef typename detail::ReadState<ScorerType>    ReadStateType;
 
-    public:
-        MultiReadMutationScorer(const QuiverConfig& config, std::string tpl);
-        MultiReadMutationScorer(const MultiReadMutationScorer<R>& scorer);
-        virtual ~MultiReadMutationScorer();
-
-        int TemplateLength() const;
-        int NumReads() const;
-        const MappedRead* Read(int readIndex) const;
-
-        TemplateParameterPair Template(StrandEnum strand = FORWARD_STRAND) const;
-        TemplateParameterPair Template(StrandEnum strand, int templateStart, int templateEnd) const;
-        void ApplyMutations(const std::vector<Mutation>& mutations);
-
-        // Reads provided must be clipped to the reference/scaffold window implied by the
-        // template, however they need not span the window entirely---nonspanning reads
-        // must be provided with (0-based) template start/end coordinates.
-        AddReadResult AddRead(const MappedRead& mappedRead, double threshold);
-        AddReadResult AddRead(const MappedRead& mappedRead);
-
-        double Score(const Mutation& m) const;
-        double FastScore(const Mutation& m) const;
-
-        // Return a vector (of length NumReads) of the difference in
-        // the score of each read caused by the template mutation.  In
-        // the case where the mutation cannot be scored for a read
-        // (i.e., it is too close to the end of the template, or the
-        // read does not span the mutation site) that entry in the
-        // vector is -FLT_MAX, which is to be interpreted as NA.
-        std::vector<double> Scores(const Mutation& m, double unscoredValue) const;
-        std::vector<double> Scores(const Mutation& m) const
-        {
-            return Scores(m, 0.0);
-        }
-
-        bool IsFavorable(const Mutation& m) const;
-        bool FastIsFavorable(const Mutation& m) const;
-
-        // Rough estimate of memory consumption of scoring machinery
-        std::vector<int> AllocatedMatrixEntries() const;
-        std::vector<int> UsedMatrixEntries() const;
-        const AbstractMatrix* AlphaMatrix(int i) const;
-        const AbstractMatrix* BetaMatrix(int i) const;
-        std::vector<int> NumFlipFlops() const;
-
-#if !defined(SWIG) || defined(SWIGCSHARP)
-        // Alternate entry points for C# code, not requiring zillions of object
-        // allocations.
-        double Score(MutationType mutationType, int position, char base) const;
-        std::vector<double> Scores(MutationType mutationType,
-                                  int position, char base,
-                                  double unscoredValue) const;
-        std::vector<double> Scores(MutationType mutationType,
-                                  int position, char base) const
-        {
-            return Scores(mutationType, position, base, 0.0);
-        }
+        public:
+            MultiReadMutationScorer(const QuiverConfig& config, std::string tpl);
+            // Move constructor and assignment operator
+            MultiReadMutationScorer(MultiReadMutationScorer&& rhs) = default;
+            MultiReadMutationScorer& operator=(MultiReadMutationScorer&& rhs) = default;
+#if FALSE
+            MultiReadMutationScorer(const MultiReadMutationScorer<R>& scorer);
 #endif
+            virtual ~MultiReadMutationScorer();
 
-    public:
-        // Return the actual sum of scores for the current template.
-        // TODO(dalexander): need to refactor to make the semantics of
-        // the various "Score" functions clearer.
-        double BaselineScore() const;
-        std::vector<double> BaselineScores() const;
+            bool ReadScoresMutation(const MappedRead& mr, const Mutation& mut) const;
+            Mutation OrientedMutation(const MappedRead& mr, const Mutation& mut);
+            
+            int TemplateLength() const;
+            int NumReads() const;
+            const MappedRead* Read(int readIndex) const;
 
-    public:
-        std::string ToString() const;
+            TemplateParameterPair& Template(StrandEnum strand = FORWARD_STRAND);
+        
+            void ApplyMutations(const std::vector<Mutation>& mutations);
 
-    private:
-        void CheckInvariants() const;
+            // Reads provided must be clipped to the reference/scaffold window implied by the
+            // template, however they need not span the window entirely---nonspanning reads
+            // must be provided with (0-based) template start/end coordinates.
+            AddReadResult AddRead(const MappedRead& mappedRead, double threshold);
+            AddReadResult AddRead(const MappedRead& mappedRead);
 
-    private:
-        QuiverConfig quiv_config;
-        double fastScoreThreshold_;
-        TemplateParameterPair fwdTemplate_;
-        TemplateParameterPair revTemplate_;
-        std::vector<ReadStateType> reads_;
-    };
+            double Score(const Mutation& m, double scoreThreshold = -DBL_MAX);
+            double FastScore(const Mutation& m);
 
+            // Return a vector (of length NumReads) of the difference in
+            // the score of each read caused by the template mutation.  In
+            // the case where the mutation cannot be scored for a read
+            // (i.e., it is too close to the end of the template, or the
+            // read does not span the mutation site) that entry in the
+            // vector is -FLT_MAX, which is to be interpreted as NA.
+            std::vector<double> Scores(const Mutation& m, double unscoredValue);
+            std::vector<double> Scores(const Mutation& m)
+            {
+                return Scores(m, 0.0);
+            }
+
+        
+
+            bool IsFavorable(const Mutation& m);
+            bool FastIsFavorable(const Mutation& m);
+
+            // Rough estimate of memory consumption of scoring machinery
+            std::vector<int> AllocatedMatrixEntries() const;
+            std::vector<int> UsedMatrixEntries() const;
+            const AbstractMatrix* AlphaMatrix(int i) const;
+            const AbstractMatrix* BetaMatrix(int i) const;
+            std::vector<int> NumFlipFlops() const;
+
+    #if !defined(SWIG) || defined(SWIGCSHARP)
+            // Alternate entry points for C# code, not requiring zillions of object
+            // allocations.
+            double Score(MutationType mutationType, int position, char base);
+        
+            std::vector<double> Scores(MutationType mutationType,
+                                      int position, char base,
+                                      double unscoredValue);
+        
+            std::vector<double> Scores(MutationType mutationType,
+                                      int position, char base)
+            {
+                return Scores(mutationType, position, base, 0.0);
+            }
+    #endif
+
+        public:
+            // Return the actual sum of scores for the current template.
+            // TODO(dalexander): need to refactor to make the semantics of
+            // the various "Score" functions clearer.
+            double BaselineScore() const;
+            std::vector<double> BaselineScores() const;
+            void DumpAlpha();
+
+        public:
+            std::string ToString() const;
+
+        private:
+            void DumpMatrix(const SparseMatrix& mat, const std::string& fname);
+            void CheckInvariants() const;
+            /*
+             Create a thin wrapper around the base template with coordinates specific for this guy
+             */
+            WrappedTemplateParameterPair Template(StrandEnum strand, int templateStart, int templateEnd);
+
+        protected:
+            QuiverConfig quiv_config;
+            double fastScoreThreshold_;
+            TemplateParameterPair fwdTemplate_;
+            TemplateParameterPair revTemplate_;
+            std::vector<ReadStateType> reads_;
+        };
+
+        
+        typedef MultiReadMutationScorer<SimpleQvRecursor> \
+        SimpleQvMultiReadMutationScorer;
+        
+        typedef MultiReadMutationScorer<SimpleQvSumProductRecursor> \
+        SimpleQvSumProductMultiReadMutationScorer;
+        
+        typedef MultiReadMutationScorer<SparseSimpleQvRecursor> \
+          SparseSimpleQvMultiReadMutationScorer;
+        
+        // This is the main one that will be used in the loop.
+        typedef MultiReadMutationScorer<SparseSimpleQvSumProductRecursor> \
+          SparseSimpleQvSumProductMultiReadMutationScorer;
     
-    typedef MultiReadMutationScorer<SimpleQvRecursor> \
-    SimpleQvMultiReadMutationScorer;
-    
-    typedef MultiReadMutationScorer<SimpleQvSumProductRecursor> \
-    SimpleQvSumProductMultiReadMutationScorer;
-    
-    typedef MultiReadMutationScorer<SparseSimpleQvRecursor> \
-      SparseSimpleQvMultiReadMutationScorer;
-    
-    // This is the main one that will be used in the loop.
-    typedef MultiReadMutationScorer<SparseSimpleQvSumProductRecursor> \
-      SparseSimpleSumProductMultiReadMutationScorer;
 }

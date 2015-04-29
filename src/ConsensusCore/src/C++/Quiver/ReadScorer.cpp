@@ -40,7 +40,6 @@
 
 #include "PairwiseAlignment.hpp"
 #include "Quiver/QuiverConfig.hpp"
-#include "Quiver/QvEvaluator.hpp"
 #include "Quiver/ReadScorer.hpp"
 #include "Matrix/SparseMatrix.hpp"
 #include "Quiver/SimpleRecursor.hpp"
@@ -57,68 +56,49 @@ namespace ConsensusCore
     {}
 
     template<typename R>
-    double ReadScorer<R>::Score(const TemplateParameterPair& tpl, const Read& read) const
+    double ReadScorer<R>::Score(const WrappedTemplateParameterPair& tpl, const Read& read) const
         throw(AlphaBetaMismatchException)
     {
         int I, J;
-        R r(_quiverConfig.Banding);
-        QvEvaluator e(read, tpl, _quiverConfig.QvParams);
-
+        R r(_quiverConfig.QvParams, read, tpl, _quiverConfig.Banding);
+        
         I = read.Length();
-        J = (int)tpl.tpl.length();
+        J = (int)tpl.Length();
         SparseMatrix alpha(I+1, J+1), beta(I+1, J+1);
-        r.FillAlphaBeta(e, alpha, beta);
+        r.FillAlphaBeta(alpha, beta);
 
         return std::log(beta(0, 0)) + beta.GetLogProdScales();
     }
-
-//    template<typename R>
-//    const PairwiseAlignment*
-//    ReadScorer<R>::Align(const string& tpl, const Read& read) const
-//        throw(AlphaBetaMismatchException)
-//    {
-//        int I, J;
-//        R r(_quiverConfig.Banding);
-//        QvEvaluator e(read, tpl, _quiverConfig.QvParams);
-//
-//        I = read.Length();
-//        J = tpl.length();
-//        SparseMatrix alpha(I+1, J+1), beta(I+1, J+1);
-//        r.FillAlphaBeta(e, alpha, beta);
-//        return r.Alignment(e, alpha);
-//    }
-
+    
     template<typename R>
     const SparseMatrix*
-    ReadScorer<R>::Alpha(const TemplateParameterPair& tpl, const Read& read) const
+    ReadScorer<R>::Alpha(const WrappedTemplateParameterPair& tpl, const Read& read) const
         throw(AlphaBetaMismatchException)
     {
         int I, J;
-        R r(_quiverConfig.Banding);
-        QvEvaluator e(read, tpl, _quiverConfig.QvParams);
+        R r(_quiverConfig.QvParams, read, tpl, _quiverConfig.Banding);
 
         I = read.Length();
-        J = tpl.tpl.length();
+        J = tpl.Length();
         SparseMatrix *alpha = new SparseMatrix(I+1, J+1);
         SparseMatrix *beta  = new SparseMatrix(I+1, J+1);
-        r.FillAlphaBeta(e, *alpha, *beta);
+        r.FillAlphaBeta(*alpha, *beta);
         return alpha;
     }
 
     template<typename R>
     const SparseMatrix*
-    ReadScorer<R>::Beta(const TemplateParameterPair& tpl, const Read& read) const
+    ReadScorer<R>::Beta(const WrappedTemplateParameterPair& tpl, const Read& read) const
         throw(AlphaBetaMismatchException)
     {
         int I, J;
-        R r(_quiverConfig.Banding);
-        QvEvaluator e(read, tpl, _quiverConfig.QvParams);
-
+        R r(_quiverConfig.QvParams, read, tpl, _quiverConfig.Banding);
+        
         I = read.Length();
-        J = tpl.tpl.length();
+        J = tpl.Length();
         SparseMatrix *alpha = new SparseMatrix(I+1, J+1);
         SparseMatrix *beta  = new SparseMatrix(I+1, J+1);
-        r.FillAlphaBeta(e, *alpha, *beta);
+        r.FillAlphaBeta(*alpha, *beta);
         return beta;
     }
 

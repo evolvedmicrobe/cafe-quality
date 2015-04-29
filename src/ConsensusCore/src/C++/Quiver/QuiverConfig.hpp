@@ -59,7 +59,7 @@ namespace ConsensusCore
     {
         double ScoreDiff;
 
-        BandingOptions(int diagonalCross, double scoreDiff)
+        BandingOptions(double scoreDiff)
             : ScoreDiff(scoreDiff)
         {
             if(scoreDiff < 0) {
@@ -67,14 +67,6 @@ namespace ConsensusCore
             }
         }
 
-        BandingOptions(int diagonalCross, double scoreDiff,
-                       double dynamicAdjustFactor, double dynamicAdjustOffset)
-            : ScoreDiff(scoreDiff)
-        {
-            if(scoreDiff < 0 ) {
-                throw InvalidInputError("ScoreDiff must be positive!");
-            }
-        }
     };
 
 
@@ -92,6 +84,16 @@ namespace ConsensusCore
             , PrNotMiscall(1.0 - mismatch)
             , PrThirdOfMiscall(mismatch / 3.0)
         {}
+        
+        // Copy constructor
+        ModelParams(const ModelParams& src) = default;
+        
+        // Move constructor
+        ModelParams(ModelParams&& src) = default;
+        
+        // Copy Assignment operator
+        ModelParams& operator=(const ModelParams& rhs) = default;
+        
     };
 
 
