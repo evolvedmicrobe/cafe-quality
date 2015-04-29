@@ -99,7 +99,7 @@ namespace ConsensusCore {
         void ClearColumn(int j);
 
     public: // Scaling and normalization
-        double GetScale(int j) const;
+        double GetLoggedScale(int j) const;
         double GetLogProdScales(int s, int e) const;
         double GetLogProdScales() const;
 

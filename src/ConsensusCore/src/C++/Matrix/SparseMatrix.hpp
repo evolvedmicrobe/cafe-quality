@@ -79,7 +79,7 @@ namespace ConsensusCore {
         void ClearColumn(int j);
 
     public: // Scaling and normalization
-        double GetScale(int j) const;
+        double GetLoggedScale(int j) const;
         double GetLogProdScales(int s, int e) const;
         double GetLogProdScales() const;
 
@@ -97,7 +97,7 @@ namespace ConsensusCore {
 
     private:
         std::vector<SparseVector*> columns_;
-        std::vector<double> scalars_;
+        std::vector<double> logged_scalars_;
         int nCols_;
         int nRows_;
         int columnBeingEdited_;

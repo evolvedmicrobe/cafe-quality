@@ -396,7 +396,7 @@ namespace ConsensusCore {
         // Due to pinning at the end, moves are only possible if less than these positions.
         int maxLeftMovePossible = tpl_.VirtualLength();
         int maxDownMovePossible = read_.Length();
-
+        
         for (int extCol = 0; extCol < numExtColumns; extCol++)
         {
             int j = beginColumn + extCol;

@@ -133,10 +133,10 @@ namespace ConsensusCore
             }
             myfile << std::endl;
         }
-        myfile << mat.GetScale(0);
+        myfile << mat.GetLoggedScale(0);
         for (int j=1; j < mat.Columns(); j++)
         {
-            myfile << "," << mat.GetScale(j);
+            myfile << "," << mat.GetLoggedScale(j);
         }
         myfile << std::endl;
         myfile.close();
@@ -200,7 +200,6 @@ namespace ConsensusCore
                 assert(extendLength <= EXTEND_BUFFER_COLUMNS);
             }
             
-            auto alphaFact = alpha_->GetLogProdScales(0, extendStartCol);
             recursor_->ExtendAlpha(*alpha_,
                                    extendStartCol, *extendBuffer_, extendLength);
             score = recursor_->LinkAlphaBeta(*extendBuffer_, extendLength,

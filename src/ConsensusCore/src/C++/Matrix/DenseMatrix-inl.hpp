@@ -161,9 +161,9 @@ namespace ConsensusCore {
     }
 
     inline double
-    DenseMatrix::GetScale(int j) const
+    DenseMatrix::GetLoggedScale(int j) const
     {
-        return 1.0;
+        return 0.0;
     }
 
     inline double

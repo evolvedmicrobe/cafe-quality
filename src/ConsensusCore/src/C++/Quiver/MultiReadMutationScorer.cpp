@@ -196,8 +196,8 @@ namespace ConsensusCore
     {
         throw NotYetImplementedException();
         // Need to convert those variables from public to private to make work.
-        std::cout << "test";
-        auto scorer = reads_[0].Scorer;
+        //std::cout << "test";
+        //auto scorer = reads_[0].Scorer;
         //DumpMatrix(*((SparseMatrix*)scorer->extendBuffer_), "/Users/nigel/git/cafe-quality/src/Tests/bin/Release/extension.csv");
       
     }
@@ -506,10 +506,10 @@ namespace ConsensusCore
             }
             myfile << std::endl;
         }
-        myfile << mat.GetScale(0);
+        myfile << mat.GetLoggedScale(0);
         for (int j=1; j < mat.Columns(); j++)
         {
-            myfile << "," << mat.GetScale(j);
+            myfile << "," << mat.GetLoggedScale(j);
         }
         myfile << std::endl;
         myfile.close();
