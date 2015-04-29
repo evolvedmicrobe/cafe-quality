@@ -457,7 +457,6 @@ namespace PacBio.Consensus
         /// <returns>The ratio of the mutated and original template likelihoods</returns>
         public double ScoreMutation(Mutation m)
         {
-            Console.WriteLine (this.Template.Length +"\t"+ m.TemplatePosition);
             return scorer.Score(m.Type, m.TemplatePosition, m.Base);
         }
 

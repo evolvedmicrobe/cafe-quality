@@ -111,6 +111,7 @@ namespace ConsensusCore
     {
         delete alpha_;
         delete beta_;
+        recursor_->tpl_ = tpl;
         int I = (int)recursor_->read_.Sequence.length() + 1;
         int J = recursor_->tpl_.Length() + 1;
         alpha_ = new MatrixType(I, J);
