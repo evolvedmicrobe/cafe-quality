@@ -145,7 +145,7 @@ namespace PacBio.Consensus
             if (length < 0)
                 length = a.Count;
 
-            var ba = new ByteVector();
+            var ba = new ByteVector(length);
 
             for (var i = 0; i < length; i++) {
                 if (a [start + i] < 20)
