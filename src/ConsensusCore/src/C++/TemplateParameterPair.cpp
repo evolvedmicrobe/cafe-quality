@@ -13,26 +13,34 @@ namespace ConsensusCore {
     
     static const int NO_MUTATION_SET_FLAG = -100;
     TemplateParameterPair::TemplateParameterPair(const std::string& tpl_,
-                          const std::vector<TransitionParameters>& trans_probs_)
-    : tpl(tpl_), trans_probs(trans_probs_), mutationOffset(NO_MUTATION_SET_FLAG)
+                                                 const std::vector<TransitionParameters>& trans_probs_)
+        : mutationOffset( NO_MUTATION_SET_FLAG )
+        , tpl(tpl_)
+        , trans_probs(trans_probs_)
     {
         assert(tpl.size() == trans_probs.size());
     }
     
     TemplateParameterPair::TemplateParameterPair()
-    : tpl() , trans_probs(), mutationOffset( NO_MUTATION_SET_FLAG )
+        : mutationOffset( NO_MUTATION_SET_FLAG )
+        , tpl()
+        , trans_probs()
     {}
     
 #if FALSE
-    TemplateParameterPair::TemplateParameterPair(const TemplateParameterPair& other) :
-    tpl(other.tpl), trans_probs(other.trans_probs), mutationOffset(NO_MUTATION_SET_FLAG)
+    TemplateParameterPair::TemplateParameterPair(const TemplateParameterPair& other)
+        : mutationOffset( NO_MUTATION_SET_FLAG )
+        , tpl(other.tpl)
+        , trans_probs(other.trans_probs)
     {
         assert(tpl.size() == trans_probs.size());
     }
 #endif
     
-    TemplateParameterPair::TemplateParameterPair(const std::string& tpl_,
-                          const ContextParameters& ctx) : tpl(tpl_), trans_probs (tpl_.size()), mutationOffset( NO_MUTATION_SET_FLAG )
+    TemplateParameterPair::TemplateParameterPair(const std::string& tpl_, const ContextParameters& ctx)
+        : mutationOffset( NO_MUTATION_SET_FLAG )
+        , tpl(tpl_)
+        , trans_probs(tpl_.size())
     {
         // Initialize the dinucleotide context values.
         for(int i = 0; i < (tpl.size() -1); i ++)

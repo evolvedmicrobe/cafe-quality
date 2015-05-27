@@ -174,7 +174,7 @@ namespace ConsensusCore {
             WrappedTemplateParameterPair Template(StrandEnum strand, int templateStart, int templateEnd);
 
         protected:
-            QuiverConfig quiv_config;
+            QuiverConfig qvConfig_;
             TemplateParameterPair fwdTemplate_;
             TemplateParameterPair revTemplate_;
             std::vector<ReadStateType> reads_;

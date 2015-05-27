@@ -29,8 +29,8 @@
 
 namespace ConsensusCore {
 
-    
-    
+
+
 //    void assert(double o, double e) {
 //        double dif = fabs(1- o/e);
 //        if (!(dif < 1e-5))
@@ -38,7 +38,7 @@ namespace ConsensusCore {
 //        else
 //            std::cerr << "passed test at " __FILE__ ":" << __LINE__ << std::endl;
 //    }
-    
+
 
 
     typedef SparseSimpleQvSumProductMultiReadMutationScorer ScorerType;
@@ -50,43 +50,42 @@ namespace ConsensusCore {
         QuiverConfig qc(ctx_params, bo);
         return ScorerType(qc, tpl);
     }
-    
+
     void AddReadToScorer(std::string read, ScorerType& scorer) {
         Read r("null", read);
         MappedRead mr(r, FORWARD_STRAND, 0, (int)scorer.Template().tpl.length());
         scorer.AddRead(mr);
     }
-    
-    
+
     int  MatrixTester::TestMutationScorer()
     {
         // A series of tests, all the correct values are derived from the C# code.
         SNR snr(10.0, 7.0, 5.0, 11.0);
-        
+
         TransitionParameters tp = ContextParameterProvider::GetTransitionParameters("CC", snr);
         // Now look at a small test case
         std::string tpl = "ACGTCGT";
         // Create a mutation scorer to test values
         auto t = createScorer(tpl, snr);
         AddReadToScorer("ACGTACGT", t);
-        
+
         double score = t.BaselineScore();
         //t.DumpAlpha();
         double t_baseline = -4.94222030733063;
         ASSERT(score, t_baseline); //-4.99600615471328
-        
-       
+
+
         //Test a giant version
         std::string longTPL = "GGGCGGCGACCTCGCGGGTTTTCGCTATTTATGAAAATTTTCCGGTTTAAGGCGTTTCCGTTCTTCTTCGTCATAACTTAATGTTTTTATTTAAAATACCCTCTGAAAAGAAAGGAAACGACAGGTGCTGAAAGCGAGCTTTTTGGCCTCTGTCGTTTCCTTTCTCTGTTTTTGTCCGTGGAATGAACAATGGAAGTCAACAAAAAGCAGCTGGCTGACATTTTCGGTGCGAGTATCCGTACCATTCAGAACTGGCAGGAACAGGGAATGCCCGTTCTGCGAGGCGGTGGCAAGGGTAATGAGGTGCTTTATGACTCTGCCGCCGTCATAAAATGGTATGCCGAAAGGGATGCTGAAATTGAGAACGAAAAGCTGCGCCGGGAGGTTGAAGAACTGCGGCAGGCCAGCGAGGCAGATCTCCAGCCAGGAACTATTGAGTACGAACGCCATCGACTTACGCGTGCGCAGGCCGACGCACAGGAACTGAAGAATGCCAGAGACTCCGCTGAAGTGGTGGAAACCGCATTCTGTACTTTCGTGCTGTCGCGGATCGCAGGTGAAATTGCCAGTATTCTCGACGGGCTCCCCCTGTCGGTGCAGCGGCGTTTTCCGGAACTGGAAAACCGACATGTTGATTTCCTGAAACGGGATATCATCAAAGCCATGAACAAAGCAGCCGCGCTGGATGAACTGATACCGGGGTTGCTGAGTGAATATATCGAACAGTCAGGTTAACAGGCTGCGGCATTTTGTCCGCGCCGGGCTTCGCTCACTGTTCAGGCCGGAGCCACAGACCGCCGTTGAATGGGCGGATGCTAATTACTATCTCCCGAAAGAATC";
-        
+
         ScorerType scorer = createScorer(longTPL, snr);
-        
+
         std::string long_read = "GGGCGGCGACCTCGCGGGTTTTCGCTATTTCTGAAAATTTTCCGGTTTAAGGCGTTTCCGTTCTTCTTCGTCATAACTTAATGTTTTTATTTAAAATACCCTCTGAAAAGAAAGGAAACGACAGGTGCTGAAAGCGAGCTTTTTGGCCTCTGTCGTTTCCTTTCTCTGTTTTTGTCCGTGGAATGAACAATGGAAGTCAACAAAAAGCAGCTGGCTGACATTTTCGGTGGAGTATCCGTACCATTCAGAACTGGCAGGACAGGGAATGCCCGTTCTGCGAGGCGGTGGCAAGGGTAATGAGGTGCTTTATGACTCTGCCGCCGTCATAAAATGGTATGCCGAAAGGGATGCTGAAATTGAGAACGAATAGCTGCGCCGGGAGGTTGAAGAACTGCGGCAGGCCAGCGAGGCAGATCTCCAGCCAGGAACTATTGAGTACGAACGCCATCGACTTACGCGTGCGCAGGCCGACGCACAGGAACTGAAGAATGCCAGAGACTCCGCTGAAGTGGTGGAAACCGCATTCCCCTGTACTTTCGTGCTGTCGCGGATCGCAGGTGAAATTGCCAGTATTCTCGACGGGCTCCCCCTGTCGGTGCAGCGGCGTTTTCCGGAACTGGAAAACCGACATGTTGATTTCCTGAAACGGGATATCATCAAAGCCATGAACAAAGCAGCCGCGCTGGATGAACTGATACCGGGGTTGCTGAGTGAATATATCGAACAGTCAGGTTAACAGGCTGCGGCATTTTGTCCGCGCCGGGCTTCGCTCACTGTTCAGGCCGGAGCCACAGACCGCCGTTGAACGGATGCTAATTACTATCTCCCGAAAGAATC";
         AddReadToScorer(long_read, scorer);
-        
+
         score = scorer.BaselineScore();
         ASSERT(score, -131.73248120890264); // This one was not verified in C#
-        
+
         // Now let's check deletion times
         int i=0;
         for(; i< 20000;i++) {
@@ -94,14 +93,14 @@ namespace ConsensusCore {
             score = scorer.Score(mL);
             ASSERT(score, -4.039538);
         }
-        
+
         // Check the CC Context
         ScorerType t2 = createScorer(tpl, snr);
         AddReadToScorer("ACCTCGT", t2);
         double score2 = t2.BaselineScore();
         ASSERT(score2, -6.17329812914413);
-        
-        
+
+
         i=0;
         for(;i<1;i++) {
         // Test an insertion mutation
@@ -109,7 +108,7 @@ namespace ConsensusCore {
         auto new_score = t.Score(m);
         ASSERT(new_score, (-0.584415070238446 - t_baseline));
 
-       
+
         // Now get the same value by mutating the original template
         Mutation m2(MutationType::SUBSTITUTION, 2, 'C');
         auto new_score2 = t.Score(m2);

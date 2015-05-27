@@ -42,22 +42,22 @@
 #include "Quiver/QuiverConfig.hpp"
 
 namespace ConsensusCore {
-    QuiverConfig::QuiverConfig(const ContextParameters& dinucleotide_params,
+    QuiverConfig::QuiverConfig(const ContextParameters& ctxParams,
                                const BandingOptions& bandingOptions,
                                double fastScoreThreshold,
                                double addThreshold)
-        : QvParams(),
-          Ctx_params(dinucleotide_params),
-          Banding(bandingOptions),
-          FastScoreThreshold(fastScoreThreshold),
-          AddThreshold(addThreshold)
+        : QvParams()
+        , CtxParams(ctxParams)
+        , Banding(bandingOptions)
+        , FastScoreThreshold(fastScoreThreshold)
+        , AddThreshold(addThreshold)
     {
 
     }
 
     QuiverConfig::QuiverConfig(const QuiverConfig& qvConfig)
         : QvParams(qvConfig.QvParams),
-          Ctx_params(qvConfig.Ctx_params),
+          CtxParams(qvConfig.CtxParams),
           Banding(qvConfig.Banding),
           FastScoreThreshold(qvConfig.FastScoreThreshold),
           AddThreshold(qvConfig.AddThreshold)
