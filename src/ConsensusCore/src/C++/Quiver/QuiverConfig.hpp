@@ -53,6 +53,12 @@
 
 namespace ConsensusCore
 {
+    // private anonymous parameters
+    namespace
+    {
+        const double MATCH_IQV_PMF[]  = { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+        const double INSERT_IQV_PMF[] = { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    }
 
     /// \brief The banding optimizations to be used by a recursor
     struct BandingOptions
@@ -73,17 +79,24 @@ namespace ConsensusCore
     /// \brief A parameter vector for analysis using the QV model
     struct ModelParams
     {
+        double MatchIqvPmf[20];
+        double InsertIqvPmf[20];
         double PrMiscall;
         double PrNotMiscall;
         double PrThirdOfMiscall;
         //
         // Constructor for single merge rate and merge rate slope
         //
-        ModelParams(double mismatch = MISMATCH_PROBABILITY)
+        ModelParams(const double matchIqvPmf[]  = MATCH_IQV_PMF,
+                    const double insertIqvPmf[] = INSERT_IQV_PMF,
+                    double mismatch             = MISMATCH_PROBABILITY)
             : PrMiscall(mismatch)
             , PrNotMiscall(1.0 - mismatch)
             , PrThirdOfMiscall(mismatch / 3.0)
-        {}
+        {
+            memcpy(MatchIqvPmf,  matchIqvPmf,  sizeof(MatchIqvPmf));
+            memcpy(InsertIqvPmf, insertIqvPmf, sizeof(InsertIqvPmf));
+        }
         
         // Copy constructor
         ModelParams(const ModelParams& src) = default;
@@ -93,7 +106,6 @@ namespace ConsensusCore
         
         // Copy Assignment operator
         ModelParams& operator=(const ModelParams& rhs) = default;
-        
     };
 
 
@@ -101,12 +113,12 @@ namespace ConsensusCore
     {
         public:
             ModelParams QvParams;
-            ContextParameters Ctx_params;
+            ContextParameters CtxParams;
             BandingOptions Banding;
             double FastScoreThreshold;
             double AddThreshold;
 
-            QuiverConfig(const ContextParameters& dinucleotide_params,
+            QuiverConfig(const ContextParameters& ctxParams,
                          const BandingOptions& bandingOptions,
                          double fastScoreThreshold = -12.5,
                          double addThreshold = 1.0f);

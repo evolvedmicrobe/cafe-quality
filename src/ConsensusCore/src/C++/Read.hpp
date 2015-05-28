@@ -48,9 +48,14 @@ namespace ConsensusCore
     struct Read {
         std::string Name;
         std::string Sequence;
-        
+        std::vector<unsigned char> Iqvs;
 
-        Read(std::string name, std::string sequence);
+        Read(const std::string& name,
+             const std::string& sequence);
+
+        Read(const std::string& name,
+             const std::string& sequence,
+             const std::vector<unsigned char>& iqvs);
 
         Read(const Read& other);
 

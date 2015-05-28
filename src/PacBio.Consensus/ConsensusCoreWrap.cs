@@ -44,7 +44,6 @@ namespace PacBio.Consensus
         }
 
 
-
         private static FloatArray MakeFloatArray(IList<float> a, int start = 0, int length = -1)
         {
             if (length < 0)
@@ -141,6 +140,23 @@ namespace PacBio.Consensus
             logger.Log(level, String.Format(msg, args));
         }
 
+        private static ByteVector MakeIqvVector(IList<byte> a, int start, int length = -1)
+        {
+            if (length < 0)
+                length = a.Count;
+
+            var ba = new ByteVector(length);
+
+            for (var i = 0; i < length; i++) {
+                if (a [start + i] < 20)
+                    ba [i] = a [start + i];
+                else
+                    ba [i] = 19;
+            }
+
+            return ba;
+        }
+
         public float ScoreDiff = 15;
         public float DynamicAdjustFactor = 0.0f;
         public float DynamicAdjustOffset = -0.3f;
@@ -199,8 +215,8 @@ namespace PacBio.Consensus
                 var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
                 //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
 
-
-                using (var read = new Read( name, seq))
+                using (var iqvs = MakeIqvVector(bases.InsertionQV, r.Start, r.End - r.Start))
+                using (var read = new Read(name, seq, iqvs))
                 using (var mappedRead = new MappedRead(read, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd,
                                                        r.AdapterHitBefore, r.AdapterHitAfter))
                 {
@@ -277,7 +293,8 @@ namespace PacBio.Consensus
                 //var chem = config.HasChemistryOverride ? "*" : bases.Zmw.Movie.SequencingChemistry;
                 var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
                 //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
-                using (var read = new Read( name, seq))
+                using (var iqvs = MakeIqvVector(bases.InsertionQV, r.Start, r.End - r.Start))
+                using (var read = new Read(name, seq, iqvs))
                 using (var mappedRead = new MappedRead(read, (StrandEnum)r.Strand, r.TemplateStart, r.TemplateEnd,
                                             r.AdapterHitBefore, r.AdapterHitAfter))
                 {
