@@ -144,16 +144,24 @@ namespace PacBio.Consensus
         {
             if (length < 0)
                 length = a.Count;
+            /* Despite what the SWIG documentation might indicate, under the hood
+               new ByteVector(length) performs the following (setting capacity and not size):
 
-            var ba = new ByteVector(length);
-
-            for (var i = 0; i < length; i++) {
+                        pv = new std::vector< unsigned char >();
+                        pv->reserve(length);
+                        
+                and so attempts to index it directly via [] leads to an out of bounds exception.
+                Will use .Add instead for now.
+            */
+            var ba = new ByteVector (length);
+            int i = 0;              
+            for (i = 0; i < length; i++) {
                 if (a [start + i] < 20)
-                    ba [i] = a [start + i];
+                    ba.Add(a [start + i]);
                 else
-                    ba [i] = 19;
+                    ba.Add(19);
             }
-
+           
             return ba;
         }
 
