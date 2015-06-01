@@ -86,7 +86,6 @@ namespace ConsensusCore {
 
         int hintBeginRow = 1, hintEndRow = I - 1;
         auto prevTransProbs = TransitionParameters();
-        auto prevTempBP = 'N';
         const std::string& readSeq = read_.Sequence;
         const std::vector<unsigned char>& readIqvs = read_.Iqvs;
         const ModelParams& params = params_;
@@ -166,7 +165,6 @@ namespace ConsensusCore {
             endRow = i;
             alpha.FinishEditingColumn(j, beginRow, endRow);
             prevTransProbs = curTransProbs;
-            prevTempBP = curTempBase;
             // Now, revise the hints to tell the caller where the mass of the
             // distribution really lived in this column.
             hintEndRow = endRow;
@@ -220,7 +218,6 @@ namespace ConsensusCore {
         for (int j = (J-1); j > 0; --j)
         {
             auto nextTempPos = tpl_.GetTemplatePosition(j);
-            auto nextTransProbs = nextTempPos.second;
             auto nextTempBase = nextTempPos.first;
 
             auto curTempPos = tpl_.GetTemplatePosition(j - 1);
@@ -338,17 +335,16 @@ namespace ConsensusCore {
 
         auto currentTplPos = tpl_.GetVirtuallyMutatedTemplatePosition(absoluteColumn - 1);
         auto currentTplBase = currentTplPos.first;
-        auto currentTplParams = currentTplPos.second;
 
         auto prevTplPos = tpl_.GetVirtuallyMutatedTemplatePosition(absoluteColumn - 2);
         TransitionParameters prevTplParams = prevTplPos.second;
 
         for (int i = usedBegin; i < usedEnd; i++)
         {
-            char readBase = read_.Sequence[i];
-            unsigned char readIqv = read_.Iqvs[i];
             if (i < I)
             {
+                char readBase = read_.Sequence[i];
+                unsigned char readIqv = read_.Iqvs[i];
                 double match_prob = prevTplParams.Match * (readBase == currentTplBase ? params_.PrNotMiscall : params_.PrThirdOfMiscall);
                 // Incorporate
                 thisMoveScore = alpha(i, alphaColumn - 1) *
@@ -585,11 +581,9 @@ namespace ConsensusCore {
             nextTplBase = nextTplPos.first;
 
             TransitionParameters curTransParams;
-            char curTplBase;
             if (jp > 0) {
                 auto curTransPos = tpl_.GetVirtuallyMutatedTemplatePosition(jp - 1);
                 curTransParams = curTransPos.second;
-                curTplBase = curTransPos.first;
             }
 
             for (i = endRow - 1; i >= beginRow; i--)
