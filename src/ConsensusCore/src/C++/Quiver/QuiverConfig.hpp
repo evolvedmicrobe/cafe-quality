@@ -56,8 +56,8 @@ namespace ConsensusCore
     // private anonymous parameters
     namespace
     {
-        const double MATCH_IQV_PMF[]  = { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        const double INSERT_IQV_PMF[] = { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+        const double MATCH_IQV_PMF[]  = { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+        const double INSERT_IQV_PMF[] = { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     }
 
     /// \brief The banding optimizations to be used by a recursor
@@ -79,8 +79,8 @@ namespace ConsensusCore
     /// \brief A parameter vector for analysis using the QV model
     struct ModelParams
     {
-        double MatchIqvPmf[21];
-        double InsertIqvPmf[21];
+        double MatchIqvPmf[20];
+        double InsertIqvPmf[20];
         double PrMiscall;
         double PrNotMiscall;
         double PrThirdOfMiscall;

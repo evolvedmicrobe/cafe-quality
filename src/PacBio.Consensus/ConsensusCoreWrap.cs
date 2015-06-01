@@ -148,7 +148,7 @@ namespace PacBio.Consensus
             var ba = new ByteVector(length);
 
             for (var i = 0; i < length; i++) {
-                if (a [start + i] < 21)
+                if (a [start + i] < 20)
                     ba [i] = a [start + i];
                 else
                     ba [i] = 19;
