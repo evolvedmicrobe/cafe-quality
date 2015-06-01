@@ -1,5 +1,7 @@
 # Nigel's list
 BuildAndRun.py
+*.ii
+*.S
 *.ccs.fasta
 tempLambdaVariant/
 NotTracked/
@@ -24,6 +26,9 @@ NotTracked/
 *.gif
 *.plist
 *.vspscc
+*.xcscheme
+*.xcbkptlist
+*.xcuserstate
 Temporary*
 Bio.csproj.FilesWrittenAbsolute.txt
 *AssemblyAttribute.cs
