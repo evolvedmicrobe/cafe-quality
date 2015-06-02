@@ -55,15 +55,24 @@ namespace ConsensusCore
         throw(AlphaBetaMismatchException)
         : recursor_(new R(recursor))
     {
-        int I = (int)recursor_->read_.Sequence.length() + 1;
-        int J = recursor_->tpl_.Length() + 1;
-        // Allocate alpha and beta
-        alpha_ = new MatrixType(I, J);
-        beta_ = new MatrixType(I, J);
-        // Buffer where we extend into
-        extendBuffer_ = new MatrixType(I, EXTEND_BUFFER_COLUMNS);
-        // Initial alpha and beta
-        numFlipFlops_ = recursor.FillAlphaBeta(*alpha_, *beta_);
+        try {
+            int I = (int)recursor_->read_.Sequence.length() + 1;
+            int J = recursor_->tpl_.Length() + 1;
+            // Allocate alpha and beta
+            alpha_ = new MatrixType(I, J);
+            beta_ = new MatrixType(I, J);
+            // Buffer where we extend into
+            extendBuffer_ = new MatrixType(I, EXTEND_BUFFER_COLUMNS);
+            // Initial alpha and beta
+            numFlipFlops_ = recursor.FillAlphaBeta(*alpha_, *beta_);
+        }
+        catch(AlphaBetaMismatchException e) {
+            delete alpha_;
+            delete beta_;
+            delete extendBuffer_;
+            delete recursor_;
+            throw e;            
+        }
     }
 
     template<typename R>
