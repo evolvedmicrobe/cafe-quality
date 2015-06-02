@@ -29,7 +29,6 @@ namespace boost {
 %include "Mutation.i"
 %include "QuiverConsensus.i"
 %include "PairwiseAlignment.i"
-%include "PoaConsensus.i"
 %include "Utils.i"
 %include "Simulation.i"
 %include "Statistics.i"
