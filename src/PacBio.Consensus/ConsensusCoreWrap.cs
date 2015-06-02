@@ -13,23 +13,7 @@ using PacBio.Utils;
 namespace PacBio.Consensus
 {
 
-    public class ConsensusCorePoa
-    {
-        public static string FindConsensus(string[] sequences, out float consensusScore)
-        {
-            var config = new PoaConfig(false);
-
-            // Put reads into POA
-            var stringVect = new StringVector(sequences);
-
-            // Compute consensus
-            var p = PoaConsensus.FindConsensus(stringVect, config);
-
-            consensusScore = p.Score();
-            return p.Sequence();
-        }
-    }
-    
+   
     /// <summary>
     /// Utility code for getting data into ConsensusCore
     /// </summary>
