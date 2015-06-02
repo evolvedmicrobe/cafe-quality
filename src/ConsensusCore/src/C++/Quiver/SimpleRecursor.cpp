@@ -178,7 +178,7 @@ namespace ConsensusCore {
          * We require that we end in a match.
          * search for the term EDGE_CONDITION to find a comment with more information */
         auto match_emission =  (readSeq[I-1] == curTempBase ? params.PrNotMiscall : params.PrThirdOfMiscall);
-        auto likelihood = alpha(I - 1, J - 1) * match_emission;
+        auto likelihood = alpha(I - 1, J - 1) * match_emission * params.MatchIqvPmf[readIqvs[I-1]];
         alpha.StartEditingColumn(J, I, I + 1);
         alpha.Set(I, J, likelihood);
         alpha.FinishEditingColumn(J, I, I + 1);
@@ -301,7 +301,8 @@ namespace ConsensusCore {
          * search for the term EDGE_CONDITION to find a comment with more information */
 
         auto match_emission_prob = (tpl_.GetTemplatePosition(0).first == readSeq[0]) ? params.PrNotMiscall : params.PrThirdOfMiscall;
-        beta.Set(0, 0, match_emission_prob * beta(1, 1));
+        auto match_iqv_emisson_prob = params.MatchIqvPmf[readIqvs[0]];
+        beta.Set(0, 0, match_emission_prob * beta(1, 1) * match_iqv_emisson_prob);
         beta.FinishEditingColumn(0, 0, 1);
     }
 
@@ -687,6 +688,7 @@ namespace ConsensusCore {
         if (mismatch_percentage > ALPHA_BETA_MISMATCH_TOLERANCE)
         {
             LDEBUG << "Could not mate alpha, beta.  Read: " << read_.Name << " Tpl: Was wrapped, improve debugging to pring";
+            std::cout << "Mismatch : " << mismatch_percentage << "% Alpha " << alphaV << " Beta " << betaV << std::endl;
             throw AlphaBetaMismatchException();
         }
 
