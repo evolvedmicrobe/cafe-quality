@@ -147,8 +147,9 @@ namespace ConsensusCore
           revTemplate_(ReverseComplement(tpl), config.CtxParams),
           reads_()
     {
+                
         DEBUG_ONLY(CheckInvariants());
-        QuiverConfigTable::const_iterator it;
+
 
     }
 
