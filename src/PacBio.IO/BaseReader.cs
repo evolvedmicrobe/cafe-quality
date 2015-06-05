@@ -786,7 +786,7 @@ namespace PacBio.IO
         /// <value>The sequencing chemistry.</value>
         public string SequencingChemistry
         {
-            get { return ZmwSource.SequencingChemistry; }
+            get { return ""; }// ZmwSource.SequencingChemistry; }
         }
 
         // Set up the methods to return read-level metrics data.
