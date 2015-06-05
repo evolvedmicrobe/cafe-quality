@@ -56,7 +56,7 @@ using namespace std;
 
 namespace ConsensusCore {
 
-
+    
     //
     // Dense matrix recursors and such
     //
@@ -82,6 +82,9 @@ namespace ConsensusCore {
 
 
     %template(SparseQvSumProductMultiReadMutationScorer) MultiReadMutationScorer<SparseSimpleQvSumProductRecursor>;
+    
+    
+    %template(ReadStateType) detail::ReadState<ConsensusCore::MutationScorer<SparseSimpleQvSumProductRecursor>>;
 
 
 }

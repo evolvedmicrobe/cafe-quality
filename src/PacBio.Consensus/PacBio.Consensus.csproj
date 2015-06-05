@@ -89,6 +89,7 @@
     <Compile Include="ConsensusTrainExamples.cs" />
     <Compile Include="SnrCut.cs" />
     <Compile Include="PhredQVs.cs" />
+    <Compile Include="RInterop.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
@@ -102,6 +103,10 @@
     <ProjectReference Include="..\PacBio.IO\PacBio.IO.csproj">
       <Project>{0B3AC336-FCA6-488C-8C4C-07F43B51B17A}</Project>
       <Name>PacBio.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VariantCaller\VariantCaller.csproj">
+      <Project>{C1EA5B21-991D-4455-BAA7-05CFD8C04B88}</Project>
+      <Name>VariantCaller</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
