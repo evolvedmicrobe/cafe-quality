@@ -42,6 +42,7 @@ namespace ConsensusCore {
         , tpl(tpl_)
         , trans_probs(tpl_.size())
     {
+        
         // Initialize the dinucleotide context values.
         for(int i = 0; i < (tpl.size() -1); i ++)
         {
@@ -248,8 +249,14 @@ namespace ConsensusCore {
         this->start = start;
         this->length = length;
     }
-    
-    
-    
-    
+    std::string WrappedTemplateParameterPair::GetTemplateSequence() const
+    {
+        char tpl [length];
+        for(int i=0;i<length;i++)
+        {
+            tpl[i] = GetTemplatePosition(i).first;
+            
+        }
+        return std::string(tpl);
+    }
 }

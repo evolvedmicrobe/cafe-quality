@@ -213,6 +213,7 @@ namespace ConsensusCore {
             return base->GetVirtuallyMutatedTemplatePosition(newIndex);
         }
         
+        std::string GetTemplateSequence() const;        
     };
 
 }

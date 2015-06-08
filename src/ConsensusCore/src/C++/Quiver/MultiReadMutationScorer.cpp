@@ -147,8 +147,9 @@ namespace ConsensusCore
           revTemplate_(ReverseComplement(tpl), config.CtxParams),
           reads_()
     {
+                
         DEBUG_ONLY(CheckInvariants());
-        QuiverConfigTable::const_iterator it;
+
 
     }
 
@@ -354,6 +355,13 @@ namespace ConsensusCore
         revTemplate_.ClearVirtualMutation();
         return sum;
     }
+    
+    template<typename R>
+    typename MultiReadMutationScorer<R>::ReadStateType MultiReadMutationScorer<R>::GetRead(int i) {
+        return reads_.at(i);
+    }
+    
+    
 
     template<typename R>
     double MultiReadMutationScorer<R>::Score(MutationType mutationType,
@@ -619,4 +627,5 @@ namespace ConsensusCore
     template class MultiReadMutationScorer<SimpleQvSumProductRecursor>;
     template class MultiReadMutationScorer<SparseSimpleQvRecursor>;
     template class MultiReadMutationScorer<SparseSimpleQvSumProductRecursor>;
+    template class detail::ReadState<ConsensusCore::MutationScorer<SparseSimpleQvSumProductRecursor>>;
 }

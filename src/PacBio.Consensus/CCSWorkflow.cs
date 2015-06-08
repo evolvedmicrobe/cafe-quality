@@ -695,6 +695,70 @@ namespace PacBio.Consensus
             return (float)(1.0 - QVs.PhredProb(recalibratedQ));
         }
 
+        public Dictionary<string, object> ReturnAlignments(IZmwBases bases) {
+            var readRegions = partitioner.GetPartition(bases, AdapterPadBases);
+            float graphScore;
+            // The POA step must emit an initial template, and the subread regions to use
+            TrialTemplate initialTpl = null;
+            List<AlignedSequenceReg> regions = null;
+
+
+            // New-style POA setup -- use in all cases -- do a local alignment between subreads to find
+            // overlapping sections
+            initialTpl = FindConsensus.InitialConsensusTemplate(readRegions, bases, out graphScore,
+                out regions, AdapterPadBases, Adapter);
+            
+            var toReturn = new Dictionary<string, object> ();
+            toReturn ["tpl"] = initialTpl.ToString ();
+            toReturn ["snr"] = bases.Metrics.HQRegionSNR;
+            int iterationsTaken;
+            int maxIterations = 7;
+            var reads = new Dictionary<string, object> ();
+            var snrs = bases.Metrics.HQRegionSNR;
+            var readsToR = new Dictionary<string, object> ();
+            IZmwConsensusBases result;
+            using (var snr = new SNR (snrs [2], snrs [3], snrs [1], snrs [0])) {
+                using (var ctx_params = new ContextParameters (snr)) {
+                    ScorerConfig config = new ScorerConfig ();
+                    config.Algorithm = RecursionAlgo.Prob;
+                    var scoreDiff = 12;
+                    var fastScoreThreshold = -30;
+                    var bo = new BandingOptions (scoreDiff);
+                    var qc = new QuiverConfig (ctx_params, bo, fastScoreThreshold);
+                    config.Qconfig = qc;
+                    //perf.Time(zmw.HoleNumber, "CCSMutationTesting");
+                    using (var scorer = new MultiReadMutationScorer (regions, bases, initialTpl, config)) {//, snr))
+                        result = FindConsensus.MultiReadConsensusAndQv (scorer, regions, bases.Zmw,
+                            maxIterations, out iterationsTaken);
+                        
+                        result.IterationsTaken = iterationsTaken;
+                        toReturn ["ll"] = scorer.BaselineScore ();
+               
+                        toReturn["llByRead"] = scorer.GetBaselineScores ();
+                        var mps = scorer.MappedStates;
+
+                        foreach (var r in mps) {
+                            var read = new Dictionary<string, object> ();
+                            var mr = r.Read;
+                            read ["iqv"] = mr.Iqvs.Select (x => (int)x).ToArray ();
+                            read ["strand"] = mr.Strand.ToString ();
+                            read ["start"] = mr.TemplateStart;
+                            read ["end"] = mr.TemplateEnd;
+                            read ["name"] = mr.Name;
+                            read ["seq"] = mr.Sequence;
+                            read ["tpl"] = r.Scorer.Template ().GetTemplateSequence ();
+                            read ["score"] = r.Scorer.Score ();
+                            readsToR [r.Read.Name] = read;
+                        }
+                    }
+                }
+            }
+            toReturn ["reads"] = readsToR;
+
+            return toReturn;    
+
+        }
+
         /// <summary>
         /// Compute SMC for one trace.
         /// </summary>
@@ -784,6 +848,7 @@ namespace PacBio.Consensus
                 int maxIterations = 7;
                 int iterationsTaken = 0; // in order T, G, A, C
                 var snrs = bases.Metrics.HQRegionSNR;
+
                 using (var snr = new SNR (snrs [2], snrs [3], snrs [1], snrs [0])) {
                     using (var ctx_params = new ContextParameters (snr)) {
                        /* Lance had set these to hard code 18, -12.5 if chemistry known

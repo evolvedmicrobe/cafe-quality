@@ -129,29 +129,4 @@ namespace ConsensusCore
             // Assuming compiler generated destructor is sufficient.
     };
 
-
-
-    class QuiverConfigTable
-    {
-    private:
-        typedef std::pair<const std::string, const QuiverConfig> QuiverConfigTableEntry;
-        std::list<QuiverConfigTableEntry> table;
-
-    public:
-        typedef std::list<QuiverConfigTableEntry>::const_iterator const_iterator;
-
-        QuiverConfigTable();
-
-        bool Insert(const std::string& name, const QuiverConfig& config);
-        int Size() const;
-
-        const QuiverConfig& At(const std::string& name) const throw(InvalidInputError);
-
-        std::vector<std::string> Keys() const;
-
-#ifndef SWIG
-        const_iterator begin() const;
-        const_iterator end() const;
-#endif
-    };
 }

@@ -124,7 +124,7 @@ namespace PacBio.Consensus
             logger.Log(level, String.Format(msg, args));
         }
 
-        private static ByteVector MakeIqvVector(IList<byte> a, int start, int length = -1)
+        internal static ByteVector MakeIqvVector(IList<byte> a, int start, int length = -1)
         {
             if (length < 0)
                 length = a.Count;
@@ -168,7 +168,7 @@ namespace PacBio.Consensus
         /// </summary>
         private int EndAdapterBases;
 
-        private SparseQvSumProductMultiReadMutationScorer scorer;
+        public SparseQvSumProductMultiReadMutationScorer scorer;
 
         /// <summary>
         /// Construct a mutation evalutor for the pulse observations in encapsulated by read, on template TrialTemplate.
@@ -404,14 +404,26 @@ namespace PacBio.Consensus
         {
             get
             {
-                var r = new MappedRead[scorer.NumReads()];
-
+                var r = new MappedRead[scorer.NumReads ()];
                 for (int i = 0; i < scorer.NumReads(); i++)
                 {
                     r[i] = scorer.Read(i);
                 }
 
                 return r;
+            }
+        }
+
+        public List<ReadStateType> MappedStates {
+            get {
+                List<ReadStateType> toR = new List<ReadStateType> (scorer.NumReads ());
+                for (int i = 0; i < scorer.NumReads(); i++) {
+                    var r = scorer.GetRead (i);
+                    if (r != null) {
+                        toR.Add (scorer.GetRead (i));
+                    }
+                }
+                return toR;
             }
         }
 
