@@ -140,12 +140,13 @@ namespace PacBio.Consensus
             var ba = new ByteVector (length);
             int i = 0;              
             for (i = 0; i < length; i++) {
-                if (a [start + i] < 20)
-                    ba.Add(a [start + i]);
+                var value = a [start + i];
+                var val2 = Convert.ToInt32(Math.Floor(((double) value) / 3.0));
+                if (val2 <= 20)
+                    ba.Add(val2);
                 else
-                    ba.Add(19);
-            }
-           
+                    ba.Add(21);
+            }           
             return ba;
         }
 
@@ -207,7 +208,7 @@ namespace PacBio.Consensus
                 var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
                 //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
 
-                using (var iqvs = MakeIqvVector(bases.InsertionQV, r.Start, r.End - r.Start))
+                using (var iqvs = MakeIqvVector(bases.MergeQV, r.Start, r.End - r.Start))
                 using (var read = new Read(name, seq, iqvs))
                 using (var mappedRead = new MappedRead(read, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd,
                                                        r.AdapterHitBefore, r.AdapterHitAfter))
