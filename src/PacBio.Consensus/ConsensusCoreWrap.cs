@@ -143,9 +143,9 @@ namespace PacBio.Consensus
                 var value = a [start + i];
                 var val2 = Convert.ToInt32(Math.Floor(((double) value) / 3.0));
                 if (val2 <= 20)
-                    ba.Add(val2);
+                    ba.Add((byte)val2);
                 else
-                    ba.Add(21);
+                    ba.Add((byte)21);
             }           
             return ba;
         }
