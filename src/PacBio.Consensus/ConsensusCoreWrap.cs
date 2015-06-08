@@ -124,7 +124,7 @@ namespace PacBio.Consensus
             logger.Log(level, String.Format(msg, args));
         }
 
-        internal static ByteVector MakeIqvVector(IList<byte> a, int start, int length = -1)
+        internal static ByteVector MakePWVector(IList<ushort> a, int start, int length = -1)
         {
             if (length < 0)
                 length = a.Count;
@@ -133,7 +133,7 @@ namespace PacBio.Consensus
 
                         pv = new std::vector< unsigned char >();
                         pv->reserve(length);
-                        
+
                 and so attempts to index it directly via [] leads to an out of bounds exception.
                 Will use .Add instead for now.
             */
@@ -141,11 +141,10 @@ namespace PacBio.Consensus
             int i = 0;              
             for (i = 0; i < length; i++) {
                 var value = a [start + i];
-                var val2 = Convert.ToInt32(Math.Floor(((double) value) / 3.0));
-                if (val2 <= 20)
-                    ba.Add((byte)val2);
+                if (value <= 20)
+                    ba.Add((byte)value);
                 else
-                    ba.Add((byte)21);
+                    ba.Add((byte)20);
             }           
             return ba;
         }
@@ -208,7 +207,7 @@ namespace PacBio.Consensus
                 var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
                 //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
 
-                using (var iqvs = MakeIqvVector(bases.MergeQV, r.Start, r.End - r.Start))
+                using (var iqvs = MakePWVector(bases.WidthInFrames, r.Start, r.End - r.Start))
                 using (var read = new Read(name, seq, iqvs))
                 using (var mappedRead = new MappedRead(read, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd,
                                                        r.AdapterHitBefore, r.AdapterHitAfter))
@@ -252,64 +251,7 @@ namespace PacBio.Consensus
         }
 
 
-
-        /// <summary>
-        /// Construct a mutation evalutor for the pulse observations in encapsulated by read, on template TrialTemplate.
-        /// </summary>
-        public MultiReadMutationScorer(IEnumerable<Tuple<AlignedSequenceReg, IZmwBases>> regions,
-                                       TrialTemplate trialTemplate, ScorerConfig config)
-        {
-            StartAdapterBases = trialTemplate.StartAdapterBases;
-            EndAdapterBases = trialTemplate.EndAdapterBases;
-
-            var strandTpl = trialTemplate.GetSequence(Strand.Forward);
-
-            if (config.Algorithm == RecursionAlgo.Viterbi)
-            {
-                throw new Exception ("Integrate, don't optimize");
-                //scorer = new SparseQvViterbiMultiReadMutationScorer(config.Qconfig, strandTpl);
-            }
-            else if (config.Algorithm == RecursionAlgo.Prob)
-            {
-                scorer = new SparseQvSumProductMultiReadMutationScorer(config.Qconfig, strandTpl);
-            }
-            else
-            {
-                throw new ApplicationException("unrecognized recursion algorthim");
-            }
-
-            foreach (var regAndBases in regions)
-            {
-                var r = regAndBases.Item1;
-                var bases = regAndBases.Item2;
-                var name = TraceReference.CreateSpringfieldSubread(bases, r.Start, r.End);
-                //var chem = config.HasChemistryOverride ? "*" : bases.Zmw.Movie.SequencingChemistry;
-                var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
-                //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
-                using (var iqvs = MakeIqvVector(bases.InsertionQV, r.Start, r.End - r.Start))
-                using (var read = new Read(name, seq, iqvs))
-                using (var mappedRead = new MappedRead(read, (StrandEnum)r.Strand, r.TemplateStart, r.TemplateEnd,
-                                            r.AdapterHitBefore, r.AdapterHitAfter))
-                {
-                    if (!(scorer.AddRead(mappedRead, AddThreshold) != AddReadResult.SUCCESS))
-                    {
-                        #if DIAGNOSTIC
-                        scorer.AddRead(mappedRead, 1.0f);
-
-                        var prefix = name.Replace("/", ".");
-
-                        WriteAlphaBetaMatrices(readBitmap.Count, prefix);
-                        #else
-                        Log(LogLevel.DEBUG, "Skipped adding read '{0}' -- more than {1}% of entries used.", name, AddThreshold * 100);
-                        #endif
-                    }
-                }
-            }
-
-        }
-
-
-       
+     
 
         /// <summary>
         /// Gets the number of allocated cells for each added MappedRead
