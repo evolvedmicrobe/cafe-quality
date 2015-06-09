@@ -44,7 +44,7 @@ namespace VariantCaller
         /// <param name="baseFiles">The original bax files</param>
         /// <param name="ccsReads">The CCS consensus files</param>
         /// <param name="referenceFile">The refrence files</param>
-        public QualityExperiment(IEnumerable<string> baseFiles, IEnumerable<string> ccsReads, IEnumerable<string> subReads,  string referenceFile)
+        public QualityExperiment(IEnumerable<string> baseFiles, IEnumerable<string> ccsReads, IEnumerable<string> subReads)
         {
             // Verify Files exist
             var names = new[] {"baseFiles", "ccsReads", "subReads"};
@@ -68,9 +68,8 @@ namespace VariantCaller
                 BaseFileNames = baseFiles.Select(x => new FileInfo(x)).ToList();
                 baseFileReaders = BaseFileNames.Select (x => new PacBio.Data.BaxH5Reader(x.FullName)).ToList ();
             }
-
-            References = (new FastAParser(referenceFile)).Parse().Select(x => new Reference((Sequence)x)).ToList();
-
+           
+            References = ReferenceGenomes.Templates;
             // Start loading CCS reads
 
             var ccs_reads_maker = Task<List<CCSRead>>.Factory.StartNew( () =>
@@ -128,21 +127,8 @@ namespace VariantCaller
         /// </summary>
         private void assignCCSReadsToReference()
         {
-            //TODO: CHANGE ME TO WORK WITH ARBITRARY INPUT
-            var lambda = References.Find(r => r.RefSeq.ID.StartsWith("lambda_NEB3011", StringComparison.Ordinal));
             foreach (var v in CCSReads) {
-                if (v.Movie.StartsWith ("m141115", StringComparison.Ordinal)) {
-                    if (v.Seq.Count > 60) {
-                        v.AssignedReference = lambda;
-                    }
-                } else {
-                    foreach (var r in References) {
-                        if (Math.Abs (r.RefSeq.Count - v.Seq.Count) < 25) {
-                            v.AssignedReference = r;
-                            break;
-                        }
-                    }
-                }
+                ReferenceGenomes.AssignReadToReference (v);
             }
         }
 
@@ -155,8 +141,7 @@ namespace VariantCaller
         {
             var subReadDictionaries = subReads.AsParallel().Select(z => new SubReadCollection(z)).ToList();
             var mainDictionary = subReadDictionaries[0];
-            for (int i = 1; i < subReadDictionaries.Count; i++)
-            {
+            for (int i = 1; i < subReadDictionaries.Count; i++) {
                 var curDict = subReadDictionaries[i];
                 foreach (var kv in curDict) {
                     mainDictionary[kv.Key] = kv.Value;

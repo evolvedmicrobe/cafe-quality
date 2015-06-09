@@ -1,16 +1,42 @@
 ﻿using System;
+using Bio;
+using Bio.IO.FastA;
+using System.Collections.Generic;
+using System.IO;
+using VariantCaller;
+using System.Linq;
 
 namespace VariantCaller
 {
     public class ReferenceGenomes
     {
-        public static List<Reference> LoadReferences()
-        {
+        public static List<Reference> Templates;
+        private static Reference lambda;
+        static ReferenceGenomes() {
+           
             var fap = new FastAParser ();
-            var sr = new StringReader (ReferenceGenomes.references);
-            References = fap.Parse((sr as StreamReader)).Select(x => new Reference((Sequence)x)).ToList();
-
+            StreamReader reader = new StreamReader (new MemoryStream (
+                System.Text.Encoding.ASCII.GetBytes (ReferenceGenomes.references)));
+            Templates = fap.Parse(reader).Select(x => new Reference((Sequence)x)).ToList();
+            lambda = Templates.Find(r => r.RefSeq.ID.StartsWith("lambda_NEB3011", StringComparison.Ordinal));
         }
+
+        public static void AssignReadToReference(CCSRead read)
+        {            
+            if (read.Movie.StartsWith ("m141115", StringComparison.Ordinal)) {
+                if (read.Seq.Count > 60) {
+                    read.AssignedReference = lambda;
+                }
+            } else {
+                foreach (var r in Templates) {
+                    if (Math.Abs (r.RefSeq.Count - read.Seq.Count) < 25) {
+                        read.AssignedReference = r;
+                        break;
+                    }
+                }
+            }
+        }
+
         public static string references = @">HP.V1.02
 CCCGGGGATCCTCTAGAATGCTCATACACTGGGGGATACATATACGGGGGGGGGGCACATCATCTAGACAGACGACTTTTTTTTTTCGAGCGCAGCTTTTTGAGCGACGCACAAGCTTGCTGAGGACTAGTAGCTTC
 >NOHP.V1.01
