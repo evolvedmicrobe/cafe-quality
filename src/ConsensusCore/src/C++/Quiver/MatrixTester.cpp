@@ -59,6 +59,28 @@ namespace ConsensusCore {
 
     int  MatrixTester::TestMutationScorer()
     {
+        
+        
+        std::string temp = "AGAGAGATAAGCTACTAGTCCTCAGCAAGCTTGTGCGTCGCTCAAAAAGCTGCGCTCGAAAAAAAAAAGTCGTCTGTCTAGATGATGTGCCCCCCCCCGTATATGTATCCCCCAGTGTATGAGCATTCTAGAGGATCCCCGGATCTCTCT";
+        SNR snro(12.797290802002,6.59999513626099,12.5511474609375,13.9942417144775);
+        
+        ContextParameters ctx_params(snro);
+        BandingOptions bo = BandingOptions(12.5);
+        
+        QuiverConfig qc(ctx_params, bo, 12.0);
+        ScorerType funny(qc, temp);
+        std::vector<unsigned char> iqvs = {16,13,14,16,8,17,9,17,16,17,16,15,17,16,17,17,17,8,17,17,2,18,16,9,17,3,15,17,18,15,14,17,17,14,17,16,17,18,17,17,18,12,12,13,9,17,18,17,12,18,5,17,16,16,16,16,16,11,12,7,10,12,12,12,12,9,18,17,17,18,17,17,17,17,16,15,14,15,14,18,17,17,17,15,18,17,17,16,8,9,10,6,7,5,5,5,9,15,16,17,17,11,17,18,17,16,17,17,8,3,4,15,17,17,18,17,18,17,18,17,16,16,18,4,16,14,17,10,15,16,16,16,16,16,18,13,9,9,9,17,16,17,7,16,15,17,15};
+
+        Read r1("m141008_060349_42194_c100704972550000001823137703241586_s1_p0/2289/11962_12109 RQ=0.872","AGAGAGAAGCTACTAGTCCTGCAGCAAGCTTGTGCGTCGTCAAAAAGCTGACGCTCGAAAAAAAAAAGTCGTCTGTCTAGATGATGTGCCCCCCCCCCGTATATGTATCCCCAGTGTATGAGCAATTCTAGAGGATCCCCGGTCTTC", iqvs);
+            MappedRead mr1(r1, StrandEnum::FORWARD_STRAND, 0, 150, true, true );
+            auto result1 = funny.AddRead(mr1, 1.0);
+            Mutation mLLL(MutationType::DELETION, 37, '-');
+            auto scoregg = funny.Score(mLLL);
+        
+        
+        
+        
+        
         // A series of tests, all the correct values are derived from the C# code.
         SNR snr(10.0, 7.0, 5.0, 11.0);
 
