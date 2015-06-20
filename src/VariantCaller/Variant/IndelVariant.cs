@@ -98,7 +98,8 @@ namespace VariantCaller
         }
         public override string ToString ()
         {
-            return string.Format ("[IndelVariant: InHomopolymer={0}, HomopolymerLengthInReference={1}, HomopolymerBase={2}]", InHomopolymer, HomopolymerLengthInReference, HomopolymerBase);
+            var insert = this.InsertionOrDeletion == IndelType.Deletion ? "Deletion" : "Insertion";
+            return string.Format ("[IndelVariant: InHomopolymer={0}, HomopolymerLengthInReference={1}, HomopolymerBase={2}, Type={3}]", InHomopolymer, HomopolymerLengthInReference, HomopolymerBase, insert);
         }
     }
 }
