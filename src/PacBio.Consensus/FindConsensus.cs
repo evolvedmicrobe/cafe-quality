@@ -412,6 +412,9 @@ namespace PacBio.Consensus
             // Compute the QVs from the mutation scores
             var qvData = ComputeConsensusQs(result.Item2, result.Item1);
             var res = ComputeConsensusQVs(sortedRegions, zmw, qvData);
+            // Reset so that that the number of passes is the number
+            // of scored subreads, not the insert regions (can differ due to alpha/beta mismatch).
+            res.NumPasses = scorer.GetBaselineScores ().Length;
             res.NumberOfMutations = numberOfAcceptedMutations;
             res.NumberOfTriedMutations = numberOfTriedMutations;
 

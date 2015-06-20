@@ -366,9 +366,20 @@ namespace PacBio.IO
 
         public int NumberOfMutations { get; set; }
 
+        /* Temporary to override inserts for the number that were actually scored */
+        private int? pNumPasses;
         public int NumPasses
         {
-            get { return InsertRegions.Length; }
+            get {
+                if (pNumPasses.HasValue) {
+                    return pNumPasses.Value;
+                } else {
+                    return InsertRegions.Length;
+                }
+            }
+            set {
+                pNumPasses = value;
+            }
         }
         public int IterationsTaken { get; set; }
         public float PredictedAccuracy
