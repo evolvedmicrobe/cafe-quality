@@ -96,5 +96,10 @@ namespace VariantCaller
             }
             return len;
         }
+        public override string ToString ()
+        {
+            var insert = this.InsertionOrDeletion == IndelType.Deletion ? "Deletion" : "Insertion";
+            return string.Format ("[IndelVariant: InHomopolymer={0}, HomopolymerLengthInReference={1}, HomopolymerBase={2}, Type={3}]", InHomopolymer, HomopolymerLengthInReference, HomopolymerBase, insert);
+        }
     }
 }

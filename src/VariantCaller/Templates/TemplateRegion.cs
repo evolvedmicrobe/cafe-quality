@@ -1,6 +1,5 @@
 ﻿using System;
 using Bio;
-using PacBio.Consensus;
 using PacBio.Data;
 using ConsensusCore;
 
@@ -33,19 +32,10 @@ namespace VariantCaller
         public Sequence Haplotype;
 
 
-        private static QuiverConfig q_config_p6c4;
-        private static QuiverConfig q_config_c2;
+       //private static QuiverConfig q_config_p6c4;
+        //private static QuiverConfig q_config_c2;
 
-        public static QuiverConfig GetP6C4QuiverConfig()
-        {
-            return q_config_p6c4;
-        }
-
-        public static QuiverConfig GetC2QuiverConfig()
-        {
-            return q_config_c2;
-        }
-
+       
 
         static TemplateRegion()
         {

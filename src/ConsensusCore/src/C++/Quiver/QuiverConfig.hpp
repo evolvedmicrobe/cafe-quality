@@ -49,17 +49,20 @@
 
 /* Hard coded mismatch probability for now.
    This is derived as the mean in PlotBinnedTraining.R */
-#define MISMATCH_PROBABILITY 0.00416541391862461
 
-
+#define MISMATCH_PROBABILITY 0.00432895545534044
+#define PMF_BINS 21
 namespace ConsensusCore
 {
     // private anonymous parameters
     namespace
     {
-        const double INSERT_IQV_PMF[]= {0, 0.398450512344855, 0.1159414219823, 0.131649010580163, 0.0858029945309225, 0.0537532970859549, 0.034406135234615, 0.0249021814886181, 0.0185778274137733, 0.0172867594420362, 0.0113596854045226, 0.0113338026349943, 0.00925507600451598, 0.00977233056331712, 0.00766698518308035, 0.00515244493156259, 0.00480540943157229, 0.00412033607840733, 0.00455217476472953, 0.00375502498302623, 0.0474565899170333};
+
+       const double INSERT_IQV_PMF[]= {0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+       const double MATCH_IQV_PMF[]  = {0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
         
-        const double MATCH_IQV_PMF[]  = {0, 0.040102840489951, 0.0376322290309637, 0.0974954582368313, 0.110007947413278, 0.0979197378060836, 0.0829516058979775, 0.0703783192772605, 0.0597271797647386, 0.050648847109636, 0.0429458513349509, 0.0356268974922942, 0.0306088572131205, 0.0262933614919783, 0.022635320175671, 0.0198070995987446, 0.0172610952234939, 0.0150629851495138, 0.0132749873057055, 0.0117210208439848, 0.117898359143822};
+       //const double INSERT_IQV_PMF[]= {0, 0.397798348635352, 0.115911699112264, 0.132138696992897, 0.0864300540208446, 0.0527942777746241, 0.0354284604620736, 0.0251104624063461, 0.0185084357783954, 0.017607162054922, 0.0115809987762472, 0.0111757260461004, 0.00924314791350931, 0.0097807015736225, 0.00776735793606597, 0.00500761578734957, 0.00500922413276454, 0.00411890672085751, 0.00452905901990536, 0.00380091335895079, 0.0462587514969085};
+       //const double MATCH_IQV_PMF[]  = {0, 0.0402222420548246, 0.0376480138102037, 0.0974564068792295, 0.109946602873532, 0.0980000091454914, 0.0828500771501694, 0.0703516958856884, 0.0597266541262199, 0.0506139988753366, 0.0429203549490854, 0.0356372895401746, 0.0306063836981209, 0.0262898394063799, 0.0226236494380033, 0.0198178894955275, 0.0172403905468526, 0.0150612896294664, 0.0132756440949005, 0.0117154978478068, 0.117996070552987};
     }
     /// \brief The banding optimizations to be used by a recursor
     struct BandingOptions
@@ -80,11 +83,13 @@ namespace ConsensusCore
     /// \brief A parameter vector for analysis using the QV model
     struct ModelParams
     {
-        double MatchIqvPmf[21];
-        double InsertIqvPmf[21];
+
+        double MatchIqvPmf[PMF_BINS];
+        double InsertIqvPmf[PMF_BINS];
         double PrMiscall;
         double PrNotMiscall;
         double PrThirdOfMiscall;
+        double MatchScalingFactor;
         //
         // Constructor for single merge rate and merge rate slope
         //
@@ -118,7 +123,16 @@ namespace ConsensusCore
             BandingOptions Banding;
             double FastScoreThreshold;
             double AddThreshold;
-
+            /* This scaling factor is needed to avoid the banding of the 
+             recursion matrices only going along the top row.  The problem is that 
+             with two emissions the probability for a match, emission and emission, 
+             is nearly equivalent to a deletion.  This can lead to an "all deletion"
+             path being selected, which goes to the top right of the matrix, but has 
+             no hope of having substantial probability after that.  To avoid this, 
+             we "reward" every emitted base being removed by multiplying it by the
+             average value for an emission.  We then cancel this scaling factor out in the likelihood
+             */
+            double MatchScalingFactor;
             QuiverConfig(const ContextParameters& ctxParams,
                          const BandingOptions& bandingOptions,
                          double fastScoreThreshold = -12.5,

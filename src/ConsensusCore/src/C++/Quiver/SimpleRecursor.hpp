@@ -60,7 +60,7 @@ namespace ConsensusCore {
         Read read_;
         WrappedTemplateParameterPair tpl_;
         ModelParams params_;
-        
+        double MatchScalingFactor;
         
         /// \brief Fill the alpha and beta matrices.
         /// This routine will fill the alpha and beta matrices, ensuring
@@ -132,7 +132,7 @@ namespace ConsensusCore {
         //
         // Constructors
         //
-        SimpleRecursor(ModelParams params, Read read, WrappedTemplateParameterPair wtpp, const BandingOptions& banding);
+        SimpleRecursor(ModelParams params, Read read, WrappedTemplateParameterPair wtpp, const BandingOptions& banding, const double matchScalingFactor);
         
 #pragma mark Row guide functions for banding optimizations.
     private:

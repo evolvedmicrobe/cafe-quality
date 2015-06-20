@@ -66,15 +66,13 @@
     <Compile Include="OutputAttributes.cs" />
     <Compile Include="OutputHelper.cs" />
     <Compile Include="ReadFromZMW.cs" />
+    <Compile Include="CCSReadAligner.cs" />
+    <Compile Include="ReferenceGenomes.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\bio\Bio.csproj">
       <Project>{B53E11DF-F9A9-4939-893E-78E59872089A}</Project>
       <Name>Bio</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PacBio.Consensus\PacBio.Consensus.csproj">
-      <Project>{D3A49F4E-1139-4782-A72A-599CCE57D715}</Project>
-      <Name>PacBio.Consensus</Name>
     </ProjectReference>
     <ProjectReference Include="..\ConsensusCore\ConsensusCore.csproj">
       <Project>{C308A414-9D37-4293-A20A-978B62A8C532}</Project>

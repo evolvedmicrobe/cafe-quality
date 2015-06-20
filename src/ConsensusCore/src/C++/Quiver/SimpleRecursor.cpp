@@ -84,7 +84,7 @@ namespace ConsensusCore {
         // End initial conditions
 
 
-        int hintBeginRow = 1, hintEndRow = I - 1;
+        int hintBeginRow = 1, hintEndRow = 3;
         auto prevTransProbs = TransitionParameters();
         const std::string& readSeq = read_.Sequence;
         const std::vector<unsigned char>& readIqvs = read_.Iqvs;
@@ -137,13 +137,13 @@ namespace ConsensusCore {
                     else if (i != 1 && j != 1) {
                         thisMoveScore = match_prev_and_emission_prob * prevTransProbs.Match;
                     }
-                    score = C::Combine(score, thisMoveScore * params.MatchIqvPmf[curReadIqv]);
+                    score = C::Combine(score, thisMoveScore * params.MatchIqvPmf[curReadIqv] * MatchScalingFactor);
 
                 // Stick or Branch:
                     if (i > 1) // Due to pinning, can't "insert" first or last read base
                     {
                         auto trans_emission_prob = curReadBase == nextTplBase ? curTransProbs.Branch : (curTransProbs.Stick / 3.0);
-                        thisMoveScore = alpha(i - 1, j) * trans_emission_prob * params.InsertIqvPmf[curReadIqv];
+                        thisMoveScore = alpha(i - 1, j) * trans_emission_prob * params.InsertIqvPmf[curReadIqv] * MatchScalingFactor;
                         score = C::Combine(score, thisMoveScore);
                     }
 
@@ -178,7 +178,8 @@ namespace ConsensusCore {
          * We require that we end in a match.
          * search for the term EDGE_CONDITION to find a comment with more information */
         auto match_emission =  (readSeq[I-1] == curTempBase ? params.PrNotMiscall : params.PrThirdOfMiscall);
-        auto likelihood = alpha(I - 1, J - 1) * match_emission * params.MatchIqvPmf[readIqvs[I-1]];
+        auto value = alpha(I-1, J-1);
+        auto likelihood = alpha(I - 1, J - 1) * match_emission * params.MatchIqvPmf[readIqvs[I-1]] * MatchScalingFactor;
         alpha.StartEditingColumn(J, I, I + 1);
         alpha.Set(I, J, likelihood);
         alpha.FinishEditingColumn(J, I, I + 1);
@@ -252,18 +253,18 @@ namespace ConsensusCore {
                 // Match
                     auto match_prev_emission_prob = beta(i+1, j+1) * (nextBasesMatch ? params.PrNotMiscall : params.PrThirdOfMiscall);
                     if (i < (I-1)) {
-                         score = C::Combine(score, match_prev_emission_prob * curTransProbs.Match * params.MatchIqvPmf[nextReadIqv]);
+                         score = C::Combine(score, match_prev_emission_prob * curTransProbs.Match * params.MatchIqvPmf[nextReadIqv] * MatchScalingFactor);
                     }
                     else if (i == (I-1) && (j == (J-1))) {
 
-                        score = C::Combine(score, match_prev_emission_prob * params.MatchIqvPmf[nextReadIqv]); // TODO: Redundant on first pass?
+                        score = C::Combine(score, match_prev_emission_prob * params.MatchIqvPmf[nextReadIqv] * MatchScalingFactor); // TODO: Redundant on first pass?
                     }
 
                 // Stick or Branch:
                     if (i < (I - 1) && i > 0) // Can only transition to an insertion for the 2nd to last read base
                     {
                         auto trans_emission_prob = nextBasesMatch ? curTransProbs.Branch : (curTransProbs.Stick / 3.0);
-                        thisMoveScore = beta(i + 1, j) * trans_emission_prob * params.InsertIqvPmf[nextReadIqv];
+                        thisMoveScore = beta(i + 1, j) * trans_emission_prob * params.InsertIqvPmf[nextReadIqv] * MatchScalingFactor;
                         score = C::Combine(score, thisMoveScore);
                     }
 
@@ -301,7 +302,7 @@ namespace ConsensusCore {
          * search for the term EDGE_CONDITION to find a comment with more information */
 
         auto match_emission_prob = (tpl_.GetTemplatePosition(0).first == readSeq[0]) ? params.PrNotMiscall : params.PrThirdOfMiscall;
-        auto match_iqv_emisson_prob = params.MatchIqvPmf[readIqvs[0]];
+        auto match_iqv_emisson_prob = params.MatchIqvPmf[readIqvs[0]] * MatchScalingFactor;
         beta.Set(0, 0, match_emission_prob * beta(1, 1) * match_iqv_emisson_prob);
         beta.FinishEditingColumn(0, 0, 1);
     }
@@ -351,7 +352,7 @@ namespace ConsensusCore {
                 thisMoveScore = alpha(i, alphaColumn - 1) *
                                 match_prob *
                                 beta(i + 1, betaColumn) *
-                                params_.MatchIqvPmf[readIqv];
+                                params_.MatchIqvPmf[readIqv] * MatchScalingFactor;
                 v = C::Combine(v, thisMoveScore);
             }
 
@@ -472,14 +473,14 @@ namespace ConsensusCore {
                     else if (i == maxDownMovePossible && j == maxLeftMovePossible) {
                         thisMoveScore = prev * emission_prob;
                     }
-                    score = thisMoveScore * params_.MatchIqvPmf[curReadIqv];
+                    score = thisMoveScore * params_.MatchIqvPmf[curReadIqv] * MatchScalingFactor;
 
 
                 // Stick or Branch:
                 if (i > 1 && i < maxDownMovePossible && j != maxLeftMovePossible)
                 {
                     auto insert_emission_prob = (nextTplBase == curReadBase) ? curTplParams.Branch : (curTplParams.Stick / 3.0);
-                    thisMoveScore = ext(i - 1, extCol) * insert_emission_prob * params_.InsertIqvPmf[curReadIqv];
+                    thisMoveScore = ext(i - 1, extCol) * insert_emission_prob * params_.InsertIqvPmf[curReadIqv] * MatchScalingFactor;
                     score = C::Combine(score, thisMoveScore);
                 }
 
@@ -613,14 +614,14 @@ namespace ConsensusCore {
                     else if ( j > firstColumn && i > 0) {
                         thisMoveScore = next * curTransParams.Match * emission_prob;
                     }
-                    score = C::Combine(score, thisMoveScore * params_.MatchIqvPmf[nextReadIqv]);
+                    score = C::Combine(score, thisMoveScore * params_.MatchIqvPmf[nextReadIqv] * MatchScalingFactor);
                 }
 
                 // Stick or branch
                 if (i < (I-1) && i > 0 && j > firstColumn)
                 {
                     double insert_trans_emission_prob = nextBasesMatch ? curTransParams.Branch : (curTransParams.Stick / 3.0);
-                    thisMoveScore = ext(i + 1, extCol) * insert_trans_emission_prob * params_.InsertIqvPmf[nextReadIqv];
+                    thisMoveScore = ext(i + 1, extCol) * insert_trans_emission_prob * params_.InsertIqvPmf[nextReadIqv] * MatchScalingFactor;
                     score = C::Combine(score, thisMoveScore);
                 }
 
@@ -640,8 +641,8 @@ namespace ConsensusCore {
 
 
     template<typename M, typename C>
-    SimpleRecursor<M, C>::SimpleRecursor(ModelParams params, Read read, WrappedTemplateParameterPair wtpp, const BandingOptions& banding)
-        : read_(read), tpl_(wtpp), params_(params), bandingOptions_(banding)
+    SimpleRecursor<M, C>::SimpleRecursor(ModelParams params, Read read, WrappedTemplateParameterPair wtpp, const BandingOptions& banding, const double matchScalingFactor)
+        : read_(read), tpl_(wtpp), params_(params), bandingOptions_(banding), MatchScalingFactor(matchScalingFactor)
     {}
 
     template<typename M, typename C>
