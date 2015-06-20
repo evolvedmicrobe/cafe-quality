@@ -7,4 +7,3 @@ open DumpForLisa
 [<EntryPoint>]
 let main args =
     DumpForLisa.main
-

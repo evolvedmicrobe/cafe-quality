@@ -10,6 +10,9 @@ using PacBio.Utils;
 using PacBio.HDF;
 using System.ComponentModel;
 using System.Reflection;
+using PacBio;
+using Bio;
+using VariantCaller;
 
 namespace PacBio.Consensus
 {
@@ -709,7 +712,7 @@ namespace PacBio.Consensus
                 out regions, AdapterPadBases, Adapter);
             
             var toReturn = new Dictionary<string, object> ();
-            toReturn ["tpl"] = initialTpl.ToString ();
+            toReturn ["init.tpl"] = initialTpl.Sequence;
             toReturn ["snr"] = bases.Metrics.HQRegionSNR;
             int iterationsTaken;
             int maxIterations = 7;
@@ -733,22 +736,49 @@ namespace PacBio.Consensus
                         
                         result.IterationsTaken = iterationsTaken;
                         toReturn ["ll"] = scorer.BaselineScore ();
+                        toReturn ["ZMW"] = bases.Zmw.HoleNumber;
                
                         toReturn["llByRead"] = scorer.GetBaselineScores ();
                         var mps = scorer.MappedStates;
 
+                        toReturn ["consensus"] = result.Sequence;
+                        var s = new Sequence (NoGapDnaAlphabet.Instance, result.Sequence);
+                        s.ID = bases.Zmw.Movie.MovieName +"/" + bases.Zmw.HoleNumber +"/ccs";
+                        var ccs = new VariantCaller.CCSRead (s);
+                        ReferenceGenomes.AssignReadToReference (ccs);
+                        var variants = CCSReadAligner.CallVariants (ccs);
+                        if (variants == null) {
+                            toReturn ["Alignment"] = "No Alignments / variants";
+                        } else {
+                            toReturn ["Alignment"] = variants.Item1;
+                            string vars = "Variants = " + variants.Item2.Count + "\n";
+                            foreach (var v in variants.Item2) {
+                                vars += v.ToString () +"\n";
+                            }
+                            toReturn["Variants"] = vars;
+                        }
                         foreach (var r in mps) {
                             var read = new Dictionary<string, object> ();
                             var mr = r.Read;
                             read ["iqv"] = mr.Iqvs.Select (x => (int)x).ToArray ();
+                            read ["pws"] = mr.PWs.Select (x => (int)x).ToArray ();
                             read ["strand"] = mr.Strand.ToString ();
                             read ["start"] = mr.TemplateStart;
                             read ["end"] = mr.TemplateEnd;
                             read ["name"] = mr.Name;
-                            read ["seq"] = mr.Sequence;
-                            read ["tpl"] = r.Scorer.Template ().GetTemplateSequence ();
+                            var seq = mr.Sequence;
+                            var tpl = r.Scorer.Template ().GetTemplateSequence ();
+                            read ["seq"] = seq;
+                            read ["tpl"] = tpl;
+                            var s2 = new Sequence (DnaAlphabet.Instance, seq);
+                            var t2 = new Sequence (DnaAlphabet.Instance, tpl);
+                            var algo = new Bio.Algorithms.Alignment.NeedlemanWunschAligner ();
+                            var alns = algo.Align (t2, s2).ToList();
+                            read ["aln"] = alns.First ().ToString ();
+                            //Console.WriteLine (alns.First ().ToString ());
                             read ["score"] = r.Scorer.Score ();
-                            readsToR [r.Read.Name] = read;
+                            var name = "SE:" +r.Read.Name.Split('/')[2];
+                            readsToR [name] = read;
                         }
                     }
                 }
@@ -758,6 +788,9 @@ namespace PacBio.Consensus
             return toReturn;    
 
         }
+
+       
+
 
         /// <summary>
         /// Compute SMC for one trace.

@@ -38,7 +38,11 @@ namespace ConsensusCore
             double Score() const;
             // Must be called from a multiread mutation context.
             double ScoreMutation(const Mutation& m) const;
-
+            /* Every emission move is multiplied by a constant factor to weight moves
+             in that direction.  To correct the likelihood, we must add the log of this 
+             scaling factor times the number of emitted bases */
+        double MatchScalingFactorCorrection() const;
+        
         private:
             void DumpMatrix(const MatrixType& mat, const std::string& fname) const;
 
@@ -64,7 +68,7 @@ namespace ConsensusCore
              */
             MatrixType* extendBuffer_;
             int numFlipFlops_;
-        
+            double cachedMatchScalingCorrectionFactor;
         
             //friend class MultiReadMutationScorer<R>;
     };
