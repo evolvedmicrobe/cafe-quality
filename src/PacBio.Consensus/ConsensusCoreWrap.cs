@@ -230,9 +230,8 @@ namespace PacBio.Consensus
 
 
                 using (var iqvs = MakeIqvVector(bases.InsertionQV, r.Start, r.End - r.Start))   
-                //using (var iqvs = MakePWVector(bases.WidthInFrames, r.Start, r.End - r.Start))   
                 using (var pws = MakePWVector(bases.WidthInFrames, r.Start, r.End - r.Start))
-                using (var read = new Read(name, seq, iqvs,pws))
+                using (var read = new Read(name, seq, pws,pws)) // Temporary hack to use pw instead of iqvs
                 using (var mappedRead = new MappedRead(read, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd,
                                                        r.AdapterHitBefore, r.AdapterHitAfter))
                 {
