@@ -32,7 +32,7 @@ namespace ConsensusCore {
         // Copy constructor for swig
         ContextParameters(const ContextParameters& arg);
         TransitionParameters GetParametersForContext(char bp1, char bp2) const;
-        const std::vector<std::string> contexts {"AA", "NA", "CC", "NC", "TT", "NT", "GG", "NG"};
+        std::vector<std::string> contexts {"AA", "NA", "CC", "NC", "TT", "NT", "GG", "NG"};
     private:
         std::unordered_map<std::string, TransitionParameters> param_map;
         
