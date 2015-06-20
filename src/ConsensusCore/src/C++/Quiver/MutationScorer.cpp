@@ -87,6 +87,7 @@ namespace ConsensusCore
         // Buffer where we extend into
         extendBuffer_ = new MatrixType(*other.extendBuffer_);
         numFlipFlops_ = other.numFlipFlops_;
+        cachedMatchScalingCorrectionFactor = other.cachedMatchScalingCorrectionFactor;
     }
 
     template<typename R>
