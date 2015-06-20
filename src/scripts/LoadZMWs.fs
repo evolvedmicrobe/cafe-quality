@@ -36,7 +36,7 @@ let ccs_data =
 
 
 
-    let qc_exp = new QualityExperiment(baxFiles, ccsFiles, subReads, reference)
+    let qc_exp = new QualityExperiment(baxFiles, ccsFiles, subReads)
     Console.WriteLine qc_exp.CCSReads.Count
     qc_exp
 
