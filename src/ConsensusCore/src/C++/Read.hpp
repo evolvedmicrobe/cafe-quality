@@ -49,6 +49,7 @@ namespace ConsensusCore
         std::string Name;
         std::string Sequence;
         std::vector<unsigned char> Iqvs;
+        std::vector<unsigned char> PWs;
 
         Read(const std::string& name,
              const std::string& sequence);
@@ -56,6 +57,11 @@ namespace ConsensusCore
         Read(const std::string& name,
              const std::string& sequence,
              const std::vector<unsigned char>& iqvs);
+        
+        Read(const std::string& name,
+             const std::string& sequence,
+             const std::vector<unsigned char>& iqvs,
+             const std::vector<unsigned char>& pws);
 
         Read(const Read& other);
 

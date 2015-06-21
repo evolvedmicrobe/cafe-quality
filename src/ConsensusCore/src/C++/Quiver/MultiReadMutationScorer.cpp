@@ -277,7 +277,7 @@ namespace ConsensusCore
     {
         AddReadResult res = SUCCESS;
         DEBUG_ONLY(CheckInvariants());
-        RecursorType recursor(qvConfig_.QvParams, mr, Template(mr.Strand, mr.TemplateStart, mr.TemplateEnd), qvConfig_.Banding);
+        RecursorType recursor(qvConfig_.QvParams, mr, Template(mr.Strand, mr.TemplateStart, mr.TemplateEnd), qvConfig_.Banding, qvConfig_.MatchScalingFactor);
 
         ScorerType* scorer;
         try
@@ -381,6 +381,14 @@ namespace ConsensusCore
     std::vector<double>
     MultiReadMutationScorer<R>::Scores(const Mutation& m, double unscoredValue)
     {
+        fwdTemplate_.ApplyVirtualMutation(m, qvConfig_.CtxParams);
+        // Now create and apply the reverse complement mutation.
+        int end   = (int)fwdTemplate_.tpl.length() - m.Start(); //Used to be int end   = mr.TemplateEnd - cmut.Start();
+        int start = (int)fwdTemplate_.tpl.length() - m.End();
+        auto rc_m = Mutation(m.Type(), start, end, ReverseComplement(m.NewBases()));
+        revTemplate_.ApplyVirtualMutation(rc_m, qvConfig_.CtxParams);
+        
+
         std::vector<double> scoreByRead;
         foreach (const ReadStateType& rs, reads_)
         {
@@ -395,6 +403,9 @@ namespace ConsensusCore
                 scoreByRead.push_back(unscoredValue);
             }
         }
+        fwdTemplate_.ClearVirtualMutation();
+        revTemplate_.ClearVirtualMutation();
+
         return scoreByRead;
     }
 

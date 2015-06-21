@@ -35,5 +35,11 @@ namespace VariantCaller
             Length = 1;
 
         }
+
+        public override string ToString ()
+        {
+            return RefBP + "->" + AltBP + " @ " + StartPosition;
+            return string.Format ("[SNPVariant]");
+        }
     }
 }

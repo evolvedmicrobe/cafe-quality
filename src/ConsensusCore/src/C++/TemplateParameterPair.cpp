@@ -251,12 +251,12 @@ namespace ConsensusCore {
     }
     std::string WrappedTemplateParameterPair::GetTemplateSequence() const
     {
-        char tpl [length];
-        for(int i=0;i<length;i++)
+        char tpl [length + 1];
+        for(int i=0; i<length; i++)
         {
             tpl[i] = GetTemplatePosition(i).first;
-            
         }
+        tpl[length] = '\0';
         return std::string(tpl);
     }
 }

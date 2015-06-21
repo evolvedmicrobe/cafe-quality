@@ -49,14 +49,16 @@
 
 /* Hard coded mismatch probability for now.
    This is derived as the mean in PlotBinnedTraining.R */
-#define MISMATCH_PROBABILITY 0.00294596431152579
 
+#define MISMATCH_PROBABILITY 0.00294596431152579
+#define PMF_BINS 21
 
 namespace ConsensusCore
 {
     // private anonymous parameters
     namespace
     {
+
         const double INSERT_IQV_PMF[]= {0, 0, 0.219532389414808, 0.138249067467146, 0.0964951203117016, 0.0711182008472811, 0.0569759446277665, 0.057424805041301, 0.0568367813453599, 0.0566771898498995, 0.0525912917510687, 0.0438549590339419, 0.0373844557901425, 0.0313525364760909, 0.0265837828135381, 0.0218400611930028, 0.0172792342846422, 0.011885773910815, 0.00389238071220323, 2.60251292914763e-05, 0};
         const double MATCH_IQV_PMF[]  = {0, 0, 0.00961791453884136, 0.0104392307774725, 0.0110232211410427, 0.012175847611473, 0.0138083237444551, 0.0175216686235707, 0.024080787797091, 0.033939499910891, 0.0432947886549802, 0.0445024285334186, 0.0493861622647802, 0.0593328738996079, 0.0639018548225965, 0.0899677361720314, 0.14398185751022, 0.217453741554622, 0.153378459358148, 0.00219360308475687, 0};
     }
@@ -80,11 +82,12 @@ namespace ConsensusCore
     /// \brief A parameter vector for analysis using the QV model
     struct ModelParams
     {
-        double MatchIqvPmf[20];
-        double InsertIqvPmf[20];
+        double MatchIqvPmf[PMF_BINS];
+        double InsertIqvPmf[PMF_BINS];
         double PrMiscall;
         double PrNotMiscall;
         double PrThirdOfMiscall;
+        double MatchScalingFactor;
         //
         // Constructor for single merge rate and merge rate slope
         //
@@ -118,7 +121,16 @@ namespace ConsensusCore
             BandingOptions Banding;
             double FastScoreThreshold;
             double AddThreshold;
-
+            /* This scaling factor is needed to avoid the banding of the 
+             recursion matrices only going along the top row.  The problem is that 
+             with two emissions the probability for a match, emission and emission, 
+             is nearly equivalent to a deletion.  This can lead to an "all deletion"
+             path being selected, which goes to the top right of the matrix, but has 
+             no hope of having substantial probability after that.  To avoid this, 
+             we "reward" every emitted base being removed by multiplying it by the
+             average value for an emission.  We then cancel this scaling factor out in the likelihood
+             */
+            double MatchScalingFactor;
             QuiverConfig(const ContextParameters& ctxParams,
                          const BandingOptions& bandingOptions,
                          double fastScoreThreshold = -12.5,

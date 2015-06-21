@@ -124,6 +124,28 @@ namespace PacBio.Consensus
             logger.Log(level, String.Format(msg, args));
         }
 
+        internal static ByteVector MakePWVector(IList<ushort> a, int start, int length = -1)
+        {
+            if (length < 0)
+                length = a.Count;
+            /* Despite what the SWIG documentation might indicate, under the hood
+               new ByteVector(length) performs the following (setting capacity and not size):
+                        pv = new std::vector< unsigned char >();
+                        pv->reserve(length);
+                and so attempts to index it directly via [] leads to an out of bounds exception.
+                Will use .Add instead for now.
+            */
+            var ba = new ByteVector (length);
+            int i = 0;              
+            for (i = 0; i < length; i++) {
+                var value = a [start + i];
+                if (value <= 20)
+                    ba.Add((byte)value);
+                else
+                    ba.Add((byte)20);
+            }           
+            return ba;
+        }
         internal static ByteVector MakeIqvVector(IList<byte> a, int start, int length = -1)
         {
             if (length < 0)
@@ -174,7 +196,7 @@ namespace PacBio.Consensus
         /// Construct a mutation evalutor for the pulse observations in encapsulated by read, on template TrialTemplate.
         /// </summary>
         public MultiReadMutationScorer(IEnumerable<AlignedSequenceReg> regions, IZmwBases bases,
-            TrialTemplate trialTemplate, ScorerConfig config)//, SNR snr)
+            TrialTemplate trialTemplate, ScorerConfig config)
         {
             StartAdapterBases = trialTemplate.StartAdapterBases;
             EndAdapterBases = trialTemplate.EndAdapterBases;
@@ -196,7 +218,6 @@ namespace PacBio.Consensus
             }
 
 //            StreamWriter sw = new StreamWriter ("Output.cpp");
-//            sw.WriteLine("std::string temp = \"" + strandTpl + "\";" );
 //            sw.WriteLine ("SNR snr(" + snr.A.ToString () + "," + snr.C + "," + snr.G + "," + snr.T + ");");
 //            sw.WriteLine ("ContextParameters ctx_params(snr);");
 //            sw.WriteLine ("QuiverConfig qc(ctx_params, bo, fast_sçore_threshold);\nSparseSimpleSumProductMultiReadMutationScorer scorer(qc, temp);");
@@ -207,13 +228,15 @@ namespace PacBio.Consensus
                 var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
                 //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
 
-                using (var iqvs = MakeIqvVector(bases.InsertionQV, r.Start, r.End - r.Start))
-                using (var read = new Read(name, seq, iqvs))
+                using (var iqvs = MakeIqvVector(bases.InsertionQV, r.Start, r.End - r.Start))   
+                //using (var iqvs = MakePWVector(bases.WidthInFrames, r.Start, r.End - r.Start))   
+                using (var pws = MakePWVector(bases.WidthInFrames, r.Start, r.End - r.Start))
+                using (var read = new Read(name, seq, iqvs,pws))
                 using (var mappedRead = new MappedRead(read, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd,
                                                        r.AdapterHitBefore, r.AdapterHitAfter))
                 {
-                    // DumpData (read, mappedRead, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd, r.AdapterHitBefore, r.AdapterHitAfter, sw);
                     var result = scorer.AddRead (mappedRead, AddThreshold);
+                    //Console.WriteLine (scorer.BaselineScore ());
                     if (result != AddReadResult.SUCCESS)
                     {
                         #if DIAGNOSTIC
@@ -231,9 +254,43 @@ namespace PacBio.Consensus
         }
 
         int ReadCounter =0;
-        void DumpData(Read rd, MappedRead mr, StrandEnum se, int ts, int tend, bool hitbefore, bool hitafter, StreamWriter sw)
+        void DumpData(SparseQvSumProductMultiReadMutationScorer scorer, StreamWriter sw)
         {
             ReadCounter++;
+            var cnt = scorer.BaselineScores ().Count;
+            for (int i = 0; i < cnt; i++) {
+                var rnd = scorer.GetRead (i);
+                if (rnd.IsActive) {
+                    var rname = "r" + i;
+                    string tmpName = "temp_" + rname;
+                    sw.WriteLine ("std::string " + tmpName + " = \"" + rnd.Scorer.Template().GetTemplateSequence() + "\";");
+
+                    var rl = "Read " + rname + "(\"" + rnd.Read.Name + "\",\"" + rnd.Read.Sequence + "\");";
+                    sw.WriteLine (rl);
+                    var mrname = "mr" + ReadCounter;
+                    var strand = "StrandEnum::" + (rnd.Read.Strand == StrandEnum.REVERSE_STRAND ? "REVERSE_STRAND" : "FORWARD_STRAND");
+                    var mrl = "MappedRead " + mrname + "(r" + ReadCounter + ", " +
+                        strand + ", " + rnd.Read.TemplateStart+ ", " + rnd.Read.TemplateEnd + " );";
+                    sw.WriteLine (mrl);
+
+                    var next = "auto result" + ReadCounter + " = scorer.AddRead(" + mrname + ", 1.0);";
+                    sw.WriteLine (next);
+
+                    var iqv = "std::vector<unsigned char> iqvs = {" + String.Join (",", rnd.Read.Iqvs.Select (x => x.ToString ())) + "};";
+                    sw.WriteLine (iqv);
+
+                    sw.Flush ();
+                }
+            }
+
+
+        }
+
+        void DumpData(Read rd, MappedRead mr, StrandEnum se, int ts, int tend, bool hitbefore, bool hitafter, StreamWriter sw, string tpl)
+        {
+            ReadCounter++;
+            sw.WriteLine("std::string temp = \"" + tpl.Substring(mr.TemplateStart, mr.TemplateEnd - mr.TemplateStart +1) + "\";" );
+
             var rname = "r" + ReadCounter;
             var rl = "Read "+rname + "(\"" + rd.Name + "\",\"" + rd.Sequence + "\");";
             sw.WriteLine (rl);
@@ -245,6 +302,10 @@ namespace PacBio.Consensus
 
             var next = "auto result" + ReadCounter + " = scorer.AddRead(" + mrname + ", 1.0);";
             sw.WriteLine (next);
+
+            var iqv = "std::vector<unsigned char> iqvs = {" + String.Join (",", mr.Iqvs.Select (x => x.ToString ())) + "};";
+            sw.WriteLine (iqv);
+
             sw.Flush ();
 
 

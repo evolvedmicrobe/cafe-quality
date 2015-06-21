@@ -35,6 +35,7 @@ Bio.csproj.FilesWrittenAbsolute.txt
 *FilesWrittenAbsolute.txt
 */bin/Release/*
 src/Tests/bin/*
+src/ConsensusCore/src/Tests/ConsensusCore.sublime*
 src/ConsensusCore/build/*
 */obj/*
 */bin/*
