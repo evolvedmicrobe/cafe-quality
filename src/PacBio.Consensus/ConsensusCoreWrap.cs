@@ -192,6 +192,8 @@ namespace PacBio.Consensus
 
         public SparseQvSumProductMultiReadMutationScorer scorer;
 
+
+        public List<int[]> delTags;
         /// <summary>
         /// Construct a mutation evalutor for the pulse observations in encapsulated by read, on template TrialTemplate.
         /// </summary>
@@ -222,6 +224,7 @@ namespace PacBio.Consensus
 //            sw.WriteLine ("ContextParameters ctx_params(snr);");
 //            sw.WriteLine ("QuiverConfig qc(ctx_params, bo, fast_sçore_threshold);\nSparseSimpleSumProductMultiReadMutationScorer scorer(qc, temp);");
 //
+            delTags = new List<int[]>();
             foreach (var r in regions)
             {
                 var name = TraceReference.CreateSpringfieldSubread(bases, r.Start, r.End);
@@ -237,8 +240,9 @@ namespace PacBio.Consensus
                 {
                     var result = scorer.AddRead (mappedRead, AddThreshold);
                     //Console.WriteLine (scorer.BaselineScore ());
-                    if (result != AddReadResult.SUCCESS)
-                    {
+                    if (result != AddReadResult.SUCCESS) {
+                        
+                        
                         #if DIAGNOSTIC
                         scorer.AddRead(mappedRead, 1.0f);
 
@@ -246,8 +250,11 @@ namespace PacBio.Consensus
 
                         WriteAlphaBetaMatrices(readBitmap.Count, prefix);
                         #else
-                        Log(LogLevel.DEBUG, "Skipped adding read '{0}' -- more than {1}% of entries used.", name, AddThreshold * 100);
+                        Log (LogLevel.DEBUG, "Skipped adding read '{0}' -- more than {1}% of entries used.", name, AddThreshold * 100);
                         #endif
+                    } else {
+                        delTags.Add(bases.DeletionTag.Skip (r.Start).Take (r.End - r.Start).Select(z=>(int)z).ToArray());
+
                     }
                 }
             }

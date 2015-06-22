@@ -757,10 +757,13 @@ namespace PacBio.Consensus
                             }
                                 toReturn["Variants"] = vars;
                         }
+                        int i = 0;
                         foreach (var r in mps) {
                             if (r.IsActive) {
                                 var read = new Dictionary<string, object> ();
                                 var mr = r.Read;
+                                read ["deltag"] = scorer.delTags [i];
+                                i++;
                                 read ["iqv"] = mr.Iqvs.Select (x => (int)x).ToArray ();
                                 read ["pws"] = mr.PWs.Select (x => (int)x).ToArray ();
                                 read ["strand"] = mr.Strand.ToString ();
