@@ -55,15 +55,28 @@ namespace ConsensusCore
         throw(AlphaBetaMismatchException)
         : recursor_(new R(recursor))
     {
-        int I = (int)recursor_->read_.Sequence.length() + 1;
-        int J = recursor_->tpl_.Length() + 1;
-        // Allocate alpha and beta
-        alpha_ = new MatrixType(I, J);
-        beta_ = new MatrixType(I, J);
-        // Buffer where we extend into
-        extendBuffer_ = new MatrixType(I, EXTEND_BUFFER_COLUMNS);
-        // Initial alpha and beta
-        numFlipFlops_ = recursor.FillAlphaBeta(*alpha_, *beta_);
+        try {
+            cachedMatchScalingCorrectionFactor = -std::log(recursor_->MatchScalingFactor) * recursor_->read_.Length();
+            int I = (int)recursor_->read_.Sequence.length() + 1;
+            int J = recursor_->tpl_.Length() + 1;
+            // Allocate alpha and beta
+            alpha_ = new MatrixType(I, J);
+            beta_ = new MatrixType(I, J);
+            // Buffer where we extend into
+            extendBuffer_ = new MatrixType(I, EXTEND_BUFFER_COLUMNS);
+            // Initial alpha and beta
+            numFlipFlops_ = recursor.FillAlphaBeta(*alpha_, *beta_);
+            if ( std::isinf(Score()) ) {
+                throw AlphaBetaMismatchException();
+            }
+        }
+        catch(AlphaBetaMismatchException e) {
+            delete alpha_;
+            delete beta_;
+            delete extendBuffer_;
+            delete recursor_;
+            throw;
+        }
     }
 
     template<typename R>
@@ -77,15 +90,23 @@ namespace ConsensusCore
         // Buffer where we extend into
         extendBuffer_ = new MatrixType(*other.extendBuffer_);
         numFlipFlops_ = other.numFlipFlops_;
+        cachedMatchScalingCorrectionFactor = other.cachedMatchScalingCorrectionFactor;
     }
 
     template<typename R>
     double
     MutationScorer<R>::Score() const
     {
-        return std::log((*beta_)(0, 0)) + beta_->GetLogProdScales();
+        
+        return std::log((*beta_)(0, 0)) + beta_->GetLogProdScales() + MatchScalingFactorCorrection();
     }
 
+    template<typename R>
+    double
+    MutationScorer<R>::MatchScalingFactorCorrection() const
+    {
+        return cachedMatchScalingCorrectionFactor;
+    }
    
     template<typename R>
     void MutationScorer<R>::DumpAlphaMatrix() const
@@ -206,7 +227,7 @@ namespace ConsensusCore
             score = recursor_->LinkAlphaBeta(*extendBuffer_, extendLength,
                                              *beta_, betaLinkCol,
                                              absoluteLinkColumn);
-            score += alpha_->GetLogProdScales(0, extendStartCol);
+            score += alpha_->GetLogProdScales(0, extendStartCol) + MatchScalingFactorCorrection();
         }
         else if (!atBegin && atEnd)
         {
@@ -220,7 +241,8 @@ namespace ConsensusCore
                                    extendStartCol, *extendBuffer_, extendLength);
             score = (std::log((*extendBuffer_)((int)recursor_->read_.Sequence.length(), extendLength - 1))
                     + alpha_->GetLogProdScales(0, extendStartCol)
-                    + extendBuffer_->GetLogProdScales(0, extendLength) );
+                    + extendBuffer_->GetLogProdScales(0, extendLength)
+                    + MatchScalingFactorCorrection());
         }
         else if (atBegin && !atEnd)
         {
@@ -233,7 +255,8 @@ namespace ConsensusCore
                                   *extendBuffer_, m.LengthDiff());
             score = ( std::log((*extendBuffer_)(0, 0))
                     + beta_->GetLogProdScales(extendLastCol + 1, beta_->Columns())
-                    + extendBuffer_->GetLogProdScales(0, extendLength) );
+                    + extendBuffer_->GetLogProdScales(0, extendLength)
+                     + MatchScalingFactorCorrection());
         }
         else
         {

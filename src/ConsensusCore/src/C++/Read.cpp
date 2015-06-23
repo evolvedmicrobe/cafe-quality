@@ -47,17 +47,44 @@
 
 namespace ConsensusCore {
 
-    Read::Read(
-               std::string name,
-               std::string seq)
-        : 
-          Name(name),
-          Sequence(seq)
+    Read::Read(const std::string& name,
+               const std::string& seq)
+        : Name(name)
+        , Sequence(seq)
+        , Iqvs(seq.length(), 0)
+        , PWs(seq.length(), 0)
     {}
 
+    Read::Read(const std::string& name,
+               const std::string& seq,
+               const std::vector<unsigned char>& iqvs)
+        : Name(name)
+        , Sequence(seq)
+        , Iqvs(iqvs)
+        , PWs(seq.length(), 0)
+    {
+        assert( Sequence.length() == Iqvs.size() );
+    }
+    
+    Read::Read(const std::string& name,
+               const std::string& seq,
+               const std::vector<unsigned char>& iqvs,
+               const std::vector<unsigned char>& pws
+               )
+    : Name(name)
+    , Sequence(seq)
+    , Iqvs(iqvs)
+    , PWs(pws)
+    {
+        assert( Sequence.length() == Iqvs.size() );
+        assert( Sequence.length() == pws.size() );
+    }
+
     Read::Read(const Read& other)
-        : Name(other.Name),
-          Sequence(other.Sequence)
+        : Name(other.Name)
+        , Sequence(other.Sequence)
+        , Iqvs(other.Iqvs)
+        , PWs(other.PWs)
     {}
     
     std::string

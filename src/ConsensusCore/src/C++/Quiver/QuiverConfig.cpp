@@ -42,85 +42,43 @@
 #include "Quiver/QuiverConfig.hpp"
 
 namespace ConsensusCore {
-    QuiverConfig::QuiverConfig(const ContextParameters& dinucleotide_params,
+    QuiverConfig::QuiverConfig(const ContextParameters& ctxParams,
                                const BandingOptions& bandingOptions,
                                double fastScoreThreshold,
                                double addThreshold)
-        : QvParams(),
-          Ctx_params(dinucleotide_params),
-          Banding(bandingOptions),
-          FastScoreThreshold(fastScoreThreshold),
-          AddThreshold(addThreshold)
+        : QvParams()
+        , CtxParams(ctxParams)
+        , Banding(bandingOptions)
+        , FastScoreThreshold(fastScoreThreshold)
+        , AddThreshold(addThreshold)
     {
+        
+        /* Calculate a match scaling factor, going for somthing near the inverse
+           of the expected score for an emission. (But note this is not the expected
+           value, just related to it 
+         */
+        double prob =0;
+        double prior = 1 / (double) ctxParams.contexts.size();
+        for (auto &ctx : ctxParams.contexts) {
+            auto probs = ctxParams.GetParametersForContext(ctx[0], ctx[1]);
+            //TODO: Revisit this, note that I should be integrating over the bin probabilities, but because these
+            // may be set at runtime, this will require some refactoring.  In the future this could be changed.
+            // just seeing how it works for now...
+            prob += prior * (1.0 / PMF_BINS) * (probs.Match + probs.Branch + probs.Stick);
+        }
+        MatchScalingFactor = 1 / prob;
 
     }
 
     QuiverConfig::QuiverConfig(const QuiverConfig& qvConfig)
         : QvParams(qvConfig.QvParams),
-          Ctx_params(qvConfig.Ctx_params),
+          CtxParams(qvConfig.CtxParams),
           Banding(qvConfig.Banding),
           FastScoreThreshold(qvConfig.FastScoreThreshold),
-          AddThreshold(qvConfig.AddThreshold)
+          AddThreshold(qvConfig.AddThreshold),
+          MatchScalingFactor(qvConfig.MatchScalingFactor)
     {}
 
 
-    QuiverConfigTable::QuiverConfigTable()
-    {}
-
-    bool QuiverConfigTable::Insert(const std::string& name, const QuiverConfig& config)
-    {
-        const_iterator it;
-
-        for (it = table.begin(); it != table.end(); it++)
-            if (name.compare(it->first) == 0)
-                return false;
-
-        table.push_front(std::make_pair(name, config));
-
-        return true;
-    }
-
-    int QuiverConfigTable::Size() const
-    {
-        return (int)table.size();
-    }
-
-    const QuiverConfig& QuiverConfigTable::At(const std::string& name) const
-        throw(InvalidInputError)
-    {
-        const_iterator it;
-
-        // If we find a direct match for the chemistry, use it
-        for (it = table.begin(); it != table.end(); it++)
-            if (it->first.compare(name) == 0)
-                return it->second;
-
-        // Fallback is "*"
-        for (it = table.begin(); it != table.end(); it++)
-            if (it->first.compare("*") == 0)
-                return it->second;
-
-        throw InvalidInputError("Chemistry not found in QuiverConfigTable");
-    }
-
-
-    std::vector<std::string> QuiverConfigTable::Keys() const
-    {
-        std::vector<std::string> keys;
-        for (const_iterator it = table.begin(); it != table.end(); it++)
-        {
-            keys.push_back(it->first);
-        }
-        return keys;
-    }
-
-    QuiverConfigTable::const_iterator QuiverConfigTable::begin() const
-    {
-        return table.begin();
-    }
-
-    QuiverConfigTable::const_iterator QuiverConfigTable::end() const
-    {
-        return table.end();
-    }
+    
 }

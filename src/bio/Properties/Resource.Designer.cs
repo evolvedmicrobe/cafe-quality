@@ -618,7 +618,7 @@ namespace Bio.Properties {
         
         internal static string InvalidSymbolInString {
             get {
-                return ResourceManager.GetString("InvalidSymbolInString", resourceCulture);
+                return "Could not recognize one or more symbol in the sequence: {0}";
             }
         }
         

@@ -60,7 +60,7 @@ namespace ConsensusCore
         throw(AlphaBetaMismatchException)
     {
         int I, J;
-        R r(_quiverConfig.QvParams, read, tpl, _quiverConfig.Banding);
+        R r(_quiverConfig.QvParams, read, tpl, _quiverConfig.Banding, _quiverConfig.MatchScalingFactor);
         
         I = read.Length();
         J = (int)tpl.Length();
@@ -76,7 +76,7 @@ namespace ConsensusCore
         throw(AlphaBetaMismatchException)
     {
         int I, J;
-        R r(_quiverConfig.QvParams, read, tpl, _quiverConfig.Banding);
+        R r(_quiverConfig.QvParams, read, tpl, _quiverConfig.Banding, _quiverConfig.MatchScalingFactor);
 
         I = read.Length();
         J = tpl.Length();
@@ -92,7 +92,7 @@ namespace ConsensusCore
         throw(AlphaBetaMismatchException)
     {
         int I, J;
-        R r(_quiverConfig.QvParams, read, tpl, _quiverConfig.Banding);
+        R r(_quiverConfig.QvParams, read, tpl, _quiverConfig.Banding, _quiverConfig.MatchScalingFactor);
         
         I = read.Length();
         J = tpl.Length();

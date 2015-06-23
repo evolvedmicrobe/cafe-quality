@@ -30,5 +30,6 @@ namespace std {
   %template(FloatVector)            std::vector<float>;
   %template(DoubleVector)           std::vector<double>;
   %template(StringVector)           std::vector<string>;
+  %template(ByteVector)             std::vector<unsigned char>;
   %template(FeaturesVector)         std::vector<const ConsensusCore::SequenceFeatures*>;
 };

@@ -10,6 +10,9 @@ using PacBio.Utils;
 using PacBio.HDF;
 using System.ComponentModel;
 using System.Reflection;
+using PacBio;
+using Bio;
+using VariantCaller;
 
 namespace PacBio.Consensus
 {
@@ -695,6 +698,106 @@ namespace PacBio.Consensus
             return (float)(1.0 - QVs.PhredProb(recalibratedQ));
         }
 
+        public Dictionary<string, object> ReturnAlignments(IZmwBases bases) {
+            var readRegions = partitioner.GetPartition(bases, AdapterPadBases);
+            float graphScore;
+            // The POA step must emit an initial template, and the subread regions to use
+            TrialTemplate initialTpl = null;
+            List<AlignedSequenceReg> regions = null;
+
+
+            // New-style POA setup -- use in all cases -- do a local alignment between subreads to find
+            // overlapping sections
+            initialTpl = FindConsensus.InitialConsensusTemplate(readRegions, bases, out graphScore,
+                out regions, AdapterPadBases, Adapter);
+            
+            var toReturn = new Dictionary<string, object> ();
+            toReturn ["init.tpl"] = initialTpl.Sequence;
+            toReturn ["snr"] = bases.Metrics.HQRegionSNR;
+            int iterationsTaken;
+            int maxIterations = 7;
+            var reads = new Dictionary<string, object> ();
+            var snrs = bases.Metrics.HQRegionSNR;
+            var readsToR = new Dictionary<string, object> ();
+            IZmwConsensusBases result;
+            using (var snr = new SNR (snrs [2], snrs [3], snrs [1], snrs [0])) {
+                using (var ctx_params = new ContextParameters (snr)) {
+                    ScorerConfig config = new ScorerConfig ();
+                    config.Algorithm = RecursionAlgo.Prob;
+                    var scoreDiff = 12;
+                    var fastScoreThreshold = -30;
+                    var bo = new BandingOptions (scoreDiff);
+                    var qc = new QuiverConfig (ctx_params, bo, fastScoreThreshold);
+                    config.Qconfig = qc;
+                    //perf.Time(zmw.HoleNumber, "CCSMutationTesting");
+                    using (var scorer = new MultiReadMutationScorer (regions, bases, initialTpl, config)) {//, snr))
+                        result = FindConsensus.MultiReadConsensusAndQv (scorer, regions, bases.Zmw,
+                            maxIterations, out iterationsTaken);
+                        
+                        result.IterationsTaken = iterationsTaken;
+                        toReturn ["ll"] = scorer.BaselineScore ();
+                        toReturn ["ZMW"] = bases.Zmw.HoleNumber;
+               
+                        toReturn["llByRead"] = scorer.GetBaselineScores ();
+                        var mps = scorer.MappedStates;
+
+                        toReturn ["consensus"] = result.Sequence;
+                        var s = new Sequence (NoGapDnaAlphabet.Instance, result.Sequence);
+                        s.ID = bases.Zmw.Movie.MovieName +"/" + bases.Zmw.HoleNumber +"/ccs";
+                        var ccs = new VariantCaller.CCSRead (s);
+                        ReferenceGenomes.AssignReadToReference (ccs);
+                        var variants = CCSReadAligner.CallVariants (ccs);
+                        if (variants == null) {
+                            toReturn ["Alignment"] = "No Alignments / variants";
+                        } else {
+                            toReturn ["Alignment"] = variants.Item1;
+                            string vars = "Variants = " + variants.Item2.Count + "\n";
+                            foreach (var v in variants.Item2) {
+                                vars += v.ToString () +"\n";
+                            }
+                                toReturn["Variants"] = vars;
+                        }
+                        int i = 0;
+                        foreach (var r in mps) {
+                            if (r.IsActive) {
+                                var read = new Dictionary<string, object> ();
+                                var mr = r.Read;
+                                read ["deltag"] = scorer.delTags [i];
+                                i++;
+                                read ["iqv"] = mr.Iqvs.Select (x => (int)x).ToArray ();
+                                read ["pws"] = mr.PWs.Select (x => (int)x).ToArray ();
+                                read ["strand"] = mr.Strand.ToString ();
+                                read ["start"] = mr.TemplateStart;
+                                read ["end"] = mr.TemplateEnd;
+                                read ["name"] = mr.Name;
+                                var seq = mr.Sequence;
+                                var g = r.Scorer.Template ();
+                                var tpl = r.Scorer.Template ().GetTemplateSequence ();
+                                read ["seq"] = seq;
+                                read ["tpl"] = tpl;
+                                var s2 = new Sequence (DnaAlphabet.Instance, seq);
+                                var t2 = new Sequence (DnaAlphabet.Instance, tpl);
+                                var algo = new Bio.Algorithms.Alignment.NeedlemanWunschAligner ();
+                                var alns = algo.Align (t2, s2).ToList ();
+                                read ["aln"] = alns.First ().ToString ();
+                                //Console.WriteLine (alns.First ().ToString ());
+                                read ["score"] = r.Scorer.Score ();
+                                var name = "SE:" + r.Read.Name.Split ('/') [2];
+                                readsToR [name] = read;
+                            }
+                        }
+                    }
+                }
+            }
+            toReturn ["reads"] = readsToR;
+
+            return toReturn;    
+
+        }
+
+       
+
+
         /// <summary>
         /// Compute SMC for one trace.
         /// </summary>
@@ -784,6 +887,7 @@ namespace PacBio.Consensus
                 int maxIterations = 7;
                 int iterationsTaken = 0; // in order T, G, A, C
                 var snrs = bases.Metrics.HQRegionSNR;
+
                 using (var snr = new SNR (snrs [2], snrs [3], snrs [1], snrs [0])) {
                     using (var ctx_params = new ContextParameters (snr)) {
                        /* Lance had set these to hard code 18, -12.5 if chemistry known
@@ -794,7 +898,7 @@ namespace PacBio.Consensus
                         ScorerConfig config = new ScorerConfig ();
                         config.Algorithm = RecursionAlgo.Prob;
                         var scoreDiff = 12;
-                        var fastScoreThreshold = -12.5;
+                        var fastScoreThreshold = -30;
                         var bo = new BandingOptions (scoreDiff);
                         var qc = new QuiverConfig(ctx_params, bo, fastScoreThreshold);
                         config.Qconfig = qc;

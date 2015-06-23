@@ -50,9 +50,20 @@
 /* Hard coded mismatch probability for now.
    This is derived as the mean in PlotBinnedTraining.R */
 #define MISMATCH_PROBABILITY 0.00505052456472967
-
+#define PMF_BINS 21
 namespace ConsensusCore
 {
+    // private anonymous parameters
+    namespace
+    {
+       const double INSERT_IQV_PMF[]= {0, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
+       const double MATCH_IQV_PMF[]  = {0, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
+        
+       //const double INSERT_IQV_PMF[]= {0, 0.397798348635352, 0.115911699112264, 0.132138696992897, 0.0864300540208446, 0.0527942777746241, 0.0354284604620736, 0.0251104624063461, 0.0185084357783954, 0.017607162054922, 0.0115809987762472, 0.0111757260461004, 0.00924314791350931, 0.0097807015736225, 0.00776735793606597, 0.00500761578734957, 0.00500922413276454, 0.00411890672085751, 0.00452905901990536, 0.00380091335895079, 0.0462587514969085};
+       //const double MATCH_IQV_PMF[]  = {0, 0.0402222420548246, 0.0376480138102037, 0.0974564068792295, 0.109946602873532, 0.0980000091454914, 0.0828500771501694, 0.0703516958856884, 0.0597266541262199, 0.0506139988753366, 0.0429203549490854, 0.0356372895401746, 0.0306063836981209, 0.0262898394063799, 0.0226236494380033, 0.0198178894955275, 0.0172403905468526, 0.0150612896294664, 0.0132756440949005, 0.0117154978478068, 0.117996070552987};
+        
+        
+    }
 
     /// \brief The banding optimizations to be used by a recursor
     struct BandingOptions
@@ -73,17 +84,25 @@ namespace ConsensusCore
     /// \brief A parameter vector for analysis using the QV model
     struct ModelParams
     {
+        double MatchIqvPmf[PMF_BINS];
+        double InsertIqvPmf[PMF_BINS];
         double PrMiscall;
         double PrNotMiscall;
         double PrThirdOfMiscall;
+        double MatchScalingFactor;
         //
         // Constructor for single merge rate and merge rate slope
         //
-        ModelParams(double mismatch = MISMATCH_PROBABILITY)
+        ModelParams(const double matchIqvPmf[]  = MATCH_IQV_PMF,
+                    const double insertIqvPmf[] = INSERT_IQV_PMF,
+                    double mismatch             = MISMATCH_PROBABILITY)
             : PrMiscall(mismatch)
             , PrNotMiscall(1.0 - mismatch)
             , PrThirdOfMiscall(mismatch / 3.0)
-        {}
+        {
+            memcpy(MatchIqvPmf,  matchIqvPmf,  sizeof(MatchIqvPmf));
+            memcpy(InsertIqvPmf, insertIqvPmf, sizeof(InsertIqvPmf));
+        }
         
         // Copy constructor
         ModelParams(const ModelParams& src) = default;
@@ -93,7 +112,6 @@ namespace ConsensusCore
         
         // Copy Assignment operator
         ModelParams& operator=(const ModelParams& rhs) = default;
-        
     };
 
 
@@ -101,12 +119,21 @@ namespace ConsensusCore
     {
         public:
             ModelParams QvParams;
-            ContextParameters Ctx_params;
+            ContextParameters CtxParams;
             BandingOptions Banding;
             double FastScoreThreshold;
             double AddThreshold;
-
-            QuiverConfig(const ContextParameters& dinucleotide_params,
+            /* This scaling factor is needed to avoid the banding of the 
+             recursion matrices only going along the top row.  The problem is that 
+             with two emissions the probability for a match, emission and emission, 
+             is nearly equivalent to a deletion.  This can lead to an "all deletion"
+             path being selected, which goes to the top right of the matrix, but has 
+             no hope of having substantial probability after that.  To avoid this, 
+             we "reward" every emitted base being removed by multiplying it by the
+             average value for an emission.  We then cancel this scaling factor out in the likelihood
+             */
+            double MatchScalingFactor;
+            QuiverConfig(const ContextParameters& ctxParams,
                          const BandingOptions& bandingOptions,
                          double fastScoreThreshold = -12.5,
                          double addThreshold = 1.0f);
@@ -116,29 +143,4 @@ namespace ConsensusCore
             // Assuming compiler generated destructor is sufficient.
     };
 
-
-
-    class QuiverConfigTable
-    {
-    private:
-        typedef std::pair<const std::string, const QuiverConfig> QuiverConfigTableEntry;
-        std::list<QuiverConfigTableEntry> table;
-
-    public:
-        typedef std::list<QuiverConfigTableEntry>::const_iterator const_iterator;
-
-        QuiverConfigTable();
-
-        bool Insert(const std::string& name, const QuiverConfig& config);
-        int Size() const;
-
-        const QuiverConfig& At(const std::string& name) const throw(InvalidInputError);
-
-        std::vector<std::string> Keys() const;
-
-#ifndef SWIG
-        const_iterator begin() const;
-        const_iterator end() const;
-#endif
-    };
 }

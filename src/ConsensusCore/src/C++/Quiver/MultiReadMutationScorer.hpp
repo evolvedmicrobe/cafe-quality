@@ -57,8 +57,9 @@ namespace ConsensusCore {
     
     namespace detail {
         template<typename ScorerType>
-        struct ReadState
+        class ReadState
         {
+        public:
             MappedRead* Read;
             ScorerType* Scorer;
             bool IsActive;
@@ -68,9 +69,12 @@ namespace ConsensusCore {
                       bool isActive);
             
             ReadState(const ReadState& other);
-            ~ReadState();
+            
             void CheckInvariants() const;
             std::string ToString() const;
+            ~ReadState();
+        private:
+            
         };
     }
 
@@ -100,7 +104,8 @@ namespace ConsensusCore {
             int TemplateLength() const;
             int NumReads() const;
             const MappedRead* Read(int readIndex) const;
-
+            ReadStateType GetRead(int i);
+        
             TemplateParameterPair& Template(StrandEnum strand = FORWARD_STRAND);
         
             void ApplyMutations(const std::vector<Mutation>& mutations);
@@ -174,8 +179,7 @@ namespace ConsensusCore {
             WrappedTemplateParameterPair Template(StrandEnum strand, int templateStart, int templateEnd);
 
         protected:
-            QuiverConfig quiv_config;
-            double fastScoreThreshold_;
+            QuiverConfig qvConfig_;
             TemplateParameterPair fwdTemplate_;
             TemplateParameterPair revTemplate_;
             std::vector<ReadStateType> reads_;

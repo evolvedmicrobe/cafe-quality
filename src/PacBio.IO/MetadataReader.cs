@@ -574,6 +574,7 @@ namespace PacBio.IO
         {
             get
             {
+                return "P6-C4";
                 return PacBio.Data.Chemistry.DecodeTriple(ChemistryBarcode);
             }
         }
