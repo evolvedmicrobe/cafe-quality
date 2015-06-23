@@ -146,6 +146,40 @@ namespace PacBio.Consensus
             }           
             return ba;
         }
+        internal static ByteVector MakeMqvVector(IZmwBases bases, out string seq_a, int start, int length = -1)
+        {
+            List<char> seq = new List<char> (length);
+            List<byte> mqv = new List<byte> (length);
+
+            var delTags = bases.DeletionTag.ToArray ();
+            var mqvs = bases.MergeQV.ToArray ();
+            var oseq = bases.Sequence.Substring (start, length);
+                         
+            for (int i = 0; i < length; i++) {
+                if (i < (length - 1)) {
+                    var delTag = delTags [start + i];
+                    if (delTag != 'N' && delTag != '-') {
+                        seq.Add (delTag);
+                        mqv.Add ((byte)0);
+                    }
+                }
+                var value = mqvs [start + i];
+                seq.Add (oseq [i]);
+                var val2 = Convert.ToInt32(Math.Floor(((double) value) / 3.0)) + 1;
+                if (val2 <= 20)
+                    mqv.Add((byte)val2);
+                else
+                    mqv.Add((byte)20);
+            }
+
+            var mqv_a = new ByteVector (mqv.Count);
+            foreach(byte b in mqv) {
+                mqv_a.Add(b);
+            }
+            seq_a = new String (seq.ToArray ());
+            return mqv_a;
+        }
+
         internal static ByteVector MakeIqvVector(IList<byte> a, int start, int length = -1)
         {
             if (length < 0)
@@ -163,7 +197,7 @@ namespace PacBio.Consensus
             int i = 0;              
             for (i = 0; i < length; i++) {
                 var value = a [start + i];
-                var val2 = Convert.ToInt32(Math.Floor(((double) value) / 3.0));
+                var val2 = Convert.ToInt32(Math.Floor(((double) value) / 3.0)) + 1;
                 if (val2 <= 20)
                     ba.Add((byte)val2);
                 else
@@ -226,13 +260,11 @@ namespace PacBio.Consensus
             foreach (var r in regions)
             {
                 var name = TraceReference.CreateSpringfieldSubread(bases, r.Start, r.End);
-                var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
+                //var seq = bases.Sequence.Substring (r.Start, r.End - r.Start);
                 //using (var qsf = ConsensusCoreWrap.MakeQvSequenceFeatures(r.Start, r.End - r.Start, bases))
 
-
-                using (var iqvs = MakeIqvVector(bases.MergeQV, r.Start, r.End - r.Start))   
-                //using (var iqvs = MakePWVector(bases.WidthInFrames, r.Start, r.End - r.Start))   
-                using (var pws = MakePWVector(bases.WidthInFrames, r.Start, r.End - r.Start))
+                string seq;
+                using (var iqvs = MakeMqvVector(bases, out seq, r.Start, r.End - r.Start))  
                 using (var read = new Read(name, seq, iqvs, iqvs)) // Hack to make sure we use merge QV
                 using (var mappedRead = new MappedRead(read, (StrandEnum) r.Strand, r.TemplateStart, r.TemplateEnd,
                                                        r.AdapterHitBefore, r.AdapterHitAfter))
