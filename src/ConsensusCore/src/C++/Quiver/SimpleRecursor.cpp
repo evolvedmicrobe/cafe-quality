@@ -642,7 +642,7 @@ namespace ConsensusCore {
 
     template<typename M, typename C>
     SimpleRecursor<M, C>::SimpleRecursor(ModelParams params, Read read, WrappedTemplateParameterPair wtpp, const BandingOptions& banding, const double matchScalingFactor)
-        : read_(read), tpl_(wtpp), params_(params), bandingOptions_(banding), MatchScalingFactor(matchScalingFactor)
+        : read_(read), tpl_(wtpp), params_(params), bandingOptions_(banding), MatchScalingFactor(1.0)
     {}
 
     template<typename M, typename C>

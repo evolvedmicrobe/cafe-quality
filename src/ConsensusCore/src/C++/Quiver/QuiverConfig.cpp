@@ -52,22 +52,7 @@ namespace ConsensusCore {
         , FastScoreThreshold(fastScoreThreshold)
         , AddThreshold(addThreshold)
     {
-        
-        /* Calculate a match scaling factor, going for somthing near the inverse
-           of the expected score for an emission. (But note this is not the expected
-           value, just related to it 
-         */
-        double prob =0;
-        double prior = 1 / (double) ctxParams.contexts.size();
-        for (auto &ctx : ctxParams.contexts) {
-            auto probs = ctxParams.GetParametersForContext(ctx[0], ctx[1]);
-            //TODO: Revisit this, note that I should be integrating over the bin probabilities, but because these
-            // may be set at runtime, this will require some refactoring.  In the future this could be changed.
-            // just seeing how it works for now...
-            prob += prior * (1.0 / PMF_BINS) * (probs.Match + probs.Branch + probs.Stick);
-        }
-        MatchScalingFactor = 1 / prob;
-
+        MatchScalingFactor = 1.0;
     }
 
     QuiverConfig::QuiverConfig(const QuiverConfig& qvConfig)
