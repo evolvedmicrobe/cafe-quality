@@ -21,7 +21,7 @@ getld <-function(fname) {
   #d = d[d$PredictedRawAccuracy > .85,]
   e = nrow(d)
   print(e/s)
-  #d=d[d$Reference=="lambda_NEB3011",]
+  d=d[d$Reference=="lambda_NEB3011",]
   #d=d[d$Reference=="HP.V1.02",]
   #d = d[d$Reference=="ALL4MER.V2.01",]
   #d = d[d$Referend=="NOHP.V1.01"]
@@ -43,6 +43,15 @@ d3 = getld("iqvlambda_cbacb93_combined_reads.csv")
 #d4 = getld("mergeQV_937384c_combined_reads.csv")
 d4 = getld("pulsewidth_79b8946_combined_reads.csv")
 d5 = getld("mergeQV_3b6e9b4_combined_reads.csv")
+head(d5)
+
+d5$Accepted = with(d5, NumberAcceptedMutations / NumberTriedMutations)
+
+pdf("percentageAccepted.pdf")
+ggplot(d5, aes(x=Accepted)) + geom_density(fill="blue") + scale_x_continuous(label=percent) + theme_bw() +labs(x="Percentage of accepted mutations out of all tested", title="Lambda 2K Example")
+dev.off()
+
+
 d6 = getld("mergeQVDelTag_c0535b6_combined_reads.csv")
 d4$Method="New"
 d5$Method = "Old"
@@ -115,7 +124,7 @@ cd$Analysis =  factor(c(rep("Original CCS",nrow(d)),
                         #rep("IQV-Uniform", nrow(d4)),
                         #rep("IQV-Old Params", nrow(d5))))
 ph = function(x) { 
-  if(x==1) {0} else if(x==0) {50} else { -10*log10(x) }
+  if(x==1) {0} else if(x==0) {60} else { -10*log10(x) }
 }
 cd$PredQV = sapply((1-cd$PredictedCCSAccuracy),ph)
 cd$ActualQV = sapply(cd$ErrorRate,ph)
@@ -136,9 +145,9 @@ ggplot(cd[cd$Analysis!="IQV",], aes(y=ActualQV, x=PredQV, color = Analysis)) + g
 toUse = cd$ZMW[cd$Analysis =="Original CCS"]
 #toUse = cd$ZMW[cd$Analysis=="Pulse-Width New" & cd$PredictedCCSAccuracy >= .99]
 toUse = cd$ZMW[cd$Analysis=="Unite-EM" & cd$PredictedCCSAccuracy >= .999]
-toUse = cd$ZMW[cd$Analysis=="Merge-QV DT" & cd$PredictedCCSAccuracy >= .9999]
+toUse = cd$ZMW[cd$Analysis=="Merge-QV DT" & cd$PredictedCCSAccuracy >= .999]
 #toUse = cd$ZMW[cd$Analysis =="Merge-QV New"]
-toUse = cd$ZMW[cd$Analysis =="Original CCS" & cd$PredictedCCSAccuracy >= .90]
+toUse = cd$ZMW[cd$Analysis =="Original CCS" & cd$PredictedCCSAccuracy >= .999]
 toUse = cd$ZMW[cd$Analysis =="Original CCS" & cd$ActualQV >= 20]
 
 
