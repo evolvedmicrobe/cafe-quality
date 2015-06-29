@@ -657,7 +657,7 @@ namespace PacBio.Consensus
             var errProb = (1.0 / (1.0 + Math.Exp(-score)));
 
             // Cap the apparent QV at 50
-            return Math.Max(1e-5, errProb);
+            return errProb;
         }
 
         public class ConsensusQVs

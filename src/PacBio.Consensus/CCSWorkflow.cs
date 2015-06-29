@@ -755,30 +755,36 @@ namespace PacBio.Consensus
                             foreach (var v in variants.Item2) {
                                 vars += v.ToString () +"\n";
                             }
-                            toReturn["Variants"] = vars;
+                                toReturn["Variants"] = vars;
                         }
+                        int i = 0;
                         foreach (var r in mps) {
-                            var read = new Dictionary<string, object> ();
-                            var mr = r.Read;
-                            read ["iqv"] = mr.Iqvs.Select (x => (int)x).ToArray ();
-                            read ["pws"] = mr.PWs.Select (x => (int)x).ToArray ();
-                            read ["strand"] = mr.Strand.ToString ();
-                            read ["start"] = mr.TemplateStart;
-                            read ["end"] = mr.TemplateEnd;
-                            read ["name"] = mr.Name;
-                            var seq = mr.Sequence;
-                            var tpl = r.Scorer.Template ().GetTemplateSequence ();
-                            read ["seq"] = seq;
-                            read ["tpl"] = tpl;
-                            var s2 = new Sequence (DnaAlphabet.Instance, seq);
-                            var t2 = new Sequence (DnaAlphabet.Instance, tpl);
-                            var algo = new Bio.Algorithms.Alignment.NeedlemanWunschAligner ();
-                            var alns = algo.Align (t2, s2).ToList();
-                            read ["aln"] = alns.First ().ToString ();
-                            //Console.WriteLine (alns.First ().ToString ());
-                            read ["score"] = r.Scorer.Score ();
-                            var name = "SE:" +r.Read.Name.Split('/')[2];
-                            readsToR [name] = read;
+                            if (r.IsActive) {
+                                var read = new Dictionary<string, object> ();
+                                var mr = r.Read;
+                                read ["deltag"] = scorer.delTags [i];
+                                i++;
+                                read ["iqv"] = mr.Iqvs.Select (x => (int)x).ToArray ();
+                                read ["pws"] = mr.PWs.Select (x => (int)x).ToArray ();
+                                read ["strand"] = mr.Strand.ToString ();
+                                read ["start"] = mr.TemplateStart;
+                                read ["end"] = mr.TemplateEnd;
+                                read ["name"] = mr.Name;
+                                var seq = mr.Sequence;
+                                var g = r.Scorer.Template ();
+                                var tpl = r.Scorer.Template ().GetTemplateSequence ();
+                                read ["seq"] = seq;
+                                read ["tpl"] = tpl;
+                                var s2 = new Sequence (DnaAlphabet.Instance, seq);
+                                var t2 = new Sequence (DnaAlphabet.Instance, tpl);
+                                var algo = new Bio.Algorithms.Alignment.NeedlemanWunschAligner ();
+                                var alns = algo.Align (t2, s2).ToList ();
+                                read ["aln"] = alns.First ().ToString ();
+                                //Console.WriteLine (alns.First ().ToString ());
+                                read ["score"] = r.Scorer.Score ();
+                                var name = "SE:" + r.Read.Name.Split ('/') [2];
+                                readsToR [name] = read;
+                            }
                         }
                     }
                 }

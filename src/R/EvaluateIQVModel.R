@@ -37,10 +37,44 @@ d = getld("master_5ba5286_combined_reads.csv")
 #d2 = getld("16s_go2_combined_reads.csv")
 #d2 = getld("lambdaParams_28fbe97_combined_reads.csv")
 d2 = getld("lambdaParams_0abe1b2_combined_reads.csv")
-d3 = getld("iqvlambda_1be4b51_combined_reads.csv")
-d4 = getld("iqvlambda_uniform_combined_reads.csv")
-d5 = getld("iqvlambda_oldparams_combined_reads.csv")
-q = merge(d, d2,by="ZMW")
+d3 = getld("iqvlambda_cbacb93_combined_reads.csv")
+#d4 = getld("iqvlambda_uniform_combined_reads.csv")
+#d5 = getld("iqvlambda_oldparams_combined_reads.csv")
+#d4 = getld("mergeQV_937384c_combined_reads.csv")
+d4 = getld("pulsewidth_79b8946_combined_reads.csv")
+d5 = getld("mergeQV_3b6e9b4_combined_reads.csv")
+head(d5)
+
+d5$Accepted = with(d5, NumberAcceptedMutations / NumberTriedMutations)
+
+pdf("percentageAccepted.pdf")
+ggplot(d5, aes(x=Accepted)) + geom_density(fill="blue") + scale_x_continuous(label=percent) + theme_bw() +labs(x="Percentage of accepted mutations out of all tested", title="Lambda 2K Example")
+dev.off()
+
+
+d6 = getld("mergeQVDelTag_c0535b6_combined_reads.csv")
+d4$Method="New"
+d5$Method = "Old"
+
+gd = rbind(d4,d5)
+aggregate(ProcessingTime~Method, gd, sum)
+
+ggplot(gd, aes(x=I(ProcessingTime), fill=Method)) + 
+  geom_density(alpha = .75) + theme_bw(base_size=12) 
+ggplot(gd, aes(x=ProcessingTime, y=Length, color=Method)) + geom_point(alpha = .1)
+ggplot(gd, aes(x=NumPasses, y=ProcessingTime, color=Method)) + geom_point(alpha = .1)
+ggplot(gd, aes(x=NumberTriedMutations, y=ProcessingTime, color=Method)) + geom_point(alpha = .1)
+
+
+
+pdf("RuntimeImprovements.pdf")
+ggplot(gd, aes(x=I(log10(ProcessingTime)), fill=Method)) + 
+  geom_density(alpha = .75) + theme_bw(base_size=12) +
+  labs(x="Log10 Processing Time (seconds)", title="Lambda-2K per ZMW Processing Time Comparison")
+dev.off()
+
+
+q = merge(d, d2, by="ZMW")
 q2 = merge(q, d3, by="ZMW")
 blacklist = q2$ZMW[q2$Reference.x!=q2$Reference.y | q2$Reference.x!=q2$Reference]
 sum(as.character(q$Reference.x)!=q$Reference.y)
@@ -58,47 +92,80 @@ d2 = d2[d2$ZMW%in%in1,]
 d3 = d3[d3$ZMW%in%in1,]
 d4 = d4[d4$ZMW%in%in1,]
 d5 = d5[d5$ZMW%in%in1,]
+d6 = d6[d6$ZMW%in%in1,]
 
-hd = merge(d4, d3, by=c("ZMW")) # uniform = x, new = y
+
+
+hd = merge(d3, d2, by=c("ZMW")) # uniform = x, new = y
 ggplot(hd[hd$NumPasses.x>20,], aes(x=NumErrors.x, y = NumErrors.y)) + geom_point()
 ggplot(hd[hd$NumPasses.x>20,], aes(x=NumErrors.x-NumErrors.y)) + geom_density()
-onedif = hd[hd$NumPasses.x>20 & ((hd$NumErrors.y - hd$NumErrors.x) ==1),]
+onedif = hd[hd$NumPasses.x>20 & ((hd$NumErrors.x - hd$NumErrors.y) == 1),]
 
+head(onedif)
 
-ggplot(hd)
 
 d2 = d2[,colnames(d2)[colnames(d2)%in%colnames(d)]]
 d3 = d3[,colnames(d3)[colnames(d3)%in%colnames(d)]]
 d4 = d4[,colnames(d4)[colnames(d4)%in%colnames(d)]]
 d5 = d5[,colnames(d5)[colnames(d5)%in%colnames(d)]]
+d6 = d6[,colnames(d6)[colnames(d6)%in%colnames(d)]]
 
 
 
-cd = rbind(d,d2, d3, d4, d5)
+
+cd = rbind(d,d2, d3, d4, d5, d6)
 cd$Analysis =  factor(c(rep("Original CCS",nrow(d)),
                         rep("Unite-EM",nrow(d2)), 
-                        rep("IQV", nrow(d3)),
-                        rep("IQV-Uniform", nrow(d4)),
-                        rep("IQV-Old Params", nrow(d5))))
+                        rep("IQV New", nrow(d3)),
+                        rep("Pulse-Width New", nrow(d4)),
+                        rep("Merge-QV New", nrow(d5)),
+                        rep("Merge-QV DT", nrow(d6))
+                        ))
+                        #rep("IQV-Uniform", nrow(d4)),
+                        #rep("IQV-Old Params", nrow(d5))))
 ph = function(x) { 
-  if(x==1) {0} else if(x==0) {50} else { -10*log10(x) }
+  if(x==1) {0} else if(x==0) {60} else { -10*log10(x) }
 }
 cd$PredQV = sapply((1-cd$PredictedCCSAccuracy),ph)
 cd$ActualQV = sapply(cd$ErrorRate,ph)
 
+aggregate(ActualQV~Analysis, cd, function(x) sum(x>=30))
+aggregate(ActualQV~Analysis + NumPasses, cd, function(x) sum(x>=30) / length(x))
+aggregate(ActualQV~Analysis, cd[cd$NumPasses<50 & cd$NumPasses>10,], function(x) sum(x>=30) / length(x))
+aggregate(ActualQV~Analysis + NumPasses, cd, median)
+
+
+ggplot(cd[cd$Analysis!="IQV",], aes(y=ActualQV, x=PredQV, color = Analysis)) + geom_smooth() + geom_abline()
+
+
 ## Make a quick graphic
-pdf("errorsWithCoverageLambda.pdf", width=8, height=6)
+#pdf("errorsWithCoverageLambdaMergePulseWidth.pdf", width=8, height=6)
 #nd = d[d$Reference=="HP.V1.02",]
 #cd = cd[cd$Reference=="lambda_NEB3011",]
 toUse = cd$ZMW[cd$Analysis =="Original CCS"]
+#toUse = cd$ZMW[cd$Analysis=="Pulse-Width New" & cd$PredictedCCSAccuracy >= .99]
+toUse = cd$ZMW[cd$Analysis=="Unite-EM" & cd$PredictedCCSAccuracy >= .999]
+toUse = cd$ZMW[cd$Analysis=="Merge-QV DT" & cd$PredictedCCSAccuracy >= .999]
+#toUse = cd$ZMW[cd$Analysis =="Merge-QV New"]
+toUse = cd$ZMW[cd$Analysis =="Original CCS" & cd$PredictedCCSAccuracy >= .999]
+toUse = cd$ZMW[cd$Analysis =="Original CCS" & cd$ActualQV >= 20]
+
+
 nd = cd[cd$ZMW%in%toUse,]
 
 res = aggregate(ErrorRate~NumPasses+Analysis+Reference, nd, FUN=mean)
 res$QV = sapply(res$ErrorRate, ph)
+pdf("MergeDTCoverage.pdf", height=8, width=10)
+ggplot(res[res$NumPasses>3,], aes(x=NumPasses, y=QV, color=Analysis)) + geom_smooth(fill="white", alpha=.1) + theme_bw(base_size=14)  + labs(x="Number of Passes", y ="Empirical Error Rate (Phred Scaled)", title="Quality by Coverage (Pred. QV > 20 in original)")  + facet_wrap(~Reference, scale="free")
+dev.off()
+res = aggregate(ErrorRate~NumPasses+Analysis+Reference, nd, FUN=median)
 
-ggplot(res[res$NumPasses>3,], aes(x=NumPasses, y=QV, color=Analysis))+geom_line()+ geom_point() +
-  theme_bw(base_size=14)  + labs(x="Number of Passes", y ="Empirical Error Rate (Phred Scaled)", title="Quality by Coverage in Lambda (All Data)") 
-head(nd)
+
+res$QV = sapply(res$ErrorRate, ph)
+
+pdf("ZoomedIn.pdf", width=10, height=8)
+ggplot(res[res$NumPasses>3,], aes(x=NumPasses, y=QV, color=Analysis) )+geom_line()+ geom_point() + theme_bw(base_size=14)  + labs(x="Number of Passes", y ="Empirical Error Rate (Phred Scaled)", title="Quality by Coverage in Lambda (All Data)") + facet_wrap(~Reference, scale="free")+ scale_x_continuous(limits=c(5,15)) + scale_y_continuous(limits=c(25,40)) 
+ head(nd)
 dev.off()
 
 
@@ -249,13 +316,14 @@ median(lb$ErrorRate)
 ct = "ALL4MER.V2.01"
 ct = "HP.V1.02"
 #ct = "NOHP.V1.01"
-ct = "lambda_NEB3011"
+#ct = "lambda_NEB3011"
 dv = read.csv("master_variants_all_variants.csv")
 ldv = dv[dv$Ref==ct,]
 #ldv2 = read.csv("lambdaParams_0abe1b2_all_variants.csv" )
-ldv2 = read.csv("iqvlambda_1be4b51_all_variants.csv")
+ldv2 = read.csv("mergeQV_3b6e9b4_all_variants.csv")
 ldv2 = ldv2[ldv2$Ref==ct,]
-ldv3 = read.csv("lambdaParams_0abe1b2_all_variants.csv")
+#ldv3 = read.csv("lambdaParams_0abe1b2_all_variants.csv")
+ldv3 = read.csv("mergeQVDelTag_c0535b6_all_variants.csv")
 ldv3 = ldv3[ldv3$Ref==ct,]
 
 
@@ -265,21 +333,25 @@ cut2 = quantile(d2$PredictedCCSAccuracy, .2)
 #ldv2= ldv2[ldv2$zmw%in%(d2$ZMW[d2$PredictedCCSAccuracy >cut2]),]
 
 cdv = rbind(ldv,ldv2, ldv3)
-cdv$Analysis = c(rep("Original",nrow(ldv)),rep("IQV-MODEL",nrow(ldv2)), rep("Unite-EM", nrow(ldv3)))
-valid = cd$ZMW[cd$NumPasses > 15]
+cdv$Analysis = factor(c(rep("Original",nrow(ldv)),rep("PW-MODEL",nrow(ldv2)), rep("Merge-DelTag", nrow(ldv3))))
+valid = cd$ZMW[cd$NumPasses > 20 ]
 #valid = cd$ZMW[SnrC > 9]
 cdv = cdv[cdv$zmw%in%valid,]
+
+
+#cdv = cdv[cdv$zmw%in%valid & cdv$QV > 40,]
 cdv$homopolymerChar[cdv$homopolymerChar=="T"]="A"
 cdv$homopolymerChar[cdv$homopolymerChar=="G"]="C"
+
 
 aggregate(Ref~QV+Analysis, data = cdv, FUN=length)
 aggregate(Ref~type+Analysis, data = cdv, FUN=length)
 
 
 errors = aggregate(Ref~Analysis+type, data =cdv, FUN=length)
-pdf("ErrorsInLambda_15.pdf", width=8, height=6)
+#pdf("ErrorsInLambda_15.pdf", width=8, height=6)
 ggplot(errors,aes(x=Analysis, y =Ref, fill=Analysis)) + geom_bar(stat="identity") +facet_grid(.~type) +theme_bw(base_size=14) +labs(y="Error Count", title="Lambda Performance Comparison (NumP > 15)")
-dev.off()
+#dev.off()
 
 
 spots = aggregate(Ref~Analysis+type+indelSize+indeltype+homopolymerChar, data=cdv, FUN=length) 
@@ -287,13 +359,31 @@ ggplot(spots, aes(x=indelSize, y=Ref, fill=Analysis))+geom_bar(stat="identity", 
   labs(x="Template Position", y="Error Count", title="Lambda Indel Errors by Type( (NP > 15)") +
   theme_bw(base_size=14)+ facet_wrap(indeltype~homopolymerChar)
 
-pdf("ErrorTypes.pdf", width=8, height=6)
+#pdf("ErrorTypes.pdf", width=8, height=6)
 spots = aggregate(Ref~Analysis+homopolymerLength+indeltype+homopolymerChar, data=cdv, FUN=length) 
+ggplot(spots, aes(x=homopolymerLength, y=I(Ref), fill=Analysis))+geom_bar(stat="identity", position="dodge") + 
+  labs(x="HP Length", y="Error Count", title="HP Errors by Position (Coverage > 15)") +
+  theme_bw(base_size=14)  + facet_wrap(indeltype~homopolymerChar)
+
+
+spots = aggregate(Ref~Analysis+homopolymerLength, data=cdv, FUN=length) 
+ggplot(spots, aes(x=homopolymerLength, y=Ref, fill=Analysis))+geom_bar(stat="identity", position="dodge") + 
+  labs(x="HP Length", y="Error Count", title="HP Errors by Position (Coverage > 15)") +
+  theme_bw(base_size=14)
+
+#dev.off()
+
+spots = aggregate(Ref~Analysis+homopolymerLength+indeltype+homopolymerChar, data=cdv, FUN=length) 
+ggplot(spots, aes(x=homopolymerLength, y=Ref, fill=Analysis))+geom_bar(stat="identity", position="dodge") + 
+  labs(x="HP Length", y="Error Count", title="HP Errors by Position (Coverage > 15)") +
+  theme_bw(base_size=14)  + facet_wrap(indeltype~homopolymerChar)
+
+
+
+spots = aggregate(Ref~Analysis+homopolymerLength+indeltype+homopolymerChar, data=cdv[cdv$QV>40,], FUN=length) 
 ggplot(spots, aes(x=homopolymerLength, y=Ref, fill=Analysis))+geom_bar(stat="identity", position="dodge") + 
   labs(x="HP Length", y="Error Count", title="Lambbda Errors by Position (Coverage > 15)") +
   theme_bw(base_size=14)  + facet_wrap(indeltype~homopolymerChar)
-dev.off()
-
 
 
 errors2 = aggregate(Ref~Analysis+Pos, data =cdv, FUN=length)
@@ -330,7 +420,9 @@ ggplot(bp2, aes(x=Region, y=indelSize, fill=Analysis)) + geom_bar(stat="identity
 #dev.off()
 
 
+ggplot(cdv[cdv$zmw%in%toUse,], aes(x=QV, fill=Analysis)) + geom_density(alpha=.5)
 
+aggregate(QV~Analysis, cdv, function(x) sum(x<=30) / length(x) )
 
 v = ggplot(res2,aes(x=homopolymerLength,y=Pos, colour=Analysis, shape=homopolymerChar))+facet_grid( .~indeltype)+geom_point(size=3)+theme_bw(base_size=9)
 v = v +labs(x="Homopolymer Length",y="Count of Total Errors", 

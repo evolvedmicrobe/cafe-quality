@@ -298,7 +298,7 @@ namespace Bio.IO.FastA
                     // Validate against supplied alphabet.
                     if (!alphabet.ValidateSequence(buffer, bufferPosition, bufferPosition + line.Length))
                     {
-                        throw new FileFormatException(string.Format(CultureInfo.InvariantCulture, Properties.Resource.InvalidSymbolInString, line));
+                        throw new FileFormatException(string.Format(CultureInfo.InvariantCulture, "InvalidSymbolInString", line));
                     }
                 }
                 bufferPosition += line.Length;

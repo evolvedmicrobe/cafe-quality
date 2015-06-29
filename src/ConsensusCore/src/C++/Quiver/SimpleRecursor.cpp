@@ -657,6 +657,10 @@ namespace ConsensusCore {
         int J = tpl_.Length();
         int flipflops = 0;
         int maxSize = static_cast<int>(0.5 + REBANDING_THRESHOLD * (I + 1) * (J + 1));
+        
+        //TODO: This should not exist in both MutationScorer.cpp and here
+        // Bad design, will have to be refactored later
+        double emit_scaling_correction_factor = -std::log(MatchScalingFactor) * I;
 
         // if we use too much space, do at least one more round
         // to take advantage of rebanding
@@ -668,8 +672,8 @@ namespace ConsensusCore {
             FillAlpha(b, a);
             flipflops += 3;
         }
-        double alphaV = std::log(a(I, J)) + a.GetLogProdScales();
-        double betaV  = std::log(b(0, 0)) + b.GetLogProdScales();
+        double alphaV = std::log(a(I, J)) + a.GetLogProdScales() + emit_scaling_correction_factor;
+        double betaV  = std::log(b(0, 0)) + b.GetLogProdScales() + emit_scaling_correction_factor;
         while (fabs(alphaV - betaV) > ALPHA_BETA_MISMATCH_TOLERANCE
                && flipflops <= MAX_FLIP_FLOPS)
         {
@@ -683,8 +687,8 @@ namespace ConsensusCore {
             }
             flipflops++;
         }
-        alphaV = std::log(a(I, J)) + a.GetLogProdScales();
-        betaV  = std::log(b(0, 0)) + b.GetLogProdScales();
+        alphaV = std::log(a(I, J)) + a.GetLogProdScales() + emit_scaling_correction_factor;
+        betaV  = std::log(b(0, 0)) + b.GetLogProdScales() + emit_scaling_correction_factor;
         auto mismatch_percentage = fabs(1.0 - alphaV/betaV);
         if (mismatch_percentage > ALPHA_BETA_MISMATCH_TOLERANCE)
         {
