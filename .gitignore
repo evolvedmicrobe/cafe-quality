@@ -5,6 +5,7 @@ BuildAndRun.py
 *.ccs.fasta
 tempLambdaVariant/
 NotTracked/
+Invitae/*
 *.log
 *.gz
 *.aux
