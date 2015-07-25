@@ -225,17 +225,36 @@ namespace Bio.IO.SAM
                         origDataPosition += len;
                         break;
                     case 'B'://integer or numeric array
-                        tagToDataTypeAndLocation[tag] = new KeyValuePair<char, int>('B', origDataPosition);
-                        char arrayType = (char)data[origDataPosition];
+                        tagToDataTypeAndLocation [tag] = new KeyValuePair<char, int> ('B', origDataPosition);
+                        char arrayType = (char)data [origDataPosition];
                         origDataPosition++;
-                        int arrayLen = Helper.GetInt32(data, origDataPosition);
+                        int arrayLen = Helper.GetInt32 (data, origDataPosition);
                         origDataPosition += 4;
-                        origDataPosition += arrayLen;
+                        origDataPosition += (arrayLen * GetArrayElementSize (arrayType));
                         break;
                     default:
                         throw new FileFormatException(Properties.Resource.BAM_InvalidOptValType);                
             }
         }
+
+        private int GetArrayElementSize(char type) {
+            switch (type) {
+            case 'i':
+            case 'I':
+                return 4;
+            case 'c':
+            case 'C':
+                return 1;
+            case 's':
+            case 'S':
+                return 2;
+            case 'f':
+                return sizeof(float);
+                
+            }
+            throw new ArgumentException ("Not a valid SAM array type: " + type.ToString ());
+        }
+
 
         /// <summary>
         /// Gets the length of the string in byte array.
