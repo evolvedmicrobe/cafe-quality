@@ -1078,9 +1078,10 @@ namespace Bio.IO.BAM
                     return 1;
                 case "s": // signed 16 bit integer
                 case "S"://unsinged 16 bit integer
+                    return 2;
                 case "i": // signed 32 bit integer
                 case "I": // unsigned 32 bit integer
-                    return GetOptionalFieldIntValueSize(optionalField.Value);
+                    return 4;
                 case "f": // float
                     return 4;
                 case "Z": // printable string 
