@@ -85,7 +85,7 @@ namespace Bio.IO.PacBio
 
         public readonly float[] ZScores;
 
-        QualitativeSequence Sequence;
+        public QualitativeSequence Sequence;
 
         public PacBioCCSRead (SAMAlignedSequence s)
         {
