@@ -494,6 +494,8 @@
     <Compile Include="SimilarityMatrices\DiagonalScoreMatrix.cs" />
     <Compile Include="Util\FastStringUtils.cs" />
     <Compile Include="Properties\HardCodedProperties.cs" />
+    <Compile Include="IO\PacBio\PacBioBamReader.cs" />
+    <Compile Include="IO\PacBio\PacBioCCSRead.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resource.resx">
@@ -528,4 +530,7 @@
   </Target>
   -->
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="IO\PacBio\" />
+  </ItemGroup>
 </Project>
