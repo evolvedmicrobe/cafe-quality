@@ -55,13 +55,13 @@ namespace Bio.IO.SAM
                         bool cached = tagCache.TryGetValue(byte1, out tag);
                         if (!cached)
                         {
-                            tag = System.Text.ASCIIEncoding.ASCII.GetString(data, origDataPosition, 2);
+                            tag = ASCIIEncoding.ASCII.GetString(data, origDataPosition, 2);
                             lock (tagCache) { tagCache[byte1] = tag; }
                         }
                     }
                     else
                     {
-                        tag = System.Text.ASCIIEncoding.ASCII.GetString(data, origDataPosition, 2);
+                        tag = ASCIIEncoding.ASCII.GetString(data, origDataPosition, 2);
                     }
                     //now get the type of variable
                     origDataPosition += 2;
@@ -84,7 +84,7 @@ namespace Bio.IO.SAM
         /// <summary>
         /// Get the data for a tag
         /// </summary>
-        /// <param name="key">The tag to get data for</param>
+        /// <param name="key">The TAG to get data for</param>
         /// <returns>The data or a </returns>
         public object this[string key]
         {
@@ -115,7 +115,7 @@ namespace Bio.IO.SAM
                 foreach(var kv in tagToDataTypeAndLocation)
                 {
                     char type=kv.Value.Key;
-                    object value=this[kv.Key].ToString();
+                    object value = this [kv.Key].ToString();
                     string tag=kv.Key;
                     SAMOptionalField sof=new SAMOptionalField(tag,value,type);
                     toReturn[tag]=sof;
@@ -135,29 +135,34 @@ namespace Bio.IO.SAM
             switch (vType)
             {
                 case 'A':  //  Printable character
-                    obj = (char)data[pos];
+                    obj = (char)data [pos];
+                    pos += 1;
                     break;
                 case 'c': //signed 8-bit integer                            
-                    int value = (data[pos] & 0x7F);
-                    if ((data[pos] & 0x80) == 0x80)
-                    {
-                        value= value + sbyte.MinValue;
+                    int value = (data [pos] & 0x7F);
+                    if ((data [pos] & 0x80) == 0x80) {
+                        value = value + sbyte.MinValue;
                     }
                     obj = value;
+                    pos += 1;
                     break;
                 case 'C'://uint8
-                    obj = (int)data[pos];                    
+                    obj = (int)data [pos];
+                    pos += 1;
                     break;
                 case 's'://int16
                 case 'S'://uint16
-                    obj=BitConverter.ToInt16(data, pos);
+                    obj = BitConverter.ToInt16 (data, pos);
+                    pos += 2;
                     break;
                 case 'i'://int32
                 case 'I'://uint32
-                    obj = BitConverter.ToInt32(data, pos);
+                    obj = BitConverter.ToInt32 (data, pos);
+                    pos += 4;
                     break;
                 case 'f'://float
-                    obj = BitConverter.ToSingle(data, pos);
+                    obj = BitConverter.ToSingle (data, pos);
+                    pos += 4;
                     break;
                 case 'Z'://printable string 
                     int len = GetStringLength(data, pos);
@@ -166,12 +171,13 @@ namespace Bio.IO.SAM
                 case 'H'://byte array in hex format
                     len = GetStringLength(data, pos);
                     //obj = System.Text.ASCIIEncoding.ASCII.GetString(data, pos, len - 1);
-                    obj = Helper.GetHexString(data, pos, len - 1);
+                    obj = Helper.GetHexString(data, pos, len - 1);                    
                     break;
                 case 'B'://integer or numeric array
                     char arrayType = (char)data[pos];
                     pos++;
-                    int arrayLen = Helper.GetInt32(data, pos);
+                    
+                int arrayLen = Helper.GetInt32(data, pos);
                     pos += 4;
                     StringBuilder strBuilder = new StringBuilder();
                     strBuilder.Append(arrayType);

@@ -14,7 +14,6 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
@@ -40,6 +39,7 @@
         <Variable name="DYLD_LIBRARY_PATH" value="/Users/nigel/analysisPrograms/hdf5/" />
       </EnvironmentVariables>
     </EnvironmentVariables>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
