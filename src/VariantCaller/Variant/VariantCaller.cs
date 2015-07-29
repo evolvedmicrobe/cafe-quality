@@ -26,8 +26,9 @@ namespace VariantCaller
         {
 
             var qualSeq = querySequence as QualitativeSequence;
-            if (alignment.SecondSequence.Metadata.ContainsKey ("+isReversed") &&
-                (bool)alignment.SecondSequence.Metadata ["+isReversed"]) {
+            bool isRC = alignment.SecondSequence.Metadata.ContainsKey ("+isReversed") &&
+                        (bool)alignment.SecondSequence.Metadata ["+isReversed"];
+            if (isRC) {
                 qualSeq = qualSeq.GetReverseComplementedSequence (true);
             }
 
@@ -73,8 +74,29 @@ namespace VariantCaller
                     var bases = getBases(reference, i, len);
                     var newVariant = new IndelVariant(refPos - 1, len, refSeq, bases, IndelType.Deletion, (i == 0 || (i + len) >= reference.Length));
                     if (qualSeq != null &&  (queryPos + 1) < qualSeq.Count ) {
+                        /* An insertion occurs BEFORE pos, so normally we get the next base
+                         * or the last one if it's a reverse complemented alignment.  However, this is not true if 
+                         * it is a homopolymer because what would have been the previous position is the next position
+                         * after left aligning and reversing the position of the QV value.
+                         * 
+                         * Consider the following
+                         * --*-       -*--
+                         * A-TA   --> TA-T
+                         * AGTA       TACT
+                         * 
+                         * However, 
+                         * --*--         --*--
+                         * A-TTA   ----> T-AAT
+                         * ATTTA         TAAAT
+                         * 
+                         */
+
+                        var qc_pos = isRC ? queryPos - 1 : queryPos + 1;
+                        if (newVariant.InHomopolymer) {
+                            qc_pos = queryPos + 1;
+                        }
                         //TODO: Check this is where the mutation would occur....
-                        newVariant.QV = qualSeq.GetPhredQualityScore (queryPos);
+                        newVariant.QV = qualSeq.GetPhredQualityScore (qc_pos);
                     }
                     variants.Add(newVariant);
                     i += len;
