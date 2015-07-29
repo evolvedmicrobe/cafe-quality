@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using VariantCaller;
 
-namespace Temp
+namespace BAMErrorReporter
 {
     public class VariantWriter
     {
@@ -20,16 +20,33 @@ namespace Temp
             sw.WriteLine ("Ref,Pos,zmw,type,length,homopolymerLength,homopolymerChar,indelSize,indeltype,QV");
 
         }
+
         public void Write(PacBioCCSRead read, Variant variant) {
             var hplength = homopolymerLength (variant);
             var vtype = variant.Type.ToString ();
             string indeltype = "NA";
+            string indelLength = "NA";
+            string homoChar = "N";
             if (!variant.AtEndOfAlignment && variant.Type == VariantType.INDEL) {
-                indeltype = (variant as IndelVariant).InsertionOrDeletion.ToString ();
+                var vi = (variant as IndelVariant);
+                indeltype = vi.InsertionOrDeletion.ToString ();
+                indelLength = vi.InsertedOrDeletedBases.Length.ToString();
+                homoChar = vi.HomopolymerBase.ToString ();
             }
-
-
+            var toW = String.Join (",", variant.RefSeq.ID,
+                                        variant.StartPosition,
+                                        read.HoleNumber,
+                                        vtype,
+                                        read.Sequence.Count,
+                                        hplength,
+                                        homoChar,
+                                        indelLength,
+                                        indeltype,
+                                        variant.QV.ToString ());
+            sw.WriteLine (toW);
+            sw.Flush ();
         }
+
         private string homopolymerLength(Variant v)
         {
             if (v.AtEndOfAlignment)

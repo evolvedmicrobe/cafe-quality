@@ -33,6 +33,8 @@ namespace Bio.IO.PacBio
 
         private readonly int[] statusCounts;
 
+
+
         /// <summary>
         /// Count of subreads successfully added for consensus generation.
         /// </summary>
@@ -72,6 +74,9 @@ namespace Bio.IO.PacBio
         public readonly float SnrG;
         public readonly float SnrT;
 
+
+        public string Movie;
+
         /// <summary>
         /// What is the hole number for the ZMW.
         /// </summary>
@@ -86,6 +91,8 @@ namespace Bio.IO.PacBio
         public readonly float[] ZScores;
 
         public QualitativeSequence Sequence;
+
+       
 
         public PacBioCCSRead (SAMAlignedSequence s)
         {
@@ -118,12 +125,14 @@ namespace Bio.IO.PacBio
                     MutationsAccepted = Convert.ToInt32 (v.Value);
                 } else if (v.Tag == "RG") {
                     ReadGroup = v.Value;
+
                 } else if (v.Tag == "zs") {
                     ZScores = v.Value.Split (',').Skip (1).Select (x => Convert.ToSingle (x)).ToArray ();
                 }
             }
-
+            Movie = String.Intern(s.QuerySequence.ID.Split ('/') [0]);
             Sequence = s.QuerySequence as QualitativeSequence;
+            Sequence.Alphabet = AmbiguousDnaAlphabet.Instance;
 
         }
     }

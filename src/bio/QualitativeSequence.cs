@@ -449,7 +449,7 @@ namespace Bio
         /// <summary>
         /// Gets the alphabet to which symbols in this sequence belongs to.
         /// </summary>
-        public IAlphabet Alphabet { get; private set; }
+        public IAlphabet Alphabet { get; internal set; }
 
         /// <summary>
         /// Gets the number of bytes contained in the Sequence.
