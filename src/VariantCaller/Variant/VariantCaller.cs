@@ -70,7 +70,7 @@ namespace VariantCaller
                     var newVariant = new IndelVariant(refPos - 1, len, refSeq, bases, IndelType.Deletion, (i == 0 || (i + len) >= reference.Length));
                     if (qualSeq != null &&  (queryPos + 1) < qualSeq.Count ) {
                         //TODO: Check this is where the mutation would occur....
-                        newVariant.QV = qualSeq.GetPhredQualityScore (queryPos+1);
+                        newVariant.QV = qualSeq.GetPhredQualityScore (queryPos);
                     }
                     variants.Add(newVariant);
                     i += len;
