@@ -26,6 +26,10 @@ namespace VariantCaller
         {
 
             var qualSeq = querySequence as QualitativeSequence;
+            if (alignment.SecondSequence.Metadata.ContainsKey ("+isReversed") &&
+                (bool)alignment.SecondSequence.Metadata ["+isReversed"]) {
+                qualSeq = qualSeq.GetReverseComplementedSequence (true);
+            }
 
            if (alignment==null) {throw new ArgumentNullException("alignment");}
         	List<Variant> variants = new List<Variant>();

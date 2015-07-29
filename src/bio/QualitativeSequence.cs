@@ -992,7 +992,7 @@ namespace Bio
         /// <summary>
         /// Return a new QualitativeSequence representing the reverse complement of this QualitativeSequence.
         /// </summary>
-        public ISequence GetReverseComplementedSequence()
+        public QualitativeSequence GetReverseComplementedSequence(bool flipHpQvValues = false)
         {
             byte[] newSequenceData = new byte[this.sequenceData.Length];
             sbyte[] newQualityScores = new sbyte[this.qualityScores.Length];
@@ -1007,9 +1007,37 @@ namespace Bio
                     throw new NotSupportedException(string.Format(CultureInfo.CurrentUICulture, Properties.Resource.ComplementNotSupportedByalphabet, (char)symbol, this.Alphabet.Name));
                 }
 
+
                 newSequenceData[index] = complementedSymbol;
 
                 newQualityScores[index] = this.qualityScores[this.qualityScores.Length - index - 1];
+            }
+
+            // TODO: Somewhat poorly implemented right now, no alphabet checks, etc.  Basic idea is 
+            // that I will assume it is A, C, G, T alphabet and flip HP values
+            // Also assumes all low QV is due to HP deletion/insertion error.
+            if (flipHpQvValues && newSequenceData.Length > 1) {
+                byte lastbp = newSequenceData [0];
+                int firstPos = 0;
+                int curLength = 1;
+                for (int i = 1; i < newSequenceData.Length; i++) {
+                    byte newbp = newSequenceData [i];
+                    if (newbp != lastbp && curLength > 1) {
+                        var tmp = newQualityScores [i - 1];
+                        newQualityScores [i - 1] = newQualityScores [firstPos];
+                        newQualityScores [firstPos] = tmp;
+                        firstPos = i;
+                        lastbp = newbp;
+                    } else if (newbp == lastbp) {
+                        curLength++;
+                    }
+                }
+                // Finally flip the end
+                if (curLength > 1) {
+                    var tmp = newQualityScores [newQualityScores.Length - 1];
+                    newQualityScores [newQualityScores.Length - 1] = newQualityScores [firstPos];
+                    newQualityScores [firstPos] = tmp;
+                }
             }
 
             QualitativeSequence seq = new QualitativeSequence(this.Alphabet, this.FormatType, newSequenceData, newQualityScores, false);
@@ -1018,6 +1046,19 @@ namespace Bio
 
             return seq;
         }
+
+
+        /// <summary>
+        /// Return a new QualitativeSequence representing the reverse complement of this QualitativeSequence.
+        /// </summary>
+        public ISequence GetReverseComplementedSequence()
+        {
+            return GetReverseComplementedSequence (false);
+        }
+
+
+
+
 
         /// <summary>
         /// Return a new QualitativeSequence representing a range (subsequence) of this QualitativeSequence.
